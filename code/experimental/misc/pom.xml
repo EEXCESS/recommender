@@ -1,0 +1,107 @@
+<!--
+  Copyright (C) 2010 
+  "Kompetenzzentrum fuer wissensbasierte Anwendungen Forschungs- und EntwicklungsgmbH" 
+  (Know-Center), Graz, Austria, office@know-center.at.
+  
+  Licensees holding valid Know-Center Commercial licenses may use this file in
+  accordance with the Know-Center Commercial License Agreement provided with 
+  the Software or, alternatively, in accordance with the terms contained in
+  a written agreement between Licensees and Know-Center.
+  
+  This program is free software: you can redistribute it and/or modify
+  it under the terms of the GNU Affero General Public License as
+  published by the Free Software Foundation, either version 3 of the
+  License, or (at your option) any later version.
+  
+  This program is distributed in the hope that it will be useful,
+  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  GNU Affero General Public License for more details.
+  
+  You should have received a copy of the GNU Affero General Public License
+  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+-->
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>eu.eexcess</groupId>
+        <artifactId>eexcess-parent</artifactId>
+        <version>1.0-SNAPSHOT</version>
+        <relativePath>../..</relativePath>
+    </parent>
+
+    <artifactId>eexcess-experimental-misc</artifactId>
+    
+    <name>EEXCESS - Experimental (misc)</name>
+    <description> 
+        Experimental code for research purposes.
+    </description> 
+
+ <dependencies>
+
+    <dependency>
+        <groupId>eu.eexcess</groupId>
+        <artifactId>eexcess-common</artifactId>
+        <version>${parent.version}</version>
+    </dependency>
+
+    <dependency>
+        <groupId>eu.eexcess</groupId>
+        <artifactId>eexcess-federated-recommender</artifactId>
+        <version>${parent.version}</version>
+    </dependency>
+
+    <dependency>
+        <groupId>org.jgrapht</groupId>
+        <artifactId>jgrapht-jdk1.5</artifactId>
+        <version>0.7.3</version>
+    </dependency>
+
+    <dependency>
+        <groupId>jgraph</groupId>
+        <artifactId>jgraph</artifactId>
+        <version>5.13.0.0</version>
+    </dependency>
+<!-- 
+    <dependency>
+        <groupId>edu.stanford.nlp</groupId>
+        <artifactId>stanford-corenlp</artifactId>
+        <version>3.3.0</version>
+    </dependency>
+
+    <dependency>
+        <groupId>edu.stanford.nlp</groupId>
+        <artifactId>stanford-corenlp</artifactId>
+        <version>3.3.0</version>
+        <classifier>models</classifier>
+    </dependency>
+-->
+    <dependency>
+        <groupId>org.xerial</groupId>
+        <artifactId>sqlite-jdbc</artifactId>
+        <version>3.7.2</version>
+    </dependency>
+
+    <dependency>
+        <groupId>at.know-center.commons</groupId>
+        <artifactId>wiktionary-index</artifactId>
+        <version>2.0-SNAPSHOT</version>
+    </dependency>
+
+    <dependency>
+        <groupId>net.sf.extjwnl</groupId>
+        <artifactId>extjwnl</artifactId>
+        <version>1.7.1</version>
+    </dependency>
+
+    <dependency>
+        <groupId>nz.ac.waikato.cms.weka</groupId>
+        <artifactId>weka-stable</artifactId>
+        <version>3.6.11</version>
+    </dependency>
+
+
+</dependencies>
+ 
+</project>

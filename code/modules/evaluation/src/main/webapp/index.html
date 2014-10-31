@@ -1,0 +1,216 @@
+
+
+
+<!-- File: chapter6/public/http-get-example.html -->
+<html ng-app="evalApp">
+<head>
+
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+
+<link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css">
+
+<link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap-theme.min.css">
+<script src="//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/js/bootstrap.min.js"></script>
+<script src="js/jquery.cookie.js"></script>
+
+</head>
+<title>EExcess Evaluation</title>
+<style>
+ .row + .row {
+  border: 1px solid black;
+}
+.hover{
+}
+..img{
+  margin:0px;
+}
+.border-colored{
+  border: 1px solid #FAFAFA;
+}
+.overlay{};
+.list-group-width{
+width:90%;
+margin:0px;
+}
+.custom-block{
+    display: table;
+    width: 100%;            
+}
+
+ .trim-info {
+      max-height: 150px;
+     
+
+    overflow: hidden;
+    text-overflow: ellipsis;
+     
+   }
+
+</style>
+
+</head>
+<body  class="body" ng-controller="MainCtrl as mainCtrl">
+
+
+ 
+<div class="well custom-block">
+	  <img class="pull-left" src="img/logo.png" style="width:80px; height:33px;"></img>
+  
+    <H1><center>  <img  src="img/eexcess.png"></img></center></H1>
+    <button type="submit" class="btn btn-primary btn-lg  pull-right submitButton" disabled="true" ng-click="mainCtrl.sendResult()" >Next</button>
+      <div ng-repeat="myIcons in mainCtrl.icons | filter: {selected:false}"  >
+	  <img class="pull-left img-circle" ng-src="{{myIcons.path}}" style="background-color:{{myIcons.color}}; opacity:0.6;width:48px; height:48px;"></img>
+      </div>
+</div>
+<input class="form-control alert alert-info" ng-if=" mainCtrl.items.length != 0 " id="disabledInput" type="text" placeholder="Query: '{{mainCtrl.items.query}}' " readonly></input>
+<input class="form-control alert alert-warning" ng-if=" mainCtrl.items.length != 0 " id="disabledInput" type="text" placeholder="Query explanation: '{{mainCtrl.items.queryDescription}}' " readonly></input>
+
+</br>
+   <div ng-repeat="myItem in mainCtrl.items.results "  >
+   	
+        <div class="col-md-3"   >
+       
+		<div class="row list-group border-colored list-group-width" >
+		<div ng-click="mainCtrl.select($index)">
+		 	<div class="list-group-item active border" style="height:48px;" >Result list {{$index +1}}</div>
+		   <div ng-repeat="keywords in myItem.result " >
+		    <div class="list-group"  ng-if="keywords" >
+	<!--  		  <div  class="list-group-item active border"  >-->
+			      <div  ng-if="keywords.title" class="list-group-item-heading border list-group-item-warning" style="color:black;"   ng-bind="keywords.title" data-toggle="tooltip" data-placement="bottom" title="{{keywords.description}}" ></div>
+	<!--  				  </div>-->
+			<!--   <div ng-if="keywords.description" class="list-group-item " > 
+				<div class="list-group-item-text "  ><div ng-bind="keywords.description" class="trim-info" data-toggle="tooltip" data-placement="bottom" title="{{keywords.description}}">{{keywords.description}}</div></div>
+			  </div>
+			  <div  ng-if="keywords.previewImage" class="list-group-item" >
+			      <div class="list-group-item-text" ><img ng-src="{{keywords.previewImage}}"/></div>
+			  </div> -->
+		    </div>
+		  </div>
+	      </div>
+	      </div>
+	</div>
+  </div>
+ </div>
+
+<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.2.19/angular.js"></script>
+
+
+
+
+<script>
+
+
+angular.module('evalApp', []).controller('MainCtrl', ['$http','$scope', function($http,$scope) {
+	  var self = this;
+	  
+	 if($.cookie('eexcessUID')==null){
+		 $.cookie('eexcessUID', Math.round(10000000*Math.random()));
+	  }
+	 
+      
+	  self.icons = [{path:"img/one.png", selected:false ,color:"green",num:1},{path:"img/two.png", selected:false ,color:"yellow",num:2},{path:"img/three.png", selected:false ,color:"orange",num:3},{path:"img/four.png", selected:false ,color:"red",num:4}];
+	  self.nextSelectedIcon=0;
+	  self.items=[];
+
+	  self.getItems=function(){ 
+			      $http.post('http://localhost:8100/eexcess-federated-recommender-evaluation-web-service-1.0-SNAPSHOT/recommender/evaluationWithUID?id='+$.cookie('eexcessUID'), { callback: "JSON_CALLBACK" }
+			      ,{ get: { method: "JSONP" }}
+			      ).then(function(response) {
+			      self.items = response.data;
+			      }, function(errResponse) {
+				  // self.done();
+			      });
+	      };
+	  
+	 self.getItems();
+	  
+	self.select = function(value){
+	   		var icon = null;
+	   /*     var currentItem=null;
+	      for(var i = 0; i<self.items.results.length;i++){
+		  if(self.items.results[i] ===value){
+			currentItem=i;
+		  }
+	      } */
+	   if(self.items.results[value].numSelect==null ||self.items.results[value].numSelect<0 ){
+		   if(self.icons[self.nextSelectedIcon].selected==true){
+	      for(var i = 0 ; i< self.icons.length; i++){
+			  if(!self.icons[i].selected){
+			    self.icons[i].selected=true;
+			    icon=self.icons[i];
+			    self.nextSelectedIcon=i+1;
+			    break;
+			  }
+	      }
+		}else{
+			icon=self.icons[self.nextSelectedIcon];
+			self.icons[self.nextSelectedIcon].selected=true;
+			self.nextSelectedIcon+=1;
+		}
+		   $(".list-group-width").unbind().click(function(){
+			
+			  $(this).css("background-color", icon.color);
+			  $(this).css("z-index", "100000");
+			  $(this).children().css("opacity", ".6");
+			  $(this).prepend('<img class="numberIcon" src="'+icon.path+'" style="position:absolute; margin:0px; width:48px; height:48px;"/>')
+			   icon = null;
+	      });
+	      self.items.results[value].numSelect=icon.num;
+	      var allSelected = true;
+	      $(self.icons).each(function(){ if(!this.selected) allSelected=false;});
+	      if(allSelected)
+				$('.submitButton').prop('disabled', false);
+	      
+	  }else{
+		  self.nextSelectedIcon= 0;
+		var iconIndex =self.items.results[value].numSelect-1
+	        self.icons[iconIndex].selected=false;
+	     
+		 $(".list-group-width").unbind().click(function(){
+		  $(this).css("background-color", "");
+		  $(this).css("z-index", "-10000");
+		  $(this).children().css("opacity", "1");
+		  $(this).children(".numberIcon").remove();
+		  self.items.results[value].numSelect=-1;
+	  });
+	    $('.submitButton').prop('disabled', true);
+	  }
+	     
+	
+	};
+	self.sendResult = function(){
+	     $(self.icons).each(function(){ this.selected=false});
+	     $('.submitButton').prop('disabled', true);
+	      $http.post('http://localhost:8100/eexcess-federated-recommender-evaluation-web-service-1.0-SNAPSHOT/recommender/evaluationResultUID?id='+$.cookie('eexcessUID'), self.items,{ callback: "JSON_CALLBACK" }
+			      ,{ get: { method: "JSONP" }}
+			      ).then(function(response) {
+			      if(response.data.evaluationDone)
+				  self.done();
+			      else{
+				  self.items=[];
+				  self.getItems();
+			      }
+			      }, function(errResponse) {
+				   self.done();
+			      });
+	      self.nextSelectedIcon=0;
+	  };
+	self.done = function(){
+	     $(self.icons).each(function(){ this.selected=false});
+	     $('.submitButton').prop('disabled', true);
+	      self.items=[];
+	     $.cookie('eexcessUID', Math.round(10000000*Math.random()));
+	     self.nextSelectedIcon=0;
+	     $(".body").append("<div class='glyphicon glyphicon-ok alert alert-success' role='alert' style='width:100%;'> <strong>Well Done!</strong> Thank you for your participation.</div>");
+	}
+	      
+	  
+}
+   
+	  
+	
+						    ]);
+	
+</script>
+</body>
+</html>

@@ -1,0 +1,15 @@
+{"solrServerUri":"http://localhost:8983/solr/",
+"graphHitsLimitPerQuery":10,
+"graphQueryDepthLimit":4,
+"graphMaxPathLength":5,
+"federatedRecommenderBaseUri":"http://localhost:8100",
+// possible Values: localStandalone, localTomcat, jrDev, jrStable
+"deploymentPlatform":"jrStable",
+"wikipediaIndexDir":"/path/to/index",
+"evaluationQueriesFile":"/path/to/json",
+"partnersTimeout":9000,
+"numRecommenderThreads":30
+}
+
+
+

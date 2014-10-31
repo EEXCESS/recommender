@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+  <groupId>eu.eexcess</groupId>
+  <artifactId>eexcess-parent</artifactId>
+  <version>1.0-SNAPSHOT</version>
+  <packaging>pom</packaging>
+  <name>EEXCESS - Parent</name>
+  <description>Parent for all EEXCESS related projects.
+    </description>
+<properties>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+</properties>
+  <modules>
+    <module>common/</module>
+    <module>modules/recommender/federated-recommender/</module>
+    <module>modules/recommender/federated-recommender-web-service/</module>
+    <module>modules/reference/partner-data-layer/</module>
+    <module>modules/reference/partner-recommender/</module>
+    <module>modules/reference/partner-web-service/</module>
+    <module>modules/partners/wissenmedia/</module>
+    <module>modules/partners/europeana/</module>
+    <module>modules/partners/kimcollect/</module>
+    <module>modules/partners/zbw/</module>
+    <module>modules/partners/mendeley/</module>
+    <module>experimental/misc/</module>
+    <module>modules/evaluation/</module>
+  </modules>
+  <developers>
+    <developer>
+      <id>plopez</id>
+      <name>Pablo Lopez</name>
+      <organization>Know-Center</organization>
+      <email>plopez@know-center.at</email>
+    </developer>
+    <developer>
+      <id>rkern</id>
+      <name>Roman Kern</name>
+      <organization>Know-Center</organization>
+      <email>rkern@know-center.at</email>
+    </developer>
+  </developers>
+  <scm>
+    <connection>scm:svn:https://knowminer.at/svn/eexcess/code</connection>
+    <developerConnection>scm:svn:https://knowminer.at/svn/eexcess/code</developerConnection>
+  </scm>
+  <dependencies>
+    <dependency>
+      <groupId>junit</groupId>
+      <artifactId>junit</artifactId>
+      <version>4.11</version>
+    </dependency>
+  </dependencies>
+  <repositories>
+    <repository>
+      <id>knowminer.at</id>
+      <url>http://knowminer.at:8085/nexus/content/repositories/public/</url>
+    </repository>
+    <repository>
+      <id>knowminer.at-snapshots</id>
+      <url>http://knowminer.at/repo/content/repositories/public-snapshots/</url>
+    </repository>
+    <repository>
+      <id>central</id>
+      <url>http://repo1.maven.org/maven2/</url>
+    </repository>
+  </repositories>
+  <distributionManagement>
+    <repository>
+      <id>eexcess</id>
+      <name>EEXCESS Repository</name>
+      <url>dav:http://knowminer.at:8085/nexus/content/repositories/eexcess</url>
+    </repository>
+    <!--
+  <snapshotRepository><id>eexcess</id><name>EEXCESS Snapshots Repository</name><url>dav:http://knowminer.at:8085/nexus/content/repositories/eexcess/snapshots</url></snapshotRepository>-->
+  </distributionManagement>
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-dependency-plugin</artifactId>
+        <version>2.2</version>
+      </plugin>
+      <plugin>
+        <groupId>org.mortbay.jetty</groupId>
+        <artifactId>maven-jetty-plugin</artifactId>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-compiler-plugin</artifactId>
+        <configuration>
+          <source>1.7</source>
+          <target>1.7</target>
+        </configuration>
+      </plugin>
+    </plugins>
+  </build>
+</project>
