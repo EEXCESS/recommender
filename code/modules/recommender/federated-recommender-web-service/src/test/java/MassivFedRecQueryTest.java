@@ -28,7 +28,7 @@ import eu.eexcess.dataformats.userprofile.SecureUserProfile;
 
 public class MassivFedRecQueryTest {
 	//private static final String searchRequest = "http://eexcess.joanneum.at/eexcess-federated-recommender-web-service-1.0-SNAPSHOT/recommender/recommend";
-	private static final String searchRequest = "http://localhost:8110/eexcess-federated-recommender-web-service-1.0-SNAPSHOT/recommender/recommend";
+	private static final String searchRequest = "http://localhost:8112/eexcess-federated-recommender-web-service-1.0-SNAPSHOT/recommender/recommend";
 	private final ExecutorService threadPool;
 	public  MassivFedRecQueryTest() {
 		threadPool= Executors.newFixedThreadPool(30);
@@ -98,11 +98,15 @@ public class MassivFedRecQueryTest {
 		List<String> queryList = test.getQueryList();
 		HashMap<String,Future<String>> futures = new HashMap<String,Future<String>>();
 		for (int i = 0; i < 30; i++) {
+			try {
+			    Thread.sleep(5000);             
+			} catch(InterruptedException ex) {
+			    Thread.currentThread().interrupt();
+			}
 			 String prevString="";
 			for (final String string : queryList) {
 				if(prevString.length()==0)
 					prevString +=string;
-				
 				else{
 					final String query = prevString + string;
 					prevString="";

@@ -62,7 +62,6 @@ public class D3GraphDocument implements Serializable{
 		nodes = new ArrayList<String>(graph.vertexSet());
 		edges = new ArrayList<D3GraphDocumentEdge>();
 		for (DefaultEdge currentEdge : graph.edgeSet()) {
-			
 			 edges.add(new D3GraphDocumentEdge(graph.getEdgeSource(currentEdge),graph.getEdgeTarget(currentEdge)));
 		}
 		

@@ -1,37 +1,35 @@
-/* Copyright (C) 2014 
+/* Copyright (C) 2014
 "Kompetenzzentrum fuer wissensbasierte Anwendungen Forschungs- und EntwicklungsgmbH" 
 (Know-Center), Graz, Austria, office@know-center.at.
 
-Licensees holding valid Know-Center Commercial licenses may use this file in
-accordance with the Know-Center Commercial License Agreement provided with 
-the Software or, alternatively, in accordance with the terms contained in
-a written agreement between Licensees and Know-Center.
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
 
-This program is free software: you can redistribute it and/or modify
-it under the terms of the GNU Affero General Public License as
-published by the Free Software Foundation, either version 3 of the
-License, or (at your option) any later version.
+    http://www.apache.org/licenses/LICENSE-2.0
 
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU Affero General Public License for more details.
-
-You should have received a copy of the GNU Affero General Public License
-along with this program.  If not, see <http://www.gnu.org/licenses/>.
-*/
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+ */
 package eu.eexcess.dataformats;
 
 import java.io.Serializable;
 import java.util.List;
 import java.util.Stack;
 
+import javax.swing.plaf.basic.BasicInternalFrameTitlePane.RestoreAction;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlElementWrapper;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlTransient;
+
+import org.apache.commons.math3.stat.descriptive.moment.StandardDeviation;
+
 
 @XmlRootElement(name = "eexcess-partner-badge")
 @XmlAccessorType(XmlAccessType.FIELD)
@@ -49,16 +47,31 @@ public class PartnerBadge implements Serializable{
     private String description;
 	@XmlElement(name="endpoint")
     private String endpoint;
+	@XmlElement(name="requestCount")
+	public int requestCount=0;
+
+	@XmlElement(name="failedRequestCount")
+	public int failedRequestCount=0;
 	
 	//Begin response time
 	@XmlTransient
 	private Stack<Long> lastResponseTimes= new Stack<Long>() ;
 	@XmlElement(name="shortTimeResponseTimes")
 	private Long shortTimeResponseTime;
+	@XmlElement(name="shortTimeResponsDeviation")
+	private Long shortTimeResponsDeviation;
 	@XmlElement(name="longTimeResponseTimes")
 	private Long longTimeResponseTime;
+	
 	//End response time	
 	
+	public Long getShortTimeResponsDeviation() {
+		return shortTimeResponsDeviation;
+	}
+	public void setShortTimeResponsDeviation(Long shortTimeResponsDeviation) {
+		this.shortTimeResponsDeviation = shortTimeResponsDeviation;
+	}
+
 	public Long getShortTimeResponseTime() {
 		return shortTimeResponseTime;
 	}
@@ -75,6 +88,9 @@ public class PartnerBadge implements Serializable{
 	@XmlElement(name="tag")
 	@XmlElementWrapper(name="tags")
     private List<String> tags;
+
+
+	
 	
 	public String getEndpoint() {
 		return endpoint;
@@ -159,7 +175,48 @@ public class PartnerBadge implements Serializable{
 				+ partnerKey + ", description=" + description + ", endpoint="
 				+ endpoint + ", tags=" + tags + "]";
 	}
-	
+	public void setShortTimeResponsDeviation() {
+		// TODO Auto-generated method stub
+		
+	}
+	/**
+	 * updates the partner response times (shortTime and longTime) and short time deviation
+	 * 
+	 * @param partner
+	 * @param respTime
+	 */
+	public void updatePartnerResponseTime(long respTime) {
+		
+		pushLastResponseTimes(respTime);
+
+		java.util.Iterator<Long> iter = getLastResponseTimes().iterator();
+		Long first = iter.next();
+		while (first == null && iter.hasNext())
+			first = iter.next();
+		if (first != null)
+			setShortTimeResponseTime(first);
+		while (iter.hasNext()) {
+			Long next = iter.next();
+			if (next != null)
+				setShortTimeResponseTime((getShortTimeResponseTime() + next) / 2);
+		}
+		if (getLongTimeResponseTime() != null)
+			setLongTimeResponseTime((getLongTimeResponseTime() + respTime) / 2);
+		else
+			setLongTimeResponseTime(respTime);
+		double[] values = new double[getLastResponseTimes().toArray().length];
+
+		StandardDeviation standartDeviation = new StandardDeviation();
+		Object[] respTimes = getLastResponseTimes().toArray();
+		int count = 0;
+		for (Object long1 : respTimes) {
+			if (long1 != null)
+				values[count] = ((Long) long1).doubleValue();
+			count++;
+		}
+		setShortTimeResponsDeviation(new Double(standartDeviation.evaluate(values)).longValue());
+	}
+
 	
 	
 }
