@@ -1,0 +1,13 @@
+{
+  "systemId": "Mendeley",
+  "queryGeneratorClass": "eu.eexcess.partnerrecommender.reference.LuceneQueryGenerator",
+  "partnerConnectorClass": "eu.eexcess.mendeley.recommender.PartnerConnector",
+  "transformerClass": "eu.eexcess.mendeley.datalayer.MendeleyTransformer",
+  "searchEndpoint": "https://api-oauth2.mendeley.com/oapi/documents/search/${query}",
+  "userName": "",
+  "password": "",
+  "mappingListTransformationFile":"mapperResultList.xsl",
+  "mappingObjectTransformationFile":"mapperObject.xsl",
+  "partnerDataRequestsTrace":"false",
+  "enableEnriching":"false"
+}

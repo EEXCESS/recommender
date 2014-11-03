@@ -1,0 +1,12 @@
+{
+  "systemId": "Europeana",
+  "queryGeneratorClass": "eu.eexcess.partnerrecommender.reference.OrQueryGenerator",
+  "partnerConnectorClass": "eu.eexcess.europeana.recommender.PartnerConnector",
+  "transformerClass": "eu.eexcess.europeana.datalayer.EuropeanaTransformer",
+  "searchEndpoint": "http://www.europeana.eu/api/v2/search.json?wskey=${apiKey}&query=${query}&rows=${numResults}",
+  "apiKey": "",
+  "mappingListTransformationFile":"mapperResultList.xsl",
+  "mappingObjectTransformationFile":"mapperObject.xsl",
+  "partnerDataRequestsTrace":"false",
+  "enableEnriching":"false"
+}
