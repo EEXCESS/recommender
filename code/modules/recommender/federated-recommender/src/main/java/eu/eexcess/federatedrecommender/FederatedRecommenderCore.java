@@ -293,47 +293,7 @@ public class FederatedRecommenderCore {
 		return federatedResults;
 	}
 
-	/**
-	 * returns a graph as object to convert to json for d3
-	 * 
-	 * @param userProfile
-	 * @return
-	 * @throws FederatedRecommenderException
-	 */
-	public D3GraphDocument getGraph(SecureUserProfile userProfile) throws FederatedRecommenderException {
-		DbPediaGraph dbPediaGraph = new DbPediaGraph(dbPediaSolrIndex);
-		List<String> keynodes = new ArrayList<String>();
-		int hitsLimit = 10;
-		int depthLimit = 10;
-		SimpleWeightedGraph<String, DefaultEdge> graph = null;
-		try {
-			graph = dbPediaGraph.getFromKeywords(userProfile.contextKeywords, keynodes, hitsLimit, depthLimit);
-		} catch (FederatedRecommenderException e) {
-			logger.log(Level.SEVERE, "There was an error while building the graph", e);
-			throw new FederatedRecommenderException("There was an error while building the graph", e);
-		}
-		D3GraphDocument d3GraphDocument = new D3GraphDocument(graph);
-		d3GraphDocument = normalizeGraphValues(d3GraphDocument);
-		return d3GraphDocument;
-	}
 
-	private D3GraphDocument normalizeGraphValues(D3GraphDocument d3GraphDocument) {
-		String regexp = "^http://.*/";
-
-		for (int i = 0; i < d3GraphDocument.nodes.size(); i++) {
-			String node = d3GraphDocument.nodes.get(i).replaceAll(regexp, "");
-			d3GraphDocument.nodes.set(i, node);
-		}
-		for (int i = 0; i < d3GraphDocument.edges.size(); i++) {
-			String targetShortString = d3GraphDocument.edges.get(i).target.replaceAll(regexp, "");
-			String sourceShortString = d3GraphDocument.edges.get(i).source.replaceAll(regexp, "");
-
-			d3GraphDocument.edges.get(i).target = targetShortString;
-			d3GraphDocument.edges.get(i).source = sourceShortString;
-		}
-
-		return d3GraphDocument;
-	}
 
 	// /**
 	// * test method for decomposers
@@ -441,7 +401,7 @@ public class FederatedRecommenderCore {
 
 	public SecureUserProfile generateFederatedRecommendationDBPedia(SecureUserProfileEvaluation userProfile) {
 
-		SecureUserProfileDecomposer<?, SecureUserProfileEvaluation> sUPDecomposer = new DBPediaDecomposer(federatedRecConfiguration, dbPediaSolrIndex,
+		SecureUserProfileDecomposer<?, SecureUserProfileEvaluation> sUPDecomposer = new DBPediaDecomposer(federatedRecConfiguration, getDbPediaSolrIndex(),
 				federatedRecConfiguration.graphQueryDepthLimit);
 		return sUPDecomposer.decompose(userProfile);
 	}
@@ -462,6 +422,10 @@ public class FederatedRecommenderCore {
 		// TODO add connection to WikipediaSourceSelection and alter
 		// userProfile.partnerList to select sources
 		return userProfile;
+	}
+
+	public DbPediaSolrIndex getDbPediaSolrIndex() {
+		return dbPediaSolrIndex;
 	}
 
 	

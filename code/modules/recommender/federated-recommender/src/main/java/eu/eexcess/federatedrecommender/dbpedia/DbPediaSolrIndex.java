@@ -297,7 +297,6 @@ public class DbPediaSolrIndex {
 	                public Void call() throws Exception {
 	                    createReferenceCountsSegment(finalModifiableSolrParams);
 						return null;
-	                     
 	                }
 	            });
 	            futures.put(i, future);

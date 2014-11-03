@@ -25,6 +25,7 @@ package eu.eexcess.federatedrecommender.evaluation;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
@@ -34,6 +35,8 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.apache.commons.lang.SerializationUtils;
+import org.jgraph.graph.DefaultEdge;
+import org.jgrapht.graph.SimpleWeightedGraph;
 
 import eu.eexcess.config.FederatedRecommenderConfiguration;
 import eu.eexcess.dataformats.PartnerBadge;
@@ -42,8 +45,12 @@ import eu.eexcess.dataformats.evaluation.EvaluationResultLists;
 import eu.eexcess.dataformats.result.Result;
 import eu.eexcess.dataformats.result.ResultList;
 import eu.eexcess.dataformats.userprofile.ContextKeyword;
+import eu.eexcess.dataformats.userprofile.SecureUserProfile;
 import eu.eexcess.dataformats.userprofile.SecureUserProfileEvaluation;
 import eu.eexcess.federatedrecommender.FederatedRecommenderCore;
+import eu.eexcess.federatedrecommender.dataformats.D3GraphDocument;
+import eu.eexcess.federatedrecommender.dbpedia.DbPediaGraph;
+import eu.eexcess.federatedrecommender.dbpedia.DbPediaSolrIndex;
 import eu.eexcess.federatedrecommender.evaluation.evaluation.EvaluationManager;
 import eu.eexcess.federatedrecommender.evaluation.evaluation.EvaluationQuery;
 import eu.eexcess.federatedrecommender.utils.FederatedRecommenderException;
@@ -52,10 +59,11 @@ import eu.eexcess.federatedrecommender.utils.FederatedRecommenderException;
 
 
 public class FederatedRecommenderEvaluationCore   {
-	private final EvaluationManager evalManager;
+	private EvaluationManager evalManager=null;
 	private final FederatedRecommenderConfiguration federatedRecommenderConfiguration;
 	private final FederatedRecommenderCore fRCore;
 	private final ExecutorService threadPool;
+	
 	private static final Logger logger = Logger
 			.getLogger(FederatedRecommenderEvaluationCore.class.getName());
 	
@@ -76,7 +84,8 @@ public class FederatedRecommenderEvaluationCore   {
 					"EvaluationQueries file could not be read "
 							+ federatedRecConfiguration.evaluationQueriesFile,
 					e);
-			throw e;
+			
+			
 		}
 		threadPool = Executors.newFixedThreadPool(30);
    }
@@ -286,6 +295,49 @@ public class FederatedRecommenderEvaluationCore   {
 	 */
 	public void evaluationWriteEraseResults() {
 		evalManager.writeAllResultsToFile();
+	}
+	/**
+	 * returns a graph as object to convert to json for d3
+	 * 
+	 * @param userProfile
+	 * @return
+	 * @throws FederatedRecommenderException
+	 */
+	public D3GraphDocument getGraph(SecureUserProfile userProfile) throws FederatedRecommenderException {
+		
+		DbPediaGraph dbPediaGraph = new DbPediaGraph(fRCore.getDbPediaSolrIndex());
+		List<String> keynodes = new ArrayList<String>();
+		int hitsLimit = 10;
+		int depthLimit = 10;
+		SimpleWeightedGraph<String, DefaultEdge> graph = null;
+		try {
+			graph = dbPediaGraph.getFromKeywords(userProfile.contextKeywords, keynodes, hitsLimit, depthLimit);
+			System.out.println(graph +" graph");
+		} catch (Exception e) {
+			logger.log(Level.SEVERE, "There was an error while building the graph", e);
+			throw new FederatedRecommenderException("There was an error while building the graph", e);
+		}
+		D3GraphDocument d3GraphDocument = new D3GraphDocument(graph);
+		d3GraphDocument = normalizeGraphValues(d3GraphDocument);
+		return d3GraphDocument;
+	}
+
+	private D3GraphDocument normalizeGraphValues(D3GraphDocument d3GraphDocument) {
+		String regexp = "^http://.*/";
+
+		for (int i = 0; i < d3GraphDocument.nodes.size(); i++) {
+			String node = d3GraphDocument.nodes.get(i).replaceAll(regexp, "");
+			d3GraphDocument.nodes.set(i, node);
+		}
+		for (int i = 0; i < d3GraphDocument.edges.size(); i++) {
+			String targetShortString = d3GraphDocument.edges.get(i).target.replaceAll(regexp, "");
+			String sourceShortString = d3GraphDocument.edges.get(i).source.replaceAll(regexp, "");
+
+			d3GraphDocument.edges.get(i).target = targetShortString;
+			d3GraphDocument.edges.get(i).source = sourceShortString;
+		}
+
+		return d3GraphDocument;
 	}
 
 	// End Evaluation

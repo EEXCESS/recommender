@@ -54,8 +54,10 @@ import eu.eexcess.dataformats.evaluation.EvaluationResponse;
 import eu.eexcess.dataformats.evaluation.EvaluationResultLists;
 import eu.eexcess.dataformats.result.ResultList;
 import eu.eexcess.dataformats.userprofile.ContextKeyword;
+import eu.eexcess.dataformats.userprofile.SecureUserProfile;
 import eu.eexcess.dataformats.userprofile.SecureUserProfileEvaluation;
 import eu.eexcess.dataformats.userprofile.UserCredentials;
+import eu.eexcess.federatedrecommender.dataformats.D3GraphDocument;
 import eu.eexcess.federatedrecommender.evaluation.FederatedRecommenderEvaluationCore;
 import eu.eexcess.federatedrecommender.utils.FederatedRecommenderException;
 import eu.eexcess.federatedrecommenderservice.FederatedRecommenderService;
@@ -216,6 +218,19 @@ public class FederatedRecommenderEvaluationService extends FederatedRecommenderS
 		fREC.evaluationWriteEraseResults();
 		return Response.ok().build();
 	}
-
+	
+	@POST
+	@Path("/viewGraph")
+	@Consumes(value = MediaType.TEXT_XML)
+	@Produces(MediaType.APPLICATION_JSON)
+	public Response viewGraph(SecureUserProfile userProfile) throws IOException {
+		D3GraphDocument d3GraphDocument;
+		try {
+			d3GraphDocument = fREC.getGraph(userProfile);
+		} catch (FederatedRecommenderException e) {
+			return Response.serverError().build();
+		}
+		return Response.ok(d3GraphDocument).build();
+	}
 
 }

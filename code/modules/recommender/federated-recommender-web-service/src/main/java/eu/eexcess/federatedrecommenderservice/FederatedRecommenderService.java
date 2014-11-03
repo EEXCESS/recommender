@@ -486,19 +486,7 @@ public class FederatedRecommenderService {
 		return secureUserProfile;
 	}
 
-	@POST
-	@Path("/viewGraph")
-	@Consumes(value = MediaType.TEXT_XML)
-	@Produces(MediaType.APPLICATION_JSON)
-	public Response viewGraph(SecureUserProfile userProfile) throws IOException {
-		D3GraphDocument d3GraphDocument;
-		try {
-			d3GraphDocument = fRC.getGraph(userProfile);
-		} catch (FederatedRecommenderException e) {
-			return Response.serverError().build();
-		}
-		return Response.ok(d3GraphDocument).build();
-	}
+
 
 	// End Test Services
 

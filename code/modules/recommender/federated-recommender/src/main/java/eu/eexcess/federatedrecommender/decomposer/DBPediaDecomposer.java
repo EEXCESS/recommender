@@ -42,6 +42,7 @@ import eu.eexcess.federatedrecommender.utils.FederatedRecommenderException;
 /**
  * Transforms the secure user profile in multiple profiles with different
  * interests combinations
+ * @author hziak
  */
 
 public class DBPediaDecomposer implements SecureUserProfileDecomposer<SecureUserProfileEvaluation, SecureUserProfileEvaluation> {
@@ -101,14 +102,7 @@ public class DBPediaDecomposer implements SecureUserProfileDecomposer<SecureUser
 
 
 		List<ContextKeyword> profileKeywords = inputSecureUserProfile.contextKeywords; // Keywords
-		// consist
-		// (for
-		// now)
-		// in
-		// context
-		// keywords
-		// keywordList.addAll(inputSecureUserProfile.interestList);
-
+		// consist (for now) in context keywords keywordList.addAll(inputSecureUserProfile.interestList);
 		// Return inputSecureUserProfile if no further combinations are
 		// possible.
 		if (profileKeywords.size() < 3) {
@@ -156,20 +150,13 @@ public class DBPediaDecomposer implements SecureUserProfileDecomposer<SecureUser
 															// inputProfile
 		{
 			restOfdbPediaEntityNames.remove(dbPediaEntityName);
-
 			for (String dbPediaEntityName2 : restOfdbPediaEntityNames) {
-
 				DijkstraShortestPath<String, DefaultEdge> path = new DijkstraShortestPath<String, DefaultEdge>(semanticGraph, dbPediaEntityName, dbPediaEntityName2);
-
 				System.out.println("[" + dbPediaEntityName + ", " + dbPediaEntityName2 + "] - path length: " + path.getPathLength());
-
 				if (path.getPathLength() < semanticDistanceThreshold) {
-//					SecureUserProfile candidateProfile = new SecureUserProfile();
 					ArrayList<ContextKeyword> contextKeywordGroup = new ArrayList<ContextKeyword>();
 					contextKeywordGroup.add(new ContextKeyword(dbPediaEntityName));
 					contextKeywordGroup.add(new ContextKeyword(dbPediaEntityName2));
-				//	inputSecureUserProfile.contextKeywordsGroups.add(contextKeywordGroup);
-					
 				}
 			}
 

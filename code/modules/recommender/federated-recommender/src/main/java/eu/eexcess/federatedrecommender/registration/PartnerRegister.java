@@ -61,11 +61,11 @@ public class PartnerRegister {
 
     public void addPartner(PartnerBadge badge) {
         partners.add(badge);
-        String proxyHost = "localhost";//System.getProperty("http.proxyHost");
-        String proxyPort = "8888";//System.getProperty("http.proxyPort");
+//        String proxyHost = "localhost";//System.getProperty("http.proxyHost");
+//        String proxyPort = "8888";//System.getProperty("http.proxyPort");
         DefaultClientConfig config = new DefaultClientConfig();
         config.getFeatures().put(ClientConfig.FEATURE_DISABLE_XML_SECURITY, true);
-        config.getProperties().put(DefaultApacheHttpClientConfig.PROPERTY_PROXY_URI, "http://" + proxyHost + ":" + proxyPort);
+//        config.getProperties().put(DefaultApacheHttpClientConfig.PROPERTY_PROXY_URI, "http://" + proxyHost + ":" + proxyPort);
         Client client =new Client(new URLConnectionClientHandler(
                 new HttpURLConnectionFactory() {
                     Proxy p = null;

@@ -20,7 +20,6 @@ import java.io.Serializable;
 import java.util.List;
 import java.util.Stack;
 
-import javax.swing.plaf.basic.BasicInternalFrameTitlePane.RestoreAction;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
@@ -186,9 +185,7 @@ public class PartnerBadge implements Serializable{
 	 * @param respTime
 	 */
 	public void updatePartnerResponseTime(long respTime) {
-		
 		pushLastResponseTimes(respTime);
-
 		java.util.Iterator<Long> iter = getLastResponseTimes().iterator();
 		Long first = iter.next();
 		while (first == null && iter.hasNext())
