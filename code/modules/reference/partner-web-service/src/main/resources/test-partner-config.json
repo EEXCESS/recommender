@@ -1,0 +1,8 @@
+{
+  "queryGeneratorClass": "eu.eexcess.partnerrecommender.reference.LuceneQueryGenerator",
+  "searchEndpoint": "http://service-int.wissens-server.com/wissensserver/view.html?a=s&t=${query}&w=EEXCESS&l=10&fields=fachgebiet_id,searchresult-pic,artikeltyp&p=intro",
+  "userName": "bep",
+  "password": "wissenhappen",
+  "mappingListTransformationFile":"mapping_result-list-wissensserver2exxcess.xsl",
+  "mappingObjectTransformationFile":"mapping_result-object-wissensserver2exxcess.xsl"
+}
