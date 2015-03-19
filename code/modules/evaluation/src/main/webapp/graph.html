@@ -1,7 +1,7 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN">
 <html lang="en">
 	<head>
-		<meta charset="utf-8">
+		
 		<title>Force based label placement</title>
 		<script type="text/javascript" src="http://mbostock.github.com/d3/d3.js?2.6.0"></script>
 		
@@ -34,9 +34,9 @@ text {
 <script>
 
 // get the data
- var eexcessAPI = "http://localhost:8113/eexcess-federated-recommender-evaluation-web-service-1.0-SNAPSHOT/recommender/viewGraph";
- /* 	<context>Obama</context><context>clinton</context><context>George W. Bush</context><context>iraq</context><context>cuba</context>	<context>Steyer</context> */
-			 var data ="<?xml version=\"1.0\" ?><eexcess-secure-user-profile firstName=\"Max\" lastName=\"Musterman\">  <contextKeywords><contextKeywords><text>clinton</text><weight>0.5</weight></contextKeywords><contextKeywords><text>obama</text><weight>0.5</weight></contextKeywords></contextKeywords><context-list><context>workforce</context>	<context>Braveheart</context>			      </context-list>			</eexcess-secure-user-profile>";
+ var eexcessAPI = "http://localhost:8114/eexcess-federated-recommender-evaluation-web-service-1.0-SNAPSHOT/recommender/viewGraph";
+ /* 	<context>Obama</context><context>clinton</context><context>women</context><context>iraq</context><context>cuba</context>	<context>Steyer</context> */
+			 var data ="<?xml version=\"1.0\" ?><eexcess-secure-user-profile firstName=\"Max\" lastName=\"Musterman\">  <contextKeywords><contextKeywords><text>kennedy</text><weight>0.5</weight></contextKeywords><contextKeywords><text>obama</text><weight>0.5</weight></contextKeywords><contextKeywords><text>mel gibson</text><weight>0.5</weight></contextKeywords></contextKeywords><context-list><context>workforce</context>	<context>Braveheart</context>			      </context-list>			</eexcess-secure-user-profile>";
 			 var xml =$.parseXML(data);
 			 var returnData;
 			$.ajax({

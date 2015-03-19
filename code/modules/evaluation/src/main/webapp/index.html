@@ -67,8 +67,8 @@ margin:0px;
 
 </br>
    <div ng-repeat="myItem in mainCtrl.items.results "  >
-   	
-        <div class="col-md-3"   >
+   	 <div class="col-md-6"   >
+     <!--     <div class="col-md-3"   >-->
        
 		<div class="row list-group border-colored list-group-width" >
 		<div ng-click="mainCtrl.select($index)">
@@ -90,7 +90,7 @@ margin:0px;
 	      </div>
 	</div>
   </div>
- </div>
+
 
 <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.2.19/angular.js"></script>
 
@@ -108,12 +108,13 @@ angular.module('evalApp', []).controller('MainCtrl', ['$http','$scope', function
 	  }
 	 
       
-	  self.icons = [{path:"img/one.png", selected:false ,color:"green",num:1},{path:"img/two.png", selected:false ,color:"yellow",num:2},{path:"img/three.png", selected:false ,color:"orange",num:3},{path:"img/four.png", selected:false ,color:"red",num:4}];
+	  self.icons = [{path:"img/one.png", selected:false ,color:"green",num:1},{path:"img/two.png", selected:false ,color:"yellow",num:2}];
+	  <!--,{path:"img/three.png", selected:false ,color:"orange",num:3},{path:"img/four.png", selected:false ,color:"red",num:4}];-->
 	  self.nextSelectedIcon=0;
 	  self.items=[];
 
 	  self.getItems=function(){ 
-			      $http.post('http://localhost:8100/eexcess-federated-recommender-evaluation-web-service-1.0-SNAPSHOT/recommender/evaluationWithUID?id='+$.cookie('eexcessUID'), { callback: "JSON_CALLBACK" }
+			      $http.post('http://localhost/eexcess-federated-recommender-web-service-1.0-SNAPSHOT/evaluation/blockEvaluationWithUID?id='+$.cookie('eexcessUID'), { callback: "JSON_CALLBACK" }
 			      ,{ get: { method: "JSONP" }}
 			      ).then(function(response) {
 			      self.items = response.data;
@@ -181,7 +182,7 @@ angular.module('evalApp', []).controller('MainCtrl', ['$http','$scope', function
 	self.sendResult = function(){
 	     $(self.icons).each(function(){ this.selected=false});
 	     $('.submitButton').prop('disabled', true);
-	      $http.post('http://localhost:8100/eexcess-federated-recommender-evaluation-web-service-1.0-SNAPSHOT/recommender/evaluationResultUID?id='+$.cookie('eexcessUID'), self.items,{ callback: "JSON_CALLBACK" }
+	      $http.post('http://localhost/eexcess-federated-recommender-web-service-1.0-SNAPSHOT/evaluation/evaluationResultUID?id='+$.cookie('eexcessUID'), self.items,{ callback: "JSON_CALLBACK" }
 			      ,{ get: { method: "JSONP" }}
 			      ).then(function(response) {
 			      if(response.data.evaluationDone)

@@ -34,18 +34,19 @@ import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
 
 import org.codehaus.jackson.JsonParseException;
 import org.codehaus.jackson.JsonParser;
 import org.codehaus.jackson.map.JsonMappingException;
 import org.codehaus.jackson.map.ObjectMapper;
 
+import javax.ws.rs.core.Response;
 import com.sun.jersey.spi.resource.Singleton;
 
 import eu.eexcess.config.FederatedRecommenderConfiguration;
 import eu.eexcess.dataformats.PartnerBadge;
 import eu.eexcess.dataformats.PartnerBadgeList;
+import eu.eexcess.dataformats.RecommenderStats;
 import eu.eexcess.dataformats.result.ResultList;
 import eu.eexcess.dataformats.userprofile.Address;
 import eu.eexcess.dataformats.userprofile.Context;
@@ -59,7 +60,6 @@ import eu.eexcess.dataformats.userprofile.SecureUserProfile;
 import eu.eexcess.dataformats.userprofile.UserCredentials;
 import eu.eexcess.dataformats.userprofile.UserLocation;
 import eu.eexcess.federatedrecommender.FederatedRecommenderCore;
-import eu.eexcess.federatedrecommender.dataformats.D3GraphDocument;
 import eu.eexcess.federatedrecommender.utils.FederatedRecommenderException;
 
 /**
@@ -132,142 +132,136 @@ public class FederatedRecommenderService {
 
 	@PostConstruct
 	public void initialize() throws Exception {
-
-		/*
-		 * 
-		 * TODO: Remove when full registration from partners is implemented.
-		 */
-
-		String europeana = null, mendeley = null, zbw = null, kimCollect = null, wissensserver = null;
-
-		if (federatedRecommenderConfiguration.deploymentPlatform
-				.equals("localStandalone")) {
-
-			europeana = "http://localhost:8101/eexcess-partner-europeana-1.0-SNAPSHOT/partner/recommend/";
-
-			mendeley = "http://localhost:8103/eexcess-partner-mendeley-1.0-SNAPSHOT/partner/recommend/";
-
-			zbw = "http://localhost:8105/eexcess-partner-zbw-1.0-SNAPSHOT/partner/recommend/";
-
-			kimCollect = "http://localhost:8102/eexcess-partner-kim-collect-1.0-SNAPSHOT/partner/recommend/";
-
-			wissensserver = "http://localhost:8104/eexcess-partner-wissenmedia-1.0-SNAPSHOT/partner/recommend/";
-
-		} else if (federatedRecommenderConfiguration.deploymentPlatform
-				.equals("localTomcat")) {
-
-			europeana = "http://localhost:8080/eexcess-partner-europeana-1.0-SNAPSHOT/partner/recommend/";
-
-			mendeley = "http://localhost:8080/eexcess-partner-mendeley-1.0-SNAPSHOT/partner/recommend/";
-
-			zbw = "http://localhost:8080/eexcess-partner-zbw-1.0-SNAPSHOT/partner/recommend/";
-
-			kimCollect = "http://localhost:8080/eexcess-partner-kim-collect-1.0-SNAPSHOT/partner/recommend/";
-
-			wissensserver = "http://localhost:8080/eexcess-partner-wissenmedia-1.0-SNAPSHOT/partner/recommend/";
-
-		}
-
-		else if (federatedRecommenderConfiguration.deploymentPlatform
-				.equals("jrDev")) {
-
-			europeana = "http://eexcess-dev.joanneum.at/eexcess-partner-europeana-1.0-SNAPSHOT/partner/recommend/";
-
-			mendeley = "http://eexcess-dev.joanneum.at/eexcess-partner-mendeley-1.0-SNAPSHOT/partner/recommend/";
-
-			zbw = "http://eexcess-dev.joanneum.at/eexcess-partner-zbw-1.0-SNAPSHOT/partner/recommend/";
-
-			kimCollect = "http://eexcess-dev.joanneum.at/eexcess-partner-kim-collect-1.0-SNAPSHOT/partner/recommend/";
-
-			wissensserver = "http://eexcess-dev.joanneum.at/eexcess-partner-wissenmedia-1.0-SNAPSHOT/partner/recommend/";
-
-		}
-
-		else if (federatedRecommenderConfiguration.deploymentPlatform
-				.equals("jrStable")) {
-
-			europeana = "http://eexcess.joanneum.at/eexcess-partner-europeana-1.0-SNAPSHOT/partner/recommend/";
-
-			mendeley = "http://eexcess.joanneum.at/eexcess-partner-mendeley-1.0-SNAPSHOT/partner/recommend/";
-
-			zbw = "http://eexcess.joanneum.at/eexcess-partner-zbw-1.0-SNAPSHOT/partner/recommend/";
-
-			kimCollect = "http://eexcess.joanneum.at/eexcess-partner-kim-collect-1.0-SNAPSHOT/partner/recommend/";
-
-			wissensserver = "http://eexcess.joanneum.at/eexcess-partner-wissenmedia-1.0-SNAPSHOT/partner/recommend/";
-
-		}
-
-		else {
-			throw new Exception(
-					"Problem deploying! Please use an appropriate deployment scenario in the config file (localStandalone, localTomcat, jrDev, jrStable)");
-		}
-
-		PartnerBadge badge = new PartnerBadge();
-		badge = new PartnerBadge();
-		badge.setSystemId("Europeana");
-		badge.setEndpoint(europeana);
-		badge.setTags(new ArrayList<String>() {
-			private static final long serialVersionUID = -7498028779074331771L;
-			{
-				add("Europe");
-				add("Culture");
-			}
-		});
-		fRC.addPartner(badge);
-
-		PartnerBadge badge2 = new PartnerBadge();
-		badge2 = new PartnerBadge();
-		badge2.setSystemId("Mendeley");
-		badge2.setEndpoint(mendeley);
-		badge2.setTags(new ArrayList<String>() {
-			private static final long serialVersionUID = -4961167430016500063L;
-
-			{
-				add("Science");
-				add("Journals");
-			}
-		});
-		fRC.addPartner(badge2);
-
-		PartnerBadge badge3 = new PartnerBadge();
-		badge3.setSystemId("ZBW");
-		badge3.setEndpoint(zbw);
-		badge3.setTags(new ArrayList<String>() {
-			private static final long serialVersionUID = 7970224907132161869L;
-			{
-				add("Economy");
-				add("Articles");
-			}
-		});
-		fRC.addPartner(badge3);
-
-		PartnerBadge badge4 = new PartnerBadge();
-		badge4.setSystemId("KIMCollect");
-		badge4.setEndpoint(kimCollect);
-		badge4.setTags(new ArrayList<String>() {
-			private static final long serialVersionUID = -8047754475051394204L;
-
-			{
-				add("Swiss");
-				add("Culture");
-			}
-		});
-		fRC.addPartner(badge4);
-
-		PartnerBadge badge5 = new PartnerBadge();
-		badge5.setSystemId("Wissenmedia");
-		badge5.setEndpoint(wissensserver);
-		badge5.setTags(new ArrayList<String>() {
-			private static final long serialVersionUID = -993773655268128609L;
-
-			{
-				add("Articles");
-				add("Culture");
-			}
-		});
-		fRC.addPartner(badge5);
-
+		logger.log(Level.INFO,"Initialize");
+//		String europeana = null, mendeley = null, zbw = null, kimCollect = null, wissensserver = null;
+//
+//		if (federatedRecommenderConfiguration.deploymentPlatform
+//				.equals("localStandalone")) {
+//
+//			europeana = "http://localhost:8101/eexcess-partner-europeana-1.0-SNAPSHOT/partner/recommend/";
+//
+//			mendeley = "http://localhost:8103/eexcess-partner-mendeley-1.0-SNAPSHOT/partner/recommend/";
+//
+//			zbw = "http://localhost:8105/eexcess-partner-zbw-1.0-SNAPSHOT/partner/recommend/";
+//
+//			kimCollect = "http://localhost:8102/eexcess-partner-kim-collect-1.0-SNAPSHOT/partner/recommend/";
+//
+//			wissensserver = "http://localhost:8104/eexcess-partner-wissenmedia-1.0-SNAPSHOT/partner/recommend/";
+//
+//		} else if (federatedRecommenderConfiguration.deploymentPlatform
+//				.equals("localTomcat")) {
+//
+//			europeana = "http://localhost:8080/eexcess-partner-europeana-1.0-SNAPSHOT/partner/recommend/";
+//
+//			mendeley = "http://localhost:8080/eexcess-partner-mendeley-1.0-SNAPSHOT/partner/recommend/";
+//
+//			zbw = "http://localhost:8080/eexcess-partner-zbw-1.0-SNAPSHOT/partner/recommend/";
+//
+//			kimCollect = "http://localhost:8080/eexcess-partner-kim-collect-1.0-SNAPSHOT/partner/recommend/";
+//
+//			wissensserver = "http://localhost:8080/eexcess-partner-wissenmedia-1.0-SNAPSHOT/partner/recommend/";
+//
+//		}
+//
+//		else if (federatedRecommenderConfiguration.deploymentPlatform
+//				.equals("jrDev")) {
+//
+//			europeana = "http://eexcess-dev.joanneum.at/eexcess-partner-europeana-1.0-SNAPSHOT/partner/recommend/";
+//
+//			mendeley = "http://eexcess-dev.joanneum.at/eexcess-partner-mendeley-1.0-SNAPSHOT/partner/recommend/";
+//
+//			zbw = "http://eexcess-dev.joanneum.at/eexcess-partner-zbw-1.0-SNAPSHOT/partner/recommend/";
+//
+//			kimCollect = "http://eexcess-dev.joanneum.at/eexcess-partner-kim-collect-1.0-SNAPSHOT/partner/recommend/";
+//
+//			wissensserver = "http://eexcess-dev.joanneum.at/eexcess-partner-wissenmedia-1.0-SNAPSHOT/partner/recommend/";
+//
+//		}
+//
+//		else if (federatedRecommenderConfiguration.deploymentPlatform
+//				.equals("jrStable")) {
+//
+//			europeana = "http://eexcess.joanneum.at/eexcess-partner-europeana-1.0-SNAPSHOT/partner/recommend/";
+//
+//			mendeley = "http://eexcess.joanneum.at/eexcess-partner-mendeley-1.0-SNAPSHOT/partner/recommend/";
+//
+//			zbw = "http://eexcess.joanneum.at/eexcess-partner-zbw-1.0-SNAPSHOT/partner/recommend/";
+//
+//			kimCollect = "http://eexcess.joanneum.at/eexcess-partner-kim-collect-1.0-SNAPSHOT/partner/recommend/";
+//
+//			wissensserver = "http://eexcess.joanneum.at/eexcess-partner-wissenmedia-1.0-SNAPSHOT/partner/recommend/";
+//
+//		}
+//
+//		else {
+//			throw new Exception(
+//					"Problem deploying! Please use an appropriate deployment scenario in the config file (localStandalone, localTomcat, jrDev, jrStable)");
+//		}
+//
+//		PartnerBadge badge = new PartnerBadge();
+//		badge = new PartnerBadge();
+//		badge.setSystemId("Europeana");
+//		badge.setEndpoint(europeana);
+//		badge.setTags(new ArrayList<String>() {
+//			private static final long serialVersionUID = -7498028779074331771L;
+//			{
+//				add("Europe");
+//				add("Culture");
+//			}
+//		});
+//		fRC.addPartner(badge);
+//
+//		PartnerBadge badge2 = new PartnerBadge();
+//		badge2 = new PartnerBadge();
+//		badge2.setSystemId("Mendeley");
+//		badge2.setEndpoint(mendeley);
+//		badge2.setTags(new ArrayList<String>() {
+//			private static final long serialVersionUID = -4961167430016500063L;
+//
+//			{
+//				add("Science");
+//				add("Journals");
+//			}
+//		});
+//		fRC.addPartner(badge2);
+//
+//		PartnerBadge badge3 = new PartnerBadge();
+//		badge3.setSystemId("ZBW");
+//		badge3.setEndpoint(zbw);
+//		badge3.setTags(new ArrayList<String>() {
+//			private static final long serialVersionUID = 7970224907132161869L;
+//			{
+//				add("Economy");
+//				add("Articles");
+//			}
+//		});
+//		fRC.addPartner(badge3);
+//
+//		PartnerBadge badge4 = new PartnerBadge();
+//		badge4.setSystemId("KIMCollect");
+//		badge4.setEndpoint(kimCollect);
+//		badge4.setTags(new ArrayList<String>() {
+//			private static final long serialVersionUID = -8047754475051394204L;
+//
+//			{
+//				add("Swiss");
+//				add("Culture");
+//			}
+//		});
+//		fRC.addPartner(badge4);
+//
+//		PartnerBadge badge5 = new PartnerBadge();
+//		badge5.setSystemId("Wissenmedia");
+//		badge5.setEndpoint(wissensserver);
+//		badge5.setTags(new ArrayList<String>() {
+//			private static final long serialVersionUID = -993773655268128609L;
+//
+//			{
+//				add("Articles");
+//				add("Culture");
+//			}
+//		});
+//		fRC.addPartner(badge5);
 	}
 
 	// Begin Services
@@ -288,16 +282,26 @@ public class FederatedRecommenderService {
 	 */
 	@POST
 	@Path("/register")
-	@Consumes({ MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON })
-	@Produces(MediaType.WILDCARD)
+	@Consumes({MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON })
+	@Produces({MediaType.WILDCARD})
 	public Response registerPartner(PartnerBadge badge) throws IOException {
-		if (badge.partnerKey != null)
-			if (!badge.partnerKey.isEmpty())
-				if (badge.partnerKey.length() < 20)
-					return Response.serverError().build();
-		fRC.addPartner(badge);
+		logger.log(Level.INFO,"Registering Partner: "+badge.getSystemId());
+		String returnString =fRC.registerPartner(badge);
+		if(returnString.contains("Key is too Short"))
+			return Response.notModified(returnString).build();
 		return Response.ok().build();
 	}
+
+	
+	@POST
+	@Path("/unregister")
+	@Consumes({ MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON })
+	@Produces({ MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON })
+	public void unregisterPartner(PartnerBadge badge) throws IOException {
+		logger.log(Level.INFO,"Unregistering Partner: "+badge.getSystemId());
+		fRC.unregisterPartner(badge);
+	}
+
 
 	@POST
 	@Path("/recommend")
@@ -334,7 +338,12 @@ public class FederatedRecommenderService {
 
 		return partners;
 	}
-
+	@GET
+	@Path("/getRecommenderStats")
+	@Produces({ MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON })
+	public RecommenderStats getRecommenderStats() throws IOException {
+		return fRC.getRecommenderStats();
+	}
 	// End Services
 
 	// Begin Test Services
@@ -369,7 +378,7 @@ public class FederatedRecommenderService {
 		for (String text : Arrays.asList(context)) {
 			userProfile.contextKeywords.add(new ContextKeyword(text, 0.1));
 		}
-		return fRC.generateSafeModeFederatedRecommendation(userProfile);
+		return fRC.generateFederatedRecommendation(userProfile);
 	}
 
 	@GET
@@ -379,7 +388,7 @@ public class FederatedRecommenderService {
 
 		PartnerBadge pb = new PartnerBadge();
 		pb.setSystemId("Europeana");
-		pb.setEndpoint("http://DIGV536.joanneum.at/eexcess-partner-europeana-1.0-SNAPSHOT/partner/recommend/");
+		pb.setPartnerConnectorEndpoint("http://DIGV536.joanneum.at/eexcess-partner-europeana-1.0-SNAPSHOT/partner/recommend/");
 		pb.setDescription("Multi-lingual online collection of millions of digitized items from European museums, libraries, archives and multi-media collections");
 
 		return pb;
@@ -415,7 +424,7 @@ public class FederatedRecommenderService {
 		secureUserProfile.contextKeywords = contextList;
 		PartnerBadge pB = new PartnerBadge();
 		pB.setSystemId("Europeana");
-		// secureUserProfile.partnerList.add(pB);
+		 secureUserProfile.partnerList.add(pB);
 
 		List<Interest> interestList = new ArrayList<Interest>();
 		interestList.add(new Interest("text", 0.1, 0.1, 0.1, "source",

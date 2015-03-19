@@ -32,23 +32,23 @@ import java.util.logging.Logger;
 import javax.ws.rs.core.MediaType;
 
 import org.apache.commons.lang.text.StrSubstitutor;
-import org.codehaus.jackson.jaxrs.JacksonJsonProvider;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.w3c.dom.Document;
 
 import com.sun.jersey.api.client.Client;
 import com.sun.jersey.api.client.WebResource;
 import com.sun.jersey.api.client.WebResource.Builder;
-import com.sun.jersey.api.client.config.ClientConfig;
-import com.sun.jersey.api.client.config.DefaultClientConfig;
 
 import eu.eexcess.config.PartnerConfiguration;
+import eu.eexcess.dataformats.result.ResultList;
 import eu.eexcess.dataformats.userprofile.SecureUserProfile;
 import eu.eexcess.europeana.recommender.dataformat.EuropeanaDoc;
 import eu.eexcess.europeana.recommender.dataformat.EuropeanaResponse;
 import eu.eexcess.europeana.recommender.dataformat.details.EuropeanaDocDetail;
 import eu.eexcess.partnerdata.api.EEXCESSDataTransformationException;
+import eu.eexcess.partnerdata.reference.PartnerdataLogger;
 import eu.eexcess.partnerdata.reference.PartnerdataTracer;
+import eu.eexcess.partnerrecommender.api.PartnerConfigurationEnum;
 import eu.eexcess.partnerrecommender.api.PartnerConnectorApi;
 import eu.eexcess.partnerrecommender.api.QueryGeneratorApi;
 import eu.eexcess.partnerrecommender.reference.PartnerConnectorBase;
@@ -61,9 +61,10 @@ import eu.eexcess.utils.URLParamEncoder;
  */
 
 public class PartnerConnector extends PartnerConnectorBase implements PartnerConnectorApi {
-	private final Logger logger = Logger.getLogger(PartnerConnector.class.getName());
+	private final Logger log = Logger.getLogger(PartnerConnector.class.getName());
     private QueryGeneratorApi queryGenerator;
     
+    private boolean makeDetailRequests = false;
     
     public PartnerConnector(){
     
@@ -79,25 +80,23 @@ public class PartnerConnector extends PartnerConnectorBase implements PartnerCon
         return queryGenerator;
     }
     
+    @Override
+    public ResultList queryPartnerNative(PartnerConfiguration partnerConfiguration, SecureUserProfile userProfile, PartnerdataLogger logger)
+    				throws IOException {
+    	return null;
+    }
+    
 	@Override
-	public Document queryPartner(PartnerConfiguration partnerConfiguration, SecureUserProfile userProfile) throws IOException {
+	public Document queryPartner(PartnerConfiguration partnerConfiguration, SecureUserProfile userProfile, PartnerdataLogger logger) throws IOException {
 		
 		// Configure
-		ExecutorService threadPool = Executors.newCachedThreadPool();
-	    final Client client;
+		ExecutorService threadPool = Executors.newFixedThreadPool(10);
 	    
-        ClientConfig config = new DefaultClientConfig();
-        config.getClasses().add(JacksonJsonProvider.class);
-        client = Client.create(config);
-        try {
-			queryGenerator = (QueryGeneratorApi)Class.forName(partnerConfiguration.queryGeneratorClass).newInstance();
-		} catch (InstantiationException | IllegalAccessException
-				| ClassNotFoundException e) {
-			// TODO add logger!
-			logger.log(Level.INFO,"Error getting Query Generator",e);
-			
-		}
-		
+//        ClientConfig config = new DefaultClientConfig();
+//        config.getClasses().add(JacksonJsonProvider.class);
+//        
+        final Client client = new Client(PartnerConfigurationEnum.CONFIG.getClientJacksonJson());
+        queryGenerator = PartnerConfigurationEnum.CONFIG.getQueryGenerator();
         String query = getQueryGenerator().toQuery(userProfile);
         long start = System.currentTimeMillis();
 		
@@ -117,46 +116,50 @@ public class PartnerConnector extends PartnerConnectorBase implements PartnerCon
         EuropeanaResponse response= builder.get(EuropeanaResponse.class);
         if (response.items.size() > numResultsRequest)
         	response.items = response.items.subList(0, numResultsRequest);
-        PartnerdataTracer.dumpFile(this.getClass(), partnerConfiguration, response.toString(), "service-response", PartnerdataTracer.FILETYPE.JSON);
-                
-        HashMap<EuropeanaDoc, Future<Void>> futures= new HashMap<EuropeanaDoc, Future<Void>>();
-        final HashMap<EuropeanaDoc, EuropeanaDocDetail> docDetails= new HashMap<EuropeanaDoc,EuropeanaDocDetail>();
-        final PartnerConfiguration partnerConfigLocal = partnerConfiguration;
-        for (int i = 0;i<response.items.size()  ;i++) {
-        	final EuropeanaDoc item = response.items.get(i);
-        	
-        	Future<Void> future = threadPool.submit(new Callable<Void>() {
-				@Override
-				public Void call() throws Exception {
-					EuropeanaDocDetail details = null;
-					try {
-						details = fetchDocumentDetails(client, item.id, partnerConfigLocal);
-					} catch (EEXCESSDataTransformationException e) {
-						logger.log(Level.INFO,"Error getting item with id"+item.id,e);
+        PartnerdataTracer.dumpFile(this.getClass(), partnerConfiguration, response.toString(), "service-response", PartnerdataTracer.FILETYPE.JSON, logger);
+        client.destroy();     
+        if (makeDetailRequests) 
+        {
+	        HashMap<EuropeanaDoc, Future<Void>> futures= new HashMap<EuropeanaDoc, Future<Void>>();
+	        final HashMap<EuropeanaDoc, EuropeanaDocDetail> docDetails= new HashMap<EuropeanaDoc,EuropeanaDocDetail>();
+	        final PartnerConfiguration partnerConfigLocal = partnerConfiguration;
+	        final String eexcessRequestId = logger.getActLogEntry().getRequestId();
+	        for (int i = 0;i<response.items.size()  ;i++) {
+	        	final EuropeanaDoc item = response.items.get(i);
+	        	
+	        	Future<Void> future = threadPool.submit(new Callable<Void>() {
+					@Override
+					public Void call() throws Exception {
+						EuropeanaDocDetail details = null;
+						try {
+							details = fetchDocumentDetails( item.id, partnerConfigLocal, eexcessRequestId);
+						} catch (EEXCESSDataTransformationException e) {
+							log.log(Level.INFO,"Error getting item with id"+item.id,e);
+							return null;
+						}		
+						docDetails.put(item,details);
 						return null;
-					}		
-					docDetails.put(item,details);
-					return null;
-				}
-			});
-			futures.put(item, future);
-		}
-
-		for (EuropeanaDoc doc : futures.keySet()) {
-			try {
-				futures.get(doc).get(start + 15 * 500 - System.currentTimeMillis(),
-						TimeUnit.MILLISECONDS);
-			} catch (InterruptedException | ExecutionException
-					| TimeoutException e) {
-				logger.log(Level.WARNING,"Detail thread for "+doc.id+" did not responses in time",e);
+					}
+				});
+				futures.put(item, future);
 			}
-
-			
-			//item.edmConcept.addAll(details.concepts);
-//			item.edmConcept = details.concepts; TODO: copy into doc
-//			item.edmCountry = details.edmCountry;
-//			item.edmPlace = details.places;
-		}
+	
+			for (EuropeanaDoc doc : futures.keySet()) {
+				try {
+					futures.get(doc).get(start + 15 * 500 - System.currentTimeMillis(),
+							TimeUnit.MILLISECONDS);
+				} catch (InterruptedException | ExecutionException
+						| TimeoutException e) {
+					log.log(Level.WARNING,"Detail thread for "+doc.id+" did not responses in time",e);
+				}
+	
+				
+				//item.edmConcept.addAll(details.concepts);
+	//			item.edmConcept = details.concepts; TODO: copy into doc
+	//			item.edmCountry = details.edmCountry;
+	//			item.edmPlace = details.places;
+			}
+        }
 		
         long end = System.currentTimeMillis();
 		
@@ -168,18 +171,21 @@ public class PartnerConnector extends PartnerConnectorBase implements PartnerCon
 			} catch (EEXCESSDataTransformationException e) {
 				// TODO logger
 				
-				logger.log(Level.INFO,"Error Transforming Json to xml",e );
+				log.log(Level.INFO,"Error Transforming Json to xml",e );
 				
 			}
 			long endXML = System.currentTimeMillis();
 			System.out.println("millis "+(endXML-startXML) + "   "+ (end-start));
-			threadPool.shutdownNow();		
+			
+			threadPool.shutdownNow();
+			
         return newResponse;
 		
 	}
 	
-	protected EuropeanaDocDetail fetchDocumentDetails(Client client, String objectId, PartnerConfiguration partnerConfiguration) throws EEXCESSDataTransformationException {
+	protected EuropeanaDocDetail fetchDocumentDetails( String objectId, PartnerConfiguration partnerConfiguration, String  eexcessRequestId) throws EEXCESSDataTransformationException {
 		try {
+			Client client = new Client(PartnerConfigurationEnum.CONFIG.getClientJacksonJson());
 	        Map<String, String> valuesMap = new HashMap<String, String>();
 	        valuesMap.put("objectId", objectId);
 	        valuesMap.put("apiKey", partnerConfiguration.apiKey);		
@@ -188,8 +194,9 @@ public class PartnerConnector extends PartnerConnectorBase implements PartnerCon
 		    WebResource service = client.resource(detailRequest);
 		    Builder builder = service.accept(MediaType.APPLICATION_JSON);
 		    EuropeanaDocDetail jsonResponse = builder.get(EuropeanaDocDetail.class);
-		    PartnerdataTracer.dumpFile(this.getClass(), partnerConfiguration, jsonResponse.toString(), "detail-response", PartnerdataTracer.FILETYPE.JSON);
-			return jsonResponse;
+		    PartnerdataTracer.dumpFile(this.getClass(), partnerConfiguration, jsonResponse.toString(), "detail-response", PartnerdataTracer.FILETYPE.JSON, eexcessRequestId);
+		    client.destroy();
+		    return jsonResponse;
 		} catch (Exception e) {
 			throw new EEXCESSDataTransformationException(e);
 		}

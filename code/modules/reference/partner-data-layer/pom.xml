@@ -43,23 +43,31 @@
             <artifactId>xom</artifactId>
             <version>1.1</version>
         </dependency>
-        
         <!-- enrichment services -->
         <dependency>
             <groupId>com.google.apis</groupId>
             <artifactId>google-api-services-freebase</artifactId>
             <version>v1-rev56-1.18.0-rc</version>
         </dependency>
-		<dependency>
-			<groupId>org.geonames</groupId>
-			<artifactId>geonames</artifactId>
-			<version>1.0</version>
-		</dependency>
-<dependency>
-    <groupId>org.apache.httpcomponents</groupId>
-    <artifactId>httpclient</artifactId>
-    <version>4.3.4</version>
-</dependency>
-
+        <dependency>
+            <groupId>org.geonames</groupId>
+            <artifactId>geonames</artifactId>
+            <version>1.0</version>
+        </dependency>
+        <dependency>
+            <groupId>net.sf.extjwnl</groupId>
+            <artifactId>extjwnl</artifactId>
+            <version>1.8.0</version>
+        </dependency>
+        <dependency>
+            <groupId>net.sf.extjwnl</groupId>
+            <artifactId>extjwnl-data-wn31</artifactId>
+            <version>1.2</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.httpcomponents</groupId>
+            <artifactId>httpclient</artifactId>
+            <version>4.3.4</version>
+        </dependency>
     </dependencies>
 </project>

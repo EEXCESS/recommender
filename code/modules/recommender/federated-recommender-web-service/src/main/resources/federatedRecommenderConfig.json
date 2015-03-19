@@ -2,13 +2,11 @@
 "graphHitsLimitPerQuery":10,
 "graphQueryDepthLimit":4,
 "graphMaxPathLength":5,
-"federatedRecommenderBaseUri":"http://localhost:8100",
-// possible Values: localStandalone, localTomcat, jrDev, jrStable
-"deploymentPlatform":"jrStable",
-"wikipediaIndexDir":"/path/to/index",
-"evaluationQueriesFile":"/path/to/json",
-"partnersTimeout":9000,
-"numRecommenderThreads":30
+"wikipediaIndexDir":"/opt/datasets/wiki",
+"evaluationQueriesFile":"/home/hziak/workspaces/eexcess8/code/modules/evaluation/evaluationQueryExample.json",
+"partnersTimeout":7000,
+"numRecommenderThreads":30,
+"statsLogDatabase":"/var/lib/tomcat6/webapps/eexcess-federated-recommender-web-service-1.0-SNAPSHOT/FederatedRecommenderStats.db"
 }
 
 

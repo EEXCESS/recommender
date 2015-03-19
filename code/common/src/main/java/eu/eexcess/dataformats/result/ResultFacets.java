@@ -43,5 +43,65 @@ public class ResultFacets implements Serializable{
     
     @XmlElement(name="license")
     public String license;
+
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result
+				+ ((language == null) ? 0 : language.hashCode());
+		result = prime * result + ((license == null) ? 0 : license.hashCode());
+		result = prime * result
+				+ ((provider == null) ? 0 : provider.hashCode());
+		result = prime * result + ((type == null) ? 0 : type.hashCode());
+		result = prime * result + ((year == null) ? 0 : year.hashCode());
+		return result;
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		ResultFacets other = (ResultFacets) obj;
+		if (language == null) {
+			if (other.language != null)
+				return false;
+		} else if (!language.equals(other.language))
+			return false;
+		if (license == null) {
+			if (other.license != null)
+				return false;
+		} else if (!license.equals(other.license))
+			return false;
+		if (provider == null) {
+			if (other.provider != null)
+				return false;
+		} else if (!provider.equals(other.provider))
+			return false;
+		if (type == null) {
+			if (other.type != null)
+				return false;
+		} else if (!type.equals(other.type))
+			return false;
+		if (year == null) {
+			if (other.year != null)
+				return false;
+		} else if (!year.equals(other.year))
+			return false;
+		return true;
+	}
+
+	@Override
+	public String toString() {
+		return "ResultFacets [provider=" + provider + ", type=" + type
+				+ ", language=" + language + ", year=" + year + ", license="
+				+ license + "]";
+	}
+    
+    
     
 }

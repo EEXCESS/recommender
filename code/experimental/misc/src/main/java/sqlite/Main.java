@@ -24,6 +24,8 @@ package sqlite;
 
 import java.sql.*;
 
+import eu.eexcess.sqlite.Database;
+
 public class Main {
 
     private static final String DATABASE = "frequency.sqlite";
@@ -32,10 +34,10 @@ public class Main {
 	  {
 	  
           Connection dbConnection;
-          
+          Database db=new Database();
 		try {
 			
-			dbConnection = Database.connect(DATABASE);
+			dbConnection = db.connect(DATABASE);
 			
 			//ArrayList elements = new ArrayList();
 			
@@ -46,7 +48,7 @@ public class Main {
 		        System.out.println(rs.getString("term") + ": " + rs.getString("count"));
 		      }
 		    rs.close();
-		    Database.disconnect();
+		    db.close();
 			
 			//con.setAutoCommit(false); // Disable autocommit (very slow, one commit per update)
 	        //Statement stat = con.createStatement();

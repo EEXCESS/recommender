@@ -24,16 +24,10 @@ import javax.xml.bind.annotation.XmlElement;
  * @author hziak
  *
  */
+
 public class ContextKeyword implements Serializable{
 	
 	private static final long serialVersionUID = -4047662119669146571L;
-	public ContextKeyword(String reason, String text, Double weight) {
-		super();
-		
-		this.text = text;
-		this.weight = weight;
-		this.expansion=false;
-	}
 	//Is used for query expansion
 	@XmlElement(name="expansion",required=false)
 	public Boolean expansion;
@@ -46,6 +40,14 @@ public class ContextKeyword implements Serializable{
 	public ContextKeyword() {
 
 	}
+
+	public ContextKeyword(String reason, String text, Double weight) {
+		super();
+		this.text = text;
+		this.weight = weight;
+		this.expansion=false;
+	}
+
 	public ContextKeyword(String text) {
 		this.text = text;
 	}

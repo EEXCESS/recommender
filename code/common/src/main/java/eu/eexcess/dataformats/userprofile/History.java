@@ -47,6 +47,10 @@ public class History  implements Serializable{
 		
 	}
 	
+	public History(String title) {
+		this.title= title;
+	}
+
 	@XmlElement(name="lastVisitTime")
     public Date lastVisitTime;
 	@XmlElement(name="title")

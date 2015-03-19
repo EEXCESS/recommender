@@ -22,23 +22,38 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 package eu.eexcess.federatedrecommender.decomposer;
 
+import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Locale;
+import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
+import org.apache.commons.lang.LocaleUtils;
+
+import at.knowcenter.commons.wikipedia.queryexpansion.WikipediaQueryExpansion;
+import at.knowcenter.util.term.TermSet;
+import at.knowcenter.util.term.TypedTerm;
+import eu.eexcess.dataformats.userprofile.ContextKeyword;
+import eu.eexcess.dataformats.userprofile.Language;
 import eu.eexcess.dataformats.userprofile.SecureUserProfile;
 import eu.eexcess.federatedrecommender.interfaces.SecureUserProfileDecomposer;
-
+import eu.eexcess.utils.LanguageGuesser;
 /**
- * Class to provide query expansion from
+ * Class to provide query expansion from Wikipedia
  * 
  * @author hziak
  *
  */
 public class PseudoRelevanceWikipediaDecomposer implements SecureUserProfileDecomposer<SecureUserProfile,SecureUserProfile> {
-/*
+
 	private static final Logger logger = Logger.getLogger(PseudoRelevanceWikipediaDecomposer.class.getName());
 	
 	private Map<String, WikipediaQueryExpansion> localeToQueryExpansion;
 	private String[] supportedLocales;
-*/
+
 
 	/**
 	 * 
@@ -47,7 +62,7 @@ public class PseudoRelevanceWikipediaDecomposer implements SecureUserProfileDeco
 	 */
 	
 	public PseudoRelevanceWikipediaDecomposer(String wikipediaBaseIndexDir, String[] supportedLocales) throws IOException {
-		/*this.supportedLocales = supportedLocales;
+		this.supportedLocales = supportedLocales;
 		localeToQueryExpansion = new HashMap<String, WikipediaQueryExpansion>();
 		
 		for (String localeName : supportedLocales) {
@@ -55,12 +70,12 @@ public class PseudoRelevanceWikipediaDecomposer implements SecureUserProfileDeco
 			localeToQueryExpansion.put(localeName, new WikipediaQueryExpansion(new File(wikipediaBaseIndexDir, locale+"wiki"), locale));
 			
 		}
-		*/
+		
 	}
 
 	@Override
 	public SecureUserProfile decompose(SecureUserProfile inputSecureUserProfile) {
-		/*
+		
 		TermSet<TypedTerm> terms = new TermSet<TypedTerm>(new TypedTerm.AddingWeightTermMerger());
 		StringBuilder builder = new StringBuilder();
 		for (ContextKeyword keyword : inputSecureUserProfile.contextKeywords) {
@@ -94,7 +109,7 @@ public class PseudoRelevanceWikipediaDecomposer implements SecureUserProfileDeco
 			queryExpansionTerms = wikipediaQueryExpansion.expandQuery(query);
 			terms.addAll(queryExpansionTerms.getTopTerms(5));
 		} catch (IOException e) {
-			logger.log(Level.WARNING, "Cannot expand the query using Wikipedia", e);
+			logger.log(Level.SEVERE, "Cannot expand the query using Wikipedia", e);
 		}
 		
 		ArrayList<ContextKeyword> newContextKeywords = new ArrayList<ContextKeyword>();
@@ -104,7 +119,7 @@ public class PseudoRelevanceWikipediaDecomposer implements SecureUserProfileDeco
 		inputSecureUserProfile.contextKeywords.addAll(newContextKeywords);
 		logger.log(Level.INFO, "Wikipedia Expansion: " + newContextKeywords.toString());
 		return inputSecureUserProfile;
-		*/
-		return null;
+
+		//return null;
 	}
 }

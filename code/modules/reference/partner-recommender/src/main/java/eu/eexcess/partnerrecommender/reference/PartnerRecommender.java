@@ -22,11 +22,10 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 package eu.eexcess.partnerrecommender.reference;
 
-import java.io.File;
 import java.io.IOException;
-import java.net.URL;
-import org.codehaus.jackson.map.ObjectMapper;
-import org.codehaus.jackson.JsonParser;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
 import org.w3c.dom.Document;
 
 //import com.hp.hpl.jena.ontology.OntModel;
@@ -41,18 +40,17 @@ import org.w3c.dom.Document;
 //import com.hp.hpl.jena.rdf.model.ModelFactory;
 //import com.hp.hpl.jena.rdf.model.Resource;
 //import com.hp.hpl.jena.rdf.model.Statement;
-
-
-
 import eu.eexcess.config.PartnerConfiguration;
 import eu.eexcess.dataformats.result.ResultList;
+import eu.eexcess.dataformats.result.ResultStats;
 import eu.eexcess.dataformats.userprofile.SecureUserProfile;
 import eu.eexcess.partnerdata.api.IEnrichment;
 import eu.eexcess.partnerdata.api.ITransformer;
-import eu.eexcess.partnerdata.reference.Enrichment;
 import eu.eexcess.partnerdata.reference.PartnerdataLogger;
-import eu.eexcess.partnerrecommender.api.PartnerRecommenderApi;
+import eu.eexcess.partnerdata.reference.PartnerdataTracer;
+import eu.eexcess.partnerrecommender.api.PartnerConfigurationEnum;
 import eu.eexcess.partnerrecommender.api.PartnerConnectorApi;
+import eu.eexcess.partnerrecommender.api.PartnerRecommenderApi;
 
 /**
  * 
@@ -61,16 +59,11 @@ import eu.eexcess.partnerrecommender.api.PartnerConnectorApi;
  * @author plopez@know-center.at
  */
 public class PartnerRecommender implements PartnerRecommenderApi {
-
-    private PartnerConfiguration partnerConfiguration;
-    
-    private PartnerConnectorApi partnerConnector;
-    
- //   private Client client;
-    
-    private ITransformer transformer;
-
-    private IEnrichment enricher;
+	Logger log = Logger.getLogger(PartnerRecommender.class.getName());
+    private static PartnerConfiguration partnerConfiguration =PartnerConfigurationEnum.CONFIG.getPartnerConfiguration();
+    private static PartnerConnectorApi partnerConnector =PartnerConfigurationEnum.CONFIG.getPartnerConnector();
+    private static ITransformer transformer= PartnerConfigurationEnum.CONFIG.getTransformer();
+    private static IEnrichment enricher= PartnerConfigurationEnum.CONFIG.getEnricher();
     
     /**
      * Creates a new instance of this class.
@@ -81,42 +74,7 @@ public class PartnerRecommender implements PartnerRecommenderApi {
 
     @Override
     public void initialize() throws IOException {
-        ObjectMapper mapper = new ObjectMapper();
-        try {
-        	
-        	/*
-        	 * Read partner configuration file
-        	 * 
-        	 */
-        	
-        	URL resource = getClass().getResource("/partner-config.json");
-        	mapper.configure(JsonParser.Feature.ALLOW_COMMENTS, true);
-        	partnerConfiguration = mapper.readValue(new File(resource.getFile()), PartnerConfiguration.class);
-                      
-        	/*
-        	 * Configure the partner connector
-        	 */   
-            
-            partnerConnector = (PartnerConnectorApi)Class.forName(partnerConfiguration.partnerConnectorClass).newInstance();
-            
-            /*
-             * Configure data transformer
-             * 
-             */
-            transformer = (ITransformer)Class.forName(partnerConfiguration.transformerClass).newInstance();       
-            transformer.init(partnerConfiguration);
-            
-            /*
-             * Configure data enricher
-             * 
-             */
-            
-            enricher = new Enrichment();
-            enricher.init(partnerConfiguration);
-            
-        } catch (Exception e) {
-            throw new IOException("Cannot initialize recommender", e);
-        }
+       
     }
 
     
@@ -131,37 +89,56 @@ public class PartnerRecommender implements PartnerRecommenderApi {
         try {
             PartnerdataLogger partnerdataLogger = new PartnerdataLogger(partnerConfiguration);
         	partnerdataLogger.getActLogEntry().start();
+        	long startCallPartnerApi = System.currentTimeMillis();
+        	// use native untransformed result primarily
+        	ResultList nativeResult = partnerConnector.queryPartnerNative(partnerConfiguration, userProfile, partnerdataLogger);
+        	if (nativeResult != null) {
+        		  long endCallPartnerApi = System.currentTimeMillis();
+        		  nativeResult.setResultStats(new ResultStats(PartnerConfigurationEnum.CONFIG.getQueryGenerator().toQuery(userProfile),endCallPartnerApi-startCallPartnerApi,0,0,0,nativeResult.totalResults));
+                
+        		return nativeResult;
+        	}
             
         	/*
         	 *  Call remote API from partner
         	 */
+        
         	partnerdataLogger.getActLogEntry().queryPartnerAPIStart();
-
-            Document searchResultsNative = partnerConnector.queryPartner(partnerConfiguration, userProfile);
+        	
+            Document searchResultsNative = partnerConnector.queryPartner(partnerConfiguration, userProfile, partnerdataLogger);
             partnerdataLogger.getActLogEntry().queryPartnerAPIEnd();
+            long endCallPartnerApi = System.currentTimeMillis();
         	/*
         	 *  Transform Document in partner format to EEXCESS RDF format
         	 */
-
+            long startTransform1 = System.currentTimeMillis();
             partnerdataLogger.addQuery(userProfile);
+            // TODO rrubien: begin impl of PartnerRecommender
             Document searchResultsEexcess = transformer.transform(searchResultsNative, partnerdataLogger);
-            
+            long endTransform1 = System.currentTimeMillis();
         	/*
         	 *  Enrich results
         	 */
-            
+            long startEnrich = System.currentTimeMillis();
+        	partnerdataLogger.getActLogEntry().enrichStart();
             Document enrichedResultsExcess = enricher.enrichResultList(searchResultsEexcess, partnerdataLogger);
-            
+        	partnerdataLogger.getActLogEntry().enrichEnd();
+            long endEnrich = System.currentTimeMillis();
         	/*
         	 *  Pack into ResultList simple format
         	 */
-            
+            long startTransform2 = System.currentTimeMillis();
             ResultList recommendations = transformer.toResultList(searchResultsNative, enrichedResultsExcess, partnerdataLogger);
             partnerdataLogger.addResults(recommendations);
         	partnerdataLogger.getActLogEntry().end();
             partnerdataLogger.save();
+            long endTransform2 = System.currentTimeMillis();
+            log.log(Level.INFO,"Call Parnter Api:"+(endCallPartnerApi-startCallPartnerApi)+"ms; First Transformation:"+(endTransform1-startTransform1)+"ms; Enrichment:"+(endEnrich-startEnrich)+"ms; Second Transformation:"+(endTransform2-startTransform2)+"ms");
+            recommendations.setResultStats(new ResultStats(PartnerConfigurationEnum.CONFIG.getQueryGenerator().toQuery(userProfile),endCallPartnerApi-startCallPartnerApi,endTransform1-startTransform1,endTransform2-startTransform2,endEnrich-startEnrich,recommendations.totalResults));
+            PartnerdataTracer.dumpFile(this.getClass(), this.partnerConfiguration, recommendations, "partner-recommender-results", PartnerdataTracer.FILETYPE.XML, partnerdataLogger);
             return recommendations;
             
+            // TODO rrubien: end impl of PartnerRecommender
         } catch (Exception e) {
             throw new IOException("Partner system is not working correctly ", e);
         }

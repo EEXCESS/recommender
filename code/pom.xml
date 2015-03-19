@@ -13,18 +13,22 @@
 </properties>
   <modules>
     <module>common/</module>
-    <module>modules/recommender/federated-recommender/</module>
-    <module>modules/recommender/federated-recommender-web-service/</module>
     <module>modules/reference/partner-data-layer/</module>
     <module>modules/reference/partner-recommender/</module>
     <module>modules/reference/partner-web-service/</module>
     <module>modules/partners/wissenmedia/</module>
+    <module>modules/partners/wikipedialocal/</module>
     <module>modules/partners/europeana/</module>
     <module>modules/partners/kimcollect/</module>
     <module>modules/partners/zbw/</module>
     <module>modules/partners/mendeley/</module>
-    <module>experimental/misc/</module>
+    <module>modules/partners/ddb/</module>
+    <module>modules/partners/opensearch/</module>
+    <module>modules/recommender/federated-recommender/</module>
+    <module>modules/recommender/federated-recommender-web-service/</module>
     <module>modules/evaluation/</module>
+    <module>experimental/misc/</module>
+    
   </modules>
   <developers>
     <developer>
@@ -39,11 +43,13 @@
       <organization>Know-Center</organization>
       <email>rkern@know-center.at</email>
     </developer>
+    <developer>
+      <id>oro</id>
+      <name>Thomas Orgel</name>
+      <organization>Joanneum Research</organization>
+      <email>thomas.orgel@joanneum.at</email>
+    </developer>
   </developers>
-  <scm>
-    <connection>scm:svn:https://knowminer.at/svn/eexcess/code</connection>
-    <developerConnection>scm:svn:https://knowminer.at/svn/eexcess/code</developerConnection>
-  </scm>
   <dependencies>
     <dependency>
       <groupId>junit</groupId>
@@ -52,27 +58,24 @@
     </dependency>
   </dependencies>
   <repositories>
-    <repository>
-      <id>knowminer.at</id>
-      <url>http://knowminer.at:8085/nexus/content/repositories/public/</url>
-    </repository>
-    <repository>
-      <id>knowminer.at-snapshots</id>
-      <url>http://knowminer.at/repo/content/repositories/public-snapshots/</url>
-    </repository>
-    <repository>
-      <id>central</id>
-      <url>http://repo1.maven.org/maven2/</url>
-    </repository>
+  	<repository>
+					<id>kc_external</id>
+					<releases>
+						<enabled>true</enabled>
+					</releases>
+					<snapshots>
+						<enabled>true</enabled>
+						<updatePolicy>always</updatePolicy>
+					</snapshots>
+					<url>http://nexus.know-center.tugraz.at/content/repositories/public/</url>
+				</repository>
   </repositories>
   <distributionManagement>
     <repository>
       <id>eexcess</id>
       <name>EEXCESS Repository</name>
-      <url>dav:http://knowminer.at:8085/nexus/content/repositories/eexcess</url>
+      <url>http://nexus.know-center.tugraz.at/content/repositories/eexcess</url>
     </repository>
-    <!--
-  <snapshotRepository><id>eexcess</id><name>EEXCESS Snapshots Repository</name><url>dav:http://knowminer.at:8085/nexus/content/repositories/eexcess/snapshots</url></snapshotRepository>-->
   </distributionManagement>
   <build>
     <plugins>
@@ -89,8 +92,8 @@
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-compiler-plugin</artifactId>
         <configuration>
-          <source>1.7</source>
-          <target>1.7</target>
+          <source>1.8</source>
+          <target>1.8</target>
         </configuration>
       </plugin>
     </plugins>

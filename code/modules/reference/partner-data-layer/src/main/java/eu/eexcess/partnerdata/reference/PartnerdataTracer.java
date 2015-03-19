@@ -21,6 +21,7 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
+import java.io.StringWriter;
 import java.io.UnsupportedEncodingException;
 import java.io.Writer;
 import java.text.DateFormat;
@@ -28,6 +29,12 @@ import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.logging.Logger;
+
+import javax.xml.bind.JAXBContext;
+import javax.xml.bind.JAXBException;
+import javax.xml.bind.Marshaller;
+
+import org.w3c.dom.Document;
 
 import eu.eexcess.config.PartnerConfiguration;
 
@@ -50,14 +57,26 @@ public class PartnerdataTracer {
 		if (filetype  == FILETYPE.TXT) return "txt";
 		return "";
 	}
-	public static void dumpFile(@SuppressWarnings("rawtypes") Class myClass,PartnerConfiguration partnerConfig, String input, String postfix, FILETYPE filetype) {
+	
+	
+	public static void dumpFile(@SuppressWarnings("rawtypes") Class myClass, PartnerConfiguration partnerConfig, Document input, String postfix, PartnerdataLogger logger) {
+		if (!partnerConfig.partnerDataRequestsTrace) return;
+		PartnerdataTracer.dumpFile(myClass, partnerConfig, XMLTools.getStringFromDocument(input), postfix, PartnerdataTracer.FILETYPE.XML, logger);
+	}
+
+	public static void dumpFile(@SuppressWarnings("rawtypes") Class myClass,PartnerConfiguration partnerConfig, String input, String postfix, FILETYPE filetype, PartnerdataLogger logger) {
+		if (!partnerConfig.partnerDataRequestsTrace) return;
+		PartnerdataTracer.dumpFile(myClass, partnerConfig, input, postfix, filetype, logger.getActLogEntry().getRequestId());
+	}
+	
+	public static void dumpFile(@SuppressWarnings("rawtypes") Class myClass,PartnerConfiguration partnerConfig, String input, String postfix, FILETYPE filetype, String requestId) {
 		if (!partnerConfig.partnerDataRequestsTrace) return;
 		DateFormat df = new SimpleDateFormat("yyyy-MM-dd--HH.mm.ss.SSS");
 		Date today = Calendar.getInstance().getTime();        
 		String reportDate = df.format(today);
 		try {
 			
-			File myTempFile = new File(PartnerdataConfig.logDir + reportDate + "-" + partnerConfig.systemId + "-"
+			File myTempFile = new File(PartnerdataConfig.logDir +requestId+ "-"+reportDate + "-" + partnerConfig.systemId + "-"
 					+ myClass.getSimpleName() + "-" + postfix + "." + getExtensionFromType(filetype));
 
 			Writer out = new BufferedWriter(new OutputStreamWriter(
@@ -74,6 +93,27 @@ public class PartnerdataTracer {
 			System.out.println(e.getMessage());
 		} catch (Exception e) {
 			System.out.println(e.getMessage());
+		}
+	}
+
+	public static void dumpFile(@SuppressWarnings("rawtypes") Class myClass, PartnerConfiguration partnerConfig, Object xmlObject, String postfix, FILETYPE filetype, PartnerdataLogger logger) {
+		if (!partnerConfig.partnerDataRequestsTrace) return;
+        try {
+	        JAXBContext ctx = JAXBContext.newInstance(xmlObject.getClass());
+	
+	        Marshaller m = ctx.createMarshaller();
+	        m.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, true);
+	
+	        StringWriter sw = new StringWriter();
+			m.marshal(xmlObject, sw);
+	        sw.close();
+            dumpFile(myClass, partnerConfig, sw.toString(), postfix, filetype, logger);
+		} catch (JAXBException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
 		}
 	}
 

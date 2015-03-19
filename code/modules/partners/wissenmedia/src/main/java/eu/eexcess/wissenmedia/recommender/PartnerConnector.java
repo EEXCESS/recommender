@@ -28,14 +28,15 @@ import org.w3c.dom.Document;
 import com.sun.jersey.api.client.Client;
 import com.sun.jersey.api.client.WebResource;
 import com.sun.jersey.api.client.WebResource.Builder;
-import com.sun.jersey.api.client.config.ClientConfig;
-import com.sun.jersey.api.client.config.DefaultClientConfig;
 import com.sun.jersey.api.client.filter.HTTPBasicAuthFilter;
 
 import eu.eexcess.config.PartnerConfiguration;
+import eu.eexcess.dataformats.result.ResultList;
 import eu.eexcess.dataformats.userprofile.SecureUserProfile;
-import eu.eexcess.partnerrecommender.api.QueryGeneratorApi;
+import eu.eexcess.partnerdata.reference.PartnerdataLogger;
+import eu.eexcess.partnerrecommender.api.PartnerConfigurationEnum;
 import eu.eexcess.partnerrecommender.api.PartnerConnectorApi;
+import eu.eexcess.partnerrecommender.api.QueryGeneratorApi;
 import eu.eexcess.utils.URLParamEncoder;
 
 /**
@@ -56,19 +57,25 @@ public class PartnerConnector implements PartnerConnectorApi {
         return queryGenerator;
     }
     
+    @Override
+    public ResultList queryPartnerNative(PartnerConfiguration partnerConfiguration, SecureUserProfile userProfile, PartnerdataLogger logger)
+    				throws IOException {
+    	return null;
+    }
+    
 	@Override
-	public Document queryPartner(PartnerConfiguration partnerConfiguration, SecureUserProfile userProfile) throws IOException {
+	public Document queryPartner(PartnerConfiguration partnerConfiguration, SecureUserProfile userProfile, PartnerdataLogger logger) throws IOException {
 		
 		// Configure
 	try {	
-	    Client client;
 	    
-        ClientConfig config = new DefaultClientConfig();
-        client = Client.create(config);
+	    
+//        ClientConfig config = new DefaultClientConfig();
+        Client client = new Client(PartnerConfigurationEnum.CONFIG.getClientDefault());
 
         client.addFilter(new HTTPBasicAuthFilter(partnerConfiguration.userName, partnerConfiguration.password));
 
-        queryGenerator = (QueryGeneratorApi)Class.forName(partnerConfiguration.queryGeneratorClass).newInstance();
+        queryGenerator = PartnerConfigurationEnum.CONFIG.getQueryGenerator();
 		
         String query = getQueryGenerator().toQuery(userProfile);
         
@@ -83,6 +90,7 @@ public class PartnerConnector implements PartnerConnectorApi {
         
         WebResource service = client.resource(searchRequest);
         Builder builder = service.accept(MediaType.APPLICATION_XML);
+        client.destroy();
         return builder.get(Document.class);
 		}
 		catch (Exception e) {

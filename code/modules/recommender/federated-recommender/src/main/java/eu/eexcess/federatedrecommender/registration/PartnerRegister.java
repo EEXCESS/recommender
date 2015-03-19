@@ -22,11 +22,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 package eu.eexcess.federatedrecommender.registration;
 
-import java.io.IOException;
-import java.net.HttpURLConnection;
-import java.net.InetSocketAddress;
-import java.net.Proxy;
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -36,17 +31,14 @@ import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 
 import com.sun.jersey.api.client.Client;
-import com.sun.jersey.api.client.config.ClientConfig;
 import com.sun.jersey.api.client.config.DefaultClientConfig;
 
 import eu.eexcess.dataformats.PartnerBadge;
 
-import com.sun.jersey.client.apache.config.DefaultApacheHttpClientConfig;
-import com.sun.jersey.client.urlconnection.HttpURLConnectionFactory;
-import com.sun.jersey.client.urlconnection.URLConnectionClientHandler;
-
 /**
  * Registration for the partners PartnerRecommenderApis
+ * @author hziak
+ *
  */
 @XmlRootElement(name = "eexcess-registered-partners")
 public class PartnerRegister {
@@ -56,51 +48,62 @@ public class PartnerRegister {
 	private Map<PartnerBadge, Client> partnerToClient = new HashMap<PartnerBadge, Client>();
 
 	public List<PartnerBadge> getPartners() {
-		return partners;
+		synchronized (partners) {
+			return partners;		
+		}
+	
 	}
 
-    public void addPartner(PartnerBadge badge) {
-        partners.add(badge);
+    public  void  addPartner(PartnerBadge badge) {
+    	synchronized (partners) {
+    		partners.add(badge);
 //        String proxyHost = "localhost";//System.getProperty("http.proxyHost");
 //        String proxyPort = "8888";//System.getProperty("http.proxyPort");
-        DefaultClientConfig config = new DefaultClientConfig();
-        config.getFeatures().put(ClientConfig.FEATURE_DISABLE_XML_SECURITY, true);
+        	DefaultClientConfig config = new DefaultClientConfig();
+       // config.getFeatures().put(ClientConfig.FEATURE_DISABLE_XML_SECURITY, true); //TODO : SWITCHED SECURE FEATURE ON FEATURE_DISABLE_XML_SECURITY 
+        //based on "Feature 'http://javax.xml.XMLConstants/feature/secure-processing' is not recognized" error
 //        config.getProperties().put(DefaultApacheHttpClientConfig.PROPERTY_PROXY_URI, "http://" + proxyHost + ":" + proxyPort);
-        Client client =new Client(new URLConnectionClientHandler(
-                new HttpURLConnectionFactory() {
-                    Proxy p = null;
-                    @Override
-                    public HttpURLConnection getHttpURLConnection(URL url)
-                            throws IOException {
-                        if (p == null) {
-                            if (System.getProperties().containsKey("http.proxyHost")) {
-                                p = new Proxy(Proxy.Type.HTTP,
-                                        new InetSocketAddress(
-                                        System.getProperty("http.proxyHost"),
-                                        Integer.getInteger("http.proxyPort", 80)));
-                            } else {
-                                p = Proxy.NO_PROXY;
-                            }
-                        }
-                        return (HttpURLConnection) url.openConnection(p);
-                    }
-                }), config); 
-        		
-        		
-        		
-        		
-        		
-        		
-      //  Client.create(config); // new Client(null, config);
-        partnerToClient.put(badge, client);
+//        Client client =new Client(new URLConnectionClientHandler(
+//                new HttpURLConnectionFactory() {
+//                    Proxy p = null;
+//                    @Override
+//                    public HttpURLConnection getHttpURLConnection(URL url)
+//                            throws IOException {
+//                        if (p == null) {
+//                            if (System.getProperties().containsKey("http.proxyHost")) {
+//                                p = new Proxy(Proxy.Type.HTTP,
+//                                        new InetSocketAddress(
+//                                        System.getProperty("http.proxyHost"),
+//                                        Integer.getInteger("http.proxyPort", 80)));
+//                            } else {
+//                                p = Proxy.NO_PROXY;
+//                            }
+//                        }
+//                        return (HttpURLConnection) url.openConnection(p);
+//                    }
+//                }), config); 
+//        		
+//        		
+//        		
+//        		
+//        		
+//        		
+	        Client client= Client.create(config); // new Client(null, config);
+	        partnerToClient.put(badge, client);
+    	}
     }
 
-	public void removePartner(PartnerBadge badge) {
-		partners.remove(badge);
+	public synchronized void removePartner(PartnerBadge badge) {
+		synchronized (partners) {
+			partners.remove(badge);	
+		}
 	}
 	
-	public Client getClient(PartnerBadge badge) {
-	    return partnerToClient.get(badge);
+	public synchronized Client getClient(PartnerBadge badge) {
+			return partnerToClient.get(badge);	
+		
 	}
+
+	
 
 }

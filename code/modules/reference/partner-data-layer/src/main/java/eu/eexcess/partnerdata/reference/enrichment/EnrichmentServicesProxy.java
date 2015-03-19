@@ -18,11 +18,14 @@ package eu.eexcess.partnerdata.reference.enrichment;
 
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.Set;
 import java.util.StringTokenizer;
 
 import eu.eexcess.config.PartnerConfiguration;
 import eu.eexcess.partnerdata.reference.PartnerdataLogger;
+import eu.eexcess.partnerdata.reference.PartnerdataTracer;
+import eu.eexcess.partnerdata.reference.PartnerdataTracer.FILETYPE;
 
 public class EnrichmentServicesProxy {
 	
@@ -48,28 +51,53 @@ public class EnrichmentServicesProxy {
 		while (st.hasMoreElements()) {
 			String actWord = st.nextElement().toString();
 			actWord = StringNormalizer.removeStopMarks(actWord);
-			if (wordFilter.isKeyWord(actWord)) 
+			if (wordFilter.isKeyWord(actWord, logger)) 
 			{
-				if (this.partnerConfig.partnerDataRequestsTrace) System.out.println("query freebase with:"+actWord);
-				ArrayList<FreebaseResult> responseFreebase = freebase.getEntitiesFreeBase(actWord, logger);
-				for (FreebaseResult freebaseResult : responseFreebase) {
-					EnrichmentResult enrichmentResult = new EnrichmentResult();
-					enrichmentResult.setWord(freebaseResult.getName());
-					enrichmentResult.setUri(freebaseResult.getURI());
-					enrichmentResult.setLanguage(freebaseResult.getLanguage());
-					words.add(enrichmentResult);
-					if (freebaseResult.getNotableId()!= null && ! freebaseResult.getNotableId().isEmpty() &&
-							(freebaseResult.getNotableId().toLowerCase().startsWith("/location") ) )
-//							.contains("city")||
-//							responseFreebase.contains("town")||
-//							responseFreebase.contains("village")||
-//							responseFreebase.contains("river")||
-//							responseFreebase.contains("mountain")||
-//							responseFreebase.contains("location"))
-					{
-						if (this.partnerConfig.partnerDataRequestsTrace) System.out.println("query geonames with:"+actWord);
-						Set<EnrichmentResult> responseGeonames = geonames.getLocationHierarchy(actWord, logger);
-						words.addAll(responseGeonames);
+				if (this.partnerConfig.partnerDataRequestsTrace) System.out.println("wordnet with:"+actWord);
+				Set<String> synonyms = wordFilter.getSynonymsWordNet(actWord);
+				for (Iterator<String> iterator = synonyms.iterator(); iterator.hasNext();) {
+					String actSynonym = (String) iterator.next();
+					if (this.partnerConfig.partnerDataRequestsTrace) System.out.println("wordnet synonym:"+actSynonym);
+					
+					if (this.partnerConfig.partnerDataRequestsTrace) System.out.println("query dbpedia with:"+actSynonym);
+					DbpediaSpotlight dbpediaSpotlight = new DbpediaSpotlight(partnerConfig);
+					DbpediaSpotlightResult dbpediaResults = dbpediaSpotlight.selectEntityDbpediaSpotlight(actSynonym, logger);
+					if ( dbpediaResults != null && dbpediaResults.isDBpediaConcept() ) {
+						ArrayList<String> dbPediaConcepts = dbpediaResults.getDBpediaConcept();
+//						ArrayList<String> freebaseConcepts = dbpediaResults.getFreebaseConcept();
+//						ArrayList<String> schemaConcepts = dbpediaResults.getSchemaConcept();
+				        PartnerdataTracer.dumpFile(DbpediaSpotlight.class, this.partnerConfig, dbpediaResults.toString(), "dbpedia-response-concept", FILETYPE.TXT, logger);
+						if (this.partnerConfig.partnerDataRequestsTrace) System.out.println("query dbpedia result:"+dbpediaResults.toString());
+						for (int i = 0; i < dbPediaConcepts.size(); i++) {
+							EnrichmentResult enrichmentResult = new EnrichmentResult();
+							enrichmentResult.setWord(dbpediaResults.getName());
+							enrichmentResult.setUri(dbpediaResults.getURI());
+							enrichmentResult.setType(dbPediaConcepts.get(i));
+							words.add(enrichmentResult);
+						}
+
+					}
+					
+					ArrayList<FreebaseResult> responseFreebase = freebase.getEntitiesFreeBase(actSynonym, logger);
+					for (FreebaseResult freebaseResult : responseFreebase) {
+						EnrichmentResult enrichmentResult = new EnrichmentResult();
+						enrichmentResult.setWord(freebaseResult.getName());
+						enrichmentResult.setUri(freebaseResult.getURI());
+						enrichmentResult.setLanguage(freebaseResult.getLanguage());
+						words.add(enrichmentResult);
+						if (freebaseResult.getNotableId()!= null && ! freebaseResult.getNotableId().isEmpty() &&
+								(freebaseResult.getNotableId().toLowerCase().startsWith("/location") ) )
+	//							.contains("city")||
+	//							responseFreebase.contains("town")||
+	//							responseFreebase.contains("village")||
+	//							responseFreebase.contains("river")||
+	//							responseFreebase.contains("mountain")||
+	//							responseFreebase.contains("location"))
+						{
+							if (this.partnerConfig.partnerDataRequestsTrace) System.out.println("query geonames with:"+actSynonym);
+							Set<EnrichmentResult> responseGeonames = geonames.getLocationHierarchy(actSynonym, logger);
+							words.addAll(responseGeonames);
+						}
 					}
 				}
 			}

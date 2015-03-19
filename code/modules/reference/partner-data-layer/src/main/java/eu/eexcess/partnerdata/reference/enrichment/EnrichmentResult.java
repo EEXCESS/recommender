@@ -23,6 +23,16 @@ public class EnrichmentResult {
 	protected String language;
 
 	protected String uri;
+	
+	protected String type;
+
+	public String getType() {
+		return type;
+	}
+
+	public void setType(String type) {
+		this.type = type;
+	}
 
 	public String getLanguage() {
 		return language;

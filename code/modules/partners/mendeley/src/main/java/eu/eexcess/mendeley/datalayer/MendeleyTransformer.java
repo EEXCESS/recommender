@@ -29,7 +29,7 @@ public class MendeleyTransformer extends Transformer implements ITransformer{
 	
 	@Override
 	protected ResultList postProcessResults(Document orgPartnerResult, ResultList resultList) {
-		resultList.totalResults = Integer.parseInt(getValueWithXPath("/o/total_results", orgPartnerResult));
+        resultList.totalResults = resultList.results.size();
 		return resultList;
 	}
 

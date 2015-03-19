@@ -25,6 +25,17 @@ package eu.eexcess.federatedrecommender.evaluation.evaluation;
 import java.util.ArrayList;
 import java.util.List;
 
+import eu.eexcess.dataformats.userprofile.SecureUserProfile;
+import eu.eexcess.dataformats.userprofile.SecureUserProfileEvaluation;
+
 public class EvaluationQueries {
-	public List<EvaluationQuery> queries= new ArrayList<EvaluationQuery>();
+	private List<SecureUserProfileEvaluation> queries= new ArrayList<SecureUserProfileEvaluation>();
+
+	public List<SecureUserProfileEvaluation> getQueries() {
+		return queries;
+	}
+
+	public void setQueries(List<SecureUserProfileEvaluation> queries) {
+		this.queries = queries;
+	}
 }

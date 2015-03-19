@@ -24,6 +24,7 @@ package eu.eexcess.dataformats.userprofile;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+
 import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlElementWrapper;
 import javax.xml.bind.annotation.XmlRootElement;
@@ -46,4 +47,16 @@ public class SecureUserProfileEvaluation extends SecureUserProfile implements Se
 	public String decomposer;
 	@XmlAttribute
 	public String sourceSelect;
+	@XmlAttribute
+	public String description;
+	
+	@XmlTransient
+	public String getContextKeywordConcatenation(){
+		StringBuilder builder = new StringBuilder();
+		for (ContextKeyword contextKeyword : contextKeywords) {
+			builder.append(contextKeyword.text);
+			builder.append(" ");
+		}
+		return builder.toString();
+	}
 }

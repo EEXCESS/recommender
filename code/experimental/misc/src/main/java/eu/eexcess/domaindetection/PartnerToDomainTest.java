@@ -60,6 +60,7 @@ import eu.eexcess.dataformats.userprofile.SecureUserProfile;
 import eu.eexcess.domaindetection.wordnet.WordnetDomainsDetector;
 import eu.eexcess.federatedrecommender.registration.PartnerRegister;
 
+
 /**
  * 
  * 
@@ -90,7 +91,7 @@ public class PartnerToDomainTest {
             PartnerBadge badge = new PartnerBadge();
             badge = new PartnerBadge();
             badge.setSystemId("Europeana");
-            badge.setEndpoint(europeana);
+            badge.setPartnerConnectorEndpoint(europeana);
             badge.setTags(new ArrayList<String>() {/**
 				 * 
 				 */
@@ -103,24 +104,27 @@ public class PartnerToDomainTest {
             partnerRegister.addPartner(badge);
         }
         
-        PartnerBadge badge2 = new PartnerBadge();
-        badge2 = new PartnerBadge();
-        badge2.setSystemId("Mendeley");
-        badge2.setEndpoint(mendeley);
-        badge2.setTags(new ArrayList<String>() {/**
-			 * 
-			 */
-			private static final long serialVersionUID = 1L;
+        if (false) {
+			PartnerBadge badge2 = new PartnerBadge();
+			badge2 = new PartnerBadge();
+			badge2.setSystemId("Mendeley");
+			badge2.setPartnerConnectorEndpoint(mendeley);
+			badge2.setTags(new ArrayList<String>() {
+				/**
+				 * 
+				 */
+				private static final long serialVersionUID = 1L;
 
-		{
-            add("Science");
-            add("Journals");
-        }});
-        partnerRegister.addPartner(badge2);
-        
-        PartnerBadge badge3 = new PartnerBadge();
+				{
+					add("Science");
+					add("Journals");
+				}
+			});
+			partnerRegister.addPartner(badge2);
+		}
+		PartnerBadge badge3 = new PartnerBadge();
         badge3.setSystemId("ZBW");
-        badge3.setEndpoint(zbw);
+        badge3.setPartnerConnectorEndpoint(zbw);
         badge3.setTags(new ArrayList<String>() {/**
 			 * 
 			 */
@@ -132,33 +136,41 @@ public class PartnerToDomainTest {
         }});
         partnerRegister.addPartner(badge3);
                
-        PartnerBadge badge4 = new PartnerBadge();
-        badge4.setSystemId("KIMCollect");
-        badge4.setEndpoint(kimCollect);
-        badge4.setTags(new ArrayList<String>() {/**
-			 * 
-			 */
-			private static final long serialVersionUID = 1L;
+        if (false) {
+			PartnerBadge badge4 = new PartnerBadge();
+			badge4.setSystemId("KIMCollect");
+			badge4.setPartnerConnectorEndpoint(kimCollect);
+			badge4.setTags(new ArrayList<String>() {
+				/**
+				 * 
+				 */
+				private static final long serialVersionUID = 1L;
 
-		{
-            add("Swiss");
-            add("Culture");
-        }});
-        partnerRegister.addPartner(badge4);
+				{
+					add("Swiss");
+					add("Culture");
+				}
+			});
+			partnerRegister.addPartner(badge4);
+		}
+        
+		if (false) {
+			PartnerBadge badge5 = new PartnerBadge();
+			badge5.setSystemId("Wissenmedia");
+			badge5.setPartnerConnectorEndpoint(wissensserver);
+			badge5.setTags(new ArrayList<String>() {
+				/**
+				 * 
+				 */
+				private static final long serialVersionUID = 1L;
 
-        PartnerBadge badge5 = new PartnerBadge();
-        badge5.setSystemId("Wissenmedia");
-        badge5.setEndpoint(wissensserver);
-        badge5.setTags(new ArrayList<String>() {/**
-			 * 
-			 */
-			private static final long serialVersionUID = 1L;
-
-		{
-            add("Articles");
-            add("Culture");
-        }});
-        partnerRegister.addPartner(badge5);
+				{
+					add("Articles");
+					add("Culture");
+				}
+			});
+			partnerRegister.addPartner(badge5);
+		}
     }
     
     private ResultList getPartnerResult(PartnerBadge partner, SecureUserProfile secureUserProfile) {
@@ -167,7 +179,7 @@ public class PartnerToDomainTest {
         Client client = partnerRegister.getClient(partner);
         if (client != null) {
             try {
-                WebResource resource = client.resource(partner.getEndpoint());
+                WebResource resource = client.resource(partner.getPartnerConnectorEndpoint());
                 resource.accept(MediaType.APPLICATION_JSON);
 
                 resultList = resource.post(ResultList.class, secureUserProfile);

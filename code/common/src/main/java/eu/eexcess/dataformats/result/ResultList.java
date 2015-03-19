@@ -16,13 +16,14 @@ limitations under the License.
  */
 package eu.eexcess.dataformats.result;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.io.Serializable;
+import java.util.LinkedList;
 
 import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
-import javax.xml.bind.annotation.XmlTransient;
+
+import eu.eexcess.dataformats.result.ResultStats;
 
 /**
  * Encapsulation of results in EEXCESS data format.
@@ -30,24 +31,91 @@ import javax.xml.bind.annotation.XmlTransient;
  * @author plopez@know-center.at
  */
 @XmlRootElement(name = "eexcess-results")
-public class ResultList {
+
+public class ResultList implements Serializable {
 	
+	private static final long serialVersionUID = 1L;
+
 	@XmlAttribute
     public String provider;
     
+	private ResultStats resultStats;
+	
     @XmlAttribute
     public int totalResults;
 
     @XmlElement(name="result")
-    public List<Result> results = new ArrayList<Result>();
+    public LinkedList<Result> results = new LinkedList<Result>();
     
     @XmlElement(name="resultsRDF")
     public Object resultsRDF = null;
-    @XmlTransient //TODO: Should be @XmlAttribute but not for the stable version
-	public String queryID;
+    
+    @XmlElement(name="queryID")
+    public String queryID;
     
     @Override
-    public String toString(){
-    	return provider +" "+ totalResults;
-    }
+	public String toString() {
+		return "ResultList [provider=" + provider + ", totalResults="
+				+ totalResults + ", results=" + results + ", resultsRDF="
+				+ resultsRDF + ", queryID=" + queryID + "]";
+	}
+
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result
+				+ ((provider == null) ? 0 : provider.hashCode());
+		result = prime * result + ((queryID == null) ? 0 : queryID.hashCode());
+		result = prime * result + ((results == null) ? 0 : results.hashCode());
+		result = prime * result
+				+ ((resultsRDF == null) ? 0 : resultsRDF.hashCode());
+		result = prime * result + totalResults;
+		return result;
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		ResultList other = (ResultList) obj;
+		if (provider == null) {
+			if (other.provider != null)
+				return false;
+		} else if (!provider.equals(other.provider))
+			return false;
+		if (queryID == null) {
+			if (other.queryID != null)
+				return false;
+		} else if (!queryID.equals(other.queryID))
+			return false;
+		if (results == null) {
+			if (other.results != null)
+				return false;
+		} else if (!results.equals(other.results))
+			return false;
+		if (resultsRDF == null) {
+			if (other.resultsRDF != null)
+				return false;
+		} else if (!resultsRDF.equals(other.resultsRDF))
+			return false;
+		if (totalResults != other.totalResults)
+			return false;
+		return true;
+	}
+    
+	@XmlElement(name = "resultStats")
+	public ResultStats getResultStats() {
+		return resultStats;
+	}
+
+	public void setResultStats(ResultStats resultStats) {
+		this.resultStats = resultStats;
+	}
+
+    
 }

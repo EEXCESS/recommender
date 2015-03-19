@@ -40,17 +40,22 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import javax.ws.rs.core.Response.ResponseBuilder;
 
 import org.codehaus.jackson.JsonParseException;
 import org.codehaus.jackson.JsonParser;
 import org.codehaus.jackson.map.JsonMappingException;
 import org.codehaus.jackson.map.ObjectMapper;
 
+import com.sun.jersey.api.client.Client;
+import com.sun.jersey.api.client.WebResource;
 import com.sun.jersey.spi.resource.Singleton;
 
 import eu.eexcess.config.FederatedRecommenderConfiguration;
 import eu.eexcess.dataformats.PartnerBadge;
+import eu.eexcess.dataformats.PartnerBadgeList;
 import eu.eexcess.dataformats.evaluation.EvaluationResponse;
+import eu.eexcess.dataformats.evaluation.EvaluationResultList;
 import eu.eexcess.dataformats.evaluation.EvaluationResultLists;
 import eu.eexcess.dataformats.result.ResultList;
 import eu.eexcess.dataformats.userprofile.ContextKeyword;
@@ -61,7 +66,7 @@ import eu.eexcess.federatedrecommender.dataformats.D3GraphDocument;
 import eu.eexcess.federatedrecommender.evaluation.FederatedRecommenderEvaluationCore;
 import eu.eexcess.federatedrecommender.utils.FederatedRecommenderException;
 import eu.eexcess.federatedrecommenderservice.FederatedRecommenderService;
-@Path("/recommender")
+@Path("/evaluation")
 @Singleton
 public class FederatedRecommenderEvaluationService extends FederatedRecommenderService{
 	private static final Logger logger = Logger
@@ -156,12 +161,40 @@ public class FederatedRecommenderEvaluationService extends FederatedRecommenderS
 	@Consumes({ MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON })
 	@Produces({ MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON })
 	@Deprecated
-	public ResultList evaluation(SecureUserProfileEvaluation userProfile)
+	public EvaluationResultLists evaluation(SecureUserProfileEvaluation userProfile)
 			throws IOException {
-		ResultList resultList = fREC.getEvaluationResults(userProfile);
+		EvaluationResultLists resultList = new EvaluationResultLists();
+		resultList.results.add(fREC.getEvaluationResults(userProfile));
 		return resultList;
 	}
 
+
+
+	@POST
+	@Path("/blockEvaluation")
+	@Consumes( { MediaType.APPLICATION_XML, MediaType.WILDCARD } )
+	@Produces({ MediaType.APPLICATION_XML, MediaType.WILDCARD } )
+	public EvaluationResultLists blockEvaluation(SecureUserProfileEvaluation userProfile) {
+		
+		EvaluationResultLists resultList = fREC.getblockResult( userProfile);
+		resultList.queryID=userProfile.queryID;
+		return resultList;
+	}
+	
+	@GET
+	@Path("/getPartnersFromFedRec")
+	@Produces({ MediaType.APPLICATION_XML, MediaType.WILDCARD })
+	public Response getPartnersFromFedRec(){
+		logger.log(Level.WARNING,"getPartnersFromFedRec");
+		System.out.println("getPartnersFromFedRec");
+		WebResource webResource = new Client().resource("http://localhost/eexcess-federated-recommender-web-service-1.0-SNAPSHOT/recommender/getRegisteredPartners");
+		PartnerBadgeList partnerList=webResource.get(PartnerBadgeList.class);
+		System.out.println(webResource.get(String.class));
+		fREC.setPartners(partnerList);
+		logger.log(Level.WARNING,partnerList.toString());
+		return Response.ok().build();
+	}
+	
 	/**
 	 * takes the already evaluated result and returns if there is a query left
 	 * to evaluate
@@ -173,7 +206,7 @@ public class FederatedRecommenderEvaluationService extends FederatedRecommenderS
 	 */
 	@POST
 	@Path("/evaluationResultUID")
-	@Consumes({ MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON })
+	@Consumes({ MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON, MediaType.APPLICATION_FORM_URLENCODED })
 	public Response evaluationResultUID(@QueryParam("id") Integer id,
 			EvaluationResultLists result) throws IOException {
 		EvaluationResponse eR = new EvaluationResponse();
@@ -193,13 +226,35 @@ public class FederatedRecommenderEvaluationService extends FederatedRecommenderS
 	 * @throws IOException
 	 */
 	@POST
-	@Path("/evaluationWithUID")
+	@Path("/expEvaluationWithUID")
 	// @Consumes({ MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON })
 	@Produces({ MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON })
-	public Response evaluationWithUID(@QueryParam("id") Integer id)
+	public Response expEvaluationWithUID(@QueryParam("id") Integer id)
 			throws IOException {
 		
 		EvaluationResultLists results = fREC.getExpansionEvaluation(id);
+
+		return Response.ok(results).build();
+		// return Response.ok().build();
+
+	}
+	
+	/**
+	 * 
+	 * returns the results to evaluate
+	 * 
+	 * @param id
+	 * @return
+	 * @throws IOException
+	 */
+	@POST
+	@Path("/blockEvaluationWithUID")
+	// @Consumes({ MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON })
+	@Produces({ MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON , MediaType.APPLICATION_FORM_URLENCODED })
+	public Response blockEvaluationWithUID(@QueryParam("id") Integer id)
+			throws IOException {
+		
+		EvaluationResultLists results = fREC.getBlockEvaluation(id);
 
 		return Response.ok(results).build();
 		// return Response.ok().build();

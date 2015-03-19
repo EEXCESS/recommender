@@ -84,10 +84,11 @@ public class SecureUserProfile implements Serializable {
     public List<Interest> interestList = new ArrayList<Interest>();
     
     @XmlElementWrapper(name="contextKeywords")
-    @XmlElement(name="contextKeywords")
+    //@XmlElement(name="contextKeywords")
     public List<ContextKeyword> contextKeywords = new ArrayList<ContextKeyword>();
     
     @XmlElement(name="context")
+    
     public Context context = new Context();
     
     @XmlElement(name="contextNamedEntities")

@@ -20,55 +20,59 @@ package eu.eexcess.mendeley.recommender.dataformat;
  * @author hziak
  *
  */
+import org.codehaus.jackson.annotate.JsonIgnoreProperties;
+import org.codehaus.jackson.annotate.JsonProperty;
+
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlElementWrapper;
-
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class MendeleyDocs {
-	
-    @XmlElement
-	public String uuid;
-    @XmlElement
+    @JsonProperty("id")
+	public String id;
+
+    @JsonProperty("title")
 	public String title;
-    @XmlElement
-	public String publication_outlet;
-    @XmlElement
+
+    @JsonProperty("source")
+	public String source;
+
+    @JsonProperty("year")
 	public Integer year;
-    @XmlElement
-	public String mendeley_url;
-    @XmlElement
-	public String doi;
-    @XmlElementWrapper(name="authors")
-    @XmlElement(name="authors")
+
+    @JsonProperty("link")
+	public String link;
+
+    @JsonProperty("authors")
 	public List<MendeleyAuthors> authors = new ArrayList<MendeleyAuthors>();
 	public String authorsString;
-	public String publicationOutlet;
+
+    @JsonProperty("abstract")
 	public String description;
-	public String website;
+
 	@Override
 	public String toString() {
-		return "MendeleyDocs [uuid=" + uuid + ", title=" + title
-				+ ", publication_outlet=" + publication_outlet + ", year="
-				+ year + ", mendeley_url=" + mendeley_url + ", doi=" + doi
-				+ ", authors=" + authors + "]";
+		return "MendeleyDocs [id=" + id + ", title=" + title
+				+ ", source=" + source + ", year="
+				+ year + ", link=" + link
+				+ ", authors=" + authors
+                + ", description=" + description + "]";
 	}
 	@Override
 	public int hashCode() {
 		final int prime = 31;
 		int result = 1;
 		result = prime * result + ((authors == null) ? 0 : authors.hashCode());
-		result = prime * result + ((doi == null) ? 0 : doi.hashCode());
 		result = prime * result
-				+ ((mendeley_url == null) ? 0 : mendeley_url.hashCode());
+				+ ((link == null) ? 0 : link.hashCode());
 		result = prime
 				* result
-				+ ((publication_outlet == null) ? 0 : publication_outlet
+				+ ((source == null) ? 0 : source
 						.hashCode());
 		result = prime * result + ((title == null) ? 0 : title.hashCode());
-		result = prime * result + ((uuid == null) ? 0 : uuid.hashCode());
+		result = prime * result + ((id == null) ? 0 : id.hashCode());
 		result = prime * result + ((year == null) ? 0 : year.hashCode());
+        result = prime * result + ((description == null) ? 0 : description.hashCode());
 		return result;
 	}
 	@Override
@@ -85,38 +89,36 @@ public class MendeleyDocs {
 				return false;
 		} else if (!authors.equals(other.authors))
 			return false;
-		if (doi == null) {
-			if (other.doi != null)
+		if (link == null) {
+			if (other.link != null)
 				return false;
-		} else if (!doi.equals(other.doi))
+		} else if (!link.equals(other.link))
 			return false;
-		if (mendeley_url == null) {
-			if (other.mendeley_url != null)
+		if (source == null) {
+			if (other.source != null)
 				return false;
-		} else if (!mendeley_url.equals(other.mendeley_url))
-			return false;
-		if (publication_outlet == null) {
-			if (other.publication_outlet != null)
-				return false;
-		} else if (!publication_outlet.equals(other.publication_outlet))
+		} else if (!source.equals(other.source))
 			return false;
 		if (title == null) {
 			if (other.title != null)
 				return false;
 		} else if (!title.equals(other.title))
 			return false;
-		if (uuid == null) {
-			if (other.uuid != null)
+		if (id == null) {
+			if (other.id != null)
 				return false;
-		} else if (!uuid.equals(other.uuid))
+		} else if (!id.equals(other.id))
 			return false;
 		if (year == null) {
 			if (other.year != null)
 				return false;
 		} else if (!year.equals(other.year))
 			return false;
+        if (description == null) {
+            if (other.description != null)
+                return false;
+        } else if (!description.equals(other.description))
+            return false;
 		return true;
 	}
-	
-	
 }

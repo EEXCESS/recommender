@@ -29,11 +29,12 @@ public class FederatedRecommenderConfiguration {
 	public int graphHitsLimitPerQuery;
 	public int graphQueryDepthLimit;
 	public int graphMaxPathLength;
-	public String federatedRecommenderBaseUri;
-	public String deploymentPlatform; // localStandalone, localTomcat, jrDev, jrStable
+	//public String federatedRecommenderBaseUri;
+	//public String deploymentPlatform; // localStandalone, localTomcat, jrDev, jrStable
 	public String wikipediaIndexDir; //directory of the wikipedia index
 	public String evaluationQueriesFile; //file path to the queries file for evaluation
 	public long partnersTimeout;
 	public int numRecommenderThreads;
+	public String statsLogDatabase;
 
 }

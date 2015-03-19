@@ -21,7 +21,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.StringReader;
-import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.logging.Logger;
 
 import javax.xml.transform.TransformerConfigurationException;
@@ -61,7 +61,7 @@ import eu.eexcess.partnerdata.api.ITransformer;
 public class Transformer implements ITransformer{
 
 	private static final String EEXCESS_FACETS_VALUE_DEFAULT_LICENSE = "restricted";
-	private static final String EEXCESS_FACETS_VALUE_UNKOWN = "unkown";
+	private static final String EEXCESS_FACETS_VALUE_UNKNOWN = "unknown";
 	protected PartnerConfiguration partnerConfig;
 	protected String resultListTransformationFilename;
 	
@@ -74,6 +74,30 @@ public class Transformer implements ITransformer{
 	protected Document transformationResultList;
 	protected Document transformationResultObject;
 	protected final Logger log = Logger.getLogger(Transformer.class.getName());
+	/*
+	protected String xslTranformationRemoveEmptyElements = 
+			"<xsl:stylesheet version=\"1.0\" xmlns:xsl=\"http://www.w3.org/1999/XSL/Transform\">" + 
+			" <xsl:strip-space elements=\"*\"/> " + 
+			"<xsl:output indent=\"yes\" /> " +
+			"<xsl:template match=\"@*|node()\">" + 
+    		"<xsl:if test=\". != '' or ./@* != ''\">" + 
+    		"<xsl:copy>" + 
+    		"<xsl:apply-templates  select=\"@*|node()\"/> " + 
+    		"</xsl:copy>" + 
+    		"</xsl:if>" + 
+    		"</xsl:template>" + 
+    		"</xsl:stylesheet>";
+	*/
+	protected String xslTranformationRemoveEmptyElements =
+			"<xsl:stylesheet version=\"1.0\" xmlns:xsl=\"http://www.w3.org/1999/XSL/Transform\">" + 
+	"<xsl:template match=\"*\">" + 
+	"  <xsl:if test=\"normalize-space(.) != ''\"> " +
+	"    <xsl:copy>" + 
+	"      <xsl:apply-templates/>" + 
+	"    </xsl:copy>" + 
+	"  </xsl:if>" + 
+	"</xsl:template>" + 
+	"</xsl:stylesheet>";
 
 	public void init(PartnerConfiguration partnerConfig) throws TransformerConfigurationException {
 		this.partnerConfig = partnerConfig;
@@ -139,16 +163,48 @@ public class Transformer implements ITransformer{
 	protected Document transformInternal(Document input, javax.xml.transform.Transformer transformer, PartnerdataLogger logger) throws EEXCESSDataTransformationException {
 		PartnerdataTracer.debugTrace(this.partnerConfig, "before transform:\n" + XMLTools.getStringFromDocument(input));
 		
-		XMLTools.dumpFile(this.getClass(), partnerConfig, input, "before-transform"); 
+		PartnerdataTracer.dumpFile(this.getClass(), partnerConfig, input, "before-transform", logger); 
 			
+		input = preProcessTransform( input, logger);  
+
+/*		
+		XPathFactory xpathFactory = XPathFactory.newInstance();
+		// XPath to find empty text nodes.
+		XPathExpression xpathExp;
+		try {
+			xpathExp = xpathFactory.newXPath().compile("//text()[normalize-space(.) = '']");
+			NodeList emptyTextNodes = (NodeList) xpathExp.evaluate(input, XPathConstants.NODESET);
+	
+			// Remove each empty text node from document.
+			for (int i = 0; i < emptyTextNodes.getLength(); i++) {
+			    Node emptyTextNode = emptyTextNodes.item(i);
+			    emptyTextNode.getParentNode().removeChild(emptyTextNode);
+			}
+		} catch (XPathExpressionException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}  
+		
+		PartnerdataTracer.dumpFile(this.getClass(), partnerConfig, input, "before-transform-after-cleanup"); 
+		*/
 		DOMSource source = new DOMSource( input );
+		DOMResult domResultCleaned = new DOMResult();
 		DOMResult domResult = new DOMResult();
 		try {
-			transformer.transform(source, domResult);
+			// remove all empty Tags
+			TransformerFactory tFactory = TransformerFactory.newInstance();
+			if (this.partnerConfig.makeCleanupBeforeTransformation) {
+				javax.xml.transform.Transformer transformerRemoveEmptyTags = tFactory.newTransformer(new StreamSource(new StringReader(xslTranformationRemoveEmptyElements)));
+				transformerRemoveEmptyTags.transform(source, domResultCleaned);
+				PartnerdataTracer.dumpFile(this.getClass(), partnerConfig,(Document) domResultCleaned.getNode(), "before-transform-after-cleanup", logger); 
+				transformer.transform(new DOMSource(domResultCleaned.getNode()), domResult);
+			} else {
+				transformer.transform(source, domResult);
+			}
 			Document result = (Document)domResult.getNode();
 			result = this.postTransformationResults(input, result);
 			PartnerdataTracer.debugTrace(this.partnerConfig, "after transform:\n" + XMLTools.getStringFromDocument(result));
-			XMLTools.dumpFile(this.getClass(), partnerConfig, result, "done-transform"); 
+			PartnerdataTracer.dumpFile(this.getClass(), partnerConfig, result, "done-transform", logger); 
 			return result;
 		} catch (TransformerException e) {
 			throw new EEXCESSDataTransformationException(e);
@@ -164,6 +220,9 @@ public class Transformer implements ITransformer{
 		return transformInternal(input, transformerResultObject, logger);
 	}
 
+	public Document preProcessTransform(Document input, PartnerdataLogger logger)  throws EEXCESSDataTransformationException{
+		return input;
+	}
     
 	
 	@Override
@@ -192,7 +251,7 @@ public class Transformer implements ITransformer{
 
 		ResultSet queryResults =  qe.execSelect();
 		
-		ArrayList<Result> resultsList = new ArrayList<Result>();
+		LinkedList<Result> resultsList = new LinkedList<Result>();
 
 		while (queryResults.hasNext()) {
 			
@@ -263,31 +322,31 @@ public class Transformer implements ITransformer{
 				result.facets.language.isEmpty() ||
 				result.facets.language.trim().isEmpty() )
 			{
-				result.facets.language=EEXCESS_FACETS_VALUE_UNKOWN;
+				result.facets.language=EEXCESS_FACETS_VALUE_UNKNOWN;
 			}
 			if (result.facets.license == null ||
 					result.facets.license.isEmpty() ||
 					result.facets.license.trim().isEmpty() )
 			{
-					result.facets.license=EEXCESS_FACETS_VALUE_UNKOWN;
+					result.facets.license=EEXCESS_FACETS_VALUE_UNKNOWN;
 			}
 			if (result.facets.provider == null ||
 					result.facets.provider.isEmpty() ||
 					result.facets.provider.trim().isEmpty() )
 			{
-					result.facets.provider=EEXCESS_FACETS_VALUE_UNKOWN;
+					result.facets.provider=EEXCESS_FACETS_VALUE_UNKNOWN;
 			}
 			if (result.facets.type == null ||
 					result.facets.type.isEmpty() ||
 					result.facets.type.trim().isEmpty() )
 			{
-					result.facets.type=EEXCESS_FACETS_VALUE_UNKOWN;
+					result.facets.type=EEXCESS_FACETS_VALUE_UNKNOWN;
 			}
 			if (result.facets.year == null ||
 					result.facets.year.isEmpty() ||
 					result.facets.year.trim().isEmpty() )
 			{
-					result.facets.year=EEXCESS_FACETS_VALUE_UNKOWN;
+					result.facets.year=EEXCESS_FACETS_VALUE_UNKNOWN;
 			}
 
 			
@@ -383,6 +442,7 @@ public class Transformer implements ITransformer{
 		queryContent += "PREFIX foaf: <http://xmlns.com/foaf/0.1/> ";
 		queryContent += "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> ";
 		queryContent += "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#> ";
+		queryContent += "PREFIX dbpedia: <http://dbpedia.org/ontology/> ";
 		return queryContent;
 	}
 	

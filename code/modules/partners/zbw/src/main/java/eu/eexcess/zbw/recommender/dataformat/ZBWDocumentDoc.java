@@ -80,6 +80,9 @@ public class ZBWDocumentDoc {
 	@XmlElement(name="creator")
 	public List<String> creator;
 
+	@XmlElement(name="creatorString")
+	public String creatorString;
+
 	@XmlElement(name="identifier_url")
 	public List<String> identifierUrl;
 	@XmlElement(name="lng")

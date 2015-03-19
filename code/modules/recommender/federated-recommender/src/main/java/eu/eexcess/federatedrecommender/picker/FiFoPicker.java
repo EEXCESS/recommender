@@ -32,12 +32,16 @@ import eu.eexcess.dataformats.userprofile.SecureUserProfile;
 import eu.eexcess.federatedrecommender.dataformats.PFRChronicle;
 import eu.eexcess.federatedrecommender.dataformats.PartnersFederatedRecommendations;
 import eu.eexcess.federatedrecommender.interfaces.PartnersFederatedRecommendationsPicker;
-
+/**
+ * First in First out picker implementation 
+ * @author hziak
+ *
+ */
 public class FiFoPicker implements 	PartnersFederatedRecommendationsPicker {
 
 
 		private static final Logger logger = Logger
-				.getLogger(OccurrenceProbabilityPicker.class.getName());
+				.getLogger(FiFoPicker.class.getName());
 
 		@Override
 		public ResultList pickResults(PFRChronicle pFRChronicle, int numResults) {
@@ -50,15 +54,16 @@ public class FiFoPicker implements 	PartnersFederatedRecommendationsPicker {
 				PartnersFederatedRecommendations resultList,
 				List<PartnerBadge> partners, int numResults) {
 			ResultList result = new ResultList();
-			for (int i=0; i<= numResults;i++)
-			for (PartnerBadge partnerBadge : partners) {
-				if(resultList.getResults().get(partnerBadge)!=null)
-					if(resultList.getResults().get(partnerBadge).results.size()>0){
-							result.results.add(resultList.getResults().get(partnerBadge).results.get(0));
-							resultList.getResults().get(partnerBadge).results.remove(0);
+		
+			for (int i=0; i< numResults;i++)
+				for (PartnerBadge partnerBadge : partners) {
+					if(resultList.getResults().get(partnerBadge)!=null)
+						if(resultList.getResults().get(partnerBadge).results.size()>0 && result.results.size()< numResults){
+								result.results.add(resultList.getResults().get(partnerBadge).results.get(0));
+								resultList.getResults().get(partnerBadge).results.remove(0);
+						}
 					}
-			}
-			
+		
 			return result;
 		}
 

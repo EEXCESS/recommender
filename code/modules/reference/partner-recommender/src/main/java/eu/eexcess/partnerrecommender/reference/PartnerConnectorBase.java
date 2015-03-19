@@ -62,7 +62,7 @@ public class PartnerConnectorBase {
 	    {  
 			SAXReader reader = new SAXReader();
 			org.dom4j.Document dom4jDoc = reader.read(new StringReader(xmlString));
-			  
+			
 			DOMWriter writer = new DOMWriter();
 			org.w3c.dom.Document w3cDoc = writer.write(dom4jDoc);
 

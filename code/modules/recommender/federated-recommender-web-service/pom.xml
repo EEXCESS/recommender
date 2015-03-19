@@ -52,16 +52,8 @@
             <artifactId>xom</artifactId>
             <version>1.1</version>
         </dependency>
-        <dependency>
-            <groupId>eu.eexcess</groupId>
-            <artifactId>eexcess-common</artifactId>
-            <version>${project.parent.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>eu.eexcess</groupId>
-            <artifactId>eexcess-reference-partner-data-layer</artifactId>
-            <version>${project.parent.version}</version>
-        </dependency>
+    
+      
         <dependency>
             <groupId>eu.eexcess</groupId>
             <artifactId>eexcess-federated-recommender</artifactId>

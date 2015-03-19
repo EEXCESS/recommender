@@ -20,13 +20,13 @@ import java.io.IOException;
 import java.util.Date;
 
 import javax.annotation.PostConstruct;
+import javax.annotation.PreDestroy;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
-
 import org.w3c.dom.Document;
 
 import eu.eexcess.dataformats.result.Result;
@@ -37,40 +37,43 @@ import eu.eexcess.dataformats.userprofile.SecureUserProfile;
 import eu.eexcess.partnerrecommender.api.PartnerRecommenderApi;
 import eu.eexcess.partnerrecommender.reference.PartnerRecommender;
 
+
 /**
  * Reference implementation of a partner recommender web service.
  * 
  * @author rkern@know-center.at
  */
+
 @Path("/partner")
 public class PartnerRecommenderService {
 //	private static final String EEXCESS_MIMETYPE = "application/vnd.eexcess.recommendation-results+xml";
 //	private static final String EEXCESS_NAMESPACE = "http://eexcess.eu/schema/recommender-results";
-
-	private final PartnerRecommenderApi partnerRecommender;
-
-	/**
-	 * Creates a new instance of this class.
-	 */
-	public PartnerRecommenderService() {
-		partnerRecommender = new PartnerRecommender();
+	
+	private PartnerRecommenderApi partnerRecommender;
+		public PartnerRecommenderService() {
+			partnerRecommender = new PartnerRecommender();
 	}
-
+	
 	@PostConstruct
-	public void initialize() throws IOException {
-		partnerRecommender.initialize();
+	@POST
+	@Path("/intialize")
+	public void initialize( ) throws IOException {
 	}
-
+	@PreDestroy
+	public void destroy( ) throws IOException {
+	}
+	
 	@POST
 	@Path("/recommend")
 	@Consumes(value = MediaType.APPLICATION_XML)
 	@Produces(value = MediaType.APPLICATION_XML)
 	public ResultList recommend(SecureUserProfile userProfile)
 			throws IOException {
-
 		return partnerRecommender.recommend(userProfile);
 	}
 
+
+	
 	/**
 	 * Returns the EEXCESS user profile for a given user.
 	 * 
@@ -170,5 +173,8 @@ public class PartnerRecommenderService {
 		resultList.results.add(result);
 		return resultList;
 	}
+
+
+	
 
 }

@@ -47,7 +47,7 @@ public class PartnerdataLogger {
 	}
 
 
-
+	
 	public void save()
      {
     	 // write the actLogEntry in a file

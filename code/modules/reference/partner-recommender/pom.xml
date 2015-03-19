@@ -55,6 +55,11 @@
     	<type>pom</type>
     	<version>2.11.0</version>
   	  </dependency>
+<dependency>
+    <groupId>javax.mail</groupId>
+    <artifactId>mail</artifactId>
+    <version>1.4</version>
+</dependency>
 	</dependencies>
        
 </project>

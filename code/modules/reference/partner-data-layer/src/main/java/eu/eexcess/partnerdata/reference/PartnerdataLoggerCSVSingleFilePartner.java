@@ -45,7 +45,7 @@ public class PartnerdataLoggerCSVSingleFilePartner {
 		Date today = Calendar.getInstance().getTime();        
 		String reportDate = df.format(today);
 
-		String filename = PartnerdataConfig.dataDir + reportDate + "-"+ entry.getSystemId()+"-enchrichment-stats.csv";
+		String filename = PartnerdataConfig.dataDir + reportDate + "-"+ entry.getSystemId()+"-enrichment-stats.csv";
 		boolean fileExists = false;
 		{
 			File f = new File(filename);

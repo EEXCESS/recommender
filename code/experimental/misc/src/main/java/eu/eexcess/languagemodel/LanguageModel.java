@@ -62,10 +62,10 @@ public class LanguageModel {
 		
 		Statement stat = null;
 		
-	    
+	    Database db = new Database();
 		try {
 			
-			dbConnection = Database.connect(dbName);
+			dbConnection = db.connect(dbName);
 			
 			dbConnection.setAutoCommit(false);
 		    stat = dbConnection.createStatement();
@@ -85,7 +85,7 @@ public class LanguageModel {
 	    if(dbConnection!=null)
 	    dbConnection.commit();
 	    
-	    Database.disconnect();
+	    db.disconnect();
 		
 	}
 	

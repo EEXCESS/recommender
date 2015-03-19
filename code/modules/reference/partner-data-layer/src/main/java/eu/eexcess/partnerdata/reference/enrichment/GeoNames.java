@@ -38,6 +38,7 @@ public class GeoNames extends EnrichmentServiceBase {
 
 	public Set<EnrichmentResult> getLocationHierarchy(String location, PartnerdataLogger logger)
 	{
+        long startTime = logger.getActLogEntry().getTimeNow();
 		Set<EnrichmentResult> resultSet=new HashSet<EnrichmentResult>();
 		try {
 			WebService.setUserName("geonamesmichal"); // add your username here
@@ -49,12 +50,28 @@ public class GeoNames extends EnrichmentServiceBase {
 			//			for (Toponym toponym : searchResult.getToponyms()) {
 			//				System.out.println(toponym.getName()+" "+ toponym.getCountryName());
 			//			}
-	        PartnerdataTracer.dumpFile(GeoNames.class, this.partnerConfig, toStringToponymSearchResult(searchResult), "geonames-response", FILETYPE.TXT);
+	        PartnerdataTracer.dumpFile(GeoNames.class, this.partnerConfig, toStringToponymSearchResult(searchResult), "geonames-response", FILETYPE.TXT, logger);
 
 			if (searchResult.getToponyms().size()>0)
 			{
 				Toponym topo=searchResult.getToponyms().get(0);
+				EnrichmentResult result = new EnrichmentResult();
+				String word = "";
+				if (topo.getName() != null && !topo.getName().isEmpty())
+					word += topo.getName();
+				if (topo.getCountryName() != null && !topo.getCountryName().isEmpty())
+				{
+					
+					if (word.isEmpty()) 
+						word += topo.getCountryName();
+					else 
+						word += "(" + topo.getCountryName() + ")";
+				}
+				result.setWord(word);
+				result.setUri("http://www.geonames.org/" + topo.getGeoNameId());
+				resultSet.add(result);
 				
+				/*
 				String[] topoWordArray=topo.getName().toLowerCase().split(" ");
 				for (String t: topoWordArray)
 				{
@@ -72,6 +89,7 @@ public class GeoNames extends EnrichmentServiceBase {
 					result.setWord(t);
 					resultSet.add(result);
 				}
+				*/
 			}
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
@@ -79,6 +97,7 @@ public class GeoNames extends EnrichmentServiceBase {
 		}
 		logger.getActLogEntry().addEnrichmentGeonamesResults(resultSet.size());
 		logger.getActLogEntry().addEnrichmentGeonamesServiceCalls(1);
+		logger.getActLogEntry().addEnrichmentGeonamesServiceCallDuration(startTime);
 
 		return resultSet;
 	}

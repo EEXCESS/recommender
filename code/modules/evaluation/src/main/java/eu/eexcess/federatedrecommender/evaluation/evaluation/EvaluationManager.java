@@ -41,6 +41,9 @@ import java.util.logging.Logger;
 
 import eu.eexcess.dataformats.evaluation.EvaluationResultList;
 import eu.eexcess.dataformats.evaluation.EvaluationResultLists;
+import eu.eexcess.dataformats.userprofile.ContextKeyword;
+import eu.eexcess.dataformats.userprofile.SecureUserProfile;
+import eu.eexcess.dataformats.userprofile.SecureUserProfileEvaluation;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -54,29 +57,42 @@ import com.google.gson.GsonBuilder;
 public class EvaluationManager {
 	private static final Logger logger = Logger
 			.getLogger(EvaluationResultLists.class.getName());
-	private final EvaluationQueries evalQueries;
+	private EvaluationQueries evalQueries=null;
 	private boolean cacheWarmed = false;
-	private HashMap<Integer, Iterator<EvaluationQuery>> userQueryIteratorMap = new HashMap<Integer, Iterator<EvaluationQuery>>();
+	private HashMap<Integer, Iterator<SecureUserProfileEvaluation>> userQueryIteratorMap = new HashMap<Integer, Iterator<SecureUserProfileEvaluation>>();
 	private HashMap<Integer, HashMap<String, EvaluationResultLists>> userResultMap = new HashMap<Integer, HashMap<String, EvaluationResultLists>>();
-	private HashMap<EvaluationQuery, EvaluationResultLists> queryCache = new HashMap<EvaluationQuery, EvaluationResultLists>();
+	private HashMap<SecureUserProfileEvaluation, EvaluationResultLists> queryCache = new HashMap<SecureUserProfileEvaluation, EvaluationResultLists>();
 	private final Gson gson = new GsonBuilder().setPrettyPrinting().create();
 	private String evaluationQueriesFile;
-	private List<EvaluationQuery> removeList=new ArrayList<>();
+	private List<SecureUserProfile> removeList=new ArrayList<>();
 
-	public EvaluationManager(String evaluationQueriesFile)
-			throws FileNotFoundException {
+	public EvaluationManager(String evaluationQueriesFile) {
 		this.evaluationQueriesFile = evaluationQueriesFile;
-		BufferedReader br = new BufferedReader(new FileReader(
+		BufferedReader br = null;
+		try{
+			br = new BufferedReader(new FileReader(
 				evaluationQueriesFile));
-
-		this.evalQueries = gson.fromJson(br, EvaluationQueries.class);
+			this.evalQueries = gson.fromJson(br, EvaluationQueries.class);
+		}
+		catch(FileNotFoundException e){
+			logger.log(Level.WARNING, "Could not load EvaluationQueriesFile",e);
+		}
+		if (this.evalQueries==null ){
+			this.evalQueries= new EvaluationQueries();
+			SecureUserProfileEvaluation query = new SecureUserProfileEvaluation();
+			ContextKeyword keyword=new ContextKeyword("Test");
+			query.contextKeywords.add(keyword);
+			this.evalQueries.getQueries().add(query );
+			
+		}
+		
 	}
 
-	public EvaluationQuery getNextQuery(Integer id) {
+	public SecureUserProfileEvaluation getNextQuery(Integer id) {
 		if (!userQueryIteratorMap.containsKey(id)) {
-			userQueryIteratorMap.put(id, evalQueries.queries.iterator());
+			userQueryIteratorMap.put(id, evalQueries.getQueries().iterator());
 		}
-		EvaluationQuery query = null;
+		SecureUserProfileEvaluation query = null;
 		try {
 
 			query = userQueryIteratorMap.get(id).next();
@@ -140,8 +156,8 @@ public class EvaluationManager {
 		}
 	}
 
-	public List<EvaluationQuery> getAllQueries() {
-		return evalQueries.queries;
+	public List<SecureUserProfileEvaluation> getAllQueries() {
+		return evalQueries.getQueries();
 	}
 
 	/**
@@ -151,16 +167,16 @@ public class EvaluationManager {
 	 * @param query
 	 * @param evaluationResultLists
 	 */
-	public void addResultToQueryCache(EvaluationQuery query,
+	public void addResultToQueryCache(SecureUserProfileEvaluation query,
 			EvaluationResultLists evaluationResultLists) {
 		boolean resultSaved = true;
-		for (EvaluationResultList result : evaluationResultLists.results) {
-			if (result.totalResults == 0) {
-				resultSaved = false;
-
-				break;
-			}
-		}
+//		for (EvaluationResultList result : evaluationResultLists.results) {
+//			if (result.totalResults == 0) {
+//				resultSaved = false;
+//
+//				break;
+//			}
+//		}
 		if (resultSaved)
 			queryCache.put(query, evaluationResultLists);
 		else {
@@ -172,7 +188,7 @@ public class EvaluationManager {
 			removeList.add(query);
 		}
 
-		if (queryCache.size()+removeList.size() == evalQueries.queries.size()) {
+		if (queryCache.size()+removeList.size() == evalQueries.getQueries().size()) {
 			cacheWarmed = true;
 			
 		}
@@ -209,14 +225,16 @@ public class EvaluationManager {
 	 * @return
 	 */
 	public EvaluationResultLists getNextResultsForQuery(Integer uID) {
-		EvaluationQuery nextQuery = getNextQuery(uID);
+		SecureUserProfile nextQuery = getNextQuery(uID);
 		if (cacheWarmed){
 			if(removeList.size()>0){
-				evalQueries.queries.removeAll(removeList);
+				evalQueries.getQueries().removeAll(removeList);
 				removeList.clear();
-				writeNewQueryFile();
+				//writeNewQueryFile(); 
 			}
 			EvaluationResultLists evaluationResultLists = queryCache.get(nextQuery);
+			if(evaluationResultLists!=null)
+			if(evaluationResultLists.results!=null)
 			Collections.shuffle(evaluationResultLists.results);
 			return evaluationResultLists;
 		}

@@ -22,15 +22,18 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 package eu.eexcess.config;
 
+import eu.eexcess.dataformats.PartnerBadge;
+
 
 /**
  * 
  * 
  * @author rkern@know-center.at
  */
-public class PartnerConfiguration {
+public class PartnerConfiguration extends PartnerBadge {
+	private static final long serialVersionUID = 2257947888683158873L;
 
-    public String systemId; 
+	//public String systemId; 
     public String searchEndpoint; // e.g."http://localhost:8080/search/${query}";
 	
     public String partnerConnectorClass;
@@ -40,7 +43,7 @@ public class PartnerConfiguration {
     /** 
      * Data mappings and transformations
      */
-    
+    public boolean isTransformedNative; // in case of partner transforms himself a local transformation is not used
     public String transformerClass; // e.g., DummyTransformr
     public String mappingListTransformationFile;
     public String mappingObjectTransformationFile;
@@ -59,6 +62,8 @@ public class PartnerConfiguration {
     
     public String partnerDataLogDir;
     public String partnerDataDataDir;
-
+    public Boolean makeCleanupBeforeTransformation;
+    
+    public String federatedRecommenderURI;
 
 }

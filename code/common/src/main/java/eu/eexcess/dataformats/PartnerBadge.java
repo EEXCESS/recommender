@@ -17,6 +17,7 @@ limitations under the License.
 package eu.eexcess.dataformats;
 
 import java.io.Serializable;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Stack;
 
@@ -25,13 +26,15 @@ import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlElementWrapper;
 import javax.xml.bind.annotation.XmlRootElement;
-import javax.xml.bind.annotation.XmlTransient;
-
 import org.apache.commons.math3.stat.descriptive.moment.StandardDeviation;
+import org.codehaus.jackson.annotate.JsonIgnoreProperties;
+
+import eu.eexcess.dataformats.result.ResultStats;
 
 
 @XmlRootElement(name = "eexcess-partner-badge")
 @XmlAccessorType(XmlAccessType.FIELD)
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class PartnerBadge implements Serializable{
 	
 	private static final long serialVersionUID = -6411801334911587483L;
@@ -39,49 +42,24 @@ public class PartnerBadge implements Serializable{
 	
 	@XmlElement(name="systemId")
     public String systemId;
-	
 	@XmlElement(name="partnerKey") //has to be the same value than in SecureUserProfile
     public String partnerKey;
 	@XmlElement(name="description")
     private String description;
-	@XmlElement(name="endpoint")
-    private String endpoint;
-	@XmlElement(name="requestCount")
-	public int requestCount=0;
+	@XmlElement(name="partnerConnectorEndpoint")
+    private String partnerConnectorEndpoint;
+	
+	@XmlElement(name="shortTimeStats", required=false)
+	public PartnerBadgeStats shortTimeStats = new PartnerBadgeStats();
 
-	@XmlElement(name="failedRequestCount")
-	public int failedRequestCount=0;
-	
-	//Begin response time
-	@XmlTransient
-	private Stack<Long> lastResponseTimes= new Stack<Long>() ;
-	@XmlElement(name="shortTimeResponseTimes")
-	private Long shortTimeResponseTime;
-	@XmlElement(name="shortTimeResponsDeviation")
-	private Long shortTimeResponsDeviation;
-	@XmlElement(name="longTimeResponseTimes")
-	private Long longTimeResponseTime;
-	
-	//End response time	
-	
-	public Long getShortTimeResponsDeviation() {
-		return shortTimeResponsDeviation;
-	}
-	public void setShortTimeResponsDeviation(Long shortTimeResponsDeviation) {
-		this.shortTimeResponsDeviation = shortTimeResponsDeviation;
-	}
+	@XmlElement(name="longTimeStats", required=false)
+	public PartnerBadgeStats longTimeStats = new PartnerBadgeStats();	
 
 	public Long getShortTimeResponseTime() {
-		return shortTimeResponseTime;
+		return shortTimeStats.shortTimeResponseTime;
 	}
 	public void setShortTimeResponseTime(Long shortTimeResponseTime) {
-		this.shortTimeResponseTime = shortTimeResponseTime;
-	}
-	public Long getLongTimeResponseTime() {
-		return longTimeResponseTime;
-	}
-	public void setLongTimeResponseTime(Long longTimeResponseTime) {
-		this.longTimeResponseTime = longTimeResponseTime;
+		this.shortTimeStats.shortTimeResponseTime = shortTimeResponseTime;
 	}
 
 	@XmlElement(name="tag")
@@ -91,11 +69,11 @@ public class PartnerBadge implements Serializable{
 
 	
 	
-	public String getEndpoint() {
-		return endpoint;
+	public String getPartnerConnectorEndpoint() {
+		return partnerConnectorEndpoint;
 	}
-	public void setEndpoint(String endpoint) {
-		this.endpoint = endpoint;
+	public void setPartnerConnectorEndpoint(String endpoint) {
+		this.partnerConnectorEndpoint = endpoint;
 	}
 	public String getDescription() {
 		return description;
@@ -116,12 +94,12 @@ public class PartnerBadge implements Serializable{
 		this.tags = tags;
 	}
 	public Stack<Long> getLastResponseTimes() {
-		return lastResponseTimes;
+		return this.shortTimeStats.lastResponseTimes;
 	}
 	public void pushLastResponseTimes(Long lastResponseTime) {
-		while(lastResponseTimes.size()>10)
-			lastResponseTimes.pop();
-		this.lastResponseTimes.push(lastResponseTime);
+		while(this.shortTimeStats.lastResponseTimes.size()>50)
+			this.shortTimeStats.lastResponseTimes.pop();
+		this.shortTimeStats.lastResponseTimes.push(lastResponseTime);
 	}
 	@Override
 	public int hashCode() {
@@ -130,7 +108,7 @@ public class PartnerBadge implements Serializable{
 		result = prime * result
 				+ ((description == null) ? 0 : description.hashCode());
 		result = prime * result
-				+ ((endpoint == null) ? 0 : endpoint.hashCode());
+				+ ((partnerConnectorEndpoint == null) ? 0 : partnerConnectorEndpoint.hashCode());
 		result = prime * result
 				+ ((partnerKey == null) ? 0 : partnerKey.hashCode());
 		result = prime * result
@@ -151,10 +129,10 @@ public class PartnerBadge implements Serializable{
 				return false;
 		} else if (!description.equals(other.description))
 			return false;
-		if (endpoint == null) {
-			if (other.endpoint != null)
+		if (partnerConnectorEndpoint == null) {
+			if (other.partnerConnectorEndpoint != null)
 				return false;
-		} else if (!endpoint.equals(other.endpoint))
+		} else if (!partnerConnectorEndpoint.equals(other.partnerConnectorEndpoint))
 			return false;
 		if (partnerKey == null) {
 			if (other.partnerKey != null)
@@ -172,7 +150,7 @@ public class PartnerBadge implements Serializable{
 	public String toString() {
 		return "PartnerBadge [systemId=" + systemId + ", partnerKey="
 				+ partnerKey + ", description=" + description + ", endpoint="
-				+ endpoint + ", tags=" + tags + "]";
+				+ partnerConnectorEndpoint + ", tags=" + tags + "]";
 	}
 	public void setShortTimeResponsDeviation() {
 		// TODO Auto-generated method stub
@@ -197,10 +175,10 @@ public class PartnerBadge implements Serializable{
 			if (next != null)
 				setShortTimeResponseTime((getShortTimeResponseTime() + next) / 2);
 		}
-		if (getLongTimeResponseTime() != null)
-			setLongTimeResponseTime((getLongTimeResponseTime() + respTime) / 2);
-		else
-			setLongTimeResponseTime(respTime);
+//		if (getLongTimeResponseTime() != null)
+//			setLongTimeResponseTime((getLongTimeResponseTime() + respTime) / 2);
+//		else
+//			setLongTimeResponseTime(respTime);
 		double[] values = new double[getLastResponseTimes().toArray().length];
 
 		StandardDeviation standartDeviation = new StandardDeviation();
@@ -211,9 +189,19 @@ public class PartnerBadge implements Serializable{
 				values[count] = ((Long) long1).doubleValue();
 			count++;
 		}
-		setShortTimeResponsDeviation(new Double(standartDeviation.evaluate(values)).longValue());
+//		setShortTimeResponsDeviation(new Double(standartDeviation.evaluate(values)).longValue());
 	}
-
+	public LinkedList<ResultStats> getLastQueries() {
+		return this.shortTimeStats.lastQueries;
+	}
+	public void addLastQueries(ResultStats lastQuerie) {
+		this.shortTimeStats.lastQueries.addLast(lastQuerie);
+		if(this.shortTimeStats.lastQueries.size()>50)
+			this.shortTimeStats.lastQueries.removeFirst();
+	}
+	
+	
+	
 	
 	
 }

@@ -21,7 +21,11 @@ You should have received a copy of the GNU Affero General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 package eu.eexcess.federatedrecommender.utils;
-
+/**
+ * Standart exception for the Federated Recommender
+ * @author hziak
+ *
+ */
 public class FederatedRecommenderException extends Exception {
 	private static final long serialVersionUID = 4986819839728541789L;
 

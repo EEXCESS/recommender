@@ -26,33 +26,32 @@ import java.util.List;
 import javax.xml.bind.annotation.XmlElementWrapper;
 
 public class MendeleyResponse {
-	@XmlElementWrapper(name="documents")
-    public List<MendeleyDocs> documents = new ArrayList<MendeleyDocs>();
-	public Integer total_results;
-	public Integer total_pages;
-	public Integer current_page;
-	public Integer items_per_page;
+    @XmlElementWrapper(name="documents")
+    private List<MendeleyDocs> documents = new ArrayList<MendeleyDocs>();
+
+    public MendeleyResponse(List<MendeleyDocs> documents) {
+        this.documents = documents;
+    }
+
+    public List<MendeleyDocs> getDocuments() {
+        return documents;
+    }
+
+    public void limitNumDocuments(int limit) {
+        if (limit > 0 && limit < documents.size())
+            documents = documents.subList(0, limit);
+    }
+
 	@Override
 	public String toString() {
-		return "MendeleyResponse [documents=" + documents + ", total_results="
-				+ total_results + ", total_pages=" + total_pages
-				+ ", current_page=" + current_page + ", items_per_page="
-				+ items_per_page + "]";
+		return "MendeleyResponse [documents=" + documents + "]";
 	}
 	@Override
 	public int hashCode() {
 		final int prime = 31;
 		int result = 1;
 		result = prime * result
-				+ ((current_page == null) ? 0 : current_page.hashCode());
-		result = prime * result
 				+ ((documents == null) ? 0 : documents.hashCode());
-		result = prime * result
-				+ ((items_per_page == null) ? 0 : items_per_page.hashCode());
-		result = prime * result
-				+ ((total_pages == null) ? 0 : total_pages.hashCode());
-		result = prime * result
-				+ ((total_results == null) ? 0 : total_results.hashCode());
 		return result;
 	}
 	@Override
@@ -64,30 +63,10 @@ public class MendeleyResponse {
 		if (getClass() != obj.getClass())
 			return false;
 		MendeleyResponse other = (MendeleyResponse) obj;
-		if (current_page == null) {
-			if (other.current_page != null)
-				return false;
-		} else if (!current_page.equals(other.current_page))
-			return false;
 		if (documents == null) {
 			if (other.documents != null)
 				return false;
 		} else if (!documents.equals(other.documents))
-			return false;
-		if (items_per_page == null) {
-			if (other.items_per_page != null)
-				return false;
-		} else if (!items_per_page.equals(other.items_per_page))
-			return false;
-		if (total_pages == null) {
-			if (other.total_pages != null)
-				return false;
-		} else if (!total_pages.equals(other.total_pages))
-			return false;
-		if (total_results == null) {
-			if (other.total_results != null)
-				return false;
-		} else if (!total_results.equals(other.total_results))
 			return false;
 		return true;
 	}

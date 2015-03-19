@@ -40,6 +40,7 @@ import org.jgrapht.graph.SimpleWeightedGraph;
 
 import eu.eexcess.config.FederatedRecommenderConfiguration;
 import eu.eexcess.dataformats.PartnerBadge;
+import eu.eexcess.dataformats.PartnerBadgeList;
 import eu.eexcess.dataformats.evaluation.EvaluationResultList;
 import eu.eexcess.dataformats.evaluation.EvaluationResultLists;
 import eu.eexcess.dataformats.result.Result;
@@ -53,6 +54,7 @@ import eu.eexcess.federatedrecommender.dbpedia.DbPediaGraph;
 import eu.eexcess.federatedrecommender.dbpedia.DbPediaSolrIndex;
 import eu.eexcess.federatedrecommender.evaluation.evaluation.EvaluationManager;
 import eu.eexcess.federatedrecommender.evaluation.evaluation.EvaluationQuery;
+import eu.eexcess.federatedrecommender.evaluation.picker.BlockPicker;
 import eu.eexcess.federatedrecommender.utils.FederatedRecommenderException;
 
 
@@ -67,7 +69,6 @@ public class FederatedRecommenderEvaluationCore   {
 	private static final Logger logger = Logger
 			.getLogger(FederatedRecommenderEvaluationCore.class.getName());
 	
-	
    public FederatedRecommenderEvaluationCore(FederatedRecommenderConfiguration federatedRecConfiguration) throws FederatedRecommenderException, FileNotFoundException{
 	   this.federatedRecommenderConfiguration = federatedRecConfiguration;
 	   try {
@@ -76,17 +77,9 @@ public class FederatedRecommenderEvaluationCore   {
 		logger.log(Level.SEVERE,"Could not get FederatedRecommenderCore");
 		throw e1;
 	}
-	   try {
-			this.evalManager = new EvaluationManager(
-					federatedRecConfiguration.evaluationQueriesFile);
-		} catch (FileNotFoundException e) {
-			logger.log(Level.WARNING,
-					"EvaluationQueries file could not be read "
-							+ federatedRecConfiguration.evaluationQueriesFile,
-					e);
-			
-			
-		}
+	   
+		this.evalManager = new EvaluationManager(federatedRecConfiguration.evaluationQueriesFile);
+		
 		threadPool = Executors.newFixedThreadPool(30);
    }
 	// Begin Evaluation
@@ -95,7 +88,7 @@ public class FederatedRecommenderEvaluationCore   {
 	 * @param userProfile
 	 * @return
 	 */
-	public ResultList getEvaluationResults(
+	public EvaluationResultList getEvaluationResults(
 			SecureUserProfileEvaluation userProfile) {
 		SecureUserProfileEvaluation userProfileEvaluation = null;
 		if (userProfile.sourceSelect != null)
@@ -114,10 +107,11 @@ public class FederatedRecommenderEvaluationCore   {
 				break;
 			default:
 				logger.log(Level.WARNING,
-						"Sourceselection unknown or not defined, not using any decomposer at all");
+						"Source selection unknown or not defined, not using any source selection at all");
 				userProfileEvaluation = userProfile;
 				break;
 			}
+	
 		if (userProfile.decomposer != null)
 			switch (userProfile.decomposer) {
 			case "wikipedia":
@@ -132,17 +126,28 @@ public class FederatedRecommenderEvaluationCore   {
 				userProfileEvaluation = (SecureUserProfileEvaluation) fRCore
 						.generateFederatedRecommendationDBPedia(userProfile);
 				break;
+			case "serendipity":
+				userProfileEvaluation = (SecureUserProfileEvaluation) fRCore
+						.generateFederatedRecommendationSerendipity(userProfile);
+				break;
 			default:
 				logger.log(Level.WARNING,
 						"Decomposer unknown or not defined, not using any decomposer at all");
 				userProfileEvaluation = userProfile;
 				break;
 			}
-		if (userProfileEvaluation == null)
+		if (userProfileEvaluation == null){
 			userProfileEvaluation = userProfile;
-		else
+			userProfileEvaluation.numResults=10;
+			if(userProfile.numResults !=null)	
 			userProfileEvaluation.numResults = userProfile.numResults;
-
+		}
+		else{
+			userProfileEvaluation.numResults=10;
+			if(userProfile.numResults !=null)	
+			userProfileEvaluation.numResults = userProfile.numResults;
+		}
+			
 		EvaluationResultList resultList = null;
 		//
 		// logger.log(Level.SEVERE, "Picker class not found", new Exception());
@@ -193,7 +198,8 @@ public class FederatedRecommenderEvaluationCore   {
 	public EvaluationResultLists getExpansionEvaluation(Integer uID)
 			throws IOException {
 		if (!evalManager.isCacheWarmed()) {
-			for (EvaluationQuery query : evalManager.getAllQueries()) {
+			for (SecureUserProfileEvaluation query : evalManager.getAllQueries()) {
+				logger.log(Level.INFO,"Warming evalualtion query cache");
 				evalManager.addResultToQueryCache(query, getExpansionEvaluationResult(-1));
 			}
 		}
@@ -201,6 +207,128 @@ public class FederatedRecommenderEvaluationCore   {
 		return evalManager.getNextResultsForQuery(uID);
 
 	}
+
+	/**
+	 * returns the next result from the evaluation manager and checks if the manager chache is warmed
+	 * @param uID
+	 * @return
+	 * @throws IOException
+	 */
+	public EvaluationResultLists getBlockEvaluation(Integer uID)
+			throws IOException {
+		if (!evalManager.isCacheWarmed()) {
+			for (SecureUserProfileEvaluation query : evalManager.getAllQueries()) {
+				logger.log(Level.INFO,"Warming evalualtion query cache");
+				evalManager.addResultToQueryCache(query, getBlockEvaluationResultFromQManager(-1));
+			}
+		}
+
+		return evalManager.getNextResultsForQuery(uID);
+
+	}
+	/**
+	 * main function for the block evaluation
+	 * @param id
+	 * @return
+	 */
+	private EvaluationResultLists getBlockEvaluationResultFromQManager(Integer id) {
+	
+		final SecureUserProfileEvaluation evalProfil = evalManager.getNextQuery(id);
+		final EvaluationResultLists results = getblockResult(evalProfil);
+		
+		return results;
+	}
+	public EvaluationResultLists getblockResult(final SecureUserProfileEvaluation evalProfil) {
+		final EvaluationResultLists results = new EvaluationResultLists();
+		final EvaluationResultLists blockTmpResults = new EvaluationResultLists();
+		//EvaluationQuery query = evalManager.getNextQuery(id);
+		//evalProfil.contextKeywords.add(new ContextKeyword(query.query));
+//		//BEGIN Partner Selection
+//		ArrayList<PartnerBadge> blockEvalPartners= new ArrayList<PartnerBadge>();
+//		for (PartnerBadge partner : fRCore.getPartnerRegister().getPartners()) {
+//			if(partner.systemId.contains("ZBW"))
+//				blockEvalPartners.add(partner);
+//		}
+//		ArrayList<PartnerBadge> queryPartner= new ArrayList<PartnerBadge>();
+//		for (PartnerBadge partner : fRCore.getPartnerRegister().getPartners()) {
+//			if(partner.systemId.contains("Mendeley"))
+//				queryPartner.add(partner);
+//		}
+//		//END Partner Selection		
+		
+		results.query = evalProfil.getContextKeywordConcatenation();
+		results.queryDescription= evalProfil.description;
+		evalProfil.picker = "FiFoPicker";
+		
+		final SecureUserProfileEvaluation diversityProfile = (SecureUserProfileEvaluation) SerializationUtils.clone(evalProfil);
+//		diversityProfile.partnerList=queryPartner;
+		
+		Future<Void> diversityFuture = threadPool.submit(new Callable<Void>() {
+			@Override
+			public Void call() throws Exception {
+				
+				diversityProfile.decomposer = "wikipedia";
+				EvaluationResultList evaluationResults = (EvaluationResultList) getEvaluationResults(diversityProfile);
+				evaluationResults.provider="Diversity";
+				blockTmpResults.results
+						.add(evaluationResults);
+				return null;
+			}
+		});
+		final SecureUserProfileEvaluation unmodifiedProfile = (SecureUserProfileEvaluation) SerializationUtils.clone(evalProfil);
+		
+		Future<Void> unmodifiedFutur = threadPool.submit(new Callable<Void>() {
+			@Override
+			public Void call() throws Exception {
+				
+				unmodifiedProfile.decomposer = "none";
+				EvaluationResultList eRL= (EvaluationResultList) getEvaluationResults(unmodifiedProfile);
+				eRL.provider="Basic";
+				blockTmpResults.results
+						.add(eRL);
+				results.results.add(eRL); //ADDING IT ALLREADY IN THE FINAL RESULT LIST SINCE IT'S THE SECOND RESULT LIST TO PRESENT
+				return null;
+			}
+		});
+		
+		final SecureUserProfileEvaluation serendipityProfile = (SecureUserProfileEvaluation) SerializationUtils.clone(evalProfil);
+		
+		Future<Void> serendipityFutur = threadPool.submit(new Callable<Void>() {
+			@Override
+			public Void call() throws Exception {
+				serendipityProfile.decomposer = "serendipity";
+				EvaluationResultList evaluationResults = (EvaluationResultList) getEvaluationResults(serendipityProfile);
+				evaluationResults.provider="Serendipity";
+				blockTmpResults.results
+						.add(evaluationResults);
+				return null;
+			}
+		});
+		try {
+			unmodifiedFutur.get();
+			diversityFuture.get();
+			serendipityFutur.get();
+		} catch (InterruptedException | ExecutionException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+		BlockPicker bP = new BlockPicker();
+		try {
+			results.results.add(bP.pickBlockResults(blockTmpResults,  evalProfil.numResults));
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+//		for (EvaluationResultList evalResultList : blockTmpResults.results) {
+//			System.out.println(evalResultList);	
+//		}
+//		
+
+//		results.results.addAll(blockTmpResults.results);
+		return results;
+	}
+	
 	/**
 	 * main function for the decomposer evaluation
 	 * @param id
@@ -208,10 +336,10 @@ public class FederatedRecommenderEvaluationCore   {
 	 */
 	private EvaluationResultLists getExpansionEvaluationResult(Integer id) {
 		final EvaluationResultLists results = new EvaluationResultLists();
-		final SecureUserProfileEvaluation evalProfil = new SecureUserProfileEvaluation();
-		EvaluationQuery query = evalManager.getNextQuery(id);
+		final SecureUserProfileEvaluation evalProfil =  evalManager.getNextQuery(id);
+		
 
-		evalProfil.contextKeywords.add(new ContextKeyword(query.query));
+	
 		ArrayList<PartnerBadge> sourceExpansionPartners= new ArrayList<PartnerBadge>();
 		for (PartnerBadge partner : fRCore.getPartnerRegister().getPartners()) {
 			if(partner.systemId.contains("ZBW"))
@@ -223,12 +351,11 @@ public class FederatedRecommenderEvaluationCore   {
 				queryPartner.add(partner);
 		}
 		
-		results.query = query.query;
-		results.queryDescription= query.description;
+		results.query = evalProfil.getContextKeywordConcatenation(); //TODO!
+		results.queryDescription= evalProfil.description;
 		evalProfil.picker = "FiFoPicker";
 		
-		final SecureUserProfileEvaluation wikipediaProfile = (SecureUserProfileEvaluation) SerializationUtils
-				.clone(evalProfil);
+		final SecureUserProfileEvaluation wikipediaProfile = (SecureUserProfileEvaluation) SerializationUtils.clone(evalProfil);
 		wikipediaProfile.partnerList=queryPartner;
 		Future<Void> wikipedia = threadPool.submit(new Callable<Void>() {
 			@Override
@@ -307,8 +434,8 @@ public class FederatedRecommenderEvaluationCore   {
 		
 		DbPediaGraph dbPediaGraph = new DbPediaGraph(fRCore.getDbPediaSolrIndex());
 		List<String> keynodes = new ArrayList<String>();
-		int hitsLimit = 10;
-		int depthLimit = 10;
+		int hitsLimit = federatedRecommenderConfiguration.graphHitsLimitPerQuery;
+		int depthLimit = federatedRecommenderConfiguration.graphQueryDepthLimit;
 		SimpleWeightedGraph<String, DefaultEdge> graph = null;
 		try {
 			graph = dbPediaGraph.getFromKeywords(userProfile.contextKeywords, keynodes, hitsLimit, depthLimit);
@@ -338,6 +465,11 @@ public class FederatedRecommenderEvaluationCore   {
 		}
 
 		return d3GraphDocument;
+	}
+	public void setPartners(PartnerBadgeList list){
+		for (PartnerBadge partner : list.partners) {
+			this.fRCore.addPartner(partner);	
+		}
 	}
 
 	// End Evaluation

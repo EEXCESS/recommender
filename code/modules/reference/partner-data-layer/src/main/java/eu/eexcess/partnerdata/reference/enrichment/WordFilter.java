@@ -26,11 +26,8 @@ import java.util.List;
 import java.util.Set;
 
 import eu.eexcess.config.PartnerConfiguration;
+import eu.eexcess.partnerdata.reference.PartnerdataLogger;
 import eu.eexcess.partnerdata.reference.PartnerdataTracer;
-
-//import edu.smu.tspell.wordnet.Synset;
-//import edu.smu.tspell.wordnet.SynsetType;
-//import edu.smu.tspell.wordnet.WordNetDatabase;
 
 public class WordFilter {
 
@@ -40,22 +37,21 @@ public class WordFilter {
 	public WordFilter(PartnerConfiguration config) {
 		this.partnerConfig = config;
 		//set system property
-		System.setProperty("wordnet.database.dir", "C:\\Program Files (x86)\\WordNet\\2.1\\dict");
+		//System.setProperty("wordnet.database.dir", "C:\\Program Files (x86)\\WordNet\\2.1\\dict");
 		//load wordnet database 
-//		wordnetDataBase = WordNetDatabase.getFileInstance();
+		wordnetProxy = new WordNetProxy();
 		//load stop words
 		stopWordsList=new StopWords(this.partnerConfig).getStopWordsList();
 	}
 
-/*
-	private WordNetDatabase wordnetDataBase ;
+	private WordNetProxy wordnetProxy ;
 
-	public WordNetDatabase getWordNetDatabase()
+	public WordNetProxy getWordNet()
 	{
-		return wordnetDataBase;
+		return wordnetProxy;
 	}
-*/
-	public boolean isKeyWord(String word)
+
+	public boolean isKeyWord(String word, PartnerdataLogger logger)
 	{
 		int demandedMinLength=3;
 
@@ -71,7 +67,7 @@ public class WordFilter {
 			return false;
 		}
 
-		return (isEntityDbpediaSpotlight(word));
+		return (isEntityDbpediaSpotlight(word, logger));
 
 		//		//check if it's rather noun or verb
 		//		int nounMeanings = wordnetDataBase.getSynsets(word, SynsetType.NOUN).length;
@@ -80,13 +76,13 @@ public class WordFilter {
 		//return true;
 	}
 	
-	public Set<String> selectKeyWords (Set<String> words)
+	public Set<String> selectKeyWords (Set<String> words, PartnerdataLogger logger)
 	{
 		Set<String> results=new HashSet<String>();
 		
 		for (String w: words)
 		{
-			if (isKeyWord(w))
+			if (isKeyWord(w, logger))
 			{
 				results.add(w);
 			}
@@ -94,42 +90,22 @@ public class WordFilter {
 		
 		return results;
 	}
-/*
+
 	public Set<String> getSynonymsWordNet(String word)
 	{
-		Synset[] synsets = wordnetDataBase.getSynsets(word, SynsetType.NOUN);
-
-		HashSet<String> resultSet=new HashSet<String>();
-
-		for (Synset s: synsets)
-		{
-			String synonym=s.getWordForms()[0];
-
-			String[] synonyms =synonym.toLowerCase().split(" ");
-
-			for (String syn: synonyms)
-			{
-				if (syn.equals(word))
-				{
-					continue;
-				}
-				resultSet.add(syn);
-			}
-		}
-
-		return resultSet;
+		return this.wordnetProxy.getSynonymsWordNet(word);
 	}
 
+/*
 	public Set<String> getEntietiesFreeBase(String word)
 	{
 		return FreeBase.getEntietiesFreeBase(word);
 	}
-
-	*/
-	public boolean isEntityDbpediaSpotlight(String word)
+*/
+	public boolean isEntityDbpediaSpotlight(String word, PartnerdataLogger logger)
 	{
 		DbpediaSpotlight spotlight = new DbpediaSpotlight(this.partnerConfig);
-		return spotlight.isEntityDbpediaSpotlight(word);
+		return spotlight.isEntityDbpediaSpotlight(word, logger);
 
 	}
 /*

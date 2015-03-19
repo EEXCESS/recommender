@@ -23,9 +23,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 package eu.eexcess.dataformats.evaluation;
 
 import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.List;
-
+import java.util.LinkedList;
 import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlElement;
 /**
@@ -45,6 +43,6 @@ public class EvaluationResultLists implements Serializable{
   	@XmlAttribute
     public String queryID;
     @XmlElement(name="results")
-    public List<EvaluationResultList> results = new ArrayList<EvaluationResultList>();
+    public LinkedList<EvaluationResultList> results = new LinkedList<EvaluationResultList>();
     
 }

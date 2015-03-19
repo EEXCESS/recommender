@@ -24,13 +24,12 @@ package eu.eexcess.federatedrecommender;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collections;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.Random;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -42,25 +41,23 @@ import java.util.logging.Logger;
 
 import javax.ws.rs.core.MediaType;
 
-import org.jgraph.graph.DefaultEdge;
-import org.jgrapht.graph.SimpleWeightedGraph;
-
 import com.sun.jersey.api.client.Client;
 import com.sun.jersey.api.client.WebResource;
 
 import eu.eexcess.config.FederatedRecommenderConfiguration;
 import eu.eexcess.dataformats.PartnerBadge;
-import eu.eexcess.dataformats.result.Result;
+import eu.eexcess.dataformats.PartnerBadgeStats;
+import eu.eexcess.dataformats.RecommenderStats;
 import eu.eexcess.dataformats.result.ResultList;
+import eu.eexcess.dataformats.result.ResultStats;
 import eu.eexcess.dataformats.userprofile.SecureUserProfile;
 import eu.eexcess.dataformats.userprofile.SecureUserProfileEvaluation;
-import eu.eexcess.federatedrecommender.dataformats.D3GraphDocument;
 import eu.eexcess.federatedrecommender.dataformats.PartnersFederatedRecommendations;
-import eu.eexcess.federatedrecommender.dbpedia.DbPediaGraph;
 import eu.eexcess.federatedrecommender.dbpedia.DbPediaSolrIndex;
 import eu.eexcess.federatedrecommender.decomposer.DBPediaDecomposer;
 import eu.eexcess.federatedrecommender.decomposer.PseudoRelevanceSourcesDecomposer;
 import eu.eexcess.federatedrecommender.decomposer.PseudoRelevanceWikipediaDecomposer;
+import eu.eexcess.federatedrecommender.decomposer.SerendiptiyDecomposer;
 import eu.eexcess.federatedrecommender.interfaces.PartnersFederatedRecommendationsPicker;
 import eu.eexcess.federatedrecommender.interfaces.SecureUserProfileDecomposer;
 import eu.eexcess.federatedrecommender.picker.FiFoPicker;
@@ -68,13 +65,17 @@ import eu.eexcess.federatedrecommender.picker.OccurrenceProbabilityPicker;
 import eu.eexcess.federatedrecommender.picker.SimilarityDiversificationPicker;
 import eu.eexcess.federatedrecommender.registration.PartnerRegister;
 import eu.eexcess.federatedrecommender.utils.FederatedRecommenderException;
+import eu.eexcess.sqlite.Database;
+import eu.eexcess.sqlite.DatabaseQueryStats;
 
 /**
  * FederatedRecommenderCore (Singleton)
+ * 
  */
 public class FederatedRecommenderCore {
 
-	private static final Logger logger = Logger.getLogger(FederatedRecommenderCore.class.getName());
+	private static final Logger logger = Logger
+			.getLogger(FederatedRecommenderCore.class.getName());
 	private static final String[] SUPPORTED_LOCALES = new String[] { "en", "de" };
 
 	private static volatile FederatedRecommenderCore instance;
@@ -83,19 +84,37 @@ public class FederatedRecommenderCore {
 	private PartnerRegister partnerRegister = new PartnerRegister();
 	private ExecutorService threadPool;
 	private final DbPediaSolrIndex dbPediaSolrIndex;
+	private RecommenderStats recommenderStats;
 
-	private FederatedRecommenderCore(FederatedRecommenderConfiguration federatedRecConfiguration) {
-		threadPool = Executors.newFixedThreadPool(federatedRecConfiguration.numRecommenderThreads);
+	private FederatedRecommenderCore(
+			FederatedRecommenderConfiguration federatedRecConfiguration) {
+		threadPool = Executors
+				.newFixedThreadPool(federatedRecConfiguration.numRecommenderThreads);
 		this.federatedRecConfiguration = federatedRecConfiguration;
 		this.dbPediaSolrIndex = new DbPediaSolrIndex(federatedRecConfiguration);
+		this.recommenderStats = new RecommenderStats();
 	}
 
+	/**
+	 * returns the registered partners in the system
+	 * 
+	 * @return
+	 */
 	public PartnerRegister getPartnerRegister() {
-		return partnerRegister;
+		synchronized (partnerRegister) {
+			return partnerRegister;
+		}
 	}
 
+	/**
+	 * adds a partner to the system
+	 * 
+	 * @param badge
+	 */
 	public void addPartner(PartnerBadge badge) {
-		partnerRegister.addPartner(badge);
+		synchronized (partnerRegister) {
+			partnerRegister.addPartner(badge);
+		}
 	}
 
 	/**
@@ -105,13 +124,15 @@ public class FederatedRecommenderCore {
 	 * @return
 	 * @throws FederatedRecommenderException
 	 */
-	public static FederatedRecommenderCore getInstance(FederatedRecommenderConfiguration federatedRecommenderConfiguration)
+	public static FederatedRecommenderCore getInstance(
+			FederatedRecommenderConfiguration federatedRecommenderConfiguration)
 			throws FederatedRecommenderException {
 		if (instance == null) {
 			synchronized (FederatedRecommenderCore.class) {
 				// Double check
 				if (instance == null) {
-					instance = new FederatedRecommenderCore(federatedRecommenderConfiguration);
+					instance = new FederatedRecommenderCore(
+							federatedRecommenderConfiguration);
 				}
 			}
 		}
@@ -126,7 +147,8 @@ public class FederatedRecommenderCore {
 	 * @param secureUserProfile
 	 * @return
 	 */
-	public PartnersFederatedRecommendations getPartnersRecommendations(final SecureUserProfile secureUserProfile) {
+	public PartnersFederatedRecommendations getPartnersRecommendations(
+			final SecureUserProfile secureUserProfile) {
 		final PartnersFederatedRecommendations partnersFederatedResults = new PartnersFederatedRecommendations();
 
 		long start = System.currentTimeMillis();
@@ -135,51 +157,94 @@ public class FederatedRecommenderCore {
 			if (checkUserSelectedPartners(secureUserProfile, partner)) {
 				final Client tmpClient = partnerRegister.getClient(partner);
 
-				Future<ResultList> future = threadPool.submit(new Callable<ResultList>() {
-					@Override
-					public ResultList call() throws Exception {
-						long startTime = System.currentTimeMillis();
-						ResultList resultList = getPartnerResult(partner, tmpClient, secureUserProfile);
-						long endTime = System.currentTimeMillis();
-						long respTime = endTime - startTime;
-						partner.updatePartnerResponseTime(respTime);
-						return resultList;
-					}
+				Future<ResultList> future = threadPool
+						.submit(new Callable<ResultList>() {
+							@Override
+							public ResultList call() throws Exception {
+								long startTime = System.currentTimeMillis();
+								ResultList resultList = getPartnerResult(
+										partner, tmpClient, secureUserProfile);
+								long endTime = System.currentTimeMillis();
+								long respTime = endTime - startTime;
+								partner.updatePartnerResponseTime(respTime);
+								return resultList;
+							}
 
-				});
+							/**
+							 * trys to recieve the results from the partners
+							 * 
+							 * @param partner
+							 * @param secureUserProfile
+							 * @return
+							 */
+							private ResultList getPartnerResult(
+									PartnerBadge partner, Client client,
+									SecureUserProfile secureUserProfile) {
+								ResultList resultList = new ResultList();
+								if (client != null) {
+									try {
+										WebResource resource = client.resource(partner
+												.getPartnerConnectorEndpoint());
+										resource.accept(MediaType.APPLICATION_JSON);
+										resultList = resource.post(
+												ResultList.class,
+												secureUserProfile);
+									} catch (Exception e) {
+										logger.log(Level.WARNING, "Partner: "
+												+ partner.getSystemId()
+												+ " is not working currently.",
+												e);
+										throw e;
+									}
+								}
+								client.destroy();
+								return resultList;
+							}
+						});
 				futures.put(partner, future);
 
 			}
 		}
+
 		long timeout = federatedRecConfiguration.partnersTimeout; // ms
 		for (Entry<PartnerBadge, Future<ResultList>> entry : futures.entrySet()) {
 			long startT = System.currentTimeMillis();
 			try {
-				entry.getKey().requestCount++;
-				ResultList rL = entry.getValue().get(timeout, TimeUnit.MILLISECONDS);
+				entry.getKey().shortTimeStats.requestCount++;
+				ResultList rL = entry.getValue().get(timeout,
+						TimeUnit.MILLISECONDS);
 				entry.getValue().cancel(true);
 				partnersFederatedResults.getResults().put(entry.getKey(), rL);
+				entry.getKey().addLastQueries(rL.getResultStats());
+
 				timeout -= System.currentTimeMillis() - startT;
-				// entry.getValue().get(start + 15 * 10000 - now,
-				// TimeUnit.MILLISECONDS);
+
 				timeout = timeout - (System.currentTimeMillis() - startT);
 
 			} catch (TimeoutException e) {
-				entry.getKey().failedRequestCount++;
+				entry.getKey().shortTimeStats.failedRequestCount++;
+				entry.getKey().shortTimeStats.failedRequestTimeoutCount++;
 				entry.getValue().cancel(true);
 				timeout -= System.currentTimeMillis() - startT;
-				logger.log(Level.WARNING, "Waited too long for partner system '" + entry.getKey() + "' to respond " + timeout, e);
+				logger.log(Level.WARNING,
+						"Waited too long for partner system '" + entry.getKey()
+								+ "' to respond " + timeout, e);
 			} catch (Exception e) {
-				entry.getKey().failedRequestCount++;
-				entry.getValue().cancel(true);
-				timeout -= System.currentTimeMillis() - startT;
-				logger.log(Level.SEVERE, "Failed to retrieve results from a parter system '" + entry.getKey() + "'" + (timeout) + "ms ", e);
+				if (entry.getKey() != null) {
+					entry.getKey().shortTimeStats.failedRequestCount++;
+					entry.getValue().cancel(true);
+					timeout -= System.currentTimeMillis() - startT;
+				}
+				logger.log(Level.SEVERE,
+						"Failed to retrieve results from a parter system '"
+								+ entry.getKey() + "'" + (timeout) + "ms ", e);
 			}
 			entry.setValue(null);
 
 		}
 		long end = System.currentTimeMillis();
-		logger.log(Level.INFO, "Federated Recommender took " + (end - start) + "ms for query '" + secureUserProfile.contextKeywords + "'");
+		logger.log(Level.INFO, "Federated Recommender took " + (end - start)
+				+ "ms for query '" + secureUserProfile.contextKeywords + "'");
 
 		return partnersFederatedResults;
 	}
@@ -192,7 +257,8 @@ public class FederatedRecommenderCore {
 	 * @param partner
 	 * @return true/false
 	 */
-	private boolean checkUserSelectedPartners(SecureUserProfile secureUserProfile, PartnerBadge partner) {
+	private boolean checkUserSelectedPartners(
+			SecureUserProfile secureUserProfile, PartnerBadge partner) {
 		if (secureUserProfile.partnerList != null) { // if the list is null then
 														// we query every
 														// partner
@@ -210,7 +276,10 @@ public class FederatedRecommenderCore {
 					for (PartnerBadge uBadge : secureUserProfile.protectedPartnerList) {
 						if (uBadge.partnerKey != null)
 							if (!uBadge.partnerKey.isEmpty())
-								if (partner.partnerKey.equals(uBadge.partnerKey) && uBadge.getSystemId().equals(partner.getSystemId()))
+								if (partner.partnerKey
+										.equals(uBadge.partnerKey)
+										&& uBadge.getSystemId().equals(
+												partner.getSystemId()))
 									return true;
 					}
 			} else
@@ -222,39 +291,12 @@ public class FederatedRecommenderCore {
 	}
 
 	/**
-	 * trys to recieve the results from the partners
-	 * 
-	 * @param partner
-	 * @param secureUserProfile
-	 * @return
-	 */
-	private ResultList getPartnerResult(PartnerBadge partner, Client client, SecureUserProfile secureUserProfile) {
-
-		ResultList resultList = new ResultList();
-		// SecureUserProfile secureUserProfileTmp = (SecureUserProfile)
-		// secureUserProfile;
-
-		if (client != null) {
-			try {
-				WebResource resource = client.resource(partner.getEndpoint());
-				resource.accept(MediaType.APPLICATION_JSON);
-
-				resultList = resource.post(ResultList.class, secureUserProfile);
-
-			} catch (Exception e) {
-				logger.log(Level.WARNING, "Partner: " + partner.getSystemId() + " is not working currently.", e);
-
-			}
-		}
-		return resultList;
-	}
-
-	/**
 	 * main function to generate a federated recommendation
 	 * 
 	 * @return
 	 */
-	public ResultList generateFederatedRecommendation(SecureUserProfile secureUserProfile) throws FileNotFoundException {
+	public ResultList generateFederatedRecommendation(
+			SecureUserProfile secureUserProfile) throws FileNotFoundException {
 		// ResultList result = new ResultList();
 		ResultList resultList = null;
 
@@ -268,56 +310,14 @@ public class FederatedRecommenderCore {
 	}
 
 	/**
-	 * Generates a simple recommendation from N registered partners (for demo
-	 * purposes)
+	 * calls the OccurrenceProbabilityPicker to aggregate results between the
+	 * partners result lists
 	 * 
+	 * @param userProfile
 	 * @return
 	 */
-	public ResultList generateSafeModeFederatedRecommendation(SecureUserProfile secureUserProfile) throws FileNotFoundException {
-
-		ResultList federatedResults = new ResultList();
-
-		federatedResults.provider = "Federated";
-
-		for (PartnerBadge partner : this.getPartnerRegister().getPartners()) {
-			Client client = getPartnerRegister().getClient(partner);
-			for (Result partnerResults : getPartnerResult(partner, client, secureUserProfile).results) {
-				federatedResults.results.add(partnerResults);
-			}
-		}
-
-		federatedResults.totalResults = federatedResults.results.size();
-
-		Collections.shuffle(federatedResults.results, new Random(666));
-
-		return federatedResults;
-	}
-
-
-
-	// /**
-	// * test method for decomposers
-	// */
-	// public ResultList generateFederatedRecommendationDecomposerTests(
-	// SecureUserProfile secureUserProfile) throws IOException {
-	// // ResultList result = new ResultList();
-	// ResultList resultList = null;
-	// String wikipediaIndexDirectory = "/home/hziak/Datasets/EExcess/dewiki/";
-	// SecureUserProfileDecomposer<SecureUserProfile,
-	// SecureUserProfileEvaluation> sUPDecomposer = new
-	// PseudoRelevanceWikipediaDecomposer(
-	// wikipediaIndexDirectory, SUPPORTED_LOCALES);
-	// sUPDecomposer.decompose((SecureUserProfile) SerializationUtils
-	// .clone(secureUserProfile));
-	// sUPDecomposer = new PseudoRelevanceSourcesDecomposer();
-	// sUPDecomposer.decompose(secureUserProfile);
-	//
-	// resultList = useOccurenceProbabilityPicker(secureUserProfile);
-	// return resultList;
-	//
-	// }
-
-	public ResultList useOccurenceProbabilityPicker(SecureUserProfile userProfile) {
+	public ResultList useOccurenceProbabilityPicker(
+			SecureUserProfile userProfile) {
 		ResultList resultList;
 		PartnersFederatedRecommendationsPicker pFRPicker = new OccurrenceProbabilityPicker();
 		long start = System.currentTimeMillis();
@@ -328,16 +328,28 @@ public class FederatedRecommenderCore {
 		int numResults = 10;
 		if (userProfile.numResults != null)
 			numResults = userProfile.numResults;
-		resultList = pFRPicker.pickResults(userProfile, pFR, partnerRegister.getPartners(), numResults);
+		resultList = pFRPicker.pickResults(userProfile, pFR,
+				partnerRegister.getPartners(), numResults);
 		end = System.currentTimeMillis();
 		long timeToPickResults = end - start;
-		logger.log(Level.INFO, " Time to get " + resultList.results.size() + " Results from the Partners: " + timeToGetPartners
-				+ "ms. Time to pick the best results: " + timeToPickResults + "ms");
+		recommenderStats.setAverageGlobalTime(timeToGetPartners);
+		recommenderStats.setAverageAggregationTime(timeToPickResults);
+		logger.log(Level.INFO, " Time to get " + resultList.results.size()
+				+ " Results from the Partners: " + timeToGetPartners
+				+ "ms. Time to pick the best results: " + timeToPickResults
+				+ "ms");
 		resultList.totalResults = resultList.results.size();
 		resultList.provider = "federated";
 		return resultList;
 	}
 
+	/**
+	 * calls the FIFOPicker to aggregate results between the partners result
+	 * lists
+	 * 
+	 * @param userProfile
+	 * @return
+	 */
 	public ResultList useFiFoPicker(SecureUserProfile userProfile) {
 		ResultList resultList;
 		PartnersFederatedRecommendationsPicker pFRPicker = new FiFoPicker();
@@ -349,20 +361,34 @@ public class FederatedRecommenderCore {
 		int numResults = 10;
 		if (userProfile.numResults != null)
 			numResults = userProfile.numResults;
-		resultList = pFRPicker.pickResults(userProfile, pFR, partnerRegister.getPartners(), numResults);
+		resultList = pFRPicker.pickResults(userProfile, pFR,
+				partnerRegister.getPartners(), numResults);
 		end = System.currentTimeMillis();
 		long timeToPickResults = end - start;
-		logger.log(Level.INFO, " Time to get " + resultList.results.size() + " Results from the Partners: " + timeToGetPartners
-				+ "ms. Time to pick the best results: " + timeToPickResults + "ms");
+
+		recommenderStats.setAverageGlobalTime(timeToGetPartners);
+		recommenderStats.setAverageAggregationTime(timeToPickResults);
+		logger.log(Level.INFO, " Time to get " + resultList.results.size()
+				+ " Results from the Partners: " + timeToGetPartners
+				+ "ms. Time to pick the best results: " + timeToPickResults
+				+ "ms");
 		resultList.totalResults = resultList.results.size();
 		resultList.provider = "federated";
 		return resultList;
 	}
 
+	/**
+	 * calls the SimDiversificationPicker to aggregate results between the
+	 * partners result lists
+	 * 
+	 * @param userProfile
+	 * @return
+	 */
 	public ResultList useSimDiversificationPicker(SecureUserProfile userProfile) {
 		ResultList resultList;
 		SecureUserProfile currentUserProfile = new SecureUserProfile();
-		PartnersFederatedRecommendationsPicker pFRPicker = new SimilarityDiversificationPicker(0.5);
+		PartnersFederatedRecommendationsPicker pFRPicker = new SimilarityDiversificationPicker(
+				0.5);
 		long start = System.currentTimeMillis();
 		PartnersFederatedRecommendations pFR = getPartnersRecommendations(userProfile);
 		long end = System.currentTimeMillis();
@@ -371,22 +397,36 @@ public class FederatedRecommenderCore {
 		int numResults = 10;
 		if (currentUserProfile.numResults != null)
 			numResults = currentUserProfile.numResults;
-		resultList = pFRPicker.pickResults(currentUserProfile, pFR, partnerRegister.getPartners(), numResults);
+		resultList = pFRPicker.pickResults(currentUserProfile, pFR,
+				partnerRegister.getPartners(), numResults);
 		end = System.currentTimeMillis();
 		long timeToPickResults = end - start;
-		logger.log(Level.INFO, " Time to get " + resultList.totalResults + " Results from the Partners: " + timeToGetPartners
-				+ "ms. Time to pick the best results: " + timeToPickResults + "ms");
+		logger.log(Level.INFO, " Time to get " + resultList.totalResults
+				+ " Results from the Partners: " + timeToGetPartners
+				+ "ms. Time to pick the best results: " + timeToPickResults
+				+ "ms");
 		resultList.totalResults = resultList.results.size();
 		resultList.provider = "federated";
 		return resultList;
 	}
 
-	public SecureUserProfile generateFederatedRecommendationQEWikipedia(SecureUserProfileEvaluation userProfile) {
+	/**
+	 * calls the wikipedia query expansion
+	 * 
+	 * @param userProfile
+	 * @return
+	 */
+	public SecureUserProfile generateFederatedRecommendationQEWikipedia(
+			SecureUserProfileEvaluation userProfile) {
 		SecureUserProfileDecomposer<SecureUserProfile, SecureUserProfile> sUPDecomposer = null;
 		try {
-			sUPDecomposer = new PseudoRelevanceWikipediaDecomposer(federatedRecConfiguration.wikipediaIndexDir, SUPPORTED_LOCALES);
+			sUPDecomposer = new PseudoRelevanceWikipediaDecomposer(
+					federatedRecConfiguration.wikipediaIndexDir,
+					SUPPORTED_LOCALES);
 		} catch (IOException e) {
-			logger.log(Level.SEVERE, "Wikipedia index directory could be wrong or not readable:" + federatedRecConfiguration.wikipediaIndexDir, e);
+			logger.log(Level.SEVERE,
+					"Wikipedia index directory could be wrong or not readable:"
+							+ federatedRecConfiguration.wikipediaIndexDir, e);
 		}
 		if (sUPDecomposer == null)
 			return (SecureUserProfile) userProfile;
@@ -394,39 +434,257 @@ public class FederatedRecommenderCore {
 
 	}
 
-	public SecureUserProfile generateFederatedRecommendationQESources(SecureUserProfileEvaluation userProfile) {
+	/**
+	 * generates a expanded user profile(query) out of the given user profile
+	 * 
+	 * @param userProfile
+	 * @return
+	 */
+	public SecureUserProfile generateFederatedRecommendationQESources(
+			SecureUserProfileEvaluation userProfile) {
 		SecureUserProfileDecomposer<?, SecureUserProfileEvaluation> sUPDecomposer = new PseudoRelevanceSourcesDecomposer();
 		return (SecureUserProfile) sUPDecomposer.decompose(userProfile);
 	}
 
-	public SecureUserProfile generateFederatedRecommendationDBPedia(SecureUserProfileEvaluation userProfile) {
+	/**
+	 * generates a expanded user profile(query) out of the given user profile
+	 * 
+	 * @param userProfile
+	 * @return
+	 */
+	public SecureUserProfile generateFederatedRecommendationDBPedia(
+			SecureUserProfileEvaluation userProfile) {
 
-		SecureUserProfileDecomposer<?, SecureUserProfileEvaluation> sUPDecomposer = new DBPediaDecomposer(federatedRecConfiguration, getDbPediaSolrIndex(),
+		SecureUserProfileDecomposer<?, SecureUserProfileEvaluation> sUPDecomposer = new DBPediaDecomposer(
+				federatedRecConfiguration, getDbPediaSolrIndex(),
 				federatedRecConfiguration.graphQueryDepthLimit);
 		return sUPDecomposer.decompose(userProfile);
 	}
 
-	public SecureUserProfile sourceSelectionLanguageModel(SecureUserProfileEvaluation userProfile) {
+	/**
+	 * generates a serendipitous user profile out of the given user profile
+	 * 
+	 * @param userProfile
+	 * @return
+	 */
+	public SecureUserProfile generateFederatedRecommendationSerendipity(
+			SecureUserProfile userProfile) {
+		SecureUserProfileDecomposer<?, SecureUserProfileEvaluation> sUPDecomposer = new SerendiptiyDecomposer();
+		return sUPDecomposer
+				.decompose((SecureUserProfileEvaluation) userProfile);
+	}
+
+	/**
+	 * TODO
+	 * 
+	 * @param userProfile
+	 * @return
+	 */
+	public SecureUserProfile sourceSelectionLanguageModel(
+			SecureUserProfileEvaluation userProfile) {
 		// TODO add connection to langModelSourceSelection and alter
 		// userProfile.partnerList to select sources
 		return userProfile;
 	}
 
-	public SecureUserProfile sourceSelectionWordnet(SecureUserProfileEvaluation userProfile) {
+	/**
+	 * TODO
+	 * 
+	 * @param userProfile
+	 * @return
+	 */
+	public SecureUserProfile sourceSelectionWordnet(
+			SecureUserProfileEvaluation userProfile) {
 		// TODO add connection to WordnetSourceSelection and alter
 		// userProfile.partnerList to select sources
 		return userProfile;
 	}
 
-	public SecureUserProfile sourceSelectionWikipedia(SecureUserProfileEvaluation userProfile) {
+	/**
+	 * TODO
+	 * 
+	 * @param userProfile
+	 * @return
+	 */
+	public SecureUserProfile sourceSelectionWikipedia(
+			SecureUserProfileEvaluation userProfile) {
 		// TODO add connection to WikipediaSourceSelection and alter
 		// userProfile.partnerList to select sources
 		return userProfile;
 	}
 
+	/**
+	 * returns the path of the dbpedia solr index
+	 * 
+	 * @return
+	 */
 	public DbPediaSolrIndex getDbPediaSolrIndex() {
 		return dbPediaSolrIndex;
 	}
 
-	
+	/**
+	 * returns the statistics of the federated recommender
+	 * 
+	 * @return
+	 */
+	public RecommenderStats getRecommenderStats() {
+		return recommenderStats;
+
+	}
+
+	/**
+	 * removes partners from the partner register
+	 * 
+	 * @param badge
+	 */
+	public void unregisterPartner(PartnerBadge badge) {
+		synchronized (partnerRegister) {
+			if (this.getPartnerRegister().getPartners().contains(badge)) {
+				writeStatsToDB();
+				this.getPartnerRegister().getPartners().remove(badge);
+			}
+		}
+	}
+	/**
+	 * Writes the statistics for all the partners into the Database
+	 */
+	 public void writeStatsToDB() {
+
+		logger.log(Level.INFO, "Writing statistics into Database");
+		Database db = new Database(
+				this.federatedRecConfiguration.statsLogDatabase,
+				DatabaseQueryStats.values());
+		for (PartnerBadge partner : this.partnerRegister.getPartners()) {
+			if (partner != null) {
+				PartnerBadgeStats longStats = partner.longTimeStats;
+				PartnerBadgeStats shortStats = partner.shortTimeStats;
+				logger.log(Level.INFO, "Writing " + partner.systemId
+						+ " statistics into Database");
+				PreparedStatement updateS = db
+						.getPreparedUpdateStatement(DatabaseQueryStats.REQUESTLOG);
+				// Database Entry Style
+				// ('SYSTEM_ID','REQUESTCOUNT','FAILEDREQUESTCOUNT','FAILEDREQUESTTIMEOUTCOUNT')
+				
+				if (updateS != null) {
+					
+					try {
+						updateS.clearBatch();
+						updateS.setString(1, partner.getSystemId());
+						updateS.setInt(2, longStats.requestCount
+								+ shortStats.requestCount);
+						updateS.setInt(3, longStats.failedRequestCount
+								+ shortStats.failedRequestCount);
+						updateS.setInt(4, longStats.failedRequestTimeoutCount
+								+ shortStats.failedRequestTimeoutCount);
+						updateS.execute();
+					} catch (SQLException e) {
+						logger.log(Level.WARNING,
+								"Could not write into StatsDatabase", e);
+					}finally {
+							db.commit();
+//						try {
+//							db.close();
+//						} catch (SQLException e) {
+//							logger.log(Level.WARNING, "Could not close Database", e);
+//						}
+					}
+				} else
+					logger.log(Level.WARNING,
+							"Could write into request statistics database");
+				PreparedStatement updateQ = db
+						.getPreparedUpdateStatement(DatabaseQueryStats.QUERYLOG);
+				if(updateQ!=null){
+				//	('ID','SYSTEM_ID','QUERY','CALLTIME','FIRSTTRANSFORMATIONTIME','SECONDTRANSFORMATIONTIME','ENRICHMENTTIME','RESULTCOUNT')
+					for (ResultStats queryStats : partner.getLastQueries()) {
+						try {
+							updateQ.clearBatch();
+							
+							updateQ.setString(1,partner.getSystemId());
+							updateQ.setString(2,queryStats.getPartnerQuery() );
+							updateQ.setInt(3, (int) queryStats.getPartnerCallTime());
+							updateQ.setInt(4, (int) queryStats.getFirstTransformationTime());
+							updateQ.setInt(5, (int) queryStats.getSecondTransformationTime());
+							updateQ.setInt(6, (int) queryStats.getEnrichmentTime());
+							updateQ.setInt(7, queryStats.getResultCount());
+							updateQ.addBatch();
+							
+						} catch (SQLException e) {
+							logger.log(Level.WARNING,"Could not write into StatsDatabase", e);
+						}
+					}
+					try {
+						updateQ.executeBatch();
+					} catch (SQLException e) {
+						logger.log(Level.WARNING,"Could not write into StatsDatabase", e);
+					}
+					
+					
+				} else
+					logger.log(Level.WARNING,
+							"Could write into query statistics database");
+			}
+			}
+
+	}
+	/**
+	 * Adds the partner to the partner register if not existing allready and trys to get the old
+	 * statistics for this partner from the database
+	 * @param badge
+	 * @return
+	 */
+	public String registerPartner(PartnerBadge badge) {
+		if (this.getPartnerRegister().getPartners().contains(badge)) {
+			logger.log(Level.INFO, "Partner: " + badge.getSystemId()
+					+ " allready registered!");
+			synchronized (partnerRegister) {
+				writeStatsToDB();	
+			}
+			
+			return "Allready Registered";
+		}
+
+		if (badge.partnerKey != null)
+			if (!badge.partnerKey.isEmpty())
+				if (badge.partnerKey.length() < 20)
+					return "Partner Key is too short (<20)";
+
+		Database db = new Database(
+				this.federatedRecConfiguration.statsLogDatabase,
+				DatabaseQueryStats.values());
+		PreparedStatement getS = db
+				.getPreparedSelectStatement(DatabaseQueryStats.REQUESTLOG);
+		// Database Entry Style
+		// ('SYSTEM_ID','REQUESTCOUNT','FAILEDREQUESTCOUNT','FAILEDREQUESTTIMEOUTCOUNT')
+
+		if (getS != null) {
+			try {
+				getS.setString(1, badge.getSystemId());
+				ResultSet rs = getS.executeQuery();
+				if (rs.next()) {
+					badge.longTimeStats.requestCount = rs.getInt(2);
+					badge.longTimeStats.failedRequestCount = rs.getInt(3);
+					badge.longTimeStats.failedRequestTimeoutCount = rs
+							.getInt(4);
+				}
+			} catch (SQLException e) {
+				logger.log(
+						Level.SEVERE,
+						"could net get statistics for partner "
+								+ badge.getSystemId(), e);
+			}
+
+			try {
+				db.close();
+			} catch (SQLException e) {
+				logger.log(Level.WARNING, "Could not close Database", e);
+			}
+		} else
+			logger.log(Level.WARNING, "Could read from Statistics Database");
+
+		this.addPartner(badge);
+
+		return "Partner Added";
+
+	}
+
 }

@@ -32,6 +32,8 @@ import org.eclipse.jetty.servlet.ServletHolder;
 import com.sun.jersey.api.core.PackagesResourceConfig;
 import com.sun.jersey.spi.container.servlet.ServletContainer;
 
+import eu.eexcess.partnerwebservice.PartnerContextListener;
+
 /**
  * Standalone server to test the web service. 
  * 
@@ -51,7 +53,7 @@ public class PartnerStandaloneServer {
 	    initMap.put("com.sun.jersey.api.json.POJOMappingFeature", "true");
 	    initMap.put("com.sun.jersey.config.property.packages", "eu.eexcess.partnerwebservice");	    
 		context.addServlet(new ServletHolder(new ServletContainer(new PackagesResourceConfig(initMap))), "/*");
-		
+		context.addEventListener(new PartnerContextListener());
 //		EnrichmentServer.configProvider = configProvider;
 		server = new Server(port);
 		server.setHandler(context);

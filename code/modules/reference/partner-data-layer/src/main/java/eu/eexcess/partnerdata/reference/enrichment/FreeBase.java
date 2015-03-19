@@ -47,7 +47,7 @@ public class FreeBase extends EnrichmentServiceBase {
 	{
 		ArrayList<FreebaseResult> resultSet=new ArrayList<FreebaseResult>();
         int results = 0;
-
+        long startTime = logger.getActLogEntry().getTimeNow();
 		try {
 	    	int resultsLimit=1;
 	 
@@ -64,7 +64,7 @@ public class FreeBase extends EnrichmentServiceBase {
 	        HttpResponse httpResponse = request.execute();
 	        String responseString = httpResponse.parseAsString();
 	        
-	        PartnerdataTracer.dumpFile(FreeBase.class, this.partnerConfig, responseString, "freebase-response", FILETYPE.JSON);
+	        PartnerdataTracer.dumpFile(FreeBase.class, this.partnerConfig, responseString, "freebase-response", FILETYPE.JSON, logger);
 	        
 	        JSONObject response = (JSONObject)JSONSerializer.toJSON(responseString);
 	        JSONArray resultsResponse = (JSONArray)response.get("result");
@@ -124,7 +124,7 @@ public class FreeBase extends EnrichmentServiceBase {
 		
 		logger.getActLogEntry().addEnrichmentFreebaseResults(results);
 		logger.getActLogEntry().addEnrichmentFreebaseServiceCalls(1);
-		
+		logger.getActLogEntry().addEnrichmentFreebaseServiceCallDuration(startTime);
 		return resultSet;
 	}
 

@@ -34,7 +34,7 @@ import eu.eexcess.dataformats.result.ResultList;
  */
 public class EvaluationResultList extends ResultList implements Serializable{
 	private static final long serialVersionUID = 2401989277808424955L;
-		@SuppressWarnings("unused") 
+		@SuppressWarnings("unused")
 		private EvaluationResultList(){};
 		public EvaluationResultList(ResultList parent) {
 			this.provider = parent.provider;

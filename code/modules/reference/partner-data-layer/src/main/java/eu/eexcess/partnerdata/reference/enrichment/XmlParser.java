@@ -24,6 +24,7 @@ import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.StringTokenizer;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -36,6 +37,7 @@ import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
 import eu.eexcess.config.PartnerConfiguration;
+import eu.eexcess.partnerdata.reference.PartnerdataLogger;
 import eu.eexcess.partnerdata.reference.PartnerdataTracer;
 import eu.eexcess.partnerdata.reference.PartnerdataTracer.FILETYPE;
 import eu.eexcess.partnerdata.reference.XMLTools;
@@ -85,7 +87,7 @@ public class XmlParser {
 		return resultWordSet;
 	}
 
-	public static Map<String,WordTiming> getNounsAndTimingsFromTranscriptLIMSIXml(String xmlFilePath, WordFilter wordFilter)
+	public static Map<String,WordTiming> getNounsAndTimingsFromTranscriptLIMSIXml(String xmlFilePath, WordFilter wordFilter, PartnerdataLogger logger)
 	{
 		Document dom=parseXmlFile(xmlFilePath);
 		Map<String,WordTiming> resulNounsTimings=new Hashtable<String,WordTiming>();
@@ -108,7 +110,7 @@ public class XmlParser {
 				word=StringNormalizer.removeStopMarks(word);
 
 				//check if it's noun
-				if (wordFilter.isKeyWord(word))
+				if (wordFilter.isKeyWord(word, logger))
 				{
 					//check if it's already in collection
 					WordTiming wordTiming=resulNounsTimings.get(word);
@@ -132,7 +134,7 @@ public class XmlParser {
 		return resulNounsTimings;
 	}
 
-	public static Map<String,WordTiming> getNounsAndTimingsFromSubtitlesXml(String xmlFilePath, WordFilter wordFilter)
+	public static Map<String,WordTiming> getNounsAndTimingsFromSubtitlesXml(String xmlFilePath, WordFilter wordFilter, PartnerdataLogger logger)
 	{
 		Document dom=parseXmlFile(xmlFilePath);
 		Map<String,WordTiming> resulNounsTimings=new Hashtable<String,WordTiming>();
@@ -181,7 +183,7 @@ public class XmlParser {
 				for (String w: wordsParList)
 				{
 					//check if it's noun
-					if (wordFilter.isKeyWord(w))
+					if (wordFilter.isKeyWord(w, logger))
 					{
 						//check if it's already in collection
 						WordTiming wordTiming=resulNounsTimings.get(w);
@@ -301,29 +303,103 @@ public class XmlParser {
 		return resultAnchorList;
 	}
 
-	public static Set<String> getEntitiesDbpediaSpotlightXML(PartnerConfiguration config, InputStream xmlContentStream)
+	public static Set<DbpediaSpotlightResult> getEntitiesDbpediaSpotlightCandidatesXML(PartnerConfiguration config, InputStream xmlContentStream, PartnerdataLogger logger)
 	{
 		Document dom=parseXmlFromStream(xmlContentStream);
-		Set<String> resultEntitySet=new HashSet<String>();
+		Set<DbpediaSpotlightResult> resultEntitySet=new HashSet<DbpediaSpotlightResult>();
 
 		//get the root elememt
 		if (dom == null) return resultEntitySet;
-        PartnerdataTracer.dumpFile(DbpediaSpotlight.class,config, XMLTools.getStringFromDocument(dom), "dbpedia-response", FILETYPE.TXT);
+        PartnerdataTracer.dumpFile(DbpediaSpotlight.class,config, XMLTools.getStringFromDocument(dom), "dbpedia-response", FILETYPE.XML, logger);
 		Element docEle = dom.getDocumentElement();
 
 		//get a nodelist of word elements
 		NodeList nl = docEle.getElementsByTagName("surfaceForm");
 		if(nl != null && nl.getLength() > 0) {
 			for(int i = 0 ; i < nl.getLength();i++) {
-
 				//get the element
-				Element elWord = (Element)nl.item(i);
-				String entity=elWord.getAttribute("name");
-
+				Element surfaceFormElement = (Element)nl.item(i);
+				String entity=surfaceFormElement.getAttribute("name");
 				entity=StringNormalizer.removeStopMarks(entity);
-				
-				resultEntitySet.add(entity);
+				DbpediaSpotlightResult result = new DbpediaSpotlightResult();
+				result.setName(entity);
+				if (surfaceFormElement.hasChildNodes()) 
+				{
+					NodeList surfaceFormChilds = surfaceFormElement.getChildNodes();
+					if(surfaceFormChilds != null && surfaceFormChilds.getLength() > 0) {
+						for(int j = 0 ; j < surfaceFormChilds.getLength();j++) {
+							Node resourceElement = surfaceFormChilds.item(j);
+							if (resourceElement.getNodeType() == Node.ELEMENT_NODE) {
+								if (resourceElement.getAttributes() != null && resourceElement.getAttributes().getNamedItem("uri") != null)
+								{
+									String uri = resourceElement.getAttributes().getNamedItem("uri").getNodeValue();
+									result.setUri(uri);
+								}
+								if (resourceElement.getAttributes() != null && resourceElement.getAttributes().getNamedItem("types") != null)
+								{
+									String types = resourceElement.getAttributes().getNamedItem("types").getNodeValue();
+									StringTokenizer typesTokenizer = new StringTokenizer(types,",");
+									while (typesTokenizer.hasMoreElements()) {
+										result.addType(((String) typesTokenizer.nextElement()).trim());
+									}
+								}
+							}
+							
+						}
+					}
+				}
+				resultEntitySet.add(result);
+			}
+		}
+		return resultEntitySet;
+	}
 
+	public static Set<DbpediaSpotlightResult> getEntitiesDbpediaSpotlightAnnotateXML(PartnerConfiguration config, InputStream xmlContentStream, PartnerdataLogger logger)
+	{
+		Document dom=parseXmlFromStream(xmlContentStream);
+		Set<DbpediaSpotlightResult> resultEntitySet=new HashSet<DbpediaSpotlightResult>();
+		//String debug = XMLTools.getStringFromDocument(dom);
+		//get the root elememt
+		if (dom == null) return resultEntitySet;
+        PartnerdataTracer.dumpFile(DbpediaSpotlight.class,config, XMLTools.getStringFromDocument(dom), "dbpedia-response", FILETYPE.XML, logger);
+		Element annotationElement = dom.getDocumentElement();
+		String text="";
+		if (annotationElement.getAttributes() != null && annotationElement.getAttributes().getNamedItem("text") != null)
+		{
+			text = annotationElement.getAttributes().getNamedItem("text").getNodeValue();
+		}
+		NodeList annotationChilds = annotationElement.getChildNodes();
+		if(annotationChilds != null && annotationChilds.getLength() > 0) {
+			for(int j = 0 ; j < annotationChilds.getLength();j++) {
+				Node resourcesElement = annotationChilds.item(j);
+				if (resourcesElement.getNodeType() == Node.ELEMENT_NODE) {
+					NodeList resourcesChilds = resourcesElement.getChildNodes();
+					if(resourcesChilds != null && resourcesChilds.getLength() > 0) {
+						for(int k = 0 ; k < resourcesChilds.getLength();k++) {
+							Node resourceElement = resourcesChilds.item(j);
+							if (resourceElement.getNodeType() == Node.ELEMENT_NODE) {
+								
+								DbpediaSpotlightResult result = new DbpediaSpotlightResult();
+								result.setName(text);
+								if (resourceElement.getAttributes() != null && resourceElement.getAttributes().getNamedItem("URI") != null)
+								{
+									String uri = resourceElement.getAttributes().getNamedItem("URI").getNodeValue();
+									result.setUri(uri);
+								}								
+								if (resourceElement.getAttributes() != null && resourceElement.getAttributes().getNamedItem("types") != null)
+								{
+									String types = resourceElement.getAttributes().getNamedItem("types").getNodeValue();
+									StringTokenizer typesTokenizer = new StringTokenizer(types,",");
+									while (typesTokenizer.hasMoreElements()) {
+										result.addType(((String) typesTokenizer.nextElement()).trim());
+									}
+								}
+								resultEntitySet.add(result);
+								
+							}
+						}
+					}
+				}
 			}
 		}
 		return resultEntitySet;

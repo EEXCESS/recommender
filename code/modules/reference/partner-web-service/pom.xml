@@ -75,7 +75,37 @@
 		  <artifactId>eexcess-reference-partner-data-layer</artifactId>
 		  <version>${project.parent.version}</version>	  
 		</dependency>
+		<dependency>
+    <groupId>javax.ejb</groupId>
+    <artifactId>javax.ejb-api</artifactId>
+    <version>3.2</version>
+</dependency>
+<dependency>
+     <groupId>javax</groupId>
+     <artifactId>javaee-api</artifactId>
+     <version>6.0</version>
+     <scope>provided</scope>
+ </dependency>
+
+
+ 
 		<!--
+		 <dependency>
+	<groupId>org.eclipse.jetty</groupId>
+	<artifactId>jetty-webapp</artifactId>
+	<version>8.1.16.v20140903</version>
+</dependency>
+<dependency>
+	<groupId>org.eclipse.jetty</groupId>
+	<artifactId>jetty-util</artifactId>
+	<version>8.1.16.v20140903</version>
+</dependency>
+<dependency>
+	<groupId>org.eclipse.jetty.aggregate</groupId>
+	<artifactId>jetty-all-server</artifactId>
+	<version>8.1.16.v20140903</version>
+</dependency>
+		
         <dependency>
 		  <groupId>org.eclipse.jetty</groupId>
 		  <artifactId>jetty-client</artifactId>

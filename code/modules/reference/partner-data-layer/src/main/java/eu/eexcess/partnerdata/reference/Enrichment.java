@@ -31,6 +31,7 @@ import com.hp.hpl.jena.query.ResultSet;
 import com.hp.hpl.jena.query.ResultSetFormatter;
 import com.hp.hpl.jena.rdf.model.Literal;
 import com.hp.hpl.jena.rdf.model.Resource;
+import com.hp.hpl.jena.vocabulary.RDF;
 import com.hp.hpl.jena.vocabulary.RDFS;
 
 import eu.eexcess.config.PartnerConfiguration;
@@ -53,7 +54,7 @@ public class Enrichment implements IEnrichment{
 	
 	public Document enrichResultList(Document input, PartnerdataLogger logger){
 		if (!this.partnerConfig.enableEnriching) return input;
-		XMLTools.dumpFile(this.getClass(), this.partnerConfig, input, "before-enrichment");
+		PartnerdataTracer.dumpFile(this.getClass(), this.partnerConfig, input, "before-enrichment", logger);
 		OntModel model = XMLTools.createModel(input);
 
 		OntModel modelEnriched = XMLTools.createModel(input);
@@ -156,7 +157,7 @@ public class Enrichment implements IEnrichment{
 		}
 
 		Document output = XMLTools.convertStringToDocument(XMLTools.writeModel(modelEnriched));
-		XMLTools.dumpFile(this.getClass(), this.partnerConfig, output, "done-enrichment");
+		PartnerdataTracer.dumpFile(this.getClass(), this.partnerConfig, output, "done-enrichment", logger);
 		return output;
 	}
 
@@ -165,8 +166,7 @@ public class Enrichment implements IEnrichment{
 			Resource enrichedEEXCESSProxyItem, Literal proxyTitle,
 			String propertyEnriched, PartnerdataLogger logger) {
 		Set<EnrichmentResult> enriched = services.enrich(proxyTitle.toString(), logger);
-		for (Iterator<EnrichmentResult> iterator = enriched.iterator(); iterator
-				.hasNext();) {
+		for (Iterator<EnrichmentResult> iterator = enriched.iterator(); iterator.hasNext();) {
 			EnrichmentResult enrichmentResult = (EnrichmentResult) iterator.next();
 			if (enrichmentResult != null && 
 					enrichmentResult.getWord() != null && 
@@ -180,9 +180,10 @@ public class Enrichment implements IEnrichment{
 					else 
 						literal = modelEnriched.createLiteral(enrichmentResult.getWord());
 
-					modelEnriched.add(modelEnriched.createStatement(enrichedEEXCESSProxyItem,
-						modelEnriched.getProperty(propertyEnriched),
-						literal
+					modelEnriched.add(
+							modelEnriched.createStatement(enrichedEEXCESSProxyItem,
+									modelEnriched.getProperty(propertyEnriched),
+									literal
 						));
 				} else {
 					Resource enrichedResourceType = modelEnriched.getResource(enrichmentResult.getUri());
@@ -192,30 +193,23 @@ public class Enrichment implements IEnrichment{
 					else 
 						literal = modelEnriched.createLiteral(enrichmentResult.getWord());
 
-//					modelEnriched.add(modelEnriched.createStatement(enrichedEEXCESSProxyItem,
-//						modelEnriched.getProperty(propertyEnriched),
-//						enrichedResourceType.addProperty(RDFS.label, enrichmentResult.getWord())));
-
+					modelEnriched.add(
+							modelEnriched.createStatement(enrichedEEXCESSProxyItem,
+									modelEnriched.getProperty(propertyEnriched),
+									enrichedResourceType)); //addProperty(RDFS.label, literal)
+					modelEnriched.add(
+							modelEnriched.createStatement(enrichedResourceType,
+									RDFS.label,
+									literal)); //addProperty(RDFS.label, literal)
 					
-					modelEnriched.add(modelEnriched.createStatement(enrichedEEXCESSProxyItem,
-							modelEnriched.getProperty(propertyEnriched),
-							enrichedResourceType.addProperty(RDFS.label, literal)));
+					if (enrichmentResult.getType() != null && !enrichmentResult.getType().isEmpty()) {
+						modelEnriched.add(
+								modelEnriched.createStatement(enrichedResourceType,
+										RDF.type,
+										modelEnriched.getResource(enrichmentResult.getType()))); //addProperty(RDFS.label, literal)
+//						enrichedResourceType.addProperty(RDF.type, enrichmentResult.getType())));
+					}
 
-/*
- 					Resource enrichedResourceType = modelEnriched.getResource(propertyEnriched);
-
-					Resource enrichedResourceSource = modelEnriched.createResource(enrichmentResult.getUri(), enrichedResourceType );
-
-					modelEnriched.add(modelEnriched.createStatement(enrichedEEXCESSProxyItem,
-						modelEnriched.getProperty(propertyEnriched),
-						enrichedResourceSource.addProperty(RDF.value, enrichmentResult.getWord())));
-//					modelEnriched.add(modelEnriched.createStatement(enrichedEEXCESSProxyItem,
-//							modelEnriched.getProperty(propertyEnriched),
-//							enrichmentResult.getWord()
-//							));
-				
- */
-				
 				}
 
 			}
@@ -268,6 +262,7 @@ public class Enrichment implements IEnrichment{
 			queryContent += "PREFIX foaf: <http://xmlns.com/foaf/0.1/> ";
 			queryContent += "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> ";
 			queryContent += "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#> ";
+			queryContent += "PREFIX dbpedia: <http://dbpedia.org/ontology/> ";
 			return queryContent;
 		}
 

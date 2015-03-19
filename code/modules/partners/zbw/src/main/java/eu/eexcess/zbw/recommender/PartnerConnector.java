@@ -43,12 +43,13 @@ import org.w3c.dom.NodeList;
 import com.sun.jersey.api.client.Client;
 import com.sun.jersey.api.client.WebResource;
 import com.sun.jersey.api.client.WebResource.Builder;
-import com.sun.jersey.api.client.config.ClientConfig;
-import com.sun.jersey.api.client.config.DefaultClientConfig;
 
 import eu.eexcess.config.PartnerConfiguration;
+import eu.eexcess.dataformats.result.ResultList;
 import eu.eexcess.dataformats.userprofile.SecureUserProfile;
-import eu.eexcess.partnerdata.reference.XMLTools;
+import eu.eexcess.partnerdata.reference.PartnerdataLogger;
+import eu.eexcess.partnerdata.reference.PartnerdataTracer;
+import eu.eexcess.partnerrecommender.api.PartnerConfigurationEnum;
 import eu.eexcess.partnerrecommender.api.PartnerConnectorApi;
 import eu.eexcess.partnerrecommender.api.QueryGeneratorApi;
 import eu.eexcess.zbw.recommender.dataformat.ZBWDocument;
@@ -61,7 +62,7 @@ import eu.eexcess.zbw.recommender.dataformat.ZBWDocumentHit;
  */
 
 public class PartnerConnector implements PartnerConnectorApi {
-	private static final Logger logger = Logger.getLogger(PartnerConnector.class.getName());
+	private static final Logger log = Logger.getLogger(PartnerConnector.class.getName());
     private QueryGeneratorApi queryGenerator;
 
 	
@@ -76,78 +77,85 @@ public class PartnerConnector implements PartnerConnectorApi {
         return queryGenerator;
     }
     
+    @Override
+    public ResultList queryPartnerNative(PartnerConfiguration partnerConfiguration, SecureUserProfile userProfile, PartnerdataLogger logger)
+    				throws IOException {
+    	return null;
+    }
+    
 	@Override
-	public Document queryPartner(PartnerConfiguration partnerConfiguration, SecureUserProfile userProfile) throws IOException {
+	public Document queryPartner(PartnerConfiguration partnerConfiguration, SecureUserProfile userProfile, PartnerdataLogger logger) throws IOException {
 		
 		// Configure
-	try {	
-	    Client client;
-	    
-        ClientConfig config = new DefaultClientConfig();
-        
-        config.getClasses().add(JAXBContext.class);
-//        config.getClasses().add(XMLRootElementProvider.class);
-        client = Client.create(config);
-
-//        client.addFilter(new HTTPBasicAuthFilter(partnerConfiguration.userName, partnerConfiguration.password));
-
-        queryGenerator = (QueryGeneratorApi)Class.forName(partnerConfiguration.queryGeneratorClass).newInstance();
-		
-        String query = getQueryGenerator().toQuery(userProfile);
-        query=query.replaceAll("\"", "");
-        query=query.replaceAll("\\(", " ");
-        query=query.replaceAll("\\)", " ");
-        query = URLEncoder.encode(query,"UTF-8");
-        Map<String, String> valuesMap = new HashMap<String, String>();
-        valuesMap.put("query", query);
-        if(userProfile.numResults!=null)
-        	valuesMap.put("size", userProfile.numResults.toString());
-        else
-        	valuesMap.put("size", "10");
-        String searchRequest = StrSubstitutor.replace(partnerConfiguration.searchEndpoint, valuesMap);
-        
-        WebResource service = client.resource(searchRequest);
-        logger.log(Level.INFO,"SearchRequest: "+searchRequest);
-        
-        
-        Builder builder = service.accept(MediaType.APPLICATION_XML);
-        String response = builder.get(String.class);
-        StringReader respStringReader = new StringReader(response) ;
-
-       JAXBContext jaxbContext = JAXBContext.newInstance(ZBWDocument.class);
-       Unmarshaller jaxbUnmarshaller = jaxbContext.createUnmarshaller();
-       ZBWDocument zbwResponse = (ZBWDocument) jaxbUnmarshaller.unmarshal(respStringReader);
-       for (ZBWDocumentHit hit : zbwResponse.hits.hit) {
-    	   try{
-			if(hit.element.type.equals("event")){
-				Document detail =fetchDocumentDetails(client, hit.element.id);
-				XMLTools.dumpFile(this.getClass(), partnerConfiguration, detail, "detail-response");
-			    String latValue = getValueWithXPath("/doc/record/geocode/lat", detail);
-			    String longValue = getValueWithXPath("/doc/record/geocode/lng", detail);
-			    hit.element.lat=latValue;
-			    hit.element.lng=longValue;
-				}
-    	   }	
-    	   catch(Exception e){
-    		   logger.log(Level.WARNING,"Could not get longitude and latitude for event element "+hit.element.id,e);
-    	   }
-	}
-       DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
+		try {	
+			Client client = new Client(PartnerConfigurationEnum.CONFIG.getClientJAXBContext());
+	        queryGenerator = PartnerConfigurationEnum.CONFIG.getQueryGenerator();
+			
+	        String query = getQueryGenerator().toQuery(userProfile);
+	        query=query.replaceAll("\"", "");
+	        query=query.replaceAll("\\(", " ");
+	        query=query.replaceAll("\\)", " ");
+	        query = URLEncoder.encode(query,"UTF-8");
+	        Map<String, String> valuesMap = new HashMap<String, String>();
+	        valuesMap.put("query", query);
+	        if(userProfile.numResults!=null)
+	        	valuesMap.put("size", userProfile.numResults.toString());
+	        else
+	        	valuesMap.put("size", "10");
+	        String searchRequest = StrSubstitutor.replace(partnerConfiguration.searchEndpoint, valuesMap);
+	        
+	        WebResource service = client.resource(searchRequest);
+	        log.log(Level.INFO,"SearchRequest: "+searchRequest);
+	      
+	        
+	        Builder builder = service.accept(MediaType.APPLICATION_XML);
+	        String response = builder.get(String.class);
+	        StringReader respStringReader = new StringReader(response) ;
+	        client.destroy();
+	        JAXBContext jaxbContext = JAXBContext.newInstance(ZBWDocument.class);
+	        Unmarshaller jaxbUnmarshaller = jaxbContext.createUnmarshaller();
+	        ZBWDocument zbwResponse = (ZBWDocument) jaxbUnmarshaller.unmarshal(respStringReader);
+	        for (ZBWDocumentHit hit : zbwResponse.hits.hit) {
+	        	try{
+	        		if(hit.element.type.equals("event")){
+	        			Document detail =fetchDocumentDetails( hit.element.id);
+	        			PartnerdataTracer.dumpFile(this.getClass(), partnerConfiguration, detail, "detail-response", logger);
+	        			String latValue = getValueWithXPath("/doc/record/geocode/lat", detail);
+	        			String longValue = getValueWithXPath("/doc/record/geocode/lng", detail);
+	        			hit.element.lat=latValue;
+	        			hit.element.lng=longValue;
+	        		}
+	        	}	catch(Exception e){
+	        			log.log(Level.WARNING,"Could not get longitude and latitude for event element "+hit.element.id,e);
+	        	}
+	        	// put all creators in the creatorString
+	        	if (hit.element.creator != null)
+	        	{
+		        	for (String creator : hit.element.creator) {
+		        		if (hit.element.creatorString == null)
+		        			hit.element.creatorString = "";
+		        		if (hit.element.creatorString.length() > 0) 
+		        			hit.element.creatorString += ", ";
+		        		hit.element.creatorString += creator;
+		        	}
+	        	}
+	        }
+	        DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
 	        DocumentBuilder db = dbf.newDocumentBuilder();
 	        Document document = db.newDocument();
 	        Marshaller marshaller = jaxbContext.createMarshaller();
 	        marshaller.marshal(zbwResponse, document);
-        return document;
-		}
-		catch (Exception e) {
+	
+	        return document;
+		}	catch (Exception e) {
 			throw new IOException("Cannot query partner REST API!", e);
 		}
         
 	}
 
 	
-	protected Document fetchDocumentDetails(Client client, String id) {
-		
+	protected Document fetchDocumentDetails( String id) {
+		Client client = PartnerConfigurationEnum.CONFIG.getClientJAXBContext();
 		String request = "https://api.econbiz.de/v1/record/"+id+"?xml=true";
 		Document returnValue = null;
 		try {
@@ -158,8 +166,9 @@ public class PartnerConnector implements PartnerConnectorApi {
 			
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
-			logger.log(Level.INFO,"No Detailed information on document " +id+ " found" ,e);
+			log.log(Level.INFO,"No Detailed information on document " +id+ " found" ,e);
 		}
+		client.destroy();
 		return returnValue; 	
 }
 

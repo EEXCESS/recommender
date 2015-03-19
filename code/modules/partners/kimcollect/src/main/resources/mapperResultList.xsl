@@ -1,19 +1,3 @@
-<!--  Copyright (C) 2014
-"JOANNEUM RESEARCH Forschungsgesellschaft mbH" 
- Graz, Austria, digital-iis@joanneum.at.
-
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-    http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
--->
 <?xml version="1.0" encoding="UTF-8"?>
 <xsl:stylesheet xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
                 xmlns="http://example.org/"
@@ -48,10 +32,6 @@ limitations under the License.
 				        <xsl:attribute name="rdf:about"/>
 
 				        <xsl:element name="owl:imports">
-					          <xsl:attribute name="rdf:resource">http://www.ebu.ch/metadata/ontologies/ebucore</xsl:attribute>
-				        </xsl:element>
-
-				        <xsl:element name="owl:imports">
 					          <xsl:attribute name="rdf:resource">http://www.europeana.eu/schemas/edm/</xsl:attribute>
 				        </xsl:element>
 
@@ -59,9 +39,6 @@ limitations under the License.
 					          <xsl:attribute name="rdf:resource">http://www.openarchives.org/ore/1.0/terms</xsl:attribute>
 				        </xsl:element>
 
-				        <xsl:element name="owl:imports">
-					          <xsl:attribute name="rdf:resource">http://www.w3.org/ns/ma-ont</xsl:attribute>
-				        </xsl:element>
 			      </xsl:element>
 
 
@@ -99,9 +76,6 @@ limitations under the License.
 							              <xsl:attribute name="rdf:about">
 											             <xsl:value-of select="concat($mainURI,'/webresource/')"/>
 							              </xsl:attribute>
-							              <xsl:element name="edm:rights">
-								                <xsl:attribute name="rdf:resource">http://creativecommons.org/publicdomain/mark/1.0/</xsl:attribute>
-							              </xsl:element>
 						            </xsl:element>
 					          </xsl:element>
 
@@ -111,11 +85,7 @@ limitations under the License.
 									         </xsl:attribute>	
 								       </xsl:element>
 
-                               	<xsl:element name="edm:preview">
-									         <xsl:attribute name="rdf:resource">
-										           <xsl:call-template name="Main.previewImage"/>
-									         </xsl:attribute>	
-								       </xsl:element>
+										     <xsl:call-template name="Main.previewImage"/>
 
 								       <xsl:call-template name="Main.collectionName"/> 
 
@@ -153,10 +123,10 @@ limitations under the License.
 						            </xsl:attribute>	
 					          </xsl:element>
 					
-					        <xsl:element name="edm:rights">
-							    <xsl:value-of select="http://creativecommons.org/licenses/by-nc-sa/4.0/"/>
+					          <xsl:element name="edm:europeanaProxy">false</xsl:element>
+							        <xsl:element name="edm:rights">
+							    http://creativecommons.org/licenses/by-nc-sa/4.0/
 							</xsl:element>
-							<xsl:element name="edm:europeanaProxy">false</xsl:element>
 
 		 			         <xsl:element name="edm:language">de</xsl:element>
 
@@ -182,44 +152,44 @@ limitations under the License.
 	  <!-- <xsl:template name="Main.Language" /> -->
 	  <xsl:template name="Main.Title">
       <apply-templates xmlns="http://www.w3.org/1999/XSL/Transform"
-                       mode="m7"
+                       mode="m6"
                        select="Objektbezeichnung"/>
    </xsl:template>
 	  <xsl:template name="Main.Description">
       <apply-templates xmlns="http://www.w3.org/1999/XSL/Transform"
-                       mode="m0"
-                       select="Beschreibung"/>
+                       mode="m7"
+                       select="Katalogtext"/>
    </xsl:template>
 	  <xsl:template name="Main.Date"/>
 	  <xsl:template name="Main.Identifier">
-      <apply-templates xmlns="http://www.w3.org/1999/XSL/Transform" mode="m6" select="InvNr"/>
+      <apply-templates xmlns="http://www.w3.org/1999/XSL/Transform" mode="m2" select="InvNr"/>
    </xsl:template>
 	  <xsl:template name="Main.isShownAt">
-      <apply-templates xmlns="http://www.w3.org/1999/XSL/Transform" mode="m5" select="uri"/>
+      <apply-templates xmlns="http://www.w3.org/1999/XSL/Transform" mode="m3" select="uri"/>
    </xsl:template>
 	  <xsl:template name="Main.previewImage">
       <apply-templates xmlns="http://www.w3.org/1999/XSL/Transform"
-                       mode="m2"
+                       mode="m1"
                        select="BilderzumObjekt/image[1]/imagePath/@URI"/>
    </xsl:template>
 	  <xsl:template name="Main.URI">
-      <apply-templates xmlns="http://www.w3.org/1999/XSL/Transform" mode="m3" select="uri"/>
+      <apply-templates xmlns="http://www.w3.org/1999/XSL/Transform" mode="m4" select="uri"/>
    </xsl:template>
 	  <xsl:template name="Main.collectionName">
       <apply-templates xmlns="http://www.w3.org/1999/XSL/Transform"
-                       mode="m4"
+                       mode="m0"
                        select="Sammlung/collection/name"/>
    </xsl:template>
 	  <xsl:template name="Main.Subject">
       <apply-templates xmlns="http://www.w3.org/1999/XSL/Transform"
-                       mode="m1"
+                       mode="m5"
                        select="Sachgruppe"/>
    </xsl:template>
 
    <template xmlns="http://www.w3.org/1999/XSL/Transform"
-             match="Beschreibung"
+             match="Sammlung/collection/name"
              mode="m0">
-      <element name="dc:description">
+      <element name="edm:collectionName">
          <call-template name="StringToString"/>
       </element>
    </template>
@@ -227,16 +197,18 @@ limitations under the License.
       <xsl:value-of select="."/>
    </xsl:template>
    <template xmlns="http://www.w3.org/1999/XSL/Transform"
-             match="Sachgruppe"
-             mode="m1">
-      <element name="dc:subject">
-         <call-template name="StringToString"/>
-      </element>
-   </template>
-   <template xmlns="http://www.w3.org/1999/XSL/Transform"
              match="BilderzumObjekt/image[1]/imagePath/@URI"
-             mode="m2">
-      <element name="previewImage">
+             mode="m1">
+      <if test=". != ''">
+         <element name="edm:preview">
+            <attribute name="resource">
+               <call-template name="StringToString"/>
+            </attribute>
+         </element>
+      </if>
+   </template>
+   <template xmlns="http://www.w3.org/1999/XSL/Transform" match="InvNr" mode="m2">
+      <element name="dc:identifier">
          <call-template name="StringToString"/>
       </element>
    </template>
@@ -245,27 +217,29 @@ limitations under the License.
          <call-template name="StringToString"/>
       </element>
    </template>
-   <template xmlns="http://www.w3.org/1999/XSL/Transform"
-             match="Sammlung/collection/name"
-             mode="m4">
-      <element name="edm:collectionName">
-         <call-template name="StringToString"/>
-      </element>
-   </template>
-   <template xmlns="http://www.w3.org/1999/XSL/Transform" match="uri" mode="m5">
+   <template xmlns="http://www.w3.org/1999/XSL/Transform" match="uri" mode="m4">
       <element name="uri">
          <call-template name="StringToString"/>
       </element>
    </template>
-   <template xmlns="http://www.w3.org/1999/XSL/Transform" match="InvNr" mode="m6">
-      <element name="dc:identifier">
+   <template xmlns="http://www.w3.org/1999/XSL/Transform"
+             match="Sachgruppe"
+             mode="m5">
+      <element name="dc:subject">
          <call-template name="StringToString"/>
       </element>
    </template>
    <template xmlns="http://www.w3.org/1999/XSL/Transform"
              match="Objektbezeichnung"
-             mode="m7">
+             mode="m6">
       <element name="dc:title">
+         <call-template name="StringToString"/>
+      </element>
+   </template>
+   <template xmlns="http://www.w3.org/1999/XSL/Transform"
+             match="Katalogtext"
+             mode="m7">
+      <element name="dc:description">
          <call-template name="StringToString"/>
       </element>
    </template>

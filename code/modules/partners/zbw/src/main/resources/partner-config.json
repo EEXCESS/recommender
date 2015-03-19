@@ -3,10 +3,12 @@
   "partnerConnectorClass": "eu.eexcess.zbw.recommender.PartnerConnector",
   "queryGeneratorClass": "eu.eexcess.partnerrecommender.reference.OrQueryGenerator",
   "searchEndpoint": "https://api.econbiz.de/v1/search?q=${query}&xml=true&size=${size}",
-//  "searchEndpoint": "https://api.econbiz.de/v1/search?q=source:events+${query}&xml=true&size={}",
+"partnerConnectorEndpoint": "http://127.0.0.1/eexcess-partner-zbw-1.0-SNAPSHOT/partner/recommend",
   "transformerClass": "eu.eexcess.zbw.datalayer.ZBWTransformer",
   "mappingListTransformationFile":"mapperResultList.xsl",
   "mappingObjectTransformationFile":"mapperObject.xsl",
   "partnerDataRequestsTrace":"false",
-  "enableEnriching":"false"
+  "enableEnriching":"false",
+  "makeCleanupBeforeTransformation":"false",
+  "federatedRecommenderURI":"http://127.0.0.1/eexcess-federated-recommender-web-service-1.0-SNAPSHOT/recommender/"
 }

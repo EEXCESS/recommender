@@ -1,19 +1,3 @@
-<!--  Copyright (C) 2014
-"JOANNEUM RESEARCH Forschungsgesellschaft mbH" 
- Graz, Austria, digital-iis@joanneum.at.
-
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-    http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
--->
 <?xml version="1.0" encoding="UTF-8"?>
 <xsl:stylesheet xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
                 xmlns="http://example.org/"
@@ -42,27 +26,17 @@ limitations under the License.
 
 		    <xsl:element name="rdf:RDF">
 
-			      <xsl:attribute name="xml:base">http://api.mendeley.com//edm/</xsl:attribute>
-      
-			      <xsl:element name="owl:Ontology">
-				        <xsl:attribute name="rdf:about"/>
+			      <xsl:attribute name="xml:base">http://api.mendeley.com/edm/</xsl:attribute>
 
-				        <xsl:element name="owl:imports">
-					          <xsl:attribute name="rdf:resource">http://www.ebu.ch/metadata/ontologies/ebucore</xsl:attribute>
-				        </xsl:element>
+                <xsl:element name="owl:Ontology">
+                    <xsl:element name="owl:imports">
+                        <xsl:attribute name="rdf:resource">http://www.europeana.eu/schemas/edm/</xsl:attribute>
+                    </xsl:element>
 
-				        <xsl:element name="owl:imports">
-					          <xsl:attribute name="rdf:resource">http://www.europeana.eu/schemas/edm/</xsl:attribute>
-				        </xsl:element>
-
-				        <xsl:element name="owl:imports">
-					          <xsl:attribute name="rdf:resource">http://www.openarchives.org/ore/1.0/terms</xsl:attribute>
-				        </xsl:element>
-
-				        <xsl:element name="owl:imports">
-					          <xsl:attribute name="rdf:resource">http://www.w3.org/ns/ma-ont</xsl:attribute>
-				        </xsl:element>
-			      </xsl:element>
+                    <xsl:element name="owl:imports">
+                        <xsl:attribute name="rdf:resource">http://www.openarchives.org/ore/1.0/terms</xsl:attribute>
+                    </xsl:element>
+                </xsl:element>
 
 
 			      <xsl:for-each select="/o/documents/e">
@@ -175,13 +149,13 @@ limitations under the License.
 	  <xsl:template name="Main.Description">
       <apply-templates xmlns="http://www.w3.org/1999/XSL/Transform"
                        mode="m6"
-                       select="description"/>
+                       select="abstract"/>
    </xsl:template>
 	  <xsl:template name="Main.Date">
       <apply-templates xmlns="http://www.w3.org/1999/XSL/Transform" mode="m3" select="year"/>
    </xsl:template>
 	  <xsl:template name="Main.Identifier">
-      <apply-templates xmlns="http://www.w3.org/1999/XSL/Transform" mode="m1" select="uuid"/>
+      <apply-templates xmlns="http://www.w3.org/1999/XSL/Transform" mode="m1" select="id"/>
    </xsl:template>
 	  <xsl:template name="Main.Creator">
       <apply-templates xmlns="http://www.w3.org/1999/XSL/Transform"
@@ -191,21 +165,21 @@ limitations under the License.
 	  <xsl:template name="Main.isShownAt">
       <apply-templates xmlns="http://www.w3.org/1999/XSL/Transform"
                        mode="m4"
-                       select="mendeley_url"/>
+                       select="link"/>
    </xsl:template>
 	  <xsl:template name="Main.collectionName">
       <apply-templates xmlns="http://www.w3.org/1999/XSL/Transform"
                        mode="m7"
-                       select="publicationOutlet"/>
+                       select="source"/>
    </xsl:template>
 	  <xsl:template name="Main.URI">
       <apply-templates xmlns="http://www.w3.org/1999/XSL/Transform"
                        mode="m0"
-                       select="mendeley_url"/>
+                       select="link"/>
    </xsl:template>
 
    <template xmlns="http://www.w3.org/1999/XSL/Transform"
-             match="mendeley_url"
+             match="link"
              mode="m0">
       <element name="uri">
          <call-template name="StringToString"/>
@@ -214,7 +188,7 @@ limitations under the License.
    <xsl:template name="StringToString">
       <xsl:value-of select="."/>
    </xsl:template>
-   <template xmlns="http://www.w3.org/1999/XSL/Transform" match="uuid" mode="m1">
+   <template xmlns="http://www.w3.org/1999/XSL/Transform" match="id" mode="m1">
       <element name="dc:identifier">
          <call-template name="StringToString"/>
       </element>
@@ -230,7 +204,7 @@ limitations under the License.
       </element>
    </template>
    <template xmlns="http://www.w3.org/1999/XSL/Transform"
-             match="mendeley_url"
+             match="link"
              mode="m4">
       <element name="uri">
          <call-template name="StringToString"/>
@@ -244,14 +218,14 @@ limitations under the License.
       </element>
    </template>
    <template xmlns="http://www.w3.org/1999/XSL/Transform"
-             match="description"
+             match="abstract"
              mode="m6">
       <element name="dc:description">
          <call-template name="StringToString"/>
       </element>
    </template>
    <template xmlns="http://www.w3.org/1999/XSL/Transform"
-             match="publicationOutlet"
+             match="source"
              mode="m7">
       <element name="edm:collectionName">
          <call-template name="StringToString"/>

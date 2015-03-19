@@ -33,8 +33,6 @@ import com.hp.hpl.jena.ontology.OntModel;
 import com.hp.hpl.jena.rdf.model.Model;
 import com.hp.hpl.jena.rdf.model.ModelFactory;
 
-import eu.eexcess.config.PartnerConfiguration;
-
 public class XMLTools {
 
 
@@ -58,12 +56,6 @@ public class XMLTools {
     }
 	
 	
-	public static void dumpFile(@SuppressWarnings("rawtypes") Class myClass, PartnerConfiguration partnerConfig, Document input, String postfix) {
-		if (!partnerConfig.partnerDataRequestsTrace) return;
-		PartnerdataTracer.dumpFile(myClass, partnerConfig, XMLTools.getStringFromDocument(input), postfix, PartnerdataTracer.FILETYPE.XML);
-	}
-
-
 	public static String writeModel(Model model) {
 		String syntax = "RDF/XML-ABBREV"; // also try "N-TRIPLE" and "TURTLE"
 		StringWriter out = new StringWriter();

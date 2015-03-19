@@ -28,6 +28,7 @@ public class PartnerdataLogEntry {
 	private static String CSVSeperator = ";";
 	
 	protected Date date;
+	protected String requestId="";
 	
 	protected int resultsFound = 0;
 	protected int resultsReturnend = 0;
@@ -45,14 +46,21 @@ public class PartnerdataLogEntry {
 	protected int enrichmentFreebaseResults = 0;
 	protected long enrichmentFreebaseServiceCallduration = 0;
 	
+	protected int enrichmentDbpediaSpotlightServiceCalls = 0;
+	protected int enrichmentDbpediaSpotlightResults = 0;
+	protected long enrichmentDbpediaSpotlightServiceCallduration = 0;
+
 	protected long start;
 	protected long queryPartnerAPIStart;
 	protected long queryPartnerAPIEnd;
+	protected long enrichStart;
+	protected long enrichEnd;
 	protected long end;
 	
 	public PartnerdataLogEntry() {
 		super();
 		date = Calendar.getInstance().getTime();
+		this.requestId = System.currentTimeMillis()+"";
 	}
 	
 	public String getSystemId() {
@@ -90,6 +98,15 @@ public class PartnerdataLogEntry {
 		this.queryPartnerAPIEnd = System.currentTimeMillis();
 	}
 	
+	public void enrichStart()
+	{
+		this.enrichStart = System.currentTimeMillis();
+	}
+	
+	public void enrichEnd()
+	{
+		this.enrichEnd = System.currentTimeMillis();
+	}
 	
 	public int getEnrichmentServicesResults() {
 		return enrichmentServicesResults;
@@ -143,6 +160,28 @@ public class PartnerdataLogEntry {
 		return enrichmentFreebaseResults;
 	}
 
+	public void addEnrichmentDbpediaSpotlightServiceCalls(int enrichmentDbpediaSpotlightServiceCalls) {
+		this.enrichmentServicesCalled = this.enrichmentServicesCalled + enrichmentDbpediaSpotlightServiceCalls;
+		this.enrichmentDbpediaSpotlightServiceCalls = this.enrichmentDbpediaSpotlightServiceCalls + enrichmentDbpediaSpotlightServiceCalls;
+	}
+
+	public int getEnrichmentDbpediaSpotlightServiceCalls() {
+		return enrichmentDbpediaSpotlightServiceCalls;
+	}
+
+	public int getEnrichmentDbpediaSpotlightResults() {
+		return enrichmentDbpediaSpotlightResults;
+	}
+
+	public long getEnrichmentDbpediaSpotlightServiceCallduration() {
+		return enrichmentDbpediaSpotlightServiceCallduration;
+	}
+
+	public void addEnrichmentDbpediaSpotlightResults(int enrichmentDbpediaSpotlightResults) {
+		this.enrichmentServicesResults = this.enrichmentServicesResults + enrichmentDbpediaSpotlightResults;
+		this.enrichmentDbpediaSpotlightResults = this.enrichmentDbpediaSpotlightResults + enrichmentDbpediaSpotlightResults;
+	}
+
 	public void addEnrichmentFreebaseResults(int enrichmentFreebaseResults) {
 		this.enrichmentServicesResults = this.enrichmentServicesResults + enrichmentFreebaseResults;
 		this.enrichmentFreebaseResults = this.enrichmentFreebaseResults + enrichmentFreebaseResults;
@@ -160,8 +199,37 @@ public class PartnerdataLogEntry {
 		this.resultsReturnend = this.resultsReturnend + resultsReturnend;
 	}
 	
+	public long getTimeNow()
+	{
+		return System.currentTimeMillis();
+	}
+
+	private long getTimeConsumedFrom(long startTime)
+	{
+		return System.currentTimeMillis() - startTime;
+	}
+	
+	public void addEnrichmentFreebaseServiceCallDuration(long startTime)
+	{
+		long duration = getTimeConsumedFrom(startTime);
+		this.enrichmentFreebaseServiceCallduration += duration;
+	}
+
+	public void addEnrichmentGeonamesServiceCallDuration(long startTime)
+	{
+		long duration = getTimeConsumedFrom(startTime);
+		this.enrichmentGeonamesServiceCallduration += duration;
+	}
+	
+	public void addEnrichmentDbpediaSpotlightServiceCallDuration(long startTime)
+	{
+		long duration = getTimeConsumedFrom(startTime);
+		this.enrichmentDbpediaSpotlightServiceCallduration += duration;
+	}
+	
 	public String getCSVHeader(){
 		String ret ="";
+		ret += "requestId" + CSVSeperator;
 		ret += "date" + CSVSeperator;
 		ret += "systemId" + CSVSeperator;
 		ret += "resultsFound" + CSVSeperator;
@@ -170,10 +238,16 @@ public class PartnerdataLogEntry {
 		ret += "enrichmentServicesResults" + CSVSeperator;
 		ret += "enrichmentGeonamesServiceCalls" + CSVSeperator;
 		ret += "enrichmentGeonamesResults" + CSVSeperator;
+		ret += "enrichmentGeonamesDuration" + CSVSeperator;
 		ret += "enrichmentFreebaseServiceCalls" + CSVSeperator;
 		ret += "enrichmentFreebaseResults" + CSVSeperator;
-		ret += "duration" + CSVSeperator;
-		ret += "partnerAPI";
+		ret += "enrichmentFreebaseDuration" + CSVSeperator;
+		ret += "enrichmentDbpediaSpotlightServiceCalls" + CSVSeperator;
+		ret += "enrichmentDbpediaSpotlightResults" + CSVSeperator;
+		ret += "enrichmentDbpediaSpotlightDuration" + CSVSeperator;
+		ret += "durationOverall" + CSVSeperator;
+		ret += "durationPartnerAPI" + CSVSeperator;
+		ret += "durationEnrichment";
 		return ret;
 	}
 	
@@ -181,6 +255,7 @@ public class PartnerdataLogEntry {
 		String ret ="";
 		DateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 		String reportDate = df.format(date);
+		ret += escapeForCSV(requestId) + CSVSeperator;
 		ret += escapeForCSV(reportDate) + CSVSeperator;
 		ret += escapeForCSV(systemId) + CSVSeperator;
 		ret += escapeForCSV(resultsFound) + CSVSeperator;
@@ -189,10 +264,16 @@ public class PartnerdataLogEntry {
 		ret += escapeForCSV(enrichmentServicesResults) + CSVSeperator;
 		ret += escapeForCSV(enrichmentGeonamesServiceCalls) + CSVSeperator;
 		ret += escapeForCSV(enrichmentGeonamesResults) + CSVSeperator;
+		ret += enrichmentGeonamesServiceCallduration + CSVSeperator;
 		ret += escapeForCSV(enrichmentFreebaseServiceCalls) + CSVSeperator;
 		ret += escapeForCSV(enrichmentFreebaseResults) + CSVSeperator;
+		ret += enrichmentFreebaseServiceCallduration + CSVSeperator;
+		ret += escapeForCSV(enrichmentDbpediaSpotlightServiceCalls) + CSVSeperator;
+		ret += escapeForCSV(enrichmentDbpediaSpotlightResults) + CSVSeperator;
+		ret += enrichmentDbpediaSpotlightServiceCallduration + CSVSeperator;
 		ret += (this.end - this.start)  + CSVSeperator;
-		ret += (this.queryPartnerAPIEnd - this.queryPartnerAPIStart);
+		ret += (this.queryPartnerAPIEnd - this.queryPartnerAPIStart) + CSVSeperator;
+		ret += (this.enrichEnd - this.enrichStart);
  		return ret;
 	}
 	
@@ -223,6 +304,14 @@ public class PartnerdataLogEntry {
 	public void setEnrichmentGeonamesServiceCallduration(
 			long newDuration) {
 		this.enrichmentGeonamesServiceCallduration = newDuration;
+	}
+
+	public String getRequestId() {
+		return requestId;
+	}
+
+	public void setRequestId(String requestId) {
+		this.requestId = requestId;
 	}
 
 	public void addEnrichmentGeonamesServiceCallduration(

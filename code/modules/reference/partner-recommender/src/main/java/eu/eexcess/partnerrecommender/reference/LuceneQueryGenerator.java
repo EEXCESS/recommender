@@ -33,49 +33,84 @@ import eu.eexcess.partnerrecommender.api.QueryGeneratorApi;
  */
 public class LuceneQueryGenerator implements QueryGeneratorApi {
 
-    @Override
-    public String toQuery(SecureUserProfile userProfile) {
-        StringBuilder builder = new StringBuilder();
-        boolean expanded=false;
-        for (ContextKeyword context : userProfile.contextKeywords) {
-        	if(context.expansion==null || !context.expansion){
-	        	if (builder.length() > 0) { builder.append(' '); }
-	            builder.append('\"');
-	            builder.append(context.text);
-	            builder.append('\"');
-        	}else{
-        		expanded=true;
-        	}
-        }
-        if(expanded){
-        builder.append(" OR (");
-        Boolean first=true;
-        for (ContextKeyword context : userProfile.contextKeywords) {
-        	if(context.expansion!=null && context.expansion){
-        		
-        		if(first)
-        			builder.append("\"");
-        		else
-        			builder.append("\" OR ");	
-	            builder.append(context.text);
-	            builder.append("\"");
-	            first=false;
-        	}
-        }
-        
-        builder.append(')');
-        }
-//        boolean isFirst = false;
-//        for (String interest : userProfile.interestList) {
-//            if (builder.length() > 0) { builder.append(' '); }
-//            if (isFirst) { isFirst = false; }
-//            else {builder.append(" OR "); }
-//            builder.append('\"');
-//            builder.append(interest);
-//            builder.append("\"^0.2");
+	@Override
+	public String toQuery(SecureUserProfile userProfile) {
+		StringBuilder result = new StringBuilder();
+		boolean expansion= false;
+		for (ContextKeyword key : userProfile.contextKeywords) {
+			
+			if(key.expansion!=null && key.expansion)
+			{
+				if(!expansion){
+					expansion=true;
+					if(result.length()>0)
+						result.append(" OR (\""+key.text+"\"");
+					else
+						result.append("(\""+key.text+"\"");
+				}else{
+					result.append(" OR \""+key.text+"\"");
+				}
+			} else{
+				if(expansion){
+					result.append(") OR \""+key.text+"\"");
+					expansion=false;
+				}	
+				else
+					if(result.length()>0)
+						result.append(" \""+key.text+"\"");
+					else
+						result.append("\""+key.text+"\"");
+			}
+		}
+		if(expansion)
+			result.append(")");
+			
+		return result.toString();
+	}
+
+//    @Override
+//    public String toQuery(SecureUserProfile userProfile) {
+//        StringBuilder builder = new StringBuilder();
+//        boolean expanded=false;
+//        for (ContextKeyword context : userProfile.contextKeywords) {
+//        	if(context.expansion==null || !context.expansion){
+//	        	if (builder.length() > 0) { builder.append(' '); }
+//	            builder.append('\"');
+//	            builder.append(context.text);
+//	            builder.append('\"');
+//        	}else{
+//        		expanded=true;
+//        	}
 //        }
-        return builder.toString();
-    }
+//        if(expanded){
+//        builder.append(" OR (");
+//        Boolean first=true;
+//        for (ContextKeyword context : userProfile.contextKeywords) {
+//        	if(context.expansion!=null && context.expansion){
+//        		
+//        		if(first)
+//        			builder.append("\"");
+//        		else
+//        			builder.append("\" OR ");	
+//	            builder.append(context.text);
+//	            builder.append("\"");
+//	            first=false;
+//        	}
+//        }
+//        
+//        builder.append(')');
+//        }
+////        boolean isFirst = false;
+////        for (String interest : userProfile.interestList) {
+////            if (builder.length() > 0) { builder.append(' '); }
+////            if (isFirst) { isFirst = false; }
+////            else {builder.append(" OR "); }
+////            builder.append('\"');
+////            builder.append(interest);
+////            builder.append("\"^0.2");
+////        }
+//        return builder.toString();
+//    }
     
     
 

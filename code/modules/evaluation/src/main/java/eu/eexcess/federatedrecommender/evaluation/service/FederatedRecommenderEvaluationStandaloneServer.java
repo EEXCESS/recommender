@@ -44,7 +44,7 @@ public class FederatedRecommenderEvaluationStandaloneServer {
 		}
 
 		ServletContextHandler context = new ServletContextHandler();
-		context.setContextPath("/eexcess-federated-recommender-evaluation-web-service-1.0-SNAPSHOT");
+		context.setContextPath("/eexcess-federated-recommender-web-service-evaluation-1.0-SNAPSHOT");
 		Map<String, Object> initMap = new HashMap<String, Object>();
 		initMap.put("com.sun.jersey.api.json.POJOMappingFeature", "true");
 		initMap.put("com.sun.jersey.config.property.packages", " eu.eexcess.federatedrecommender.evaluation.service");
