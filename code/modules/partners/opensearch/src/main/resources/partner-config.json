@@ -1,0 +1,21 @@
+{
+  "systemId": "Opensearch",
+  //"systemId": "Opensearch Standalone", //Standalone Config
+  "queryGeneratorClass": "eu.eexcess.opensearch.querygenerator.OpensearchQueryGenerator",
+  "partnerConnectorClass": "eu.eexcess.opensearch.recommender.PartnerConnector",
+  "isTransformedNative": "true",
+  "transformerClass": "eu.eexcess.opensearch.datalayer.OpensearchTransformer",
+  "searchEndpoint" : "http://en.wikipedia.org/w/opensearch_desc.php" ,
+  "userName": "",
+  "password": "",
+  "mappingListTransformationFile":"mapperResultList.xsl",
+  "mappingObjectTransformationFile":"mapperObject.xsl",
+  "partnerDataRequestsTrace":"false",
+  "enableEnriching":"false",
+  "makeCleanupBeforeTransformation":"false",
+  "partnerConnectorEndpoint": "http://127.0.0.1/eexcess-partner-reference-opensearch-1.0-SNAPSHOT/partner/recommend",
+ //"partnerConnectorEndpoint": "http://127.0.0.1:8100/eexcess-partner-opensearch-1.0-SNAPSHOT/partner/recommend", // Standalone Config
+  "federatedRecommenderURI":  "http://127.0.0.1/eexcess-federated-recommender-web-service-1.0-SNAPSHOT/recommender/"
+  //"federatedRecommenderURI":"http://eexcess.joanneum.at/eexcess-federated-recommender-web-service-1.0-SNAPSHOT/recommender/"
+  //"federatedRecommenderURI":"http://eexcess-dev.joanneum.at/eexcess-federated-recommender-web-service-1.0-SNAPSHOT/recommender/"
+}
