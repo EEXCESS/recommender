@@ -1,6 +1,0 @@
-{
-  "queryGeneratorClass": "eu.eexcess.partnerrecommender.reference.ImdasWebQueryGenerator",
-  "searchEndpoint": "http://localhost:8080/imdas-imdas/rest/advancedsearch/?${query}&count=10&startIndex=0&logicalOperator=and",
-  "mappingListTransformationFile":"mapping_result-list-ambl2exxcess.xsl",
-  "mappingObjectTransformationFile":"mapping_result-object-ambl2exxcess.xsl"
-}
