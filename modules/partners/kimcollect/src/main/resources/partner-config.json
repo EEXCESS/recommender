@@ -1,0 +1,16 @@
+{
+  "systemId": "KIMCollect",
+  "partnerConnectorClass": "eu.eexcess.kimcollect.recommender.PartnerConnector",
+  "queryGeneratorClass": "eu.eexcess.kimcollect.recommender.ImdasWebQueryGenerator",
+  "searchEndpoint": "http://digv525.joanneum.at/kim-kgs/rest/advancedsearch/?&field.Publizieren=1&${query}&count=${numResults}&startIndex=1&logicalOperator=and",
+  "transformerClass": "eu.eexcess.kimcollect.datalayer.KIMCollectTransformer",
+  "isTransformedNative": "false",
+  "mappingListTransformationFile":"mapperResultList.xsl",
+  "mappingObjectTransformationFile":"mapperObject.xsl",
+  "partnerDataRequestsTrace":"false",
+  "enableEnriching":"false",
+  "makeCleanupBeforeTransformation":"false",
+  "partnerConnectorEndpoint": "http://127.0.0.1/eexcess-partner-kimcollect-1.0-SNAPSHOT/partner/recommend",
+  "federatedRecommenderURI":"http://127.0.0.1/eexcess-federated-recommender-web-service-1.0-SNAPSHOT/recommender/"
+  
+}

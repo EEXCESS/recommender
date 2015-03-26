@@ -1,0 +1,222 @@
+<html ng-app="evalApp">
+<head>
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script
+	src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+
+<link rel="stylesheet"
+	href="https://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css">
+
+<link rel="stylesheet"
+	href="https://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap-theme.min.css">
+<script
+	src="https://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/js/bootstrap.min.js"></script>
+
+<link href="css/stats.css" rel="stylesheet">
+<title>EEXCESS Statistics</title>
+
+
+
+</head>
+<body class="body" ng-controller="MainCtrl as mainCtrl">
+
+	<nav class="navbar navbar-inverse navbar-fixed-top" role="navigation">
+		<div class="container">
+			<div class="navbar-header">
+				<a class="navbar-brand" href="#">EEXCESS Statistics</a>
+			</div>
+
+		</div>
+	</nav>
+	<br />
+	<br />
+	<br />
+	<div class="alert alert-success">Average Recommender time to get
+		results from all partners: {{mainCtrl.recommender.averageGlobalTime}}
+		ms</div>
+	<div class="alert alert-success">Average Recommender time to
+		aggregate results: {{mainCtrl.recommender.averageAggregationTime}} ms</div>
+
+
+	<br />
+	<br />
+	<br />
+	<br />
+	<br />
+
+
+	<table class="table">
+		<caption>
+			<div class="alert alert-info">Partner Connectors ShortTime
+				Statistics</div>
+		</caption>
+		<thead>
+			<tr>
+				<th></th>
+				<th>Request Count</th>
+				<th>Failed Request Count</th>
+				<th>Failed Request Timeout Count</th>
+				<th>Average Response Time</th>
+			</tr>
+		</thead>
+		<th class="text-nowrap">Partner</th>
+		<tr ng-repeat="partner in mainCtrl.partners.partner">
+			<td ng-init="stats = partner.shortTimeStats" class="info"
+				ng-href='#here' ng-click="mainCtrl.getPartner(partner.systemId)">{{partner.systemId}}</td>
+			<td>{{stats.requestCount}}</td>
+			<td ng-if="stats.failedRequestCount / stats.requestCount > 0.8"
+				class="alert-danger">{{stats.failedRequestCount}}</td>
+			<td
+				ng-if="stats.failedRequestCount / stats.requestCount > 0.3 && stats.failedRequestCount / stats.requestCount <= 0.8"
+				class="alert-warning">{{stats.failedRequestCount}}</td>
+			<td
+				ng-if="stats.failedRequestCount !=0 && stats.failedRequestCount / stats.requestCount <= 0.3"
+				class="alert-success">{{stats.failedRequestCount}}</td>
+			<td ng-if="stats.failedRequestCount ==0" class="alert-success">{{stats.failedRequestCount}}</td>
+			<td ng-if="stats.failedRequestCount ==null" class="alert-success">0</td>
+			<td
+				ng-if="stats.failedRequestTimeoutCount / stats.requestCount > 0.8"
+				class="alert-danger">{{stats.failedRequestTimeoutCount}}</td>
+			<td
+				ng-if="stats.failedRequestTimeoutCount / stats.requestCount > 0.3 && stats.failedRequestCount / stats.requestCount <= 0.8"
+				class="alert-warning">{{stats.failedRequestTimeoutCount}}</td>
+			<td
+				ng-if="stats.failedRequestTimeoutCount !=0 && stats.failedRequestCount / stats.requestCount <= 0.3"
+				class="alert-success">{{stats.failedRequestTimeoutCount}}</td>
+			<td ng-if="stats.failedRequestTimeoutCount ==0" class="alert-success">{{stats.failedRequestTimeoutCount}}</td>
+			<td ng-if="stats.failedRequestTimeoutCount ==null"
+				class="alert-success">0</td>
+			<td>{{stats.shortTimeResponseTimes}}<small
+				ng-if="stats.shortTimeResponseTimes ==null">0</small> <small>ms</small></td>
+
+		</tr>
+	</table>
+
+	<table class="table">
+		<caption>
+			<div class="alert alert-info">Partner Connectors LongTime
+				Statistics</div>
+		</caption>
+		<thead>
+			<tr>
+				<th></th>
+				<th>Request Count</th>
+				<th>Failed Request Count</th>
+				<th>Failed Request Timeout Count</th>
+
+			</tr>
+		</thead>
+		<th class="text-nowrap">Partner</th>
+		<tr ng-repeat="partner in mainCtrl.partners.partner">
+			<td ng-init="stats = partner.longTimeStats" class="info"
+				ng-href='#here' ng-click="mainCtrl.getPartner(partner.systemId)">{{partner.systemId}}</td>
+			<td>{{stats.requestCount}}</td>
+			<td ng-if="stats.failedRequestCount / stats.requestCount > 0.8"
+				class="alert-danger">{{stats.failedRequestCount}}</td>
+			<td
+				ng-if="stats.failedRequestCount / stats.requestCount > 0.3 && stats.failedRequestCount / stats.requestCount <= 0.8"
+				class="alert-warning">{{stats.failedRequestCount}}</td>
+			<td ng-if="0.3 >= stats.failedRequestCount / stats.requestCount "
+				class="alert-success">{{stats.failedRequestCount}}</td>
+			<td ng-if="stats.failedRequestCount ==null" class="alert-success">0</td>
+			<td
+				ng-if="stats.failedRequestTimeoutCount / stats.requestCount >= 0.8"
+				class="alert-danger">{{stats.failedRequestTimeoutCount}}</td>
+			<td
+				ng-if="stats.failedRequestTimeoutCount / stats.requestCount > 0.3 && stats.failedRequestCount / stats.requestCount < 0.8"
+				class="alert-warning">{{stats.failedRequestTimeoutCount}}</td>
+			<td
+				ng-if="0.3 >= stats.failedRequestTimeoutCount / stats.requestCount"
+				class="alert-success">{{stats.failedRequestTimeoutCount}}</td>
+			<td ng-if="stats.failedRequestTimeoutCount ==null"
+				class="alert-success">0</td>
+		</tr>
+	</table>
+
+	<br />
+	<br />
+	<br />
+	<br />
+	<br />
+
+	<table class="table" ng-show="!!mainCtrl.partner.systemId">
+		<caption>
+			<div class="alert alert-info">Partner Detail
+				{{mainCtrl.partner.systemId}}</div>
+		</caption>
+		<thead>
+			<tr>
+				<th></th>
+				<th>Partner Call Time</th>
+				<th>First Transformation Time</th>
+				<th>Second Transformation Time</th>
+				<th>Enrichment Time</th>
+				<th>Results Returned</th>
+			</tr>
+		</thead>
+		<th class="text-nowrap">Produced Query</th>
+
+		<tr ng-repeat="query in mainCtrl.partner.shortTimeStats.lastQueries">
+			<td class="active">{{query.partnerQuery}}</td>
+			<td>{{query.partnerCallTime}}<small
+				ng-if="query.partnerCallTime ==null">0</small> <small>ms</small></td>
+			<td>{{query.firstTransformationTime}}<small
+				ng-if="query.firstTransformationTime ==null">0</small> <small>ms</small></td>
+			<td>{{query.secondTransformationTime}}<small
+				ng-if="query.secondTransformationTime ==null">0</small> <small>ms</small></td>
+			<td>{{query.enrichmentTime}}<small
+				ng-if="query.enrichmentTime ==null">0</small> <small>ms</small></td>
+			<td>{{query.resultCount}}<small
+				ng-if="query.enrichmentTime ==null">0</small></td>
+		</tr>
+	</table>
+
+
+
+
+	<script
+		src="https://ajax.googleapis.com/ajax/libs/angularjs/1.2.26/angular.min.js"></script>
+	<script>
+angular.module('evalApp', []).controller('MainCtrl', ['$http','$scope','$location', function($http,$scope,$location) {
+    var self = this;
+    self.partners=[];
+    self.getPartners=function(){ 
+            $http.get('http://localhost/eexcess-federated-recommender-web-service-1.0-SNAPSHOT/recommender/getRegisteredPartners', { callback: "JSON_CALLBACK" }
+            ,{ get: { method: "JSONP" }}
+            ).then(function(response) {
+            self.partners = response.data;
+            }, function(errResponse) {
+            });
+        };
+    self.getPartners();
+    self.recommender=[];
+    self.getRecommender=function(){ 
+            $http.get(' http://localhost/eexcess-federated-recommender-web-service-1.0-SNAPSHOT/recommender/getRecommenderStats', { callback: "JSON_CALLBACK" }
+            ,{ get: { method: "JSONP" }}
+            ).then(function(response) {
+            self.recommender = response.data;
+            }, function(errResponse) {
+            });
+        };
+    self.getRecommender();
+    self.partner=[];
+    self.getPartner=function(systemId){ 
+    	if(systemId==self.partner.systemId)
+    		self.partner=[];
+    	else{
+             for (var i = 0; i <self.partners.partner.length; i++) {
+             	if(self.partners.partner[i].systemId==systemId){
+             		self.partner=self.partners.partner[i];
+             		}
+             };
+        };
+        }
+    //self.getPartner();
+}]);
+</script>
+</body>
+</html>
+
+

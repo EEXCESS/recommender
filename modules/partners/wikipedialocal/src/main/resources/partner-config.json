@@ -1,0 +1,18 @@
+{
+  "systemId": "Wikipedia-Local",
+ 
+  "queryGeneratorClass": "eu.eexcess.partnerrecommender.reference.LuceneQueryGenerator",
+  "partnerConnectorClass": "eu.eexcess.wikipedialocal.recommender.PartnerConnector",
+  "isTransformedNative": "true",
+  "transformerClass": "eu.eexcess.wikipedialocal.datalayer.WikipediaTransformer",
+  "searchEndpoint" : "/opt/datasets/EExcess/wiki/enwiki/" ,
+  "userName": "",
+  "password": "",
+  "mappingListTransformationFile":"mapperResultList.xsl",
+  "mappingObjectTransformationFile":"mapperObject.xsl",
+  "partnerDataRequestsTrace":"false",
+  "enableEnriching":"false",
+  "makeCleanupBeforeTransformation":"false",
+  "partnerConnectorEndpoint": "http://127.0.0.1/eexcess-partner-reference-wikipedia-local-1.0-SNAPSHOT/partner/recommend",
+  "federatedRecommenderURI":  "http://127.0.0.1/eexcess-federated-recommender-web-service-1.0-SNAPSHOT/recommender/"
+}

@@ -1,0 +1,17 @@
+{
+  "systemId": "Wissenmedia",
+  "partnerConnectorClass": "eu.eexcess.wissenmedia.recommender.PartnerConnector",
+  "queryGeneratorClass": "eu.eexcess.partnerrecommender.reference.LuceneQueryGenerator",
+  "isTransformedNative": "false",
+  "searchEndpoint": "http://service.wissens-server.com/wissensserver/view.html?a=s&t=${query}&w=EEXCESS&l=${numResults}&fields=substanz-id,artikeltyp,first_published_date,geschlecht,last_published_date,lang,lat,long,searchtags,epoche,tempstart-iso8601,tempend-iso8601,dailyarticle_date,wservice-fachgebiet-texttree,ws-uri,preview-image&cdata=false&fq=wservice-searchtype:textsuche&p=intro&v=eexcess&r=CURRENT",
+  "userName": "",
+  "password": "",
+  "transformerClass": "eu.eexcess.wissenmedia.recommender.WissenmediaTransformer",
+  "mappingListTransformationFile":"mapperResultList.xsl",
+  "mappingObjectTransformationFile":"mapperObject.xsl",
+  "partnerDataRequestsTrace":"false",
+  "enableEnriching":"false",
+  "makeCleanupBeforeTransformation":"false",
+  "partnerConnectorEndpoint": "http://127.0.0.1/eexcess-partner-wissenmedia-1.0-SNAPSHOT/partner/recommend",
+  "federatedRecommenderURI":"http://127.0.0.1/eexcess-federated-recommender-web-service-1.0-SNAPSHOT/recommender/"
+}
