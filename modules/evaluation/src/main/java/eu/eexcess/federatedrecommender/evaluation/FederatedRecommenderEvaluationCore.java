@@ -59,7 +59,13 @@ import eu.eexcess.federatedrecommender.utils.FederatedRecommenderException;
 
 
 
-
+/**
+ * Core for the  Evaluation
+ * (keeping evaluation details out of the main core)
+ * 
+ * @author hziak
+ *
+ */
 public class FederatedRecommenderEvaluationCore   {
 	private EvaluationManager evalManager=null;
 	private final FederatedRecommenderConfiguration federatedRecommenderConfiguration;
