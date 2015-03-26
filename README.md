@@ -28,11 +28,35 @@ code/modules/recommender/federated-recommender-web-service/src/main/resources/fe
 as in the partner recommenders file:
 code/modules/partners/mendeley/src/main/resources/partner-config.json
 
+Set a system variable EEXCESS_PARTNER_KEY_FILE with a path to the keyfile
+
+The file has to look like:
+{"partners":[
+
+{"systemId":"Wissenmedia",
+
+"userName": "",
+
+"password": ""},
+
+{"systemId":"Europeana",
+
+"apiKey": ""
+
+},
+
+{"systemId":"Mendeley",
+
+"userName": "",
+
+"password": ""}]
+}
+
 In the main directory (code/ ) just call
 $ mvn package -Dmaven.test.skip=true
 and deploy the generated war files in the your tomcat instance. 
 Keep in mind that the abovementioned config has to be changed or 
-for convenience just let your tomcat run on port "8100".
+for convenience just let your tomcat run on port "80".
 After deploying these files you should be able to call the federated recommender
 like descriped in the wiki links above.
 
