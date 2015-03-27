@@ -36,18 +36,24 @@ public class SQliteTupleCollector implements CategoryTupleCollector, Closeable {
 		public static class Category {
 			public static class Domains {
 				public static final String PARENT = "parent";
+				public static final String PARENT_HASH = "parent_hash";
 				public static final String CHILD = "child";
+				public static final String CHILD_HASH = "child_hash";
 			}
 
 			public static final String TABLE_NAME = "Categories";
 
 			public static final String CREATE = "CREATE TABLE IF NOT EXISTS " + TABLE_NAME + " (" + Domains.PARENT
-							+ " TEXT, " + Domains.CHILD + " TEXT)";
+							+ " TEXT, " + Domains.PARENT_HASH + " INTEGER, " + Domains.CHILD + " TEXT, "
+							+ Domains.CHILD_HASH + " INTEGER)";
 			public static final String DROP = "DROP TABLE " + TABLE_NAME;
 			public static final String INSERT = "INSERT INTO " + TABLE_NAME + " (" + Domains.PARENT + ", "
-							+ Domains.CHILD + ") VALUES (?, ?)";
+							+ Domains.PARENT_HASH + ", " + Domains.CHILD + ", " + Domains.CHILD_HASH
+							+ ") VALUES (?, ?, ?, ?)";
 			public static final String SELECT_CHILDREN = "SELECT " + TABLE_NAME + "." + Domains.CHILD + " FROM "
 							+ TABLE_NAME + " WHERE " + Domains.PARENT + " IS ?";
+			public static final String SELECT_PARENTS = "SELECT " + TABLE_NAME + "." + Domains.PARENT + " FROM "
+							+ TABLE_NAME + " WHERE " + Domains.CHILD + " IS ?";
 		}
 	}
 
@@ -78,7 +84,9 @@ public class SQliteTupleCollector implements CategoryTupleCollector, Closeable {
 	@Override
 	public void takeTuple(String parent, String child) throws SQLException {
 		preparedInsertStatement.setString(1, parent);
-		preparedInsertStatement.setString(2, child);
+		preparedInsertStatement.setInt(2, parent.hashCode());
+		preparedInsertStatement.setString(3, child);
+		preparedInsertStatement.setInt(4, child.hashCode());
 		preparedInsertStatement.addBatch();
 
 		if (cachedStatements < maxCachedStatements) {

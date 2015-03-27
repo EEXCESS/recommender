@@ -20,21 +20,31 @@
 
 package eu.eexcess.diversityasurement.wikipedia;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 import java.io.File;
+import java.io.IOException;
 import java.sql.SQLException;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import org.junit.Test;
 
 import eu.eexcess.diversityasurement.wikipedia.config.Settings;
+import eu.eexcess.tree.BaseTreeNode;
+import eu.eexcess.tree.TreeNode;
+import eu.eexcess.tree.WeightedTreeNode;
 
 public class CategoryTreeInflatorTest {
 
 	@Test
 	public void fetchChildren_expectExcatlySpecifiedChildren() {
+		if (!Settings.SQLiteDb.isDBFileAvailable()) {
+			return;
+		}
+
 		CategoryTreeInflator tb = new CategoryTreeInflator(new File(Settings.SQLiteDb.PATH));
 		Set<String> children = null;
 		try {
@@ -48,7 +58,9 @@ public class CategoryTreeInflatorTest {
 		} catch (Throwable e) {
 		}
 
-		assertTrue(children.containsAll(expectedChildrenOf_1915_in_Europe()));
+		Set<String> expected = expectedChildrenOf_1915_in_Europe();
+		assertTrue(children.containsAll(expected));
+		assertEquals(expected.size(), children.size());
 	}
 
 	private Set<String> expectedChildrenOf_1915_in_Europe() {
@@ -88,5 +100,29 @@ public class CategoryTreeInflatorTest {
 		categories.add("1915_in_Poland");
 
 		return categories;
+	}
+
+	@Test
+	public void inflateFromBottomToRoots_givenDBPediaDB_expectCorrectTree() throws SQLException, IOException {
+		if (!Settings.SQLiteDb.isDBFileAvailable()) {
+			return;
+		}
+
+		CategoryTreeInflator builder = new CategoryTreeInflator(new File(Settings.SQLiteDb.PATH));
+		WeightedTreeNode child = new WeightedTreeNode("Agriculture");
+		Set<WeightedTreeNode> treeNodes = builder.inflateBF(child);
+		builder.close();
+
+		final AtomicInteger numNodes = new AtomicInteger(0);
+		BaseTreeNode.NodeInspector<Double> traverser = (n) -> {
+			if (0 == numNodes.get() % 10) {
+				System.out.println("traversed [" + numNodes.get() + "] nodes");
+			}
+			numNodes.incrementAndGet();
+		};
+		WeightedTreeNode.depthFirstTraverser(child, traverser);
+
+		assertEquals(0, numNodes.get());
+		assertEquals(140, treeNodes.size());
 	}
 }

@@ -32,7 +32,10 @@ import eu.eexcess.diversityasurement.wikipedia.config.Settings;
 public class SQLiteTupleCollectorTest {
 
 	@Test
-	public void sqliteTupleCollector_collectTuple_notExceptional() throws Exception {
+	public void sqliteTupleCollector_collectOneTuple_notExceptional() throws Exception {
+		if (!Settings.SQLiteDb.isDBFileAvailable()) {
+			return;
+		}
 		SQliteTupleCollector collector = new SQliteTupleCollector(new File(Settings.SQLiteDb.PATH));
 		try {
 			collector.takeTuple("foo-parent", "bar-child");

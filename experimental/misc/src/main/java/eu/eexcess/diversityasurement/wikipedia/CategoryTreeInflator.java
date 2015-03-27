@@ -29,7 +29,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayDeque;
-import java.util.Collection;
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.logging.Logger;
@@ -69,6 +69,7 @@ public class CategoryTreeInflator implements Closeable {
 		return null;
 	}
 
+	@Deprecated
 	Set<String> fetchChildren(String parent) throws SQLException {
 		Set<String> children = new HashSet<String>();
 
@@ -82,36 +83,100 @@ public class CategoryTreeInflator implements Closeable {
 		return children;
 	}
 
+	Set<String> fetchParents(String child) throws SQLException {
+		Set<String> parents = new HashSet<String>();
+
+		PreparedStatement statement = db.prepareStatement(SQliteTupleCollector.Tables.Category.SELECT_PARENTS);
+		statement.setString(1, child);
+		ResultSet result = statement.executeQuery();
+
+		while (result.next()) {
+			parents.add(result.getString(SQliteTupleCollector.Tables.Category.Domains.PARENT));
+		}
+		return parents;
+	}
+
 	/**
-	 * inflates a category tree from startNode traversing all children that can
-	 * be looked up in the given database
+	 * Inflates (breadth-first) a category tree from startNode traversing all predecessors (in
+	 * other words bottom up, or in reverse direction) that can be looked up in
+	 * the given database. Loops are skipped.
 	 * 
-	 * @param startNode
+	 * @param child
 	 *            where to start construction
 	 */
-	public Set<WeightedTreeNode> inflate(WeightedTreeNode startNode) throws SQLException {
+	public Set<WeightedTreeNode> inflateBF(WeightedTreeNode child) throws SQLException {
+		ArrayDeque<WeightedTreeNode> nodesToProcess = new ArrayDeque<WeightedTreeNode>();
+		nodesToProcess.add(child);
+		child = null;
+		Set<WeightedTreeNode> seenNodes = new HashSet<WeightedTreeNode>();
+
 		while (true) {
-			ArrayDeque<WeightedTreeNode> nodesToProcess = new ArrayDeque<WeightedTreeNode>();
-			Set<WeightedTreeNode> seenNodes = new HashSet<WeightedTreeNode>();
-			// memorize the start node as processed
-			WeightedTreeNode parent = startNode;
-			seenNodes.add(parent);
-
-			// get all children start node
-			for (String childName : fetchChildren(parent.getName())) {
-				WeightedTreeNode child = new WeightedTreeNode(childName);
-				parent.addChild(child);
-				nodesToProcess.add(child);
-			}
-
+			// if (0 == seenNodes.size() % 50) {
+			// System.out.println("inflating nodes: seen[" + seenNodes.size() +
+			// "] to be processed["
+			// + nodesToProcess.size() + "]");
+			// }
 			// if nothing to process any more
 			if (nodesToProcess.isEmpty()) {
 				return seenNodes;
 			}
 
-			// set next child to be processed
-			parent = nodesToProcess.remove();
+			// next node to be processed
+			child = nodesToProcess.remove();
+
+			// memorize the start node as processed
+			seenNodes.add(child);
+
+			// get all parents of current child
+			for (String parentName : fetchParents(child.getName())) {
+				WeightedTreeNode parent = findOrCreateNewNode(seenNodes, nodesToProcess, parentName);
+				parent.addChild(child);
+				System.out.println(parentName + "->" + child.getName() + "; ");
+			}
 		}
+	}
+
+	public ArrayList<WeightedTreeNode> inflate() throws SQLException {
+		ArrayList<WeightedTreeNode> nodes = new ArrayList<WeightedTreeNode>();
+		
+		
+		return nodes;
+	}
+	/**
+	 * Looks for a node named name in seenNodes and nodesToProcess. Returns it
+	 * if found else a new node is created, added to nodesToProcess and
+	 * returned.
+	 * 
+	 * @param seenNodes
+	 *            set of already seen nodes so far
+	 * @param name
+	 *            name of the wanted node
+	 * @return a node found in seenNodes or a newly but to nodesToProcess added
+	 *         node
+	 */
+	private WeightedTreeNode findOrCreateNewNode(Set<WeightedTreeNode> seenNodes,
+					ArrayDeque<WeightedTreeNode> nodesToProcess, String name) {
+		WeightedTreeNode wanted = null;
+
+		for (WeightedTreeNode seen : seenNodes) {
+			if (seen.getName().compareTo(name) == 0) {
+				wanted = seen;
+				break;
+			}
+		}
+
+		for (WeightedTreeNode queued : nodesToProcess) {
+			if (queued.getName().compareTo(name) == 0) {
+				wanted = queued;
+				break;
+			}
+		}
+
+		if (null == wanted) {
+			wanted = new WeightedTreeNode(name);
+			nodesToProcess.add(wanted);
+		}
+		return wanted;
 	}
 
 	@Override
