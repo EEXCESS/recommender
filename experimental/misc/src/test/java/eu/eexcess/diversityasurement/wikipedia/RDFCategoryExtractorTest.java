@@ -104,14 +104,19 @@ public class RDFCategoryExtractorTest {
 	}
 
 	@Test
-	public void RDFCategoryExtractor_construct_notExceptional() throws Exception {
+	public void extract_notExceptional() throws Exception {
 		if (!Settings.RDFCategories.isCategoryFileAvailable()) {
 			return;
 		}
-		SQliteTupleCollector collector = new SQliteTupleCollector(new File(Settings.SQLiteDb.PATH));
-		RDFCategoryExtractor builder = new RDFCategoryExtractor(new File(Settings.RDFCategories.PATH), collector);
+
+		CategoryTupleCollector mockCollector = new CategoryTupleCollector() {
+			@Override
+			public void takeTuple(String parent, String child) throws Exception {
+			}
+		};
+
+		RDFCategoryExtractor builder = new RDFCategoryExtractor(new File(Settings.RDFCategories.PATH), mockCollector);
 		builder.extract();
-		collector.close();
 	}
 
 }

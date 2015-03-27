@@ -52,14 +52,6 @@ public class Settings {
 		}
 	}
 
-	public static class SQLiteDb {
-		public static final String PATH = "/opt/iaselect/categories.sqlite";
-
-		public static boolean isDBFileAvailable() {
-			return printWarning(PATH);
-		}
-	}
-
 	public static class Grph {
 		public static final String PATH = "/opt/iaselect/gategories.grphbin";
 

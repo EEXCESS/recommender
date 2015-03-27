@@ -21,7 +21,6 @@
 package eu.eexcess.diversityasurement.wikipedia;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -111,12 +110,15 @@ public class GrphTupleCollectorTest {
 			return;
 		}
 
+		long startTimestamp = System.currentTimeMillis();
 		Grph g = GrphTupleCollector.readFromFile(new File(Settings.Grph.PATH), new GrphBinaryReader());
-		System.out.println("vertices [" + g.getNumberOfVertices() + "] edges [" + g.getNumberOfEdges()
-						+ "] simple edges [" + g.getNumberOfSimpleEdges() + "] undirected edges ["
-						+ g.getNumberOfUndirectedEdges() + "] undirected simple edges ["
-						+ g.getNumberOfUndirectedSimpleEdges() + "] directed edges [" + g.getNumberOfDirectedEdges()
-						+ "] directed simple edges [" + g.getNumberOfDirectedSimpleEdges() + "]");
+
+		System.out.println("read in [" + (System.currentTimeMillis() - startTimestamp) + "]ms vertices ["
+						+ g.getNumberOfVertices() + "] edges [" + g.getNumberOfEdges() + "] simple edges ["
+						+ g.getNumberOfSimpleEdges() + "] undirected edges [" + g.getNumberOfUndirectedEdges()
+						+ "] undirected simple edges [" + g.getNumberOfUndirectedSimpleEdges() + "] directed edges ["
+						+ g.getNumberOfDirectedEdges() + "] directed simple edges ["
+						+ g.getNumberOfDirectedSimpleEdges() + "]");
 		// vertices [747248] edges [1678939] simple edges [1678939] undirected
 		// edges [0] undirected simple edges [0] directed edges [1678939]
 		// directed simple edges [1678939]
