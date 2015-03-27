@@ -5,6 +5,7 @@
 
 
 
+
 <html ng-app="evalApp">
 <head>
 
@@ -60,7 +61,9 @@ margin:0px;
   
     <H1><center>  <img  src="img/eexcess.png"></img></center></H1>
 </div>
+
  <input class="alert alert-info" type="text" data-ng-model="searchStr" ng-model-options= "{updateOn: 'default blur', debounce: {'default': 500, 'blur': 0}}"  placeholder="search query ...">
+ <button ng-click="mainCtrl.getItems(searchStr)">Add</button>
 
 
 <div class="alert alert-info"   type="text" placeholder="Interested:">
@@ -110,7 +113,7 @@ margin:0px;
 	      </div>
 	</div>
   </div>
-
+ </div>
 
 <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.2.19/angular.js"></script>
 
@@ -125,13 +128,13 @@ angular.module('evalApp', []).controller('MainCtrl', ['$http','$scope', function
 	  self.nextSelectedIcon=0;
 	  self.queryText="";
 	  self.items=[];
-	var text = '{"contextKeywords":[{"text":"labour"}],"numResults":10,"interests":[],"decomposer":"FiFoPicker","partnerList":[{"systemId":"ZBW","shortTimeStats":null,"longTimeStats":null},{"systemId":"Mendeley","shortTimeStats":null,"longTimeStats":null}]}';
+	var text = '{"contextKeywords":[{"text":""}],"numResults":10,"interests":[],"decomposer":"FiFoPicker","partnerList":[{"systemId":"ZBW","shortTimeStats":null,"longTimeStats":null},{"systemId":"Mendeley","shortTimeStats":null,"longTimeStats":null}]}';
 //var text = '{"contextKeywords":[{"text":"labour"},{"text":"woman"}],"numResults":10,"interests":[{"text":"Suffragette"},{"text":"voting rights act"}],"decomposer":"FiFoPicker","partnerList":[{"systemId":"ZBW","shortTimeStats":null,"longTimeStats":null},{"systemId":"Mendeley","shortTimeStats":null,"longTimeStats":null}]}';
 
 	
 	self.query=  JSON.parse(text);
 
-	 $scope.$watch('searchStr', function (tmpStr)
+	/*  $scope.$watch('searchStr', function (tmpStr)
 			    {
 		 
 			      console.log(tmpStr);
@@ -163,18 +166,37 @@ angular.module('evalApp', []).controller('MainCtrl', ['$http','$scope', function
 						  // self.done();
 					      });
 			        }
-			    });
-	  /* self.getItems=function(){ 
-			      $http.post('http://eexcess-demo.know-center.tugraz.at/eexcess-federated-recommender-web-service-evaluation-1.0-SNAPSHOT/evaluation/blockEvaluation', self.query,{ callback: "JSON_CALLBACK" }
-			      ,{ get: { method: "JSONP" }}
-			      ).then(function(response) {
-			      self.items = response.data;
-			      }, function(errResponse) {
-				  // self.done();
-			      });
+			    }); */
+	  self.getItems=function(query){ 
+			
+	       var partners =$scope.$parent.$$childHead.$$childHead.partners.partner;
+	        self.query.partnerList=[];
+	        
+	        for(var i = 0 ; i < partners.length;i++){
+	        	if($scope.$parent.$$childHead.$$childHead.partnersQuery.partner[i].selected==true){
+	        		var partner={};
+	        		partner.systemId=partners[i].systemId;
+	        		partner.shortTimeStats=null;
+	        		partner.longTimeStats=null;
+	        		self.query.partnerList.push(partner);
+	        	}
+	        }
+	        
+	        var queryStringSplit = query.split(" ");
+	        self.query.contextKeywords=[];
+	        for(var x=0; x < queryStringSplit.length ; x++){
+	        	self.query.contextKeywords[x]={};
+	        	self.query.contextKeywords[x].text=queryStringSplit[x];	
+	        }
+	        $http.post('http://eexcess-demo.know-center.tugraz.at/eexcess-federated-recommender-web-service-evaluation-1.0-SNAPSHOT/evaluation/blockEvaluation', self.query,{ callback: "JSON_CALLBACK" }
+		      ,{ get: { method: "JSONP" }}
+		      ).then(function(response) {
+		      self.items = response.data;
+		      }, function(errResponse) {
+			  // self.done();
+		      });
 	      };
 	  
-	 self.getItems(); */
 	  self.addInterests=function(text){
 		 var interest={};
 		 interest.text=text;
@@ -229,6 +251,7 @@ angular.module('evalApp', []).controller('MainCtrl', ['$http','$scope', function
 </script>
 </body>
 </html>
+
 
 
 

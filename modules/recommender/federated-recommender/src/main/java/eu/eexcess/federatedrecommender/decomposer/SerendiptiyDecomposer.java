@@ -19,11 +19,11 @@ public class SerendiptiyDecomposer implements
 			SecureUserProfileEvaluation inputSecureUserProfile) {
 		java.util.List<History> historyList= inputSecureUserProfile.history;
 		for (History history : historyList) {
-			inputSecureUserProfile.contextKeywords.add(new ContextKeyword(history.title,0.2,ExpansionType.EXPANSION));
+			inputSecureUserProfile.contextKeywords.add(new ContextKeyword(history.title,0.2,ExpansionType.SERENDIPITY));
 		}
 		java.util.List<Interest> interestList= inputSecureUserProfile.interestList;
 		for (Interest interest : interestList) {
-			inputSecureUserProfile.contextKeywords.add(new ContextKeyword(interest.text,0.4,ExpansionType.EXPANSION));
+			inputSecureUserProfile.contextKeywords.add(new ContextKeyword(interest.text,0.4,ExpansionType.SERENDIPITY));
 			//inputSecureUserProfile.contextKeywords.add(new ContextKeyword(interest.text,interest.competenceLevel,true));
 		}
 		return inputSecureUserProfile;

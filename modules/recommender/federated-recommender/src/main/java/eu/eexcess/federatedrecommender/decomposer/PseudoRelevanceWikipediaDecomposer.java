@@ -108,10 +108,10 @@ public class PseudoRelevanceWikipediaDecomposer implements SecureUserProfileDeco
 		try {
 			TermSet<TypedTerm> queryExpansionTerms;
 			queryExpansionTerms = wikipediaQueryExpansion.expandQuery(query);
-			for (TypedTerm typedTerm : queryExpansionTerms.getTopTerms(100)) {
-				System.out.println("TypedTerm: "+ typedTerm.getText() +" Type: "+typedTerm.getType() +" Weight: " +typedTerm.getWeight());
-			}
-			System.out.println(query  +" query #############################");
+//			for (TypedTerm typedTerm : queryExpansionTerms.getTopTerms(100)) {
+//				System.out.println("TypedTerm: "+ typedTerm.getText() +" Type: "+typedTerm.getType() +" Weight: " +typedTerm.getWeight());
+//			}
+//			System.out.println(query  +" query #############################");
 			terms.addAll(queryExpansionTerms.getTopTerms(5));
 		} catch (IOException e) {
 			logger.log(Level.SEVERE, "Cannot expand the query using Wikipedia", e);
