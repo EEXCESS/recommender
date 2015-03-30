@@ -47,33 +47,41 @@ public class MainCategoryRelevanceEstimator {
 	}
 
 	private Grph graph;
-	private HashMap<String, Integer> categoryIds;
-	// private String[] topCategoryLabels;
 	int[] topCategories;
 	int topKShortestPathes;
 	private HashMap<Integer, NodeData> cachedNodes;
 
-	public MainCategoryRelevanceEstimator(Grph completeCategoryGraph, HashMap<String, Integer> categoryIdDictionary,
-					int[] mainCategories, int topKShortestPathes) {
+	public MainCategoryRelevanceEstimator(Grph completeCategoryGraph, int[] mainCategories, int topKShortestPathes) {
 		this.graph = completeCategoryGraph;
-		this.categoryIds = categoryIdDictionary;
-		// this.topCategoryLabels = mainCategories;
-		// this.topCategories = new int[topCategoryLabels.length];
 		this.topCategories = mainCategories;
-
-		// int idx = 0;
-		// for (String category : topCategoryLabels) {
-		// topCategories[idx++] = categoryIds.get(category).intValue();
-		// }
 
 		this.topKShortestPathes = topKShortestPathes;
 		this.cachedNodes = new HashMap<>();
 	}
 
+	/**
+	 * {@link #estimateProbabilities(int[], int)}
+	 */
 	public Map<Integer, HashMap<Integer, Double>> estimateProbabilities(int[] startCategories) {
 		return estimateProbabilities(startCategories, topKShortestPathes);
 	}
 
+	/**
+	 * Estimates the relevance of categories c ∈ startCategories to all m ∈
+	 * mainCategories {@link #MainCategoryRelevanceEstimator(Grph, int[], int)}.
+	 * Each c gets the probability 1.0/|startCategories|. This probability is
+	 * spread over each of the topKShortestPahtes to all mainCategories.
+	 * Probability dispersion is performed on each node where p is current
+	 * probability and p' is the new probability as: p' = p /
+	 * node.numberOfOutgoingEdges().
+	 * 
+	 * @param startCategories
+	 *            categories to find topKShortests paths to all topCategories
+	 * @param topKShortestPathes
+	 *            number of max shortest paths to consider
+	 * @return a map entry for each c containing a map of topCategories and
+	 *         their relevance
+	 */
 	public Map<Integer, HashMap<Integer, Double>> estimateProbabilities(int[] startCategories, int topKShortestPathes) {
 		this.topKShortestPathes = topKShortestPathes;
 		HashMap<Integer, HashMap<Integer, Double>> results = new HashMap<>();
@@ -90,13 +98,6 @@ public class MainCategoryRelevanceEstimator {
 			HashMap<Integer, Double> probs = disperseProbabilityOverPathes(startCategories.length,
 							startCategories[sourceIdx], sourceToTargetsPathes);
 
-			// // bring logarithmic probabilities back to decimal
-			// for (Map.Entry<String, Double> entry : probs.entrySet()) {
-			// System.out.println("map log [" + entry.getValue() +
-			// "] -> dec e^x=["
-			// + Math.pow(Math.E, entry.getValue()) + "]");
-			// entry.setValue(Math.pow(Math.E, entry.getValue()));
-			// }
 			int sourceId = startCategories[sourceIdx];
 			results.put(sourceId, probs);
 			sourceIdx++;
@@ -105,6 +106,19 @@ public class MainCategoryRelevanceEstimator {
 		return results;
 	}
 
+	/**
+	 * Disperse probability 1.0 over {@code numTotalStartCategories} ∀ k paths p
+	 * ∈ {@code sourceToTargetPaths} (∀ p from {@code sourceCategoryId} to ∀
+	 * mainmainCategories).
+	 * 
+	 * @param numTotalStartCategories
+	 *            number of total start categories to consider
+	 * @param sourceCategoryId
+	 *            from vertex id
+	 * @param sourceToTargetsPaths
+	 *            to vertices id
+	 * @return mapping from vertex id to probability
+	 */
 	private HashMap<Integer, Double> disperseProbabilityOverPathes(int numTotalStartCategories, int sourceCategoryId,
 					List<List<ArrayListPath>> sourceToTargetsPaths) {
 
@@ -113,8 +127,6 @@ public class MainCategoryRelevanceEstimator {
 			maintopicsProbability.put(category, Double.NaN);
 		}
 
-		// double categoryProbability = Math.log(1) -
-		// Math.log(numTotalStartCategories);
 		double categoryProbability = 1.0 / (double) numTotalStartCategories;
 		System.out.println("at id [" + sourceCategoryId + "] with total categories of [" + numTotalStartCategories
 						+ "] and outgoing notes of [" + getNodeData(sourceCategoryId).numOutgoingEdges + "] P(c)=["
@@ -130,14 +142,11 @@ public class MainCategoryRelevanceEstimator {
 				int[] foo = targetPath.toVertexArray();
 				for (int idx = 0; idx < (foo.length - 1); idx++) {
 					Integer categoryId = foo[idx];
-					// pathProbability = pathProbability -
-					// Math.log(getNodeData(categoryId).numOutgoingEdges);
 					pathProbability = pathProbability / (double) (getNodeData(categoryId).numOutgoingEdges);
 					System.out.println("at id [" + categoryId + "] p [" + pathProbability + "]");
 				}
 
 				// update main topic probability with currently calculated
-				// String mainTopic = topCategoryLabels[targetIdx];
 				int mainTopic = topCategories[targetIdx];
 				Double previousProbability = maintopicsProbability.get(mainTopic);
 				if (previousProbability.isNaN()) {

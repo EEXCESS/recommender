@@ -20,7 +20,6 @@
 
 package eu.eexcess.diversityasurement.wikipedia;
 
-import static org.hamcrest.CoreMatchers.startsWith;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import grph.Grph;
@@ -96,10 +95,8 @@ public class MainCategoryRelevanceEstimatorTest {
 	@Test
 	public void yenTopKShortestPaths_testModification_expectCorrectPathes() {
 		Grph g = newTestGraph();
-		HashMap<String, Integer> categoryIds = newMainCategoryIdDictionary();
 
-		MainCategoryRelevanceEstimator estimator = new MainCategoryRelevanceEstimator(g, categoryIds,
-						newMaincategoryIdArray(), 12);
+		MainCategoryRelevanceEstimator estimator = new MainCategoryRelevanceEstimator(g, newMaincategoryIdArray(), 12);
 
 		int startCategories[] = new int[] { 21, 22, 23, 24 };
 		List<List<List<ArrayListPath>>> sourcesToTargetsPathes = estimator.yenTopKShortestPaths(g, startCategories,
@@ -312,7 +309,7 @@ public class MainCategoryRelevanceEstimatorTest {
 	@Test
 	public void disperseProbability_givenTestGraph_expectCorrectProbabilities() {
 		MainCategoryRelevanceEstimator estimator = new MainCategoryRelevanceEstimator(newTestGraph(),
-						newMainCategoryIdDictionary(), newMaincategoryIdArray(), 50);
+						newMaincategoryIdArray(), 50);
 
 		double pTotal = 0.0;
 		Map<Integer, HashMap<Integer, Double>> estimation = estimator.estimateProbabilities(new int[] { 21 });
