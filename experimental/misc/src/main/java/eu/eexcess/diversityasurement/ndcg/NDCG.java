@@ -49,7 +49,7 @@ public class NDCG {
 		Double ndcg = 0.0;
 
  		if (resultList.results.size() > 1) {
-			Double rel1 = resultList.results.get(0).nDCGRelevance;
+//			Double rel1 = resultList.results.get(0).nDCGRelevance;
 			Double dCG = 0.0;//rel1;
 			NDCGResultList sortedByRelevance = getRelevanceSortedResultList(resultList,category,at);
 			Double iDCG = 0.0;// sortedByRelevance.results.get(0).nDCGRelevance;

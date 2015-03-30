@@ -30,8 +30,9 @@
         Experimental code for research purposes.
     </description>
 
-	<dependencies>
 
+
+	<dependencies>
 		<dependency>
 			<groupId>eu.eexcess</groupId>
 			<artifactId>eexcess-common</artifactId>
@@ -131,6 +132,19 @@
 			<artifactId>wikipedia-synonym-index</artifactId>
 			<version>2.0-SNAPSHOT</version>
 		</dependency>
+		
+		<dependency>
+			<groupId>grph</groupId>
+			<artifactId>grph</artifactId>
+			<version>1.5.27</version>
+		</dependency>
 	</dependencies>
 
+	<repositories>
+		<repository>
+			<id>lhogie.i3s.maven.repo</id>
+			<name>Luc Hogie Maven repository</name>
+			<url>http://www.i3s.unice.fr/~hogie/maven_repository/</url>
+		</repository>
+	</repositories>
 </project>

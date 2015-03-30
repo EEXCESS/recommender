@@ -66,18 +66,17 @@ public class RDFCategoryExtractor {
 
 	private File categoryListing;
 	private Statistics statistics = new Statistics();
-	private Pattern categoryRDFPattern;
+	Pattern categoryRDFPattern = Pattern
+					.compile("<http://dbpedia.org/resource/Category:(\\w+)>\\s*<http://www.w3.org/2004/02/skos/core#broader>\\s*<http://dbpedia.org/resource/Category:(\\w+)>");
 	private CategoryTupleCollector collector;
-	private int printStatsEvery = 100000;
+	private int printStatsEvery = 200000;
 
 	public RDFCategoryExtractor(File filePath, CategoryTupleCollector callback) {
 		categoryListing = filePath;
 		collector = callback;
-		categoryRDFPattern = Pattern
-						.compile("<http://dbpedia.org/resource/Category:(\\w+)>\\s*<http://www.w3.org/2004/02/skos/core#broader>\\s*<http://dbpedia.org/resource/Category:(\\w+)>");
 	}
 
-	public void build() throws IOException {
+	public void extract() throws IOException {
 		LineIterator categoryEntryIterator = new LineIterator(new FileReader(categoryListing));
 		statistics.startTimeStamp = System.currentTimeMillis();
 		statistics.linesInFile = getTotalNumberOfLines(categoryListing.getAbsoluteFile());
@@ -98,6 +97,7 @@ public class RDFCategoryExtractor {
 				logStatistics();
 			}
 		}
+		categoryEntryIterator.close();
 		statistics.endTimeStamp = System.currentTimeMillis();
 		logStatistics();
 	}
