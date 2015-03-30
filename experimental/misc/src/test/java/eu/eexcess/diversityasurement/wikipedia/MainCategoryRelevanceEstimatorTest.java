@@ -20,6 +20,7 @@
 
 package eu.eexcess.diversityasurement.wikipedia;
 
+import static org.hamcrest.CoreMatchers.startsWith;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import grph.Grph;
@@ -84,9 +85,9 @@ public class MainCategoryRelevanceEstimatorTest {
 
 		// ArrayListPath q = new ArrayListPath();
 		ArrayListPath q = new MyListPath();
-		p.extend(21);
-		p.extend(24);
-		p.extend(101);
+		q.extend(21);
+		q.extend(24);
+		q.extend(101);
 
 		// assertTrue(p.equals(new int[] {21,24,101}));
 		assertTrue(p.equals(q));
@@ -98,7 +99,7 @@ public class MainCategoryRelevanceEstimatorTest {
 		HashMap<String, Integer> categoryIds = newMainCategoryIdDictionary();
 
 		MainCategoryRelevanceEstimator estimator = new MainCategoryRelevanceEstimator(g, categoryIds,
-						MainCategoryRelevanceEstimator.MAIN_CATEGORIES, 12);
+						newMaincategoryIdArray(), 12);
 
 		int startCategories[] = new int[] { 21, 22, 23, 24 };
 		List<List<List<ArrayListPath>>> sourcesToTargetsPathes = estimator.yenTopKShortestPaths(g, startCategories,
@@ -115,9 +116,11 @@ public class MainCategoryRelevanceEstimatorTest {
 		}
 	}
 
+	/**
+	 * compare given paths to known paths
+	 */
 	private void assertPathes(int sourceId, int targetId, List<ArrayListPath> sourceToTargetPathes) {
-		System.out.println("pathes from [" + sourceId + "] to [" + targetId + "]");
-		List<MyListPath> knownPaths = getKnownPathesFromSrcToMainCategories(sourceId);
+		List<MyListPath> knownPaths = getKnownPathsFromSrcToMainCategories(sourceId);
 		List<MyListPath> toTargetPathes = new ArrayList<>();
 
 		// convert to paths that support .equals() as expected
@@ -138,7 +141,7 @@ public class MainCategoryRelevanceEstimatorTest {
 		}
 	}
 
-	private List<MyListPath> getKnownPathesFromSrcToMainCategories(int src) {
+	private List<MyListPath> getKnownPathsFromSrcToMainCategories(int src) {
 		List<MyListPath> pathes = new ArrayList<>();
 
 		switch (src) {
@@ -201,6 +204,21 @@ public class MainCategoryRelevanceEstimatorTest {
 			break;
 		}
 		return pathes;
+	}
+
+	private int[] newMaincategoryIdArray() {
+		return new int[] { 101, 102, 103, 104, 105, 106, 107, 108, 109, 110, 111, 112, 113, 114, 115, 116, 117, 118,
+						119, 120, 121, 122, 123, 124, 125, 126, 127, 128, 129, 130, 131, 132, 133, 134, 135, 136, 137,
+						138, 139 };
+	}
+
+	private String mapCategoryIdToName(Integer id) {
+		for (Map.Entry<String, Integer> entry : newMainCategoryIdDictionary().entrySet()) {
+			if (entry.getValue().compareTo(id) == 0) {
+				return entry.getKey();
+			}
+		}
+		return null;
 	}
 
 	private HashMap<String, Integer> newMainCategoryIdDictionary() {
@@ -284,24 +302,49 @@ public class MainCategoryRelevanceEstimatorTest {
 		g.addDirectedSimpleEdge(26, 13, 102);
 		g.addDirectedSimpleEdge(26, 10, 28);
 		g.addDirectedSimpleEdge(28, 12, 104);
+		g.addDirectedSimpleEdge(28, 5, 23);
 
 		assertEquals(14, g.getNumberOfVertices());
-		assertEquals(16, g.getNumberOfDirectedEdges());
+		assertEquals(17, g.getNumberOfDirectedEdges());
 		return g;
 	}
 
 	@Test
 	public void disperseProbability_givenTestGraph_expectCorrectProbabilities() {
 		MainCategoryRelevanceEstimator estimator = new MainCategoryRelevanceEstimator(newTestGraph(),
-						newMainCategoryIdDictionary(), MainCategoryRelevanceEstimator.MAIN_CATEGORIES, 50);
+						newMainCategoryIdDictionary(), newMaincategoryIdArray(), 50);
 
-		Map<Integer, HashMap<String, Double>> estimation = estimator.estimateProbabilities(new int[] { 21 });
-		for (Map.Entry<Integer, HashMap<String, Double>> entry : estimation.entrySet()) {
+		double pTotal = 0.0;
+		Map<Integer, HashMap<Integer, Double>> estimation = estimator.estimateProbabilities(new int[] { 21 });
+
+		for (Map.Entry<Integer, HashMap<Integer, Double>> entry : estimation.entrySet()) {
 			System.out.println("estimations for [" + entry.getKey() + "]:");
-			for (Map.Entry<String, Double> estimationEntry : entry.getValue().entrySet()) {
-				System.out.println("[" + estimationEntry.getKey() + "] estimates to [" + estimationEntry.getValue()
-								+ "] ");
+
+			for (Map.Entry<Integer, Double> estimationEntry : entry.getValue().entrySet()) {
+				int topCategoryId = estimationEntry.getKey();
+				System.out.println("[" + topCategoryId + "=" + mapCategoryIdToName(topCategoryId) + "] estimates to ["
+								+ estimationEntry.getValue() + "] ");
+
+				if (!estimationEntry.getValue().isNaN()) {
+					pTotal += estimationEntry.getValue();
+				}
+
+				switch (topCategoryId) {
+				case 101:
+					assertEquals(0.375, estimationEntry.getValue(), 0.0001);
+					break;
+				case 102:
+					assertEquals(0.25, estimationEntry.getValue(), 0.0001);
+					break;
+				case 103:
+					assertEquals(0.06641, estimationEntry.getValue(), 0.0001);
+					break;
+				case 104:
+					assertEquals(0.2344, estimationEntry.getValue(), 0.0001);
+					break;
+				}
 			}
 		}
+		System.out.println("P total [" + pTotal + "]");
 	}
 }
