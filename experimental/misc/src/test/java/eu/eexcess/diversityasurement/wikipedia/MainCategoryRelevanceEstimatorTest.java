@@ -93,24 +93,180 @@ public class MainCategoryRelevanceEstimatorTest {
 	}
 
 	@Test
-	public void yenTopKShortestPaths_testModification_expectCorrectPathes() {
+	public void yenTopKShortestPaths_testArrayInputModification_expectCorrectPaths() {
 		Grph g = newTestGraph();
-
-		MainCategoryRelevanceEstimator estimator = new MainCategoryRelevanceEstimator(g, newMaincategoryIdArray(), 12);
-
+		int[] mainCategoryIdArray = newMaincategoryIdArray();
+		MainCategoryRelevanceEstimator estimator = new MainCategoryRelevanceEstimator(g, mainCategoryIdArray);
 		int startCategories[] = new int[] { 21, 22, 23, 24 };
-		List<List<List<ArrayListPath>>> sourcesToTargetsPathes = estimator.yenTopKShortestPaths(g, startCategories,
-						estimator.topCategories, estimator.topKShortestPathes, null);
+		List<List<List<ArrayListPath>>> sourcesToTargetsPathes = estimator.yenTopKShortestPaths(startCategories, 12);
 
 		int sourceIdx = 0;
 		for (List<List<ArrayListPath>> sourceToTargetsPathes : sourcesToTargetsPathes) {
 			int sourceId = startCategories[sourceIdx++];
 			int targetIdx = 0;
 			for (List<ArrayListPath> sourceToTargetPathes : sourceToTargetsPathes) {
-				int targetId = estimator.topCategories[targetIdx++];
+				int targetId = mainCategoryIdArray[targetIdx++];
 				assertPathes(sourceId, targetId, sourceToTargetPathes);
 			}
 		}
+	}
+
+	@Test
+	public void yenTopKShortestPaths_testCacheModification_expectCorrectPaths() {
+		Grph g = newTestGraph();
+		int[] mainCategoryIdArray = newMaincategoryIdArray();
+		MainCategoryRelevanceEstimator estimator = new MainCategoryRelevanceEstimator(g, mainCategoryIdArray);
+		int startCategories[] = new int[] { 21 };
+		Map<Integer, HashMap<Integer, Double>> sourcesToTargetsRelevances = estimator.estimateRelevances(
+						startCategories, 12);
+
+		for (Map.Entry<Integer, HashMap<Integer, Double>> entry : sourcesToTargetsRelevances.entrySet()) {
+			System.out.println("[" + entry.getKey() + "] estimates:");
+			for (HashMap.Entry<Integer, Double> estimate : entry.getValue().entrySet()) {
+				System.out.println("id [" + estimate.getKey() + "] relevance [" + estimate.getValue() + "]");
+			}
+		}
+
+		// recalculate using cache
+		sourcesToTargetsRelevances = estimator.estimateRelevances(startCategories, 11);
+
+		for (Map.Entry<Integer, HashMap<Integer, Double>> entry : sourcesToTargetsRelevances.entrySet()) {
+			System.out.println("[" + entry.getKey() + "] estimates:");
+			for (HashMap.Entry<Integer, Double> estimate : entry.getValue().entrySet()) {
+				System.out.println("id [" + estimate.getKey() + "] relevance [" + estimate.getValue() + "]");
+			}
+		}
+
+		assertEquals(1, sourcesToTargetsRelevances.size());
+		HashMap<Integer, Double> estimates = sourcesToTargetsRelevances.get(21);
+		assertEquals(0.375, estimates.get(101), 0.0001);
+		assertEquals(0.25, estimates.get(102), 0.0001);
+		assertEquals(0.06640625, estimates.get(103), 0.0001);
+		assertEquals(0.234375, estimates.get(104), 0.0001);
+	}
+
+	@Test
+	public void yenTopKShortestPaths_testCacheModification_expectCorrectCacheStats() {
+		Grph g = newTestGraph();
+		int[] mainCategoryIdArray = newMaincategoryIdArray();
+		MainCategoryRelevanceEstimator estimator = new MainCategoryRelevanceEstimator(g, mainCategoryIdArray);
+		int startCategories[] = new int[] { 21, 22, 23, 24 };
+
+		List<List<List<ArrayListPath>>> sourcesToTargetsPathes = estimator.yenTopKShortestPaths(startCategories, 12);
+		int sourceIdx = 0;
+		for (List<List<ArrayListPath>> sourceToTargetsPathes : sourcesToTargetsPathes) {
+			int sourceId = startCategories[sourceIdx++];
+			int targetIdx = 0;
+			for (List<ArrayListPath> sourceToTargetPathes : sourceToTargetsPathes) {
+				int targetId = mainCategoryIdArray[targetIdx++];
+				assertPathes(sourceId, targetId, sourceToTargetPathes);
+			}
+		}
+
+		sourcesToTargetsPathes = estimator.yenTopKShortestPaths(startCategories, 10);
+		sourceIdx = 0;
+		for (List<List<ArrayListPath>> sourceToTargetsPathes : sourcesToTargetsPathes) {
+			int sourceId = startCategories[sourceIdx++];
+			int targetIdx = 0;
+			for (List<ArrayListPath> sourceToTargetPathes : sourceToTargetsPathes) {
+				int targetId = mainCategoryIdArray[targetIdx++];
+				assertPathes(sourceId, targetId, sourceToTargetPathes);
+			}
+		}
+		assertEquals(4 * 39, estimator.getStatistics().cacheEntries);
+		assertEquals(1 * 4 * 39, estimator.getStatistics().cacheHits);
+
+		sourcesToTargetsPathes = estimator.yenTopKShortestPaths(startCategories, 7);
+		sourceIdx = 0;
+		for (List<List<ArrayListPath>> sourceToTargetsPathes : sourcesToTargetsPathes) {
+			int sourceId = startCategories[sourceIdx++];
+			int targetIdx = 0;
+			for (List<ArrayListPath> sourceToTargetPathes : sourceToTargetsPathes) {
+				int targetId = mainCategoryIdArray[targetIdx++];
+				assertPathes(sourceId, targetId, sourceToTargetPathes);
+			}
+		}
+		assertEquals(4 * 39, estimator.getStatistics().cacheEntries);
+		assertEquals(2 * 4 * 39, estimator.getStatistics().cacheHits);
+
+		sourcesToTargetsPathes = estimator.yenTopKShortestPaths(startCategories, 5);
+		sourceIdx = 0;
+		for (List<List<ArrayListPath>> sourceToTargetsPathes : sourcesToTargetsPathes) {
+			int sourceId = startCategories[sourceIdx++];
+			int targetIdx = 0;
+			for (List<ArrayListPath> sourceToTargetPathes : sourceToTargetsPathes) {
+				int targetId = mainCategoryIdArray[targetIdx++];
+				assertPathes(sourceId, targetId, sourceToTargetPathes);
+			}
+		}
+		assertEquals(4 * 39, estimator.getStatistics().cacheEntries);
+		assertEquals(3 * 4 * 39, estimator.getStatistics().cacheHits);
+		System.out.println("cache statistics: " + estimator.getStatistics());
+	}
+
+	@Test
+	public void yenTopKShortestPathsConcurrent_oneThreadPerSourceNode_expectCorrectPaths() {
+
+		Grph g = newTestGraph();
+		int[] mainCategoryIdArray = newMaincategoryIdArray();
+		MainCategoryRelevanceEstimator estimator = new MainCategoryRelevanceEstimator(g, mainCategoryIdArray);
+		estimator.setNumCategoriesToCalculateBundled(1);
+		estimator.setNumCategoriesToCalculateBundled(1);
+		int startCategories[] = new int[] { 21, 22, 23, 24 };
+
+		Map<Integer, HashMap<Integer, Double>> sourcesToTargetsRelevances = estimator.estimateRelevancesConcurrent(
+						startCategories, 12, 4, 4);
+
+		for (Map.Entry<Integer, HashMap<Integer, Double>> entry : sourcesToTargetsRelevances.entrySet()) {
+			System.out.println("[" + entry.getKey() + "] estimates:");
+			for (HashMap.Entry<Integer, Double> estimate : entry.getValue().entrySet()) {
+				System.out.println("id [" + estimate.getKey() + "] relevance [" + estimate.getValue() + "]");
+			}
+		}
+
+		// recalculate using cache
+		sourcesToTargetsRelevances = estimator.estimateRelevances(startCategories, 11);
+
+		for (Map.Entry<Integer, HashMap<Integer, Double>> entry : sourcesToTargetsRelevances.entrySet()) {
+			System.out.println("[" + entry.getKey() + "] estimates:");
+			for (HashMap.Entry<Integer, Double> estimate : entry.getValue().entrySet()) {
+				System.out.println("id [" + estimate.getKey() + "] relevance [" + estimate.getValue() + "]");
+			}
+		}
+
+		assertEquals(4, sourcesToTargetsRelevances.size());
+		HashMap<Integer, Double> estimates = sourcesToTargetsRelevances.get(21);
+		assertEquals(0.09375, estimates.get(101), 0.0001);
+		assertEquals(0.0625, estimates.get(102), 0.0001);
+		assertEquals(0.0166015625, estimates.get(103), 0.0001);
+		assertEquals(0.05859375, estimates.get(104), 0.0001);
+	}
+
+	@Test
+	public void yenTopKShortestPathsConcurrent_testCacheModification_expectCorrectCacheStats() {
+		Grph g = newTestGraph();
+		int[] mainCategoryIdArray = newMaincategoryIdArray();
+		MainCategoryRelevanceEstimator estimator = new MainCategoryRelevanceEstimator(g, mainCategoryIdArray);
+		estimator.setNumCategoriesToCalculateBundled(1);
+		estimator.setNumCategoriesToCalculateBundled(1);
+		int startCategories[] = new int[] { 21, 22, 23, 24 };
+
+		estimator.estimateRelevancesConcurrent(startCategories, 12, 4, 4);
+		System.out.println("cache statistics#1: " + estimator.getStatistics());
+		assertEquals(0 * 4 * 39, estimator.getStatistics().cacheHits);
+		assertEquals(4 * 39, estimator.getStatistics().cacheEntries);
+
+		// recalculate using cache
+		estimator.estimateRelevancesConcurrent(startCategories, 11, 4, 4);
+		System.out.println("cache statistics#2: " + estimator.getStatistics());
+		assertEquals(4 * 39, estimator.getStatistics().cacheHits);
+		assertEquals(4 * 39, estimator.getStatistics().cacheEntries);
+
+		// recalculate using cache
+		estimator.estimateRelevancesConcurrent(new int[] { 21, 25 }, 11, 4, 4);
+		System.out.println("cache statistics#3: " + estimator.getStatistics());
+		assertEquals(4 * 39 + 1 * 39, estimator.getStatistics().cacheHits);
+		assertEquals(4 * 39 + 1 * 39, estimator.getStatistics().cacheEntries);
 	}
 
 	/**
@@ -309,10 +465,10 @@ public class MainCategoryRelevanceEstimatorTest {
 	@Test
 	public void disperseProbability_givenTestGraph_expectCorrectProbabilities() {
 		MainCategoryRelevanceEstimator estimator = new MainCategoryRelevanceEstimator(newTestGraph(),
-						newMaincategoryIdArray(), 50);
+						newMaincategoryIdArray());
 
 		double pTotal = 0.0;
-		Map<Integer, HashMap<Integer, Double>> estimation = estimator.estimateProbabilities(new int[] { 21 });
+		Map<Integer, HashMap<Integer, Double>> estimation = estimator.estimateRelevances(new int[] { 21 }, 50);
 
 		for (Map.Entry<Integer, HashMap<Integer, Double>> entry : estimation.entrySet()) {
 			System.out.println("estimations for [" + entry.getKey() + "]:");

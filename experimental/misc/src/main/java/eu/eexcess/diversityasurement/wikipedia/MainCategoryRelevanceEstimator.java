@@ -25,12 +25,15 @@ import edu.asu.emit.qyan.alg.model.Graph;
 import edu.asu.emit.qyan.alg.model.abstracts.BaseVertex;
 import grph.Grph;
 import grph.path.ArrayListPath;
-import grph.properties.NumericalProperty;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Estimate the relevance of a sub category c being related to all categories m
@@ -41,29 +44,179 @@ import java.util.Map;
  */
 public class MainCategoryRelevanceEstimator {
 
-	public static class NodeData {
-		int nodeId = -1;
-		int numOutgoingEdges = -1;
+	public static class Statistics {
+		public int cacheHits = 0;
+		public int cacheEntries = 0;
+
+		@Override
+		public String toString() {
+			return "cache hits [" + cacheHits + "] cache total entries [" + cacheEntries + "]";
+		}
 	}
 
-	private Grph graph;
-	int[] topCategories;
-	int topKShortestPathes;
-	private HashMap<Integer, NodeData> cachedNodes;
+	public static class NodeData {
+		public int nodeId = -1;
+		public int numOutgoingEdges = -1;
+	}
 
-	public MainCategoryRelevanceEstimator(Grph completeCategoryGraph, int[] mainCategories, int topKShortestPathes) {
+	public static class KShortestPaths {
+		public int k = -1;
+		List<ArrayListPath> paths;
+
+		@Override
+		public int hashCode() {
+			final int prime = 31;
+			int result = 1;
+			result = prime * result + k;
+			result = prime * result + ((paths == null) ? 0 : paths.hashCode());
+			return result;
+		}
+
+		@Override
+		public boolean equals(Object obj) {
+			if (this == obj)
+				return true;
+			if (obj == null)
+				return false;
+			if (getClass() != obj.getClass())
+				return false;
+			KShortestPaths other = (KShortestPaths) obj;
+			if (k != other.k)
+				return false;
+			if (paths == null) {
+				if (other.paths != null)
+					return false;
+			} else if (!paths.equals(other.paths))
+				return false;
+			return true;
+		}
+
+		@Override
+		public String toString() {
+			return "k [" + k + "] paths [" + paths + "]";
+		}
+	}
+
+	public static class PathMapKey {
+		public int source = -1;
+		public int target = -1;
+
+		public PathMapKey(int source, int target) {
+			this.source = source;
+			this.target = target;
+		}
+
+		@Override
+		public int hashCode() {
+			final int prime = 31;
+			int result = 1;
+			result = prime * result + source;
+			result = prime * result + target;
+			return result;
+		}
+
+		@Override
+		public boolean equals(Object obj) {
+			if (this == obj)
+				return true;
+			if (obj == null)
+				return false;
+			if (getClass() != obj.getClass())
+				return false;
+			PathMapKey other = (PathMapKey) obj;
+			if (source != other.source)
+				return false;
+			if (target != other.target)
+				return false;
+			return true;
+		}
+	}
+
+	private static class Worker implements Runnable {
+
+		private List<Integer> startCategories;
+		private int topK;
+		private MainCategoryRelevanceEstimator relevanceEstimator;
+		static Map<Integer, List<List<ArrayListPath>>> topKShortestPaths = Collections
+						.synchronizedMap(new HashMap<Integer, List<List<ArrayListPath>>>());
+		public static int numCategoriesToCalculateBundled = 5;
+
+		public Worker(List<Integer> startCategories, int topK, MainCategoryRelevanceEstimator estimator) {
+			System.out.println("new worker constructed @ remaining #categories [" + startCategories.size() + "]");
+			this.topK = topK;
+			this.relevanceEstimator = estimator;
+			this.startCategories = startCategories;
+		}
+
+		@Override
+		public void run() {
+			while (!startCategories.isEmpty()) {
+				// get top k shortest paths
+
+				System.out.println("get top k shortest paths");
+
+				ArrayList<Integer> fetchedCategories = new ArrayList<>();
+				int taken = 0;
+				while (!startCategories.isEmpty() && taken < numCategoriesToCalculateBundled) {
+					fetchedCategories.add(startCategories.remove(0));
+					taken++;
+				}
+
+				if (fetchedCategories.size() <= 0) {
+					return;
+				}
+				System.out.println("took [" + fetchedCategories.size() + "] categories, remaining ["
+								+ startCategories.size() + "]");
+				int idx = 0;
+				int[] sources = new int[fetchedCategories.size()];
+				for (Integer id : fetchedCategories) {
+					sources[idx++] = id;
+				}
+
+				List<List<List<ArrayListPath>>> sourcesToTargetsPathes = relevanceEstimator.yenTopKShortestPaths(
+								sources, topK);
+
+				System.out.println("collect results to map with arbitrary order");
+				// collect results to map with arbitrary order
+				idx = 0;
+				for (List<List<ArrayListPath>> sourceToTargetsPathes : sourcesToTargetsPathes) {
+					topKShortestPaths.put(sources[idx++], sourceToTargetsPathes);
+				}
+			}
+		}
+	}
+
+	private final Grph graph;
+	private final int[] topCategories;
+	private HashMap<Integer, NodeData> cachedNodes;
+	private HashMap<PathMapKey, KShortestPaths> cachedTopKShortestPaths;
+	private Statistics statistics;
+
+	public MainCategoryRelevanceEstimator(Grph completeCategoryGraph, int[] mainCategories) {
 		this.graph = completeCategoryGraph;
 		this.topCategories = mainCategories;
-
-		this.topKShortestPathes = topKShortestPathes;
-		this.cachedNodes = new HashMap<>();
+		clear();
+		clearCache();
 	}
 
 	/**
-	 * {@link #estimateProbabilities(int[], int)}
+	 * clears state dependent but no cache resources
 	 */
-	public Map<Integer, HashMap<Integer, Double>> estimateProbabilities(int[] startCategories) {
-		return estimateProbabilities(startCategories, topKShortestPathes);
+	public void clear() {
+		statistics = new Statistics();
+	}
+
+	/**
+	 * clear cache resources
+	 */
+	public void clearCache() {
+		cachedNodes = new HashMap<>();
+		cachedTopKShortestPaths = new HashMap<>();
+	}
+
+	public Statistics getStatistics() {
+		statistics.cacheEntries = cachedTopKShortestPaths.size();
+		return statistics;
 	}
 
 	/**
@@ -82,14 +235,64 @@ public class MainCategoryRelevanceEstimator {
 	 * @return a map entry for each c containing a map of topCategories and
 	 *         their relevance
 	 */
-	public Map<Integer, HashMap<Integer, Double>> estimateProbabilities(int[] startCategories, int topKShortestPathes) {
-		this.topKShortestPathes = topKShortestPathes;
-		HashMap<Integer, HashMap<Integer, Double>> results = new HashMap<>();
-
+	public Map<Integer, HashMap<Integer, Double>> estimateRelevances(int[] startCategories, int topKShortestPathes) {
 		// get top k shortest paths
-		List<List<List<ArrayListPath>>> sourcesToTargetsPathes = yenTopKShortestPaths(graph, startCategories,
-						topCategories, this.topKShortestPathes, null);
+		List<List<List<ArrayListPath>>> sourcesToTargetsPathes = yenTopKShortestPaths(startCategories,
+						topKShortestPathes);
+		return calculateProbabilites(startCategories, sourcesToTargetsPathes);
+	}
 
+	/**
+	 * concurrent implementation of {@link #estimateRelevances(int[], int)}
+	 * 
+	 * @param startCategories
+	 *            see {@link #estimateRelevances(int[], int)}
+	 * @param topKShortestPathes
+	 *            see {@link #estimateRelevances(int[], int)}
+	 * @param numTotalThreads
+	 *            must be greater than numRunningThreadsAtOnce
+	 * @param numRunningThreadsAtOnce
+	 *            must be less than numTotalThreads
+	 * @return
+	 */
+	public Map<Integer, HashMap<Integer, Double>> estimateRelevancesConcurrent(int[] startCategories,
+					int topKShortestPathes, int numTotalThreads, int numRunningThreadsAtOnce) {
+
+		List<Integer> toBeProcessed = Collections.synchronizedList(new ArrayList<Integer>());
+		for (int startCategory : startCategories) {
+			toBeProcessed.add(startCategory);
+		}
+
+		ExecutorService executor = Executors.newFixedThreadPool(numRunningThreadsAtOnce);
+		for (int i = 0; i < numTotalThreads; i++) {
+			Runnable worker = new Worker(toBeProcessed, topKShortestPathes, this);
+			executor.execute(worker);
+		}
+
+		executor.shutdown();
+		while (!executor.isTerminated()) {
+			try {
+				executor.awaitTermination(7, TimeUnit.DAYS);
+			} catch (InterruptedException e) {
+			}
+		}
+
+		// order results that are arbitrarily ordered
+		List<List<List<ArrayListPath>>> sourcesToTargetsPathes = new ArrayList<>();
+		for (int sourceIdx = 0; sourceIdx < startCategories.length; sourceIdx++) {
+			sourcesToTargetsPathes.add(Worker.topKShortestPaths.get(startCategories[sourceIdx]));
+		}
+
+		return calculateProbabilites(startCategories, sourcesToTargetsPathes);
+	}
+
+	public void setNumCategoriesToCalculateBundled(int num) {
+		Worker.numCategoriesToCalculateBundled = num;
+	}
+
+	private HashMap<Integer, HashMap<Integer, Double>> calculateProbabilites(int[] startCategories,
+					List<List<List<ArrayListPath>>> sourcesToTargetsPathes) {
+		HashMap<Integer, HashMap<Integer, Double>> results = new HashMap<>();
 		// disperse probability over paths
 		int sourceIdx = 0;
 		for (List<List<ArrayListPath>> sourceToTargetsPathes : sourcesToTargetsPathes) {
@@ -102,7 +305,6 @@ public class MainCategoryRelevanceEstimator {
 			results.put(sourceId, probs);
 			sourceIdx++;
 		}
-
 		return results;
 	}
 
@@ -128,22 +330,27 @@ public class MainCategoryRelevanceEstimator {
 		}
 
 		double categoryProbability = 1.0 / (double) numTotalStartCategories;
-		System.out.println("at id [" + sourceCategoryId + "] with total categories of [" + numTotalStartCategories
-						+ "] and outgoing notes of [" + getNodeData(sourceCategoryId).numOutgoingEdges + "] P(c)=["
-						+ categoryProbability + "] p_start=[" + "startPathProbability" + "]");
+		// System.out.println("at id [" + sourceCategoryId +
+		// "] with total categories of [" + numTotalStartCategories
+		// + "] and outgoing notes of [" +
+		// getNodeData(sourceCategoryId).numOutgoingEdges + "] P(c)=["
+		// + categoryProbability + "] p_start=[" + "startPathProbability" +
+		// "]");
 
 		int targetIdx = 0;
 		for (List<ArrayListPath> targetPaths : sourceToTargetsPaths) {
 			for (ArrayListPath targetPath : targetPaths) {
 				double pathProbability = categoryProbability;
-				System.out.println("new path starts at id [" + sourceCategoryId + "] with p [" + pathProbability + "]");
+				// System.out.println("new path starts at id [" +
+				// sourceCategoryId + "] with p [" + pathProbability + "]");
 
 				// distribute probability over path
 				int[] foo = targetPath.toVertexArray();
 				for (int idx = 0; idx < (foo.length - 1); idx++) {
 					Integer categoryId = foo[idx];
 					pathProbability = pathProbability / (double) (getNodeData(categoryId).numOutgoingEdges);
-					System.out.println("at id [" + categoryId + "] p [" + pathProbability + "]");
+					// System.out.println("at id [" + categoryId + "] p [" +
+					// pathProbability + "]");
 				}
 
 				// update main topic probability with currently calculated
@@ -151,12 +358,15 @@ public class MainCategoryRelevanceEstimator {
 				Double previousProbability = maintopicsProbability.get(mainTopic);
 				if (previousProbability.isNaN()) {
 					maintopicsProbability.put(mainTopic, pathProbability);
-					System.out.println("topic p was [" + previousProbability + "] is now [" + pathProbability
-									+ "] store it to id [" + mainTopic + "]");
+					// System.out.println("topic p was [" + previousProbability
+					// + "] is now [" + pathProbability
+					// + "] store it to id [" + mainTopic + "]");
 				} else {
 					maintopicsProbability.put(mainTopic, previousProbability + pathProbability);
-					System.out.println("topic p was [" + previousProbability + "] is now ["
-									+ maintopicsProbability.get(mainTopic) + "] store it to id [" + mainTopic + "]");
+					// System.out.println("topic p was [" + previousProbability
+					// + "] is now ["
+					// + maintopicsProbability.get(mainTopic) +
+					// "] store it to id [" + mainTopic + "]");
 				}
 			}
 			targetIdx++;
@@ -165,7 +375,7 @@ public class MainCategoryRelevanceEstimator {
 		return maintopicsProbability;
 	}
 
-	private NodeData getNodeData(Integer nodeId) {
+	synchronized private NodeData getNodeData(Integer nodeId) {
 		NodeData nd = cachedNodes.get(nodeId);
 		if (null == nd) {
 			nd = new NodeData();
@@ -176,13 +386,9 @@ public class MainCategoryRelevanceEstimator {
 		return nd;
 	}
 
-	List<List<List<ArrayListPath>>> yenTopKShortestPaths(Grph g, int[] sources, int[] targets, int topK,
-					NumericalProperty weights) {
+	List<List<List<ArrayListPath>>> yenTopKShortestPaths(int[] sources, int topKShortestPathes) {
 
-		if (weights != null)
-			throw new IllegalArgumentException("unsupported");
-
-		g = g.clone();
+		Grph g = graph.clone();
 
 		while (g.getVertices().getDensity() < 1) {
 			g.addVertex();
@@ -201,32 +407,111 @@ public class MainCategoryRelevanceEstimator {
 		}
 
 		YenTopKShortestPathsAlg alg = new YenTopKShortestPathsAlg(h);
-
 		List<List<List<ArrayListPath>>> sourcesTotargetsPaths = new ArrayList<List<List<ArrayListPath>>>();
 
+		long totalstartTimestamp = System.currentTimeMillis();
 		for (int source : sources) {
 			List<List<ArrayListPath>> sourceTargetsPaths = new ArrayList<List<ArrayListPath>>();
-			for (int target : targets) {
+			for (int target : topCategories) {
 
 				// TODO: does get_shortest_paths() perform its work read only on
 				// the graph h?
-				List<edu.asu.emit.qyan.alg.model.Path> paths = alg.get_shortest_paths(h.get_vertex(source),
-								h.get_vertex(target), topK);
+				long startTimestamp = System.currentTimeMillis();
+//				System.out.println("started get kshortest for [" + source + "] to target [" + target + "] k ["
+//								+ topKShortestPathes + "]");
 
-				List<ArrayListPath> grphPaths = new ArrayList<>();
-				for (edu.asu.emit.qyan.alg.model.Path p : paths) {
-					ArrayListPath pb = new ArrayListPath();
+				List<ArrayListPath> grphPaths = getCachedOrCalculate(h, alg, source, target, topKShortestPathes);
+				System.out.println("done in [" + (System.currentTimeMillis() - startTimestamp)
+								+ "]ms get kshortest for [" + source + "] to target [" + target + "] k ["
+								+ topKShortestPathes + "]");
 
-					for (BaseVertex v : p.get_vertices()) {
-						pb.extend(v.get_id());
-					}
-
-					grphPaths.add(pb);
-				}
 				sourceTargetsPaths.add(grphPaths);
 			}
 			sourcesTotargetsPaths.add(sourceTargetsPaths);
 		}
+		System.out.println("total duration of yenTopKShortestPaths with [" + sources.length + "] start nodes to ["
+						+ topCategories.length + "] targets with k [" + topKShortestPathes + "]: ["
+						+ (System.currentTimeMillis() - totalstartTimestamp) + "]ms ");
 		return sourcesTotargetsPaths;
+	}
+
+	private List<ArrayListPath> getCachedOrCalculate(Graph h, YenTopKShortestPathsAlg alg, int source, int target,
+					int topK) {
+		PathMapKey pathOfInterest = new PathMapKey(source, target);
+		List<ArrayListPath> paths = null;
+
+		synchronized (this) {
+			paths = copyOfCachedPaths(topK, pathOfInterest);
+			if (null != paths) {
+				statistics.cacheHits++;
+				return paths;
+			}
+		}
+
+		// O(get_shortest_paths(h,source,target, K)) = O(K * h.nodes
+		// (m+n*log(n)))
+		KShortestPaths kPaths = new KShortestPaths();
+		kPaths.k = topK;
+		kPaths.paths = getShortestKPaths(h, alg, source, target, topK);
+
+		synchronized (this) {
+			KShortestPaths doubleChecedKPaths = cachedTopKShortestPaths.get(pathOfInterest);
+			if (null != doubleChecedKPaths) {
+				if (kPaths.k < doubleChecedKPaths.k) {
+					statistics.cacheHits++;
+					return copyOfShortestPaths(kPaths.paths.size(), doubleChecedKPaths);
+				}
+			}
+			cachedTopKShortestPaths.put(pathOfInterest, kPaths);
+			statistics.cacheEntries++;
+			return copyOfCachedPaths(topK, pathOfInterest);
+		}
+	}
+
+	private List<ArrayListPath> copyOfCachedPaths(int topK, PathMapKey pathOfInterest) {
+
+		KShortestPaths cachedKPaths = cachedTopKShortestPaths.get(pathOfInterest);
+		if (null != cachedKPaths) {
+			// cached paths can only be used if topK <= kPaths.k
+			if (topK <= cachedKPaths.k) {
+				return copyOfShortestPaths(topK, cachedKPaths);
+			}
+		}
+		return null;
+	}
+
+	/**
+	 * copies the shortest topK paths from kPaths
+	 * 
+	 * @param topK
+	 *            number of paths to copy
+	 * @param paths
+	 *            where to copy paths from
+	 */
+	private List<ArrayListPath> copyOfShortestPaths(int topK, KShortestPaths kPaths) {
+		List<ArrayListPath> pathList = new ArrayList<>();
+		for (int idx = 0; idx < topK && idx < kPaths.paths.size(); idx++) {
+			ArrayListPath pathCopy = new ArrayListPath();
+			for (int vertex : kPaths.paths.get(idx).toVertexArray()) {
+				pathCopy.extend(vertex);
+			}
+			pathList.add(pathCopy);
+		}
+		return pathList;
+	}
+
+	private List<ArrayListPath> getShortestKPaths(Graph h, YenTopKShortestPathsAlg alg, int source, int target, int topK) {
+		List<edu.asu.emit.qyan.alg.model.Path> paths = alg.get_shortest_paths(h.get_vertex(source),
+						h.get_vertex(target), topK);
+
+		List<ArrayListPath> grphPaths = new ArrayList<>();
+		for (edu.asu.emit.qyan.alg.model.Path p : paths) {
+			ArrayListPath pb = new ArrayListPath();
+			for (BaseVertex v : p.get_vertices()) {
+				pb.extend(v.get_id());
+			}
+			grphPaths.add(pb);
+		}
+		return grphPaths;
 	}
 }

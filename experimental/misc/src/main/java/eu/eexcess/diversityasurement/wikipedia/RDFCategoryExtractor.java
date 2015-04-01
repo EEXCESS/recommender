@@ -55,6 +55,13 @@ public class RDFCategoryExtractor {
 		public long linesConsidered = 0;
 		public long startTimeStamp;
 		public long endTimeStamp;
+
+		@Override
+		public String toString() {
+			return "inflated graph from rdf int [" + (endTimeStamp - startTimeStamp) + "]ms lines: considered ["
+							+ linesConsidered + "] skipped [" + linesSkipped + "] seen total [" + linesTotal
+							+ "] total in file[" + linesInFile + "]";
+		}
 	}
 
 	private static class ParentChildCategoryGlue {
@@ -69,7 +76,8 @@ public class RDFCategoryExtractor {
 	Pattern categoryRDFPattern = Pattern
 					.compile("<http://dbpedia.org/resource/Category:(\\w+)>\\s*<http://www.w3.org/2004/02/skos/core#broader>\\s*<http://dbpedia.org/resource/Category:(\\w+)>");
 	private CategoryTupleCollector collector;
-	private int printStatsEvery = 200000;
+
+	// private int printStatsEvery = 200000;
 
 	public RDFCategoryExtractor(File filePath, CategoryTupleCollector callback) {
 		categoryListing = filePath;
@@ -93,9 +101,9 @@ public class RDFCategoryExtractor {
 			} else {
 				statistics.linesSkipped++;
 			}
-			if (0 == (statistics.linesTotal % printStatsEvery)) {
-				logStatistics();
-			}
+			// if (0 == (statistics.linesTotal % printStatsEvery)) {
+			// logStatistics();
+			// }
 		}
 		categoryEntryIterator.close();
 		statistics.endTimeStamp = System.currentTimeMillis();

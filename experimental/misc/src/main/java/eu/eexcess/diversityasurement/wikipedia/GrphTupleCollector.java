@@ -20,6 +20,13 @@
 
 package eu.eexcess.diversityasurement.wikipedia;
 
+import grph.Grph;
+import grph.in_memory.InMemoryGrph;
+import grph.io.AbstractGraphReader;
+import grph.io.AbstractGraphWriter;
+import grph.io.GraphBuildException;
+import grph.io.ParseException;
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -29,36 +36,33 @@ import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
-import java.util.logging.Logger;
-
-import eu.eexcess.logger.PianoLogger;
-import grph.Grph;
-import grph.in_memory.InMemoryGrph;
-import grph.io.AbstractGraphReader;
-import grph.io.AbstractGraphWriter;
-import grph.io.GraphBuildException;
-import grph.io.ParseException;
 
 public class GrphTupleCollector implements CategoryTupleCollector {
 
-	private Logger logger = PianoLogger.getLogger(GrphTupleCollector.class);
+	// private Logger logger = PianoLogger.getLogger(GrphTupleCollector.class);
 	private int initialCategoryCapacity = 350000;
-	private int logAllNTakeCalls = 200000;
+	// private int logAllNTakeCalls = 200000;
 	private Grph graph;
 	private Map<String, Integer> categoryIds;
 
 	public static class Statistics {
-		int numSelfLinked = 0;
-		int numDuplicates = 0;
-		int numTotalCalls = 0;
-		int numTotalTaken = 0;
+		public int numSelfLinked = 0;
+		public int numDuplicates = 0;
+		public int numTotalCalls = 0;
+		public int numTotalTaken = 0;
+
+		@Override
+		public String toString() {
+			return "edges inflated to graph: nodes [" + numTotalTaken + "] edge duplicates [" + numDuplicates
+							+ "] self linked [" + numSelfLinked + "] total collecting calls [" + numTotalTaken + "]";
+		}
 	}
 
 	private Statistics stats;
 
 	private HashSet<String> seenTuples;
 
-	GrphTupleCollector(int initialCategoryCapacity) {
+	public GrphTupleCollector(int initialCategoryCapacity) {
 		this.initialCategoryCapacity = initialCategoryCapacity;
 		ClassLoader.getSystemClassLoader().setDefaultAssertionStatus(true);
 		clear();
@@ -67,7 +71,7 @@ public class GrphTupleCollector implements CategoryTupleCollector {
 	private synchronized int categoryId(String category) {
 		Integer id = categoryIds.get(category);
 		if (id == null) {
-			id = categoryIds.size();
+			id = categoryIds.size() + 1;
 			categoryIds.put(category, id);
 		}
 		return id;
@@ -78,12 +82,14 @@ public class GrphTupleCollector implements CategoryTupleCollector {
 
 		stats.numTotalCalls++;
 		if (parent.hashCode() == child.hashCode()) {
-			logger.warning("skdipping loop to self with parent[" + parent + "] subcategory[" + child + "]");
+			// logger.warning("skipping loop to self with parent[" + parent +
+			// "] subcategory[" + child + "]");
 			stats.numSelfLinked++;
 			return;
 		}
-		if (seenTuples.contains(parent + child)) {
-			logger.warning("skipping seen tuple parent[" + parent + "] subcategory[" + child + "]");
+		if (seenTuples.contains(child + parent)) {
+			// logger.warning("skipping seen tuple parent[" + parent +
+			// "] subcategory[" + child + "]");
 			stats.numDuplicates++;
 			return;
 		}
@@ -92,21 +98,26 @@ public class GrphTupleCollector implements CategoryTupleCollector {
 		int childId = categoryId(child);
 		int parentId = categoryId(parent);
 
-		if (!graph.containsVertex(childId))
+		if (!graph.containsVertex(childId)) {
 			graph.addVertex(childId);
+		}
 
-		if (!graph.containsVertex(parentId))
+		if (!graph.containsVertex(parentId)) {
 			graph.addVertex(parentId);
+		}
 
 		graph.addDirectedSimpleEdge(childId, parentId);
+		seenTuples.add(child + parent);
 
-		if (0 == stats.numTotalCalls % logAllNTakeCalls) {
-			logger.info("total taken tuples [" + stats.numTotalTaken + "] out of [" + stats.numTotalCalls + "]");
-			if (stats.numDuplicates > 0 || stats.numSelfLinked > 0) {
-				logger.warning("skipped tuples: duplicates [" + stats.numDuplicates + "] self linked ["
-								+ stats.numSelfLinked + "]");
-			}
-		}
+		// if (0 == stats.numTotalCalls % logAllNTakeCalls) {
+		// logger.info("total taken tuples [" + stats.numTotalTaken +
+		// "] out of [" + stats.numTotalCalls + "]");
+		// if (stats.numDuplicates > 0 || stats.numSelfLinked > 0) {
+		// logger.warning("skipped tuples: duplicates [" + stats.numDuplicates +
+		// "] self linked ["
+		// + stats.numSelfLinked + "]");
+		// }
+		// }
 	}
 
 	/**
@@ -114,8 +125,8 @@ public class GrphTupleCollector implements CategoryTupleCollector {
 	 */
 	public void clear() {
 		graph = new InMemoryGrph();
-		this.categoryIds = new HashMap<>(initialCategoryCapacity);
-		seenTuples = new HashSet<>(initialCategoryCapacity);
+		categoryIds = new HashMap<>(initialCategoryCapacity);
+		seenTuples = new HashSet<>();
 		stats = new Statistics();
 	}
 
@@ -125,6 +136,10 @@ public class GrphTupleCollector implements CategoryTupleCollector {
 
 	public Grph getGraph() {
 		return graph;
+	}
+
+	public Map<String, Integer> getCategoryMap() {
+		return categoryIds;
 	}
 
 	public int getCategoryId(String category) {
