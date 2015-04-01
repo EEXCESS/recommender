@@ -70,6 +70,20 @@ public class ZBWPartnerRecommenderTest {
         assertEquals(20, resultList.results.size());
 
 	}
+	
+	@Test
+	public void singleQueryserendipity() {
+		ArrayList<String> keywords = new ArrayList<String>();
+		keywords.add("serendipity");
+		ResultList resultList = PartnerRecommenderTestHelper.getRecommendations("eexcess-partner-zbw-1.0-SNAPSHOT",	
+				port, PartnerRecommenderTestHelper.createParamsForPartnerRecommender(20, keywords));
+	    
+        assertNotNull(resultList);
+        assertTrue(resultList.results.size() > 0 );
+        assertEquals(20, resultList.results.size());
+
+	}
+	
 
 	@Test
 	public void singleQueryFrauenarbeitChinaArbeitsbedingungenGeschlechterrolle() {
