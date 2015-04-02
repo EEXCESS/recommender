@@ -1,0 +1,15 @@
+{
+  "systemId": "KIMPortal",
+  "partnerConnectorClass": "eu.eexcess.kimportal.recommender.PartnerConnector",
+  "queryGeneratorClass": "eu.eexcess.kimportal.recommender.KIMPortalQueryGenerator",
+  "searchEndpoint": "https://kgapi.bl.ch/solr/kim-portal.objects/select/xml?q=_fulltext_:${query}",
+  "transformerClass": "eu.eexcess.kimportal.datalayer.KIMPortalTransformer",
+  "isTransformedNative": "false",
+  "mappingListTransformationFile":"mapperResultList.xsl",
+  "mappingObjectTransformationFile":"mapperObject.xsl",
+  "partnerDataRequestsTrace":"true",
+  "enableEnriching":"false",
+  "makeCleanupBeforeTransformation":"false",
+  "partnerConnectorEndpoint": "http://127.0.0.1/eexcess-partner-kimportal-1.0-SNAPSHOT/partner/recommend",
+  "federatedRecommenderURI":"http://127.0.0.1/eexcess-federated-recommender-web-service-1.0-SNAPSHOT/recommender/"
+}
