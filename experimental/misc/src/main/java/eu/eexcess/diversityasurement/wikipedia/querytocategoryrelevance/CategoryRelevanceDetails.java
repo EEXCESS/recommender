@@ -20,12 +20,33 @@
 
 package eu.eexcess.diversityasurement.wikipedia.querytocategoryrelevance;
 
-public class QueryCategoryRelevance extends Query {
-	public static class Relevance {
+import java.io.Serializable;
+
+public class CategoryRelevanceDetails implements Serializable {
+	private static final long serialVersionUID = 2662323424344375687L;
+
+	public static class TopCategoryRelevance implements Serializable {
+		private static final long serialVersionUID = 2990339220973007267L;
 		public String categoryName = "";
 		public Integer categoryId = -1;
-		public Double categoryrelevance = Double.NaN;
+		public Double categoryRelevance = Double.NaN;
 	};
 
-	public Relevance[] relevances;
+	// public static class SubCategory implements Serializable {
+	// private static final long serialVersionUID = 7496329867387904375L;
+	// public String categoryName = "";
+	// public Integer categoryId = -1;
+	// }
+
+	public String categoryName;
+	public Integer categoryId = -1;
+
+	public String query;
+	public String queryDescription;
+	public Integer queryNumber;
+	
+	public Integer documenId;
+
+	public TopCategoryRelevance[] topCategoryRelevances;
+	// public SubCategory[] startCategories;
 }

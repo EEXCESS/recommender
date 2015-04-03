@@ -20,6 +20,8 @@
 
 package eu.eexcess.diversityasurement.wikipedia.querytocategoryrelevance;
 
-public class QueriesCategoryRelevance {
-	public QueryCategoryRelevance[] queries;
+public class Relevances {
+	@Deprecated
+	public String query;
+	public CategoryRelevanceDetails[] queries;
 }

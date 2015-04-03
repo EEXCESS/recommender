@@ -47,11 +47,10 @@ public class QueryJsonIO {
 		writer.close();
 	}
 
-	public static void writeQueries(File queryFile, QueriesCategoryRelevance queries) throws IOException {
+	public static void writeQueries(File queryFile, Relevances relevances) throws IOException {
 		FileWriter writer = new FileWriter(queryFile);
 		Gson gson = new GsonBuilder().setPrettyPrinting().create();
-		
-		gson.toJson(queries, writer);
+		gson.toJson(relevances, writer);
 		writer.close();
 	}
 
