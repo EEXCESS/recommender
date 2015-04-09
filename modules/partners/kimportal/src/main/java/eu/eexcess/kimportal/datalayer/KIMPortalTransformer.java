@@ -18,14 +18,23 @@ package eu.eexcess.kimportal.datalayer;
 
 import org.w3c.dom.Document;
 
+import com.hp.hpl.jena.query.QuerySolution;
+
+import eu.eexcess.dataformats.result.Result;
 import eu.eexcess.dataformats.result.ResultList;
 import eu.eexcess.partnerdata.reference.Transformer;
 
 public class KIMPortalTransformer extends Transformer{
 
 	@Override
+	protected Result postProcessResult(Document orgPartnerResult, Result result, QuerySolution querySol) {
+		result.uri = "https://kgapi.bl.ch/"+ result.uri;
+		return result;
+	}
+
+	@Override
 	protected ResultList postProcessResults(Document orgPartnerResult, ResultList resultList) {
-//		resultList.totalResults = Integer.parseInt(getRootAttribute("countHits", orgPartnerResult, resultList));
+		resultList.totalResults = Integer.parseInt(getAttributeWithXPath("/response/result/@numFound", orgPartnerResult));
 		return resultList;
 	}
 
