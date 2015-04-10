@@ -20,6 +20,7 @@
     <module>modules/partners/wikipedialocal/</module>
     <module>modules/partners/europeana/</module>
     <module>modules/partners/kimcollect/</module>
+    <module>modules/partners/kimportal/</module>
     <module>modules/partners/zbw/</module>
     <module>modules/partners/mendeley/</module>
     <module>modules/partners/ddb/</module>
