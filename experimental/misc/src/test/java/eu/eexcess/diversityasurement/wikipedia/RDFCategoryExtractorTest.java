@@ -40,21 +40,22 @@ public class RDFCategoryExtractorTest {
 			this.parent = parent;
 			this.child = child;
 		}
+
 		String parent;
 		String child;
 	}
 
-	@Deprecated
 	@Test
-	public void aBadTest_testingRegexp() {
+	public void categoryRDFPattern_givenSampleInput_expectCorrectMatches() {
+		if (!Settings.RDFCategories.isCategoryFileAvailable()) {
+			return;
+		}
 		Set<CategorySubcategoryGlue> expectedResults = getExpectedSampleResults();
-		Pattern pattern = Pattern
-						.compile("<http://dbpedia.org/resource/Category:(\\w+)>\\s*<http://www.w3.org/2004/02/skos/core#broader>\\s*<http://dbpedia.org/resource/Category:(\\w+)>");
+		RDFCategoryExtractor builder = new RDFCategoryExtractor(null, null);
+		Pattern pattern = builder.categoryRDFPattern;
 		for (String entry : getSampleEntries()) {
 			Matcher matcher = pattern.matcher(entry);
 			System.out.println("group count [" + matcher.groupCount() + "] against [" + entry + "]");
-
-			System.out.println(matcher);
 			if (matcher.find()) {
 				assertEquals(2, matcher.groupCount());
 				CategorySubcategoryGlue g = expectedResults.iterator().next();
@@ -65,6 +66,7 @@ public class RDFCategoryExtractorTest {
 				expectedResults.remove(g);
 			}
 		}
+		assertEquals(0, expectedResults.size());
 	}
 
 	private Set<String> getSampleEntries() {
@@ -100,13 +102,21 @@ public class RDFCategoryExtractorTest {
 		categories.add(new CategorySubcategoryGlue("Monarchs", "Oligarchs"));
 		return categories;
 	}
-	
+
 	@Test
-	public void categoryTreeBuilder_construct_notExceptional() throws Exception {
-		SQliteTupleCollector collector = new SQliteTupleCollector(new File(Settings.SQLiteDb.PATH));
-		RDFCategoryExtractor builder = new RDFCategoryExtractor(new File(Settings.RDFCategories.PATH), collector);
-		builder.build();
-		collector.close();
+	public void extract_notExceptional() throws Exception {
+		if (!Settings.RDFCategories.isCategoryFileAvailable()) {
+			return;
+		}
+
+		CategoryTupleCollector mockCollector = new CategoryTupleCollector() {
+			@Override
+			public void takeTuple(String parent, String child) throws Exception {
+			}
+		};
+
+		RDFCategoryExtractor builder = new RDFCategoryExtractor(new File(Settings.RDFCategories.PATH), mockCollector);
+		builder.extract();
 	}
-	
+
 }

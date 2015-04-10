@@ -18,21 +18,8 @@
  * @author Raoul Rubien
  */
 
-package eu.eexcess.tree;
+package eu.eexcess.diversityasurement.wikipedia.querytocategoryrelevance;
 
-public class WeightedTreeNode extends BaseTreeNode<Double> {
-
-	private double value;
-
-	public WeightedTreeNode(String name) {
-		super(name);
-	}
-
-	public double getValue() {
-		return value;
-	}
-
-	public void setValue(double newValue) {
-		value = newValue;
-	}
+public class Queries {
+	public Query[] queries;
 }

@@ -18,30 +18,9 @@
  * @author Raoul Rubien
  */
 
-package eu.eexcess.diversityasurement.wikipedia;
+package eu.eexcess.diversityasurement.wikipedia.querytocategoryrelevance;
 
-import static org.junit.Assert.assertTrue;
-
-import java.io.File;
-import java.sql.SQLException;
-
-import org.junit.Test;
-
-import eu.eexcess.diversityasurement.wikipedia.config.Settings;
-
-public class SQLiteTupleCollectorTest {
-
-	@Test
-	public void sqliteTupleCollector_collectTuple_notExceptional() throws Exception {
-		SQliteTupleCollector collector = new SQliteTupleCollector(new File(Settings.SQLiteDb.PATH));
-		try {
-			collector.takeTuple("foo-parent", "bar-child");
-		} catch (SQLException e) {
-			e.printStackTrace();
-			assertTrue(false);
-		} finally {
-			collector.close();
-		}
-	}
-
+public class Query {
+	public String query;
+	public String description;
 }
