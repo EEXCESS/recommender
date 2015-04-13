@@ -37,6 +37,7 @@ import javax.xml.xpath.XPathFactory;
 
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
+import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
 import com.hp.hpl.jena.ontology.OntModel;
@@ -463,6 +464,23 @@ public class Transformer implements ITransformer{
 		return "";
 	}
 	
+	protected String getAttributeWithXPath(String xpath, Document orgPartnerResult) {
+		XPath xPath = XPathFactory.newInstance().newXPath();
+		NodeList nodes;
+		try {
+			nodes = (NodeList)xPath.evaluate(xpath,
+					orgPartnerResult.getDocumentElement(), XPathConstants.NODESET);
+			for (int i = 0; i < nodes.getLength();) {
+			    Node e = nodes.item(i);
+			    return e.getNodeValue();
+			}
+		} catch (XPathExpressionException e1) {
+			e1.printStackTrace();
+		}
+		
+		return "";
+	}
+
 	protected String getRootAttribute(String attribut, Document orgPartnerResult,
 			ResultList resultList) {
 		Element element = orgPartnerResult.getDocumentElement();

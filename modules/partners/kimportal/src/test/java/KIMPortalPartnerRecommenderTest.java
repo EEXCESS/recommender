@@ -25,16 +25,16 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 
 import eu.eexcess.dataformats.result.ResultList;
-import eu.eexcess.zbw.webservice.tool.PartnerStandaloneServer;
+import eu.eexcess.kimportal.webservice.tool.PartnerStandaloneServer;
 import eu.eexcess.partnerrecommender.test.PartnerRecommenderTestHelper;
 
 
-public class ZBWPartnerRecommenderTest {
+public class KIMPortalPartnerRecommenderTest {
 
 	private static int port = 8812;
 	private static PartnerStandaloneServer server;
 	
-	public  ZBWPartnerRecommenderTest() {
+	public  KIMPortalPartnerRecommenderTest() {
 		
 	}
 	
@@ -46,58 +46,60 @@ public class ZBWPartnerRecommenderTest {
     }
 	
 	@Test
-	public void singleQueryWomenWorkforceChina() {
+	public void singleQuerySp() {
 		ArrayList<String> keywords = new ArrayList<String>();
-		keywords.add("women workforce china");
-		ResultList resultList = PartnerRecommenderTestHelper.getRecommendations("eexcess-partner-zbw-1.0-SNAPSHOT",	
-				port, PartnerRecommenderTestHelper.createParamsForPartnerRecommender(20, keywords));
-	    
-        assertNotNull(resultList);
-        assertTrue(resultList.results.size() > 0 );
-        assertEquals(4, resultList.results.size());
-
-	}
-
-	@Test
-	public void singleQueryFrauenarbeit() {
-		ArrayList<String> keywords = new ArrayList<String>();
-		keywords.add("frauenarbeit");
-		ResultList resultList = PartnerRecommenderTestHelper.getRecommendations("eexcess-partner-zbw-1.0-SNAPSHOT",	
-				port, PartnerRecommenderTestHelper.createParamsForPartnerRecommender(20, keywords));
+		keywords.add("sp");
+        ResultList resultList = PartnerRecommenderTestHelper.getRecommendations("eexcess-partner-kimportal-1.0-SNAPSHOT",	
+        		port, 
+        		PartnerRecommenderTestHelper.createParamsForPartnerRecommender(20,keywords ));
 	    
         assertNotNull(resultList);
         assertTrue(resultList.results.size() > 0 );
         assertEquals(20, resultList.results.size());
 
 	}
-	
+
 	@Test
-	public void singleQueryserendipity() {
+	public void singleQueryZiegelhof() {
 		ArrayList<String> keywords = new ArrayList<String>();
-		keywords.add("serendipity");
-		ResultList resultList = PartnerRecommenderTestHelper.getRecommendations("eexcess-partner-zbw-1.0-SNAPSHOT",	
-				port, PartnerRecommenderTestHelper.createParamsForPartnerRecommender(20, keywords));
+		keywords.add("ziegelhof");
+        ResultList resultList = PartnerRecommenderTestHelper.getRecommendations("eexcess-partner-kimportal-1.0-SNAPSHOT",	
+        		port, 
+        		PartnerRecommenderTestHelper.createParamsForPartnerRecommender(20,keywords ));
 	    
         assertNotNull(resultList);
         assertTrue(resultList.results.size() > 0 );
-        assertEquals(20, resultList.results.size());
+        assertEquals(12, resultList.results.size());
 
 	}
-	
 
 	@Test
-	public void singleQueryFrauenarbeitChinaArbeitsbedingungenGeschlechterrolle() {
+	public void singleQueryBierglas() {
 		ArrayList<String> keywords = new ArrayList<String>();
-		keywords.add("frauenarbeit");
-		keywords.add("china");
-		keywords.add("Arbeitsbedingungen");
-		keywords.add("Geschlechterrolle");
-		ResultList resultList = PartnerRecommenderTestHelper.getRecommendations("eexcess-partner-zbw-1.0-SNAPSHOT",	
-				port, PartnerRecommenderTestHelper.createParamsForPartnerRecommender(20, keywords));
+		keywords.add("bierglas");
+        ResultList resultList = PartnerRecommenderTestHelper.getRecommendations("eexcess-partner-kimportal-1.0-SNAPSHOT",	
+        		port, 
+        		PartnerRecommenderTestHelper.createParamsForPartnerRecommender(20,keywords ));
 	    
         assertNotNull(resultList);
         assertTrue(resultList.results.size() > 0 );
-        assertEquals(20, resultList.results.size());
+        assertEquals(7, resultList.results.size());
+
+	}
+
+	@Test
+	public void singleQueryBierglasZiegelhofKalenderbild() {
+		ArrayList<String> keywords = new ArrayList<String>();
+		keywords.add("bierglas");
+		keywords.add("ziegelhof");
+		keywords.add("Kalenderbild");
+        ResultList resultList = PartnerRecommenderTestHelper.getRecommendations("eexcess-partner-kimportal-1.0-SNAPSHOT",	
+        		port, 
+        		PartnerRecommenderTestHelper.createParamsForPartnerRecommender(20,keywords ));
+	    
+        assertNotNull(resultList);
+        assertTrue(resultList.results.size() > 0 );
+        assertEquals(1, resultList.results.size());
 
 	}
 }
