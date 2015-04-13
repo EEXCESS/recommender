@@ -13,6 +13,7 @@ import eu.eexcess.dataformats.result.ResultList;
 import eu.eexcess.dataformats.userprofile.ContextKeyword;
 import eu.eexcess.dataformats.userprofile.SecureUserProfile;
 import eu.eexcess.federatedrecommender.dataformats.PartnersFederatedRecommendations;
+import eu.eexcess.federatedrecommender.picker.FiFoPicker;
 import eu.eexcess.federatedrecommender.picker.OccurrenceProbabilityPicker;
 
 public class OccurrenceProbabilityPickerTest {
