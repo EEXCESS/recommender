@@ -24,13 +24,17 @@ package eu.eexcess.dataformats.evaluation;
 
 import java.io.Serializable;
 import java.util.LinkedList;
+
 import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlElement;
+
+import org.codehaus.jackson.annotate.JsonIgnoreProperties;
 /**
  * 
  * @author hziak
  *
  */
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class EvaluationResultLists implements Serializable{
 	
   	private static final long serialVersionUID = -5906473777311334010L;
@@ -44,5 +48,11 @@ public class EvaluationResultLists implements Serializable{
     public String queryID;
     @XmlElement(name="results")
     public LinkedList<EvaluationResultList> results = new LinkedList<EvaluationResultList>();
+	@Override
+	public String toString() {
+		return "EvaluationResultLists [userID=" + userID + ", query=" + query
+				+ ", queryDescription=" + queryDescription + ", queryID="
+				+ queryID + ", results=" + results + "]";
+	}
     
 }
