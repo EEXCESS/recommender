@@ -40,10 +40,10 @@ import eu.eexcess.federatedrecommender.interfaces.PartnersFederatedRecommendatio
 /**
  * Similar to suggested algorithm in
  * "Improving recommendation lists through topic diversification" Ziegler et al
- * 
+ *  
  * @author hziak
  */
-public class SimilarityDiversificationPicker implements PartnersFederatedRecommendationsPicker {
+public class SimilarityDiversificationPicker extends PartnersFederatedRecommendationsPicker {
 
 	/**
 	 * thetaF is a value between 0.0 and 1.0 larger values favor diversification

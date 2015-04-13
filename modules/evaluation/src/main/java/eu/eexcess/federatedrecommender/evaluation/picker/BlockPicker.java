@@ -22,19 +22,11 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 package eu.eexcess.federatedrecommender.evaluation.picker;
 
-import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
-import java.util.HashMap;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-
-import org.apache.solr.common.params.ModifiableSolrParams;
-import org.apache.solr.common.params.SolrParams;
-import org.apache.solr.update.processor.TextProfileSignature;
-import org.omg.CORBA.ExceptionList;
 
 import eu.eexcess.dataformats.PartnerBadge;
 import eu.eexcess.dataformats.evaluation.EvaluationResultList;
@@ -44,7 +36,6 @@ import eu.eexcess.dataformats.result.ResultList;
 import eu.eexcess.dataformats.userprofile.SecureUserProfile;
 import eu.eexcess.federatedrecommender.dataformats.PFRChronicle;
 import eu.eexcess.federatedrecommender.dataformats.PartnersFederatedRecommendations;
-import eu.eexcess.federatedrecommender.decomposer.SerendiptiyDecomposer;
 import eu.eexcess.federatedrecommender.interfaces.PartnersFederatedRecommendationsPicker;
 
 /**
@@ -55,12 +46,16 @@ import eu.eexcess.federatedrecommender.interfaces.PartnersFederatedRecommendatio
  * @author hziak
  *
  */
-public class BlockPicker implements PartnersFederatedRecommendationsPicker {
+public class BlockPicker extends PartnersFederatedRecommendationsPicker {
+		public BlockPicker() {
+			super();
+		}
+
 	private static final Logger logger = Logger.getLogger(BlockPicker.class.getName());
 	final private  String basic = "Basic";
 	final private  String diversity = "Diversity";
 	final private String serendiptiy = "Serendipity";
-	final private ModifiableSolrParams params =new ModifiableSolrParams();
+	
 	@Override
 	public ResultList pickResults(PFRChronicle pFRChronicle, int numResults) {
 		// TODO Auto-generated method stub
@@ -70,15 +65,13 @@ public class BlockPicker implements PartnersFederatedRecommendationsPicker {
 	void getTopResults(SecureUserProfile secureUserProfile,
 			EvaluationResultList list, int numResults, ResultList result,
 			Integer totalResults) {
-		params.set("quantRate", (int) 0.02f);
-	    params.set("minTokenLen", 3);
+
 		ArrayList<Result> results = new ArrayList<Result>();
 		
 		for (int i = 0; i < numResults && i < list.results.size()
 				&& result.results.size() < totalResults; i++) {
-			
-			Result o = list.results.get(i);
 			boolean found = false;
+			Result o = list.results.get(i);
 			byte[] signNewResult= getFuzzyHashSignature(o);
 			for (Result selectedResult : result.results) {
 				if(Arrays.equals(signNewResult, getFuzzyHashSignature(selectedResult))){
@@ -86,7 +79,7 @@ public class BlockPicker implements PartnersFederatedRecommendationsPicker {
 					break;
 				}
 			}
-			if (!found) //TODO: Fuzzy Hash should be uses here!
+			if (!found) 
 				result.results.add(o); 
 			else {
 				numResults++; // leaving one out -> increasing num results
@@ -95,20 +88,7 @@ public class BlockPicker implements PartnersFederatedRecommendationsPicker {
 		}
 	}
 
-	private byte[] getFuzzyHashSignature(Result o) {
-		TextProfileSignature tPSignatur =  new TextProfileSignature();
-		
-		
-		tPSignatur.init(params );
-		if(o.description!=null)
-			tPSignatur.add(o.description);
-		else if(o.title!=null){
-			tPSignatur.add(o.title);
-			if(o.previewImage!=null)
-				tPSignatur.add(o.previewImage);
-		}
-		return tPSignatur.getSignature();
-	}
+	
 
 	/**
 	 * FiFo Picker
