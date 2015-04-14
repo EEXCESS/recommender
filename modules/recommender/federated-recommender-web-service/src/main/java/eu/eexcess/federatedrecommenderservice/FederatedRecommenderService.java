@@ -18,6 +18,7 @@ package eu.eexcess.federatedrecommenderservice;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -41,6 +42,7 @@ import org.codehaus.jackson.map.JsonMappingException;
 import org.codehaus.jackson.map.ObjectMapper;
 
 import javax.ws.rs.core.Response;
+
 import com.sun.jersey.spi.resource.Singleton;
 
 import eu.eexcess.config.FederatedRecommenderConfiguration;
@@ -87,9 +89,22 @@ public class FederatedRecommenderService {
 	 */
 	public FederatedRecommenderService() throws FederatedRecommenderException {
 		ObjectMapper mapper = new ObjectMapper();
-		URL resource = getClass().getResource(
-				"/federatedRecommenderConfig.json");
 		mapper.configure(JsonParser.Feature.ALLOW_COMMENTS, true);
+		String eexcessPartnerKeyFile =System.getenv("EEXCESS_FEDERATED_RECOMMENDER_CONFIG_FILE");
+		URL resource =null;
+		if(eexcessPartnerKeyFile==null){
+			logger.log(Level.INFO,"Config file was not defined in environment EEXCESS_FEDERATED_RECOMMENDER_CONFIG_FILE. Reading file from package resource.");	
+		 resource = getClass().getResource("/federatedRecommenderConfig.json");
+		}else{
+			logger.log(Level.INFO,"Reading Config file from:" + eexcessPartnerKeyFile);	
+			try {
+				resource = new File(eexcessPartnerKeyFile).toURL();
+			} catch (MalformedURLException e) {
+				logger.log(Level.SEVERE,"Environment Variable was malformated:"+eexcessPartnerKeyFile,e);
+			}
+		}
+		
+		
 		try {
 			federatedRecommenderConfiguration = mapper.readValue(new File(
 					resource.getFile()),
@@ -133,135 +148,6 @@ public class FederatedRecommenderService {
 	@PostConstruct
 	public void initialize() throws Exception {
 		logger.log(Level.INFO,"Initialize");
-//		String europeana = null, mendeley = null, zbw = null, kimCollect = null, wissensserver = null;
-//
-//		if (federatedRecommenderConfiguration.deploymentPlatform
-//				.equals("localStandalone")) {
-//
-//			europeana = "http://localhost:8101/eexcess-partner-europeana-1.0-SNAPSHOT/partner/recommend/";
-//
-//			mendeley = "http://localhost:8103/eexcess-partner-mendeley-1.0-SNAPSHOT/partner/recommend/";
-//
-//			zbw = "http://localhost:8105/eexcess-partner-zbw-1.0-SNAPSHOT/partner/recommend/";
-//
-//			kimCollect = "http://localhost:8102/eexcess-partner-kim-collect-1.0-SNAPSHOT/partner/recommend/";
-//
-//			wissensserver = "http://localhost:8104/eexcess-partner-wissenmedia-1.0-SNAPSHOT/partner/recommend/";
-//
-//		} else if (federatedRecommenderConfiguration.deploymentPlatform
-//				.equals("localTomcat")) {
-//
-//			europeana = "http://localhost:8080/eexcess-partner-europeana-1.0-SNAPSHOT/partner/recommend/";
-//
-//			mendeley = "http://localhost:8080/eexcess-partner-mendeley-1.0-SNAPSHOT/partner/recommend/";
-//
-//			zbw = "http://localhost:8080/eexcess-partner-zbw-1.0-SNAPSHOT/partner/recommend/";
-//
-//			kimCollect = "http://localhost:8080/eexcess-partner-kim-collect-1.0-SNAPSHOT/partner/recommend/";
-//
-//			wissensserver = "http://localhost:8080/eexcess-partner-wissenmedia-1.0-SNAPSHOT/partner/recommend/";
-//
-//		}
-//
-//		else if (federatedRecommenderConfiguration.deploymentPlatform
-//				.equals("jrDev")) {
-//
-//			europeana = "http://eexcess-dev.joanneum.at/eexcess-partner-europeana-1.0-SNAPSHOT/partner/recommend/";
-//
-//			mendeley = "http://eexcess-dev.joanneum.at/eexcess-partner-mendeley-1.0-SNAPSHOT/partner/recommend/";
-//
-//			zbw = "http://eexcess-dev.joanneum.at/eexcess-partner-zbw-1.0-SNAPSHOT/partner/recommend/";
-//
-//			kimCollect = "http://eexcess-dev.joanneum.at/eexcess-partner-kim-collect-1.0-SNAPSHOT/partner/recommend/";
-//
-//			wissensserver = "http://eexcess-dev.joanneum.at/eexcess-partner-wissenmedia-1.0-SNAPSHOT/partner/recommend/";
-//
-//		}
-//
-//		else if (federatedRecommenderConfiguration.deploymentPlatform
-//				.equals("jrStable")) {
-//
-//			europeana = "http://eexcess.joanneum.at/eexcess-partner-europeana-1.0-SNAPSHOT/partner/recommend/";
-//
-//			mendeley = "http://eexcess.joanneum.at/eexcess-partner-mendeley-1.0-SNAPSHOT/partner/recommend/";
-//
-//			zbw = "http://eexcess.joanneum.at/eexcess-partner-zbw-1.0-SNAPSHOT/partner/recommend/";
-//
-//			kimCollect = "http://eexcess.joanneum.at/eexcess-partner-kim-collect-1.0-SNAPSHOT/partner/recommend/";
-//
-//			wissensserver = "http://eexcess.joanneum.at/eexcess-partner-wissenmedia-1.0-SNAPSHOT/partner/recommend/";
-//
-//		}
-//
-//		else {
-//			throw new Exception(
-//					"Problem deploying! Please use an appropriate deployment scenario in the config file (localStandalone, localTomcat, jrDev, jrStable)");
-//		}
-//
-//		PartnerBadge badge = new PartnerBadge();
-//		badge = new PartnerBadge();
-//		badge.setSystemId("Europeana");
-//		badge.setEndpoint(europeana);
-//		badge.setTags(new ArrayList<String>() {
-//			private static final long serialVersionUID = -7498028779074331771L;
-//			{
-//				add("Europe");
-//				add("Culture");
-//			}
-//		});
-//		fRC.addPartner(badge);
-//
-//		PartnerBadge badge2 = new PartnerBadge();
-//		badge2 = new PartnerBadge();
-//		badge2.setSystemId("Mendeley");
-//		badge2.setEndpoint(mendeley);
-//		badge2.setTags(new ArrayList<String>() {
-//			private static final long serialVersionUID = -4961167430016500063L;
-//
-//			{
-//				add("Science");
-//				add("Journals");
-//			}
-//		});
-//		fRC.addPartner(badge2);
-//
-//		PartnerBadge badge3 = new PartnerBadge();
-//		badge3.setSystemId("ZBW");
-//		badge3.setEndpoint(zbw);
-//		badge3.setTags(new ArrayList<String>() {
-//			private static final long serialVersionUID = 7970224907132161869L;
-//			{
-//				add("Economy");
-//				add("Articles");
-//			}
-//		});
-//		fRC.addPartner(badge3);
-//
-//		PartnerBadge badge4 = new PartnerBadge();
-//		badge4.setSystemId("KIMCollect");
-//		badge4.setEndpoint(kimCollect);
-//		badge4.setTags(new ArrayList<String>() {
-//			private static final long serialVersionUID = -8047754475051394204L;
-//
-//			{
-//				add("Swiss");
-//				add("Culture");
-//			}
-//		});
-//		fRC.addPartner(badge4);
-//
-//		PartnerBadge badge5 = new PartnerBadge();
-//		badge5.setSystemId("Wissenmedia");
-//		badge5.setEndpoint(wissensserver);
-//		badge5.setTags(new ArrayList<String>() {
-//			private static final long serialVersionUID = -993773655268128609L;
-//
-//			{
-//				add("Articles");
-//				add("Culture");
-//			}
-//		});
-//		fRC.addPartner(badge5);
 	}
 
 	// Begin Services
