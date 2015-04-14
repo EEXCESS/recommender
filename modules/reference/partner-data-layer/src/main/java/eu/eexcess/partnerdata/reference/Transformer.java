@@ -167,15 +167,15 @@ public class Transformer implements ITransformer{
 			throw new TransformerConfigurationException(e);
 		}
         finally{
-		try {
-			resultListTransformationStream.close();
-			resultObjectTransformationStream.close();
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			try {
+				resultListTransformationStream.close();
+				resultObjectTransformationStream.close();
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 		}
-		}
-		
+   		model = ModelFactory.createOntologyModel();
 	}
 
 	protected Document transformInternal(Document input, javax.xml.transform.Transformer transformer, PartnerdataLogger logger) throws EEXCESSDataTransformationException {
@@ -247,7 +247,7 @@ public class Transformer implements ITransformer{
 	public ResultList toResultList(Document nativeResults, Document input, PartnerdataLogger logger) {
 		ResultList returnList =  new ResultList();
     	
-   		model = ModelFactory.createOntologyModel();
+   		model.removeAll();
    		String inputString = XMLTools.getStringFromDocument(input);
    		//System.out.println(inputString);
    		StringReader stream = new StringReader(inputString);
