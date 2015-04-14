@@ -18,7 +18,7 @@
  * @author Raoul Rubien
  */
 
-package eu.eexcess.tree;
+package eu.eexcess.sourceselection.redde.tree;
 
 import java.util.HashSet;
 import java.util.Iterator;
