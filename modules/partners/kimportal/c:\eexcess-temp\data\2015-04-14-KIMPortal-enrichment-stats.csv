@@ -1,0 +1,4 @@
+requestId;date;systemId;resultsFound;resultsReturnend;enrichmentServicesCalled;enrichmentServicesResults;enrichmentGeonamesServiceCalls;enrichmentGeonamesResults;enrichmentGeonamesDuration;enrichmentFreebaseServiceCalls;enrichmentFreebaseResults;enrichmentFreebaseDuration;enrichmentDbpediaSpotlightServiceCalls;enrichmentDbpediaSpotlightResults;enrichmentDbpediaSpotlightDuration;durationOverall;durationPartnerAPI;durationEnrichment
+"1428991203742";"2015-04-14 08:00:03";"KIMPortal";"3";"3";"0";"0";"0";"0";0;"0";"0";0;"0";"0";0;2976;820;0
+"1428998815200";"2015-04-14 10:06:55";"KIMPortal";"3";"3";"0";"0";"0";"0";0;"0";"0";0;"0";"0";0;1864;832;0
+"1428998821457";"2015-04-14 10:07:01";"KIMPortal";"3";"3";"0";"0";"0";"0";0;"0";"0";0;"0";"0";0;262;153;0

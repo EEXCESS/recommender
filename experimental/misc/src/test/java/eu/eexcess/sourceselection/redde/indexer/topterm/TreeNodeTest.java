@@ -26,8 +26,8 @@ import java.util.Iterator;
 
 import org.junit.Test;
 
-import eu.eexcess.tree.TreeNode;
-import eu.eexcess.tree.ValueTreeNode;
+import eu.eexcess.sourceselection.redde.tree.TreeNode;
+import eu.eexcess.sourceselection.redde.tree.ValueTreeNode;
 
 public class TreeNodeTest {
 

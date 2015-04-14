@@ -18,21 +18,8 @@
  * @author Raoul Rubien
  */
 
-package eu.eexcess.tree;
+package eu.eexcess.diversityasurement.wikipedia.querytocategoryrelevance;
 
-import java.util.Iterator;
-import java.util.Set;
-
-public interface TreeNode<T> extends Iterable<TreeNode<T>> {
-
-	public abstract boolean addChild(TreeNode<T> n);
-
-	public abstract Set<? extends TreeNode<T>> getChildren();
-
-	public abstract Iterator<TreeNode<T>> iterator();
-
-	public abstract void setName(String name);
-
-	public abstract String getName();
-
+public class Queries {
+	public Query[] queries;
 }

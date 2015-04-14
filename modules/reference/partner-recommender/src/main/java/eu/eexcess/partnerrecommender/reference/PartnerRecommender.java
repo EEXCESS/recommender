@@ -121,14 +121,19 @@ public class PartnerRecommender implements PartnerRecommenderApi {
         	 */
             long startEnrich = System.currentTimeMillis();
         	partnerdataLogger.getActLogEntry().enrichStart();
-            Document enrichedResultsExcess = enricher.enrichResultList(searchResultsEexcess, partnerdataLogger);
+        	Document enrichedResultsExcess = null;
+        	boolean queryHasResults= transformer.hasEEXCESSRDFResponseResults(searchResultsEexcess);
+            if (queryHasResults)
+            	enrichedResultsExcess = enricher.enrichResultList(searchResultsEexcess, partnerdataLogger);
         	partnerdataLogger.getActLogEntry().enrichEnd();
             long endEnrich = System.currentTimeMillis();
         	/*
         	 *  Pack into ResultList simple format
         	 */
             long startTransform2 = System.currentTimeMillis();
-            ResultList recommendations = transformer.toResultList(searchResultsNative, enrichedResultsExcess, partnerdataLogger);
+            ResultList recommendations = new ResultList();
+            if (queryHasResults)
+            	recommendations = transformer.toResultList(searchResultsNative, enrichedResultsExcess, partnerdataLogger);
             partnerdataLogger.addResults(recommendations);
         	partnerdataLogger.getActLogEntry().end();
             partnerdataLogger.save();

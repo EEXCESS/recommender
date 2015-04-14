@@ -38,8 +38,8 @@ import eu.eexcess.domaindetection.Domain;
 import eu.eexcess.domaindetection.DomainDetectorException;
 import eu.eexcess.domaindetection.wordnet.WordnetDomainsDetector;
 import eu.eexcess.sourceselection.redde.config.Settings;
-import eu.eexcess.tree.TreeNode;
-import eu.eexcess.tree.ValueTreeNode;
+import eu.eexcess.sourceselection.redde.tree.TreeNode;
+import eu.eexcess.sourceselection.redde.tree.ValueTreeNode;
 
 public class TopTermToWNDomainTest {
 

@@ -26,12 +26,15 @@ import java.io.Serializable;
 
 import javax.xml.bind.annotation.XmlAttribute;
 
+import org.codehaus.jackson.annotate.JsonIgnoreProperties;
+
 import eu.eexcess.dataformats.result.ResultList;
 /**
  * 
  * @author hziak
  *
  */
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class EvaluationResultList extends ResultList implements Serializable{
 	private static final long serialVersionUID = 2401989277808424955L;
 		@SuppressWarnings("unused")
@@ -44,5 +47,10 @@ public class EvaluationResultList extends ResultList implements Serializable{
 		}
 	  	@XmlAttribute
 	    public String numSelect;
+		@Override
+		public String toString() {
+			return "EvaluationResultList [numSelect=" + numSelect + "]";
+		}
+	  	
 
 }

@@ -45,15 +45,27 @@ import java.io.File;
 public class Settings {
 
 	public static class RDFCategories {
-		public static final String PATH = "/opt/wikipedia/dbpedia/skos_categories_en.nt";
+		public static final String PATH = "/opt/data/wikipedia/dbpedia/skos_categories_en.nt";
+
+		public static boolean isCategoryFileAvailable() {
+			return printWarning(PATH);
+		}
 	}
 
-	public static class SQLiteDb {
-		public static final String PATH = "/opt/iaselect/categories.sqlite";
+	public static class Grph {
+		public static final String PATH = "/opt/iaselect/gategories.grphbin";
+
+		public static boolean isGrphFileAvailable() {
+			return printWarning(PATH);
+		}
 	}
-	
-	public static boolean isCategoryFileAvailable() {
-		return printWarning(RDFCategories.PATH);
+
+	public static class Queries {
+		public static final String PATH = "/opt/iaselect/queriesEn-selected-diversity.json";
+
+		public static boolean isQueriesFileAvailable() {
+			return printWarning(PATH);
+		}
 	}
 
 	private static boolean printWarning(String path) {
