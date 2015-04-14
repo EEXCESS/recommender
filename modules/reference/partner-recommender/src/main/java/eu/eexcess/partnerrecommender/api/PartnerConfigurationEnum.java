@@ -82,8 +82,8 @@ public enum PartnerConfigurationEnum {
 					new File(resource.getFile()), PartnerConfiguration.class);
 			for (PartnerConfiguration badge : partnerKeys.getPartners()) {
 					if(partnerConfiguration.systemId.equals(badge.systemId)){
-						if(badge.partnerKey!=null){
-							partnerConfiguration.partnerKey=badge.partnerKey;
+						if(badge.apiKey!=null){
+							partnerConfiguration.apiKey=badge.apiKey;
 						}
 						if(badge.userName!=null){
 							partnerConfiguration.userName=badge.userName;

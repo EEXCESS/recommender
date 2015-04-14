@@ -17,7 +17,7 @@ import eu.eexcess.dataformats.PartnerBadge;
 import eu.eexcess.partnerrecommender.api.PartnerConfigurationEnum;
 
 public class PartnerRegistrationThread implements Runnable{
-	private static final long timeout = 500000;
+	private static final long timeout = 2000000;
 	private static final Logger logger = Logger.getLogger(PartnerRegistrationThread.class.getName());
 	private PartnerConfiguration config;
 

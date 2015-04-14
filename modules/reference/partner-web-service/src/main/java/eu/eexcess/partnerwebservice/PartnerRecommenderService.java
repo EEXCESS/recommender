@@ -65,8 +65,8 @@ public class PartnerRecommenderService {
 	
 	@POST
 	@Path("/recommend")
-	@Consumes(value = MediaType.APPLICATION_XML)
-	@Produces(value = MediaType.APPLICATION_XML)
+	@Consumes({MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})
+	@Produces({MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})
 	public ResultList recommend(SecureUserProfile userProfile)
 			throws IOException {
 		return partnerRecommender.recommend(userProfile);
@@ -82,8 +82,8 @@ public class PartnerRecommenderService {
 	 */
 	@POST
 	@Path("/getUserProfile")
-	@Consumes(value = MediaType.APPLICATION_XML)
-	@Produces(value = MediaType.APPLICATION_XML)
+	@Consumes({MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})
+	@Produces({MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})
 	public Document getUserProfile(String userId) throws IOException {
 		return partnerRecommender.getUserProfile(userId);
 	}
@@ -121,7 +121,7 @@ public class PartnerRecommenderService {
 	 */
 	@GET
 	@Path("/debugDumpResult")
-	@Produces(value = MediaType.APPLICATION_XML)
+	@Produces({MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})
 	public Result debugDumpRecommendedItem() {
 		Result recommendedItem = new Result();
 
@@ -148,7 +148,7 @@ public class PartnerRecommenderService {
 	 */
 	@GET
 	@Path("/debugDumpResultList")
-	@Produces(value = MediaType.APPLICATION_XML)
+	@Produces({MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})
 	public ResultList debugDumpResultList() {
 
 		Result result = new Result();
