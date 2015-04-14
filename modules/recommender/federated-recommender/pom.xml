@@ -120,7 +120,11 @@
 		</dependency> -->
 		
 
-
+	<dependency>
+	<groupId>org.apache.solr</groupId>
+	<artifactId>solr-core</artifactId>
+	<version>4.10.1</version>
+</dependency>
 
 	</dependencies>
 </project>

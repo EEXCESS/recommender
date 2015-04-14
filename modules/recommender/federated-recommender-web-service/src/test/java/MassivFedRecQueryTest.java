@@ -56,7 +56,7 @@ private static final String searchRequest = "http://eexcess-demo.know-center.tug
 
 				futures.put(string + i, future);
 				try {
-					Thread.sleep(300);
+					Thread.sleep(30);
 				} catch (InterruptedException e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
@@ -102,7 +102,7 @@ private static final String searchRequest = "http://eexcess-demo.know-center.tug
 
 				futures.put(string , future);
 				try {
-					Thread.sleep(300);
+					Thread.sleep(30);
 				} catch (InterruptedException e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
