@@ -99,6 +99,23 @@ public class Transformer implements ITransformer{
 	"  </xsl:if>" + 
 	"</xsl:template>" + 
 	"</xsl:stylesheet>";
+	
+	
+	public boolean hasEEXCESSRDFResponseResults(Document eexcessResults ) {
+		XPath xPath = XPathFactory.newInstance().newXPath();
+		NodeList nodes;
+		try {
+			nodes = (NodeList)xPath.evaluate("//*[local-name()='Proxy']",
+					eexcessResults.getDocumentElement(), XPathConstants.NODESET);
+			for (int i = 0; i < nodes.getLength();) {
+			    return true;
+			}
+		} catch (XPathExpressionException e1) {
+			e1.printStackTrace();
+		}
+		return false;
+
+	}
 
 	public void init(PartnerConfiguration partnerConfig) throws TransformerConfigurationException {
 		this.partnerConfig = partnerConfig;
@@ -317,7 +334,7 @@ public class Transformer implements ITransformer{
 			if (oreCollectionName != null) {
 				result.collectionName = oreCollectionName.toString();
 			}
-			result.rdf = extractRDFForOneObject(result, inputString);
+			//result.rdf = extractRDFForOneObject(result, inputString);
 			// fillup empty values in the facets
 			if (result.facets.language == null ||
 				result.facets.language.isEmpty() ||

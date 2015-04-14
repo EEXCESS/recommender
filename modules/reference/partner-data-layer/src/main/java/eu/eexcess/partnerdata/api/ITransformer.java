@@ -32,6 +32,8 @@ public interface ITransformer {
 
 	public ResultList toResultList(Document nativeResults, Document input, PartnerdataLogger logger);
 
+	public boolean hasEEXCESSRDFResponseResults(Document searchResultsEexcess);
+
 	//public Document transformResultObject(Document input) throws EEXCESSDataTransformationException;
 	
 	//public void setResultListTransformation(String filename);
