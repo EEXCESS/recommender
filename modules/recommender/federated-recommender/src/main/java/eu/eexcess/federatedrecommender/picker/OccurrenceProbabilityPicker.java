@@ -23,6 +23,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 package eu.eexcess.federatedrecommender.picker;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
@@ -49,8 +50,13 @@ import eu.eexcess.federatedrecommender.interfaces.PartnersFederatedRecommendatio
  * @author hziak
  *
  */
-public class OccurrenceProbabilityPicker implements PartnersFederatedRecommendationsPicker {
-
+public class OccurrenceProbabilityPicker extends PartnersFederatedRecommendationsPicker {
+	
+	
+	public OccurrenceProbabilityPicker(){
+		super();
+	}
+	
 	private static final Logger logger = Logger
 			.getLogger(OccurrenceProbabilityPicker.class.getName());
 
@@ -114,24 +120,36 @@ public class OccurrenceProbabilityPicker implements PartnersFederatedRecommendat
 			// be sure to not leave out
 			// providers they have at least the weight of 0.1
 		}
-	
-		
-		
 		List<PartnerBadge> removeList = new ArrayList<PartnerBadge>();
 		LinkedList<Result> results = new LinkedList<Result>();
 		Random generater = new Random(secureUserProfile.hashCode());
-//		Random generater = new Random();
+
 		Collections.shuffle(listToDraw, generater);
 		while (results.size() < numResults) {
 			listToDraw.removeAll(removeList);
 			removeList.clear();
 			if(listToDraw.size()==0)
 				break;
-			PartnerBadge partner = listToDraw.get(new Double(generater.nextDouble()
-					* listToDraw.size()).intValue());
+			PartnerBadge partner = listToDraw.get(new Double(generater.nextDouble()* listToDraw.size()).intValue());
 			try {
-				results.add(resultList.getResults().get(partner).results.get(0));
+				Result resultToAdd = resultList.getResults().get(partner).results.get(0);
+				if(resultToAdd==null)
+					break;
+				byte[] signNewResult= getFuzzyHashSignature(resultToAdd);
+				boolean found=false;
+				for (Result selectedResult : results) {
+					if(Arrays.equals(signNewResult, getFuzzyHashSignature(selectedResult))){
+						found=true;
+						break;
+					}
+				}
+				if (!found) 
+					results.add(resultToAdd);
+//				else {
+//					numResults++; // leaving one out -> increasing num results
+//				}
 				resultList.getResults().get(partner).results.remove(0);
+				
 			} catch (Exception e) {
 				logger.log(Level.INFO, "Picker leaving out " 
 						+ partner.getSystemId() 

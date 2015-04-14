@@ -20,8 +20,8 @@
 
 package eu.eexcess.diversityasurement.evaluation;
 
-import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.ObjectOutputStream;
 import java.util.ArrayList;
@@ -34,8 +34,8 @@ import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.analysis.en.EnglishAnalyzer;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.document.Field;
-import org.apache.lucene.document.StoredField;
 import org.apache.lucene.document.StringField;
+import org.apache.lucene.index.DirectoryReader;
 import org.apache.lucene.index.IndexReader;
 import org.apache.lucene.index.IndexWriter;
 import org.apache.lucene.index.IndexWriterConfig;
@@ -69,19 +69,22 @@ public class QueryCategoryKShortestPathsEvaluation {
 		public File outLuceneIndexDirectory = new File("/opt/iaselect/results/category-relevance-index-big/");
 		public File outCachedNodes = new File("/opt/iaselect/results/cache/cached-nodes.bin");
 		public File outCachedPaths = new File("/opt/iaselect/results/cache/cached-paths.bin");
+		public File outCategoryIdToName = new File("/opt/iaselect/results/cache/category-id-to-name.bin");
+		public File outCategoryNameToId = new File("/opt/iaselect/results/cache/category-name-to-id.bin");
 	}
 
 	public static class ConcurrentSettigns {
-		public int totalThreads = 6;
+		public int totalThreads = 1;
 		// number of categories a thread calculates sequentially
 		public int numCategoriesToCalculateBundled = 1;
 	}
 
 	public static class EstimationArguments {
-		private int numTopDocumentsToConsider = 50;
+		private int numTopDocumentsToConsider = 60;
 		private int numKClosestCategoryNeighborsToConsider = 1000;
 		private int kShortestPaths = 1;
-		private int nodesPerChunk = 20;
+		private int nodesPerChunk = 2000;
+		private boolean isDistributionStartedAtSiblings = false;
 	}
 
 	Logger logger = PianoLogger.getLogger(QueryCategoryKShortestPathsEvaluation.class);
@@ -90,7 +93,8 @@ public class QueryCategoryKShortestPathsEvaluation {
 	MainCategoryRelevanceEstimator estimator;
 	private static final String SEARCH_FIELD_SECTIONTEXT = "sectionText";
 	private int[] topCategories;
-	private Map<String, Integer> categoryIds;
+	private Map<String, Integer> categoryNameToId;
+	private Map<Integer, String> categoryIdToName;
 	private Map<String, Integer> topCategoryIds;
 	public IOFIles fileResource = new IOFIles();
 	private ConcurrentSettigns concurrentSettings = new ConcurrentSettigns();
@@ -100,46 +104,61 @@ public class QueryCategoryKShortestPathsEvaluation {
 
 	private int chunkStartIdx = 0;
 
+	/**
+	 * Reads category relations (parent<-child) from RDF {@link #settings.RDFCategories.PATH} and
+	 * estimates their relation to top categories. Estimates are done only for
+	 * categories found by {@link #settings.Queries.PATH} looked up in {@link #fileResource.inLuceneIndexDirectory}
+	 * taking all categories of all top
+	 * {@link estimationArguments.numTopDocumentsToConsider} documents. Results
+	 * are stored after every chunk with {@link #estimationArguments.nodesPerChunk} nodes is
+	 * processed.
+	 * <p>
+	 * Results:<br>
+	 * relevances are written to lucene index in
+	 * {@link fileResource.outLuceneIndexDirectory} <br>
+	 * cache (shortest paths, known nodes) is stored to {@link #fileResource.outCachedNodes}
+	 * and {@link #fileResource.outCachedPaths}
+	 * 
+	 * @param args
+	 */
 	public static void main(String[] args) {
 		long startTimestamp = System.currentTimeMillis();
 		QueryCategoryKShortestPathsEvaluation self = new QueryCategoryKShortestPathsEvaluation();
 
-		switch (args[0]) {
-		case "--query-to-documents-relevance":
-			try {
-				self.openInIndex();
-				self.openOutIndex();
-				self.inflateCategoryTree();
-				self.tryRestoreCache();
-				ArrayList<String> queries = self.getQueries();
+		try {
+			self.openInIndex();
+			self.openOutIndex();
+			self.inflateCategoryTree();
+			self.tryRestoreCache();
+			ArrayList<String> queries = self.getQueries();
 
-				// collect categories from index
-				ArrayList<Integer> categoryIds = self.collectTopDocsCategories(queries,
-								self.estimationArguments.numTopDocumentsToConsider, SEARCH_FIELD_SECTIONTEXT,
-								self.estimationArguments.numTopDocumentsToConsider);
+			// collect categories from index
+			ArrayList<Integer> categoryIds = self.collectTopDocsCategories(queries,
+							self.estimationArguments.numTopDocumentsToConsider, SEARCH_FIELD_SECTIONTEXT,
+							self.estimationArguments.numTopDocumentsToConsider);
 
-				// evaluate and store to result-index in chunks:
-				int chunkCount = 0;
-				ArrayList<Integer> chunk = self.nextChunk(categoryIds);
-				while (chunk.size() > 0) {
-					self.logger.info("chunk count [" + chunkCount++ + "] " + chunk);
-					self.logger.info(chunk.toString());
-					self.evaluateKSortestPaths(chunk, self.estimationArguments.kShortestPaths, false);
-					self.indexWriter.commit();
-					self.trySaveCache();
-					chunk = self.nextChunk(categoryIds);
-				}
+			// evaluate and store to result-index in chunks:
+			int chunkCount = 0;
+			ArrayList<Integer> chunk = self.nextChunk(categoryIds);
+			while (chunk.size() > 0) {
+				self.logger.info("chunk count [" + chunkCount++ + "] " + chunk);
+				self.logger.info(chunk.toString());
 
-				self.closeInIndex();
-				self.closeOutIndex();
+				self.evaluateKSortestPaths(chunk, self.estimationArguments.kShortestPaths,
+								self.estimationArguments.isDistributionStartedAtSiblings);
+				self.indexWriter.commit();
 				self.trySaveCache();
-
-				self.logger.info("total duration: [" + (System.currentTimeMillis() - startTimestamp) + "]ms");
-
-			} catch (IOException | ParseException e) {
-				self.logger.severe("ERROR: " + e.getMessage());
+				chunk = self.nextChunk(categoryIds);
 			}
-			break;
+
+			self.closeInIndex();
+			self.closeOutIndex();
+			self.trySaveCache();
+
+			self.logger.info("total duration: [" + (System.currentTimeMillis() - startTimestamp) + "]ms");
+
+		} catch (IOException | ParseException e) {
+			self.logger.severe("ERROR: " + e.getMessage());
 		}
 	}
 
@@ -151,12 +170,43 @@ public class QueryCategoryKShortestPathsEvaluation {
 		} catch (Exception e) {
 			logger.severe("failed to store node cache");
 		}
+
 		try {
 			fileResource.outCachedPaths.renameTo(new File(fileResource.outCachedPaths.getAbsolutePath()
 							+ System.currentTimeMillis()));
 			estimator.writeCachedPaths(fileResource.outCachedPaths);
 		} catch (Exception e) {
 			logger.severe("failed to store paths cache");
+		}
+
+		try {
+			if (categoryIdToName != null) {
+				FileOutputStream fos = new FileOutputStream(fileResource.outCategoryIdToName);
+				ObjectOutputStream oos = new ObjectOutputStream(fos);
+				oos.writeObject(categoryIdToName);
+				oos.close();
+				fos.close();
+				logger.info("stored category-id-to-name [" + categoryIdToName.size() + "] to ["
+								+ fileResource.outCategoryIdToName.getAbsolutePath() + "]");
+
+			}
+		} catch (Exception e) {
+			logger.severe("failed to store category-id-to-name");
+		}
+
+		try {
+			if (categoryNameToId != null) {
+				FileOutputStream fos = new FileOutputStream(fileResource.outCategoryNameToId);
+				ObjectOutputStream oos = new ObjectOutputStream(fos);
+				oos.writeObject(categoryNameToId);
+				oos.close();
+				fos.close();
+				logger.info("stored category-name-to-id [" + categoryNameToId.size() + "] to ["
+								+ fileResource.outCategoryNameToId.getAbsolutePath() + "]");
+
+			}
+		} catch (Exception e) {
+			logger.severe("failed to store category-name-to-id");
 		}
 	}
 
@@ -201,6 +251,10 @@ public class QueryCategoryKShortestPathsEvaluation {
 			doc.add(new StringField("documentID", Integer.toString(crd.documenId), Field.Store.YES));
 		}
 
+		if (null != crd.categoryName) {
+			doc.add(new StringField("categoryName", crd.categoryName, Field.Store.YES));
+		}
+
 		if (null != crd.queryNumber) {
 			doc.add(new StringField("queryNumber", Integer.toString(crd.queryNumber), Field.Store.YES));
 		}
@@ -217,20 +271,22 @@ public class QueryCategoryKShortestPathsEvaluation {
 			for (CategoryRelevanceDetails.TopCategoryRelevance tcr : crd.topCategoryRelevances) {
 
 				if (null != tcr.categoryRelevance && !Double.isNaN(tcr.categoryRelevance)) {
-					try {
-						ByteArrayOutputStream bos = new ByteArrayOutputStream();
-						ObjectOutputStream oos = new ObjectOutputStream(bos);
-						oos.writeObject(tcr);
-						doc.add(new StoredField("TopCategoryRelevance", bos.toByteArray()));
-						doc.add(new StringField("TopCategoryRelevance-hr", tcr.categoryRelevance.toString() + "|"
-										+ tcr.categoryId.toString() + "|" + tcr.categoryName, Field.Store.YES));
-						// doc.add(new StringField("TopCategoryRelevance-id",
-						// tcr.categoryId.toString(), Field.Store.YES));
-						// doc.add(new StringField("TopCategoryRelevance-name",
-						// tcr.categoryName, Field.Store.YES));
-					} catch (IOException e) {
-						logger.severe("failed storing binary field [TopCategoryRelevance] to index");
-					}
+					// try {
+					// ByteArrayOutputStream bos = new ByteArrayOutputStream();
+					// ObjectOutputStream oos = new ObjectOutputStream(bos);
+					// oos.writeObject(tcr);
+					// doc.add(new StoredField("TopCategoryRelevance",
+					// bos.toByteArray()));
+
+					doc.add(new StringField("TopCategoryRelevance-hr", tcr.categoryRelevance.toString() + "|"
+									+ tcr.categoryId.toString() + "|" + tcr.categoryName, Field.Store.YES));
+					// doc.add(new StringField("TopCategoryRelevance-id",
+					// tcr.categoryId.toString(), Field.Store.YES));
+					// doc.add(new StringField("TopCategoryRelevance-name",
+					// tcr.categoryName, Field.Store.YES));
+					// } catch (IOException e) {
+					// logger.severe("failed storing binary field [TopCategoryRelevance] to index");
+					// }
 				}
 			}
 		}
@@ -254,7 +310,7 @@ public class QueryCategoryKShortestPathsEvaluation {
 
 	private void openInIndex() throws IOException {
 		Directory directory = FSDirectory.open(fileResource.inLuceneIndexDirectory);
-		indexReader = IndexReader.open(directory);
+		indexReader = DirectoryReader.open(directory);
 	}
 
 	private void closeInIndex() throws IOException {
@@ -294,57 +350,6 @@ public class QueryCategoryKShortestPathsEvaluation {
 		indexWriter = null;
 	}
 
-	// /**
-	// * get top categories of top documents for query from lucene index
-	// *
-	// * @param queryString
-	// * @param numTopDocumentsToConsider
-	// * number top documents where to take categories from
-	// */
-	// private int[] getQueryCategoryIDs(String queryString, int
-	// numTopDocumentsToConsider) throws ParseException,
-	// IOException {
-	// HashSet<Integer> categoryLabels = new HashSet<>();
-	// IndexSearcher indexSearcher = new IndexSearcher(indexReader);
-	// QueryParser queryParser = new QueryParser(SEARCH_FIELD_SECTIONTEXT, new
-	// EnglishAnalyzer());
-	// // queryParser.setDefaultOperator(Operator.OR); // TODO
-	// org.apache.lucene.search.Query query = null;
-	// query = queryParser.parse(queryString);
-	//
-	// TopDocs topDocs = indexSearcher.search(query, numTopDocumentsToConsider);
-	//
-	// int totalMissedCategories = 0;
-	// for (ScoreDoc sDocs : topDocs.scoreDocs) {
-	// org.apache.lucene.document.Document doc = indexSearcher.doc(sDocs.doc);
-	// IndexableField[] categories = doc.getFields("category");
-	// int missedCategories = 0;
-	// // collect all top docs categories
-	// for (IndexableField category : categories) {
-	// Integer categoryId = categoryIds.get(category.stringValue().replace(" ",
-	// "_"));
-	// if (categoryId == null) {
-	// // logger.warning("failed to lookup category [" +
-	// // category.stringValue().replace(" ", "_") + "]");
-	// missedCategories++;
-	// } else {
-	// categoryLabels.add(categoryId);
-	// }
-	// }
-	// totalMissedCategories += missedCategories;
-	// }
-	// logger.info("found [" + categoryLabels.size() + "] missed [" +
-	// totalMissedCategories + "] categories out of ["
-	// + (categoryLabels.size() + totalMissedCategories) + "] categories");
-	//
-	// int[] ids = new int[categoryLabels.size()];
-	// int idx = 0;
-	// for (Integer id : categoryLabels) {
-	// ids[idx++] = id;
-	// }
-	// return ids;
-	// }
-
 	private ArrayList<Integer> collectTopDocsCategories(ArrayList<String> queryStrings, int numTopDocumentsToConsider,
 					String searchField,/*
 										 * HashMap<Integer, ArrayList<Integer>>
@@ -372,7 +377,7 @@ public class QueryCategoryKShortestPathsEvaluation {
 				IndexableField[] categories = doc.getFields("category");
 				// collect all top doc categories
 				for (IndexableField category : categories) {
-					Integer categoryId = categoryIds.get(category.stringValue().replace(" ", "_"));
+					Integer categoryId = categoryNameToId.get(category.stringValue().replace(" ", "_"));
 					if (categoryId == null) {
 						missedCategories++;
 					} else {
@@ -413,7 +418,7 @@ public class QueryCategoryKShortestPathsEvaluation {
 		logger.info(collector.getStatistics().toString());
 
 		// get category id's of top categories
-		categoryIds = collector.getCategoryMap();
+		categoryNameToId = collector.getCategoryMap();
 		String[] topCategoryLabels = { "Agriculture", "Architecture", "Arts", "Behavior", "Chronology", "Concepts",
 						"Creativity", "Culture", /* "Disciplines", */"Education", "Environment", "Geography",
 						"Government", "Health", "History", "Humanities", "Humans", "Industry", "Information",
@@ -421,11 +426,19 @@ public class QueryCategoryKShortestPathsEvaluation {
 						"Objects", "People", "Politics", "Science", "Society", "Sports", "Structure", "Systems",
 						"Technology", "Universe", "World" };
 
+		// create inverted id lookup table
+		if (categoryIdToName == null) {
+			categoryIdToName = new HashMap<>();
+			for (Map.Entry<String, Integer> entry : categoryNameToId.entrySet()) {
+				categoryIdToName.put(entry.getValue(), entry.getKey());
+			}
+		}
+
 		topCategoryIds = new HashMap<>();
 		int idx = 0;
 		topCategories = new int[topCategoryLabels.length];
 		for (String topCategoryLabel : topCategoryLabels) {
-			Integer id = categoryIds.get(topCategoryLabel);
+			Integer id = categoryNameToId.get(topCategoryLabel);
 			if (null == id) {
 				logger.severe("category [" + topCategoryLabel + "] not found!");
 				continue;
@@ -480,18 +493,22 @@ public class QueryCategoryKShortestPathsEvaluation {
 				CategoryRelevanceDetails.TopCategoryRelevance topCategory = new CategoryRelevanceDetails.TopCategoryRelevance();
 				Integer topCategoryId = relEntry.getKey();
 				topCategory.categoryId = topCategoryId;
+
 				topCategory.categoryName = getCategoryName(topCategory.categoryId);
 				topCategory.categoryRelevance = relEntry.getValue();
 				category.topCategoryRelevances[idx++] = topCategory;
 
-				// if (!Double.isNaN(topCategory.categoryRelevance)) {
-				logger.info("[" + startCategoryId + "] estimates to [" + topCategoryId + "] with ["
-								+ topCategory.categoryRelevance + "]");
-				// }
+				// // if (!Double.isNaN(topCategory.categoryRelevance)) {
+				// logger.info("[" + startCategoryId + "] estimates to [" +
+				// topCategoryId + "] with ["
+				// + topCategory.categoryRelevance + "]");
+				// // }
 			}
 
 			try {
-				logger.info("write result to index");
+				// logger.info("write document [n=" + category.categoryName +
+				// " id=" + category.categoryId
+				// + "] results to index");
 				writeToIndex(category);
 			} catch (IOException e) {
 				logger.severe("failed to write to index");
@@ -500,11 +517,6 @@ public class QueryCategoryKShortestPathsEvaluation {
 	}
 
 	private String getCategoryName(Integer id) {
-		for (Map.Entry<String, Integer> entry : categoryIds.entrySet()) {
-			if (entry.getValue().compareTo(id) == 0) {
-				return entry.getKey();
-			}
-		}
-		return null;
+		return categoryIdToName.get(id);
 	}
 }

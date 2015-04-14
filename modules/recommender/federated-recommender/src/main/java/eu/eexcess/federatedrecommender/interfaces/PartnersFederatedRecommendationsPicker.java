@@ -24,13 +24,25 @@ package eu.eexcess.federatedrecommender.interfaces;
 
 import java.util.List;
 
+import org.apache.solr.common.params.ModifiableSolrParams;
+import org.apache.solr.update.processor.TextProfileSignature;
+
 import eu.eexcess.dataformats.PartnerBadge;
+import eu.eexcess.dataformats.result.Result;
 import eu.eexcess.dataformats.result.ResultList;
 import eu.eexcess.dataformats.userprofile.SecureUserProfile;
 import eu.eexcess.federatedrecommender.dataformats.PFRChronicle;
 import eu.eexcess.federatedrecommender.dataformats.PartnersFederatedRecommendations;
 
-public interface PartnersFederatedRecommendationsPicker {
+
+public abstract class PartnersFederatedRecommendationsPicker {
+	final private ModifiableSolrParams params =new ModifiableSolrParams();
+
+	protected PartnersFederatedRecommendationsPicker(){
+		params.set("quantRate", (int) 0.02f);
+	    params.set("minTokenLen", 3);
+	}
+	
 	/**
 	 * Picks results out of the chronic from multiple queries
 	 * @param pFRChronicle
@@ -53,4 +65,23 @@ public interface PartnersFederatedRecommendationsPicker {
 			PartnersFederatedRecommendations resultList,
 			List<PartnerBadge> partners, int numResults);
 
+	/**
+	 * calculated the fuzzy hash for the result set
+	 * @param o
+	 * @return
+	 */
+	public byte[] getFuzzyHashSignature(Result o) {
+		TextProfileSignature tPSignatur =  new TextProfileSignature();
+		
+		
+		tPSignatur.init(params );
+		if(o.description!=null)
+			tPSignatur.add(o.description);
+		else if(o.title!=null){
+			tPSignatur.add(o.title);
+			if(o.previewImage!=null)
+				tPSignatur.add(o.previewImage);
+		}
+		return tPSignatur.getSignature();
+	}
 }

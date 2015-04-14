@@ -1,6 +1,6 @@
 package eu.eexcess.federatedrecommender;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -8,18 +8,18 @@ import java.util.List;
 import org.junit.Test;
 
 import eu.eexcess.dataformats.PartnerBadge;
-
 import eu.eexcess.dataformats.result.Result;
 import eu.eexcess.dataformats.result.ResultList;
+import eu.eexcess.dataformats.userprofile.ContextKeyword;
 import eu.eexcess.dataformats.userprofile.SecureUserProfile;
 import eu.eexcess.federatedrecommender.dataformats.PartnersFederatedRecommendations;
 import eu.eexcess.federatedrecommender.picker.FiFoPicker;
+import eu.eexcess.federatedrecommender.picker.OccurrenceProbabilityPicker;
 
-public class FiFoPickerTest {
-
+public class OccurrenceProbabilityPickerTest {
 	@Test
 	public void standartTest() {
-		FiFoPicker picker = new FiFoPicker();
+		OccurrenceProbabilityPicker picker = new OccurrenceProbabilityPicker();
 		int numResults = 10;
 		List<PartnerBadge> partners = new ArrayList<PartnerBadge>();
 		PartnerBadge badge1 = new PartnerBadge();
@@ -50,7 +50,11 @@ public class FiFoPickerTest {
 		resultList.getResults().put(badge2, resultList2);
 		
 		try {
-			SecureUserProfile profile=null;
+			SecureUserProfile profile= new SecureUserProfile();
+			ContextKeyword keyword= new ContextKeyword("robberi");
+			profile.contextKeywords.add(keyword);
+			ContextKeyword keyword2 = new ContextKeyword("Gardner");
+			profile.contextKeywords.add(keyword2 );
 			evalList =picker.pickResults(profile, resultList , partners, numResults);
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -60,21 +64,14 @@ public class FiFoPickerTest {
 			System.out.println(iterable_element.title);
 		}
 		assertEquals(true, evalList.results.size()==10 );
-		assertEquals(true, evalList.results.get(0).title.equals("RL1T1") );
-		assertEquals(true, evalList.results.get(1).title.equals("RL2T1"));
-		assertEquals(true, evalList.results.get(2).title.equals("RL1T2") );
-		assertEquals(true, evalList.results.get(3).title.equals("RL2T2"));
-		assertEquals(true, evalList.results.get(4).title.equals("RL1T3") );
-		assertEquals(true, evalList.results.get(5).title.equals("RL2T3"));
-		assertEquals(true, evalList.results.get(6).title.equals("RL1T4") );
-		assertEquals(true, evalList.results.get(7).title.equals("RL2T4"));
-		assertEquals(true, evalList.results.get(8).title.equals("RL1T5") );
-		assertEquals(true, evalList.results.get(9).title.equals("RL2T5"));
+		assertEquals(true, evalList.results.get(0).title.equals("RL1T1")|| evalList.results.get(0).title.equals("RL2T1"));
+		assertEquals(true, evalList.results.get(0).title.equals("RL2T1")|| evalList.results.get(0).title.equals("RL1T1"));
+
 	
 	}
 	@Test
 	public void fuzzyTest() {
-		FiFoPicker picker = new FiFoPicker();
+		OccurrenceProbabilityPicker picker = new OccurrenceProbabilityPicker();
 		int numResults = 10;
 		List<PartnerBadge> partners = new ArrayList<PartnerBadge>();
 		PartnerBadge badge1 = new PartnerBadge();
@@ -122,7 +119,12 @@ public class FiFoPickerTest {
 		resultList.getResults().put(badge2, resultList2);
 		
 		try {
-			SecureUserProfile profile=null;
+			
+			SecureUserProfile profile= new SecureUserProfile();
+			ContextKeyword keyword= new ContextKeyword("robberi");
+			profile.contextKeywords.add(keyword);
+			ContextKeyword keyword2 = new ContextKeyword("Gardner");
+			profile.contextKeywords.add(keyword2 );
 			evalList =picker.pickResults(profile, resultList , partners, numResults);
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -132,21 +134,19 @@ public class FiFoPickerTest {
 			System.out.println(iterable_element.title +" "+ iterable_element.description);
 		}
 		assertEquals(true, evalList.results.size()==10 );
-		assertEquals(true, evalList.results.get(0).title.equals("RL1T1") );
-		assertEquals(true, evalList.results.get(1).title.equals("RL1T3"));
-		assertEquals(true, evalList.results.get(2).title.equals("RL1T10") );
-		assertEquals(true, evalList.results.get(3).title.equals("RL2T10"));
-		assertEquals(true, evalList.results.get(4).title.equals("RL1T11") );
-		assertEquals(true, evalList.results.get(5).title.equals("RL2T11"));
-		assertEquals(true, evalList.results.get(6).title.equals("RL1T12") );
-		assertEquals(true, evalList.results.get(7).title.equals("RL2T12"));
-		assertEquals(true, evalList.results.get(8).title.equals("RL1T13") );
-		assertEquals(true, evalList.results.get(9).title.equals("RL2T13"));
-	
+		assertEquals(true, evalList.results.get(2).description ==null);
+		assertEquals(true, evalList.results.get(3).description ==null);
+		assertEquals(true, evalList.results.get(4).description ==null);
+		assertEquals(true, evalList.results.get(5).description ==null);
+		assertEquals(true, evalList.results.get(6).description ==null);
+		assertEquals(true, evalList.results.get(7).description ==null);
+		assertEquals(true, evalList.results.get(8).description ==null);
+		assertEquals(true, evalList.results.get(9).description ==null);
+		
 	}
 	@Test
 	public void fuzzyTooLessToPickTest() {
-		FiFoPicker picker = new FiFoPicker();
+		OccurrenceProbabilityPicker picker = new OccurrenceProbabilityPicker();
 		int numResults = 100;
 		List<PartnerBadge> partners = new ArrayList<PartnerBadge>();
 		PartnerBadge badge1 = new PartnerBadge();
@@ -194,7 +194,11 @@ public class FiFoPickerTest {
 		resultList.getResults().put(badge2, resultList2);
 		
 		try {
-			SecureUserProfile profile=null;
+			SecureUserProfile profile= new SecureUserProfile();
+			ContextKeyword keyword= new ContextKeyword("robberi");
+			profile.contextKeywords.add(keyword);
+			ContextKeyword keyword2 = new ContextKeyword("Gardner");
+			profile.contextKeywords.add(keyword2 );
 			evalList =picker.pickResults(profile, resultList , partners, numResults);
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -207,14 +211,13 @@ public class FiFoPickerTest {
 		assertEquals(true, evalList.results.get(0).title.equals("RL1T1") );
 		assertEquals(true, evalList.results.get(1).title.equals("RL1T3"));
 		assertEquals(true, evalList.results.get(2).title.equals("RL1T10") );
-		assertEquals(true, evalList.results.get(3).title.equals("RL2T10"));
-		assertEquals(true, evalList.results.get(4).title.equals("RL1T11") );
-		assertEquals(true, evalList.results.get(5).title.equals("RL2T11"));
-		assertEquals(true, evalList.results.get(6).title.equals("RL1T12") );
-		assertEquals(true, evalList.results.get(7).title.equals("RL2T12"));
-		assertEquals(true, evalList.results.get(8).title.equals("RL1T13") );
-		assertEquals(true, evalList.results.get(9).title.equals("RL2T13"));
+		assertEquals(true, evalList.results.get(3).title.equals("RL1T11"));
+		assertEquals(true, evalList.results.get(4).title.equals("RL1T12") );
+		assertEquals(true, evalList.results.get(5).title.equals("RL1T13"));
+		assertEquals(true, evalList.results.get(6).title.equals("RL1T14") );
+		assertEquals(true, evalList.results.get(7).title.equals("RL2T10"));
+		assertEquals(true, evalList.results.get(8).title.equals("RL1T15") );
+		assertEquals(true, evalList.results.get(9).title.equals("RL2T11"));
 	
 	}
-
 }

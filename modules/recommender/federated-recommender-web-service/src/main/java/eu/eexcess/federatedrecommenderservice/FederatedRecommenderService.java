@@ -18,6 +18,7 @@ package eu.eexcess.federatedrecommenderservice;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -41,6 +42,7 @@ import org.codehaus.jackson.map.JsonMappingException;
 import org.codehaus.jackson.map.ObjectMapper;
 
 import javax.ws.rs.core.Response;
+
 import com.sun.jersey.spi.resource.Singleton;
 
 import eu.eexcess.config.FederatedRecommenderConfiguration;
@@ -87,9 +89,22 @@ public class FederatedRecommenderService {
 	 */
 	public FederatedRecommenderService() throws FederatedRecommenderException {
 		ObjectMapper mapper = new ObjectMapper();
-		URL resource = getClass().getResource(
-				"/federatedRecommenderConfig.json");
 		mapper.configure(JsonParser.Feature.ALLOW_COMMENTS, true);
+		String eexcessPartnerKeyFile =System.getenv("EEXCESS_FEDERATED_RECOMMENDER_CONFIG_FILE");
+		URL resource =null;
+		if(eexcessPartnerKeyFile==null){
+			logger.log(Level.INFO,"Config file was not defined in environment EEXCESS_FEDERATED_RECOMMENDER_CONFIG_FILE. Read from package resource");	
+		 resource = getClass().getResource("/federatedRecommenderConfig.json");
+		}else{
+			logger.log(Level.INFO,"Reading Config file from:" + eexcessPartnerKeyFile);	
+			try {
+				resource = new File(eexcessPartnerKeyFile).toURL();
+			} catch (MalformedURLException e) {
+				logger.log(Level.SEVERE,"Environment Variable was malformated:"+eexcessPartnerKeyFile,e);
+			}
+		}
+		
+		
 		try {
 			federatedRecommenderConfiguration = mapper.readValue(new File(
 					resource.getFile()),

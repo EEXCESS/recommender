@@ -52,6 +52,10 @@ The file has to look like:
 "password": ""}]
 }
 
+You can also set a second system variable EEXCESS_FEDERATED_RECOMMENDER_CONFIG_FILE 
+to set the path of the config file.
+If the varibale is not set the service will take the file from the resoucres in the war file.
+
 In the main directory (code/ ) just call
 $ mvn package -Dmaven.test.skip=true
 and deploy the generated war files in the your tomcat instance. 
