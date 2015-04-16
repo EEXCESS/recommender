@@ -578,7 +578,7 @@ public class FederatedRecommenderCore {
 								+ shortStats.failedRequestTimeoutCount);
 						updateS.execute();
 					} catch (SQLException e) {
-						logger.log(Level.WARNING,
+						logger.log(Level.INFO,
 								"Could not write into StatsDatabase: "+e.getMessage());
 					}finally {
 							db.commit();
@@ -589,7 +589,7 @@ public class FederatedRecommenderCore {
 //						}
 					}
 				} else
-					logger.log(Level.WARNING,
+					logger.log(Level.INFO,
 							"Could write into request statistics database");
 				PreparedStatement updateQ = db
 						.getPreparedUpdateStatement(DatabaseQueryStats.QUERYLOG);
@@ -609,18 +609,18 @@ public class FederatedRecommenderCore {
 							updateQ.addBatch();
 							
 						} catch (SQLException e) {
-							logger.log(Level.WARNING,"Could not write into StatsDatabase: "+e.getMessage());
+							logger.log(Level.INFO,"Could not write into StatsDatabase: "+e.getMessage());
 						}
 					}
 					try {
 						updateQ.executeBatch();
 					} catch (SQLException e) {
-						logger.log(Level.WARNING,"Could not write into StatsDatabase: "+e.getMessage());
+						logger.log(Level.INFO,"Could not write into StatsDatabase: "+e.getMessage());
 					}
 					
 					
 				} else
-					logger.log(Level.WARNING,
+					logger.log(Level.INFO,
 							"Could not write into query statistics database");
 			}
 			}
