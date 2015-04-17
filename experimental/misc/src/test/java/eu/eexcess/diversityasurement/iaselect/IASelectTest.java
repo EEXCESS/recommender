@@ -40,7 +40,7 @@ public class IASelectTest {
 	@Test
 	public void IASelect_givenTestData_expectCorrectdocumentOrder() {
 
-		Query q = new Query();
+		Query q = new Query("foo");
 		q.addCategory(new Category("c1", 0.7));
 		q.addCategory(new Category("c2", 0.3));
 

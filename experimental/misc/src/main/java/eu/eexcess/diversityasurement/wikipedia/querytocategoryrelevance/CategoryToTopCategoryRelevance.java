@@ -21,32 +21,49 @@
 package eu.eexcess.diversityasurement.wikipedia.querytocategoryrelevance;
 
 import java.io.Serializable;
+import java.util.Comparator;
 
-public class CategoryRelevanceDetails implements Serializable {
+/**
+ * describes the relevance of one category to n top most categories
+ * 
+ * @author Raoul Rubien
+ *
+ */
+public class CategoryToTopCategoryRelevance implements Serializable {
 	private static final long serialVersionUID = 2662323424344375687L;
 
-	public static class TopCategoryRelevance implements Serializable {
+	public static class CategoryRelevance implements Serializable {
+
+		public static class DescRelevanceComparator implements Comparator<CategoryRelevance> {
+			@Override
+			public int compare(CategoryRelevance o1, CategoryRelevance o2) {
+				if (o1.categoryRelevance == o2.categoryRelevance) {
+					return 0;
+				}
+				if (o1.categoryRelevance > o2.categoryRelevance) {
+					return -1;
+				}
+				return 1;
+			}
+		}
+
 		private static final long serialVersionUID = 2990339220973007267L;
 		public String categoryName = "";
 		public Integer categoryId = -1;
 		public Double categoryRelevance = Double.NaN;
 	};
 
-	// public static class SubCategory implements Serializable {
-	// private static final long serialVersionUID = 7496329867387904375L;
-	// public String categoryName = "";
-	// public Integer categoryId = -1;
-	// }
-
 	public String categoryName;
 	public Integer categoryId = -1;
 
+	/**
+	 * optional details how the category was chosen
+	 */
 	public String query;
 	public String queryDescription;
-	public Integer queryNumber;
-	
-	public Integer documenId;
 
-	public TopCategoryRelevance[] topCategoryRelevances;
-	// public SubCategory[] startCategories;
+	/**
+	 * relevances to top most categories
+	 */
+	public CategoryRelevance[] topCategoryRelevances;
 }
