@@ -50,12 +50,12 @@ import org.apache.lucene.store.Directory;
 import org.apache.lucene.store.FSDirectory;
 import org.apache.lucene.util.Version;
 
+import eu.eexcess.diversityasurement.evaluation.config.Settings;
 import eu.eexcess.diversityasurement.wikipedia.GrphTupleCollector;
 import eu.eexcess.diversityasurement.wikipedia.MainCategoryRelevanceEstimator;
 import eu.eexcess.diversityasurement.wikipedia.RDFCategoryExtractor;
-import eu.eexcess.diversityasurement.wikipedia.config.Settings;
-import eu.eexcess.diversityasurement.wikipedia.querytocategoryrelevance.CategoryRelevanceDetails;
-import eu.eexcess.diversityasurement.wikipedia.querytocategoryrelevance.CategoryRelevanceDetails.TopCategoryRelevance;
+import eu.eexcess.diversityasurement.wikipedia.querytocategoryrelevance.CategoryToTopCategoryRelevance;
+import eu.eexcess.diversityasurement.wikipedia.querytocategoryrelevance.CategoryToTopCategoryRelevance.CategoryRelevance;
 import eu.eexcess.diversityasurement.wikipedia.querytocategoryrelevance.Queries;
 import eu.eexcess.diversityasurement.wikipedia.querytocategoryrelevance.Query;
 import eu.eexcess.diversityasurement.wikipedia.querytocategoryrelevance.QueryJsonIO;
@@ -64,45 +64,31 @@ import grph.Grph;
 
 public class QueryCategoryKShortestPathsEvaluation {
 
-	public static class IOFIles {
-		public File inLuceneIndexDirectory = new File("/opt/data/wikipedia/eexcess/enwiki-big/");
-		public File outLuceneIndexDirectory = new File("/opt/iaselect/results/category-relevance-index-big/");
-		public File outCachedNodes = new File("/opt/iaselect/results/cache/cached-nodes.bin");
-		public File outCachedPaths = new File("/opt/iaselect/results/cache/cached-paths.bin");
-		public File outCategoryIdToName = new File("/opt/iaselect/results/cache/category-id-to-name.bin");
-		public File outCategoryNameToId = new File("/opt/iaselect/results/cache/category-name-to-id.bin");
-	}
-
 	public static class ConcurrentSettigns {
 		public int totalThreads = 1;
 		// number of categories a thread calculates sequentially
 		public int numCategoriesToCalculateBundled = 1;
 	}
 
-	public static class EstimationArguments {
-		private int numTopDocumentsToConsider = 60;
-		private int numKClosestCategoryNeighborsToConsider = 1000;
-		private int kShortestPaths = 1;
-		private int nodesPerChunk = 2000;
-		private boolean isDistributionStartedAtSiblings = false;
-	}
+	private static Logger logger = PianoLogger.getLogger(QueryCategoryKShortestPathsEvaluation.class);
+	static Grph grph;
+	// CategoryRelevanceDetails queriesRelevances = new
+	// CategoryRelevanceDetails();
+	static MainCategoryRelevanceEstimator estimator;
+	public static final String SEARCH_FIELD_SECTIONTEXT = "sectionText";
+	private static int[] topCategories;
+	private static Map<String, Integer> categoryNameToId;
+	private static Map<Integer, String> categoryIdToName;
+	private static Map<String, Integer> topCategoryIds;
+	// public IOFIles fileResource = new IOFIles();
+	private static ConcurrentSettigns concurrentSettings = new ConcurrentSettigns();
+	// private static EstimationArguments estimationArguments = new
+	// EstimationArguments();
+	static IndexReader indexReader;
+	private static IndexWriter indexWriter;
 
-	Logger logger = PianoLogger.getLogger(QueryCategoryKShortestPathsEvaluation.class);
-	Grph grph;
-	CategoryRelevanceDetails queriesRelevances = new CategoryRelevanceDetails();
-	MainCategoryRelevanceEstimator estimator;
-	private static final String SEARCH_FIELD_SECTIONTEXT = "sectionText";
-	private int[] topCategories;
-	private Map<String, Integer> categoryNameToId;
-	private Map<Integer, String> categoryIdToName;
-	private Map<String, Integer> topCategoryIds;
-	public IOFIles fileResource = new IOFIles();
-	private ConcurrentSettigns concurrentSettings = new ConcurrentSettigns();
-	private EstimationArguments estimationArguments = new EstimationArguments();
-	private IndexReader indexReader;
-	private IndexWriter indexWriter;
-
-	private int chunkStartIdx = 0;
+	private static HashMap<Integer, HashMap<Integer, Double>> estimatedRelevances;
+	private static int chunkStartIdx = 0;
 
 	/**
 	 * Reads category relations (parent<-child) from RDF {@link #settings.RDFCategories.PATH} and
@@ -123,71 +109,72 @@ public class QueryCategoryKShortestPathsEvaluation {
 	 */
 	public static void main(String[] args) {
 		long startTimestamp = System.currentTimeMillis();
-		QueryCategoryKShortestPathsEvaluation self = new QueryCategoryKShortestPathsEvaluation();
 
 		try {
-			self.openInIndex();
-			self.openOutIndex();
-			self.inflateCategoryTree();
-			self.tryRestoreCache();
-			ArrayList<String> queries = self.getQueries();
+			openInIndex();
+			openOutIndex();
+			init();
+			tryRestoreCache();
+			ArrayList<String> queries = getQueries();
 
 			// collect categories from index
-			ArrayList<Integer> categoryIds = self.collectTopDocsCategories(queries,
-							self.estimationArguments.numTopDocumentsToConsider, SEARCH_FIELD_SECTIONTEXT,
-							self.estimationArguments.numTopDocumentsToConsider);
+			ArrayList<Integer> categoryIds = collectTopDocsCategories(queries,
+							Settings.RelevanceEvaluation.EstimationArguments.numTopDocumentsToConsider);
 
 			// evaluate and store to result-index in chunks:
 			int chunkCount = 0;
-			ArrayList<Integer> chunk = self.nextChunk(categoryIds);
+			ArrayList<Integer> chunk = nextChunk(categoryIds);
 			while (chunk.size() > 0) {
-				self.logger.info("chunk count [" + chunkCount++ + "] " + chunk);
-				self.logger.info(chunk.toString());
+				logger.info("chunk count [" + chunkCount++ + "] " + chunk);
+				logger.info(chunk.toString());
 
-				self.evaluateKSortestPaths(chunk, self.estimationArguments.kShortestPaths,
-								self.estimationArguments.isDistributionStartedAtSiblings);
-				self.indexWriter.commit();
-				self.trySaveCache();
-				chunk = self.nextChunk(categoryIds);
+				evaluateKSortestPaths(chunk, Settings.RelevanceEvaluation.EstimationArguments.kShortestPaths,
+								Settings.RelevanceEvaluation.EstimationArguments.isDistributionStartedAtSiblings);
+				indexWriter.commit();
+				trySaveCache();
+				chunk = nextChunk(categoryIds);
 			}
 
-			self.closeInIndex();
-			self.closeOutIndex();
-			self.trySaveCache();
+			closeInIndex();
+			closeOutIndex();
+			trySaveCache();
 
-			self.logger.info("total duration: [" + (System.currentTimeMillis() - startTimestamp) + "]ms");
+			logger.info("total duration: [" + (System.currentTimeMillis() - startTimestamp) + "]ms");
 
 		} catch (IOException | ParseException e) {
-			self.logger.severe("ERROR: " + e.getMessage());
+			logger.severe("ERROR: " + e.getMessage());
 		}
 	}
 
-	private void trySaveCache() {
+	private static void trySaveCache() {
 		try {
-			fileResource.outCachedNodes.renameTo(new File(fileResource.outCachedNodes.getAbsolutePath()
-							+ System.currentTimeMillis()));
-			estimator.writeCachedNodes(fileResource.outCachedNodes);
+			Settings.RelevanceEvaluation.IOFIles.outCachedNodes.renameTo(new File(
+							Settings.RelevanceEvaluation.IOFIles.outCachedNodes.getAbsolutePath()
+											+ System.currentTimeMillis()));
+			estimator.writeCachedNodes(Settings.RelevanceEvaluation.IOFIles.outCachedNodes);
 		} catch (Exception e) {
 			logger.severe("failed to store node cache");
 		}
 
 		try {
-			fileResource.outCachedPaths.renameTo(new File(fileResource.outCachedPaths.getAbsolutePath()
-							+ System.currentTimeMillis()));
-			estimator.writeCachedPaths(fileResource.outCachedPaths);
+			Settings.RelevanceEvaluation.IOFIles.outCachedPaths.renameTo(new File(
+							Settings.RelevanceEvaluation.IOFIles.outCachedPaths.getAbsolutePath()
+											+ System.currentTimeMillis()));
+			estimator.writeCachedPaths(Settings.RelevanceEvaluation.IOFIles.outCachedPaths);
 		} catch (Exception e) {
 			logger.severe("failed to store paths cache");
 		}
 
 		try {
 			if (categoryIdToName != null) {
-				FileOutputStream fos = new FileOutputStream(fileResource.outCategoryIdToName);
+				Settings.RelevanceEvaluation.IOFIles.outCategoryIdToName.delete();
+				FileOutputStream fos = new FileOutputStream(Settings.RelevanceEvaluation.IOFIles.outCategoryIdToName);
 				ObjectOutputStream oos = new ObjectOutputStream(fos);
 				oos.writeObject(categoryIdToName);
 				oos.close();
 				fos.close();
 				logger.info("stored category-id-to-name [" + categoryIdToName.size() + "] to ["
-								+ fileResource.outCategoryIdToName.getAbsolutePath() + "]");
+								+ Settings.RelevanceEvaluation.IOFIles.outCategoryIdToName.getAbsolutePath() + "]");
 
 			}
 		} catch (Exception e) {
@@ -196,49 +183,67 @@ public class QueryCategoryKShortestPathsEvaluation {
 
 		try {
 			if (categoryNameToId != null) {
-				FileOutputStream fos = new FileOutputStream(fileResource.outCategoryNameToId);
+				Settings.RelevanceEvaluation.IOFIles.outCategoryNameToId.delete();
+				FileOutputStream fos = new FileOutputStream(Settings.RelevanceEvaluation.IOFIles.outCategoryNameToId);
 				ObjectOutputStream oos = new ObjectOutputStream(fos);
 				oos.writeObject(categoryNameToId);
 				oos.close();
 				fos.close();
 				logger.info("stored category-name-to-id [" + categoryNameToId.size() + "] to ["
-								+ fileResource.outCategoryNameToId.getAbsolutePath() + "]");
+								+ Settings.RelevanceEvaluation.IOFIles.outCategoryNameToId.getAbsolutePath() + "]");
 
 			}
 		} catch (Exception e) {
 			logger.severe("failed to store category-name-to-id");
 		}
+
+		try {
+			if (estimatedRelevances != null) {
+				Settings.RelevanceEvaluation.IOFIles.outRelevances.delete();
+				FileOutputStream fos = new FileOutputStream(Settings.RelevanceEvaluation.IOFIles.outRelevances);
+				ObjectOutputStream oos = new ObjectOutputStream(fos);
+				oos.writeObject(estimatedRelevances);
+				oos.close();
+				fos.close();
+				logger.info("stored estimated relevances [" + estimatedRelevances.size() + "] to ["
+								+ Settings.RelevanceEvaluation.IOFIles.outRelevances.getAbsolutePath() + "]");
+
+			}
+		} catch (Exception e) {
+			logger.severe("failed to store estimated relevances");
+		}
 	}
 
-	private void tryRestoreCache() {
+	private static void tryRestoreCache() {
 		try {
-			estimator.readCachedNodes(fileResource.outCachedNodes);
+			estimator.readCachedNodes(Settings.RelevanceEvaluation.IOFIles.outCachedNodes);
 		} catch (ClassNotFoundException | IOException e) {
 			logger.severe("failed to restore nodes cache " + e.getMessage());
 		}
 
 		try {
-			estimator.readCachedPaths(fileResource.outCachedPaths);
+			estimator.readCachedPaths(Settings.RelevanceEvaluation.IOFIles.outCachedPaths);
 		} catch (ClassNotFoundException | IOException e) {
 			logger.severe("failed to restore paths cache " + e.getMessage());
 		}
 	}
 
-	private ArrayList<Integer> nextChunk(ArrayList<Integer> categoryIds) {
+	private static ArrayList<Integer> nextChunk(ArrayList<Integer> categoryIds) {
 
 		if (chunkStartIdx > categoryIds.size()) {
 			return new ArrayList<Integer>();
 		}
 
-		int chunkEndIdx = ((chunkStartIdx + estimationArguments.nodesPerChunk) > categoryIds.size()) ? categoryIds
-						.size() : chunkStartIdx + estimationArguments.nodesPerChunk;
+		int chunkEndIdx = ((chunkStartIdx + Settings.RelevanceEvaluation.EstimationArguments.nodesPerChunk) > categoryIds
+						.size()) ? categoryIds.size() : chunkStartIdx
+						+ Settings.RelevanceEvaluation.EstimationArguments.nodesPerChunk;
 		ArrayList<Integer> chunk = new ArrayList<Integer>(categoryIds.subList(chunkStartIdx, chunkEndIdx));
-		chunkStartIdx += estimationArguments.nodesPerChunk;
+		chunkStartIdx += Settings.RelevanceEvaluation.EstimationArguments.nodesPerChunk;
 
 		return chunk;
 	}
 
-	void writeToIndex(CategoryRelevanceDetails crd) throws IOException {
+	static void writeToIndex(CategoryToTopCategoryRelevance crd) throws IOException {
 
 		// if (null == crd.topCategoryRelevances ||
 		// crd.topCategoryRelevances.length <= 0) {
@@ -247,17 +252,17 @@ public class QueryCategoryKShortestPathsEvaluation {
 
 		Document doc = new Document();
 
-		if (null != crd.documenId) {
-			doc.add(new StringField("documentID", Integer.toString(crd.documenId), Field.Store.YES));
-		}
+//		if (null != crd.documenId) {
+//			doc.add(new StringField("documentID", Integer.toString(crd.documenId), Field.Store.YES));
+//		}
 
 		if (null != crd.categoryName) {
 			doc.add(new StringField("categoryName", crd.categoryName, Field.Store.YES));
 		}
 
-		if (null != crd.queryNumber) {
-			doc.add(new StringField("queryNumber", Integer.toString(crd.queryNumber), Field.Store.YES));
-		}
+//		if (null != crd.queryNumber) {
+//			doc.add(new StringField("queryNumber", Integer.toString(crd.queryNumber), Field.Store.YES));
+//		}
 
 		if (null != crd.queryDescription) {
 			doc.add(new StringField("queryDescription", crd.queryDescription, Field.Store.YES));
@@ -268,7 +273,7 @@ public class QueryCategoryKShortestPathsEvaluation {
 		}
 
 		if (null != crd.topCategoryRelevances) {
-			for (CategoryRelevanceDetails.TopCategoryRelevance tcr : crd.topCategoryRelevances) {
+			for (CategoryToTopCategoryRelevance.CategoryRelevance tcr : crd.topCategoryRelevances) {
 
 				if (null != tcr.categoryRelevance && !Double.isNaN(tcr.categoryRelevance)) {
 					// try {
@@ -298,7 +303,7 @@ public class QueryCategoryKShortestPathsEvaluation {
 	/**
 	 * read queries from file
 	 */
-	private ArrayList<String> getQueries() throws IOException {
+	private static ArrayList<String> getQueries() throws IOException {
 		Queries queries = QueryJsonIO.readQueries(new File(Settings.Queries.PATH));
 
 		ArrayList<String> queryList = new ArrayList<>(queries.queries.length);
@@ -308,12 +313,12 @@ public class QueryCategoryKShortestPathsEvaluation {
 		return queryList;
 	}
 
-	private void openInIndex() throws IOException {
-		Directory directory = FSDirectory.open(fileResource.inLuceneIndexDirectory);
+	static void openInIndex() throws IOException {
+		Directory directory = FSDirectory.open(Settings.RelevanceEvaluation.IOFIles.inLuceneIndexDirectory);
 		indexReader = DirectoryReader.open(directory);
 	}
 
-	private void closeInIndex() throws IOException {
+	static void closeInIndex() throws IOException {
 		try {
 			indexReader.close();
 		} catch (IOException e) {
@@ -325,21 +330,22 @@ public class QueryCategoryKShortestPathsEvaluation {
 
 	}
 
-	void openOutIndex() throws IOException {
+	static void openOutIndex() throws IOException {
 		try {
-			Directory indexDirectory = FSDirectory.open(fileResource.outLuceneIndexDirectory);
+			Directory indexDirectory = FSDirectory.open(Settings.RelevanceEvaluation.IOFIles.outLuceneIndexDirectory);
 			Analyzer analyzer = new EnglishAnalyzer();
 			IndexWriterConfig writerConfig = new IndexWriterConfig(Version.LATEST, analyzer);
 			writerConfig.setOpenMode(OpenMode.CREATE);
 			// writerConfig.setRAMBufferSizeMB(ramBufferSizeMB);
 			indexWriter = new IndexWriter(indexDirectory, writerConfig);
 		} catch (IOException e) {
-			logger.log(Level.SEVERE, "unable to open/create index at [" + fileResource.outLuceneIndexDirectory + "]", e);
+			logger.log(Level.SEVERE, "unable to open/create index at ["
+							+ Settings.RelevanceEvaluation.IOFIles.outLuceneIndexDirectory + "]", e);
 			throw e;
 		}
 	}
 
-	void closeOutIndex() throws IOException {
+	static void closeOutIndex() throws IOException {
 		try {
 			indexWriter.close();
 		} catch (IOException e) {
@@ -350,16 +356,12 @@ public class QueryCategoryKShortestPathsEvaluation {
 		indexWriter = null;
 	}
 
-	private ArrayList<Integer> collectTopDocsCategories(ArrayList<String> queryStrings, int numTopDocumentsToConsider,
-					String searchField,/*
-										 * HashMap<Integer, ArrayList<Integer>>
-										 * docCatgoryCollector, HashMap<Integer,
-										 * String> categoryQueryStringCollector,
-										 */int numTopDocs) throws ParseException, IOException {
+	private static ArrayList<Integer> collectTopDocsCategories(ArrayList<String> queryStrings,
+					int numTopDocumentsToConsider) throws ParseException, IOException {
 
 		ArrayList<Integer> listOfCategoryIds = new ArrayList<>();
 		IndexSearcher indexSearcher = new IndexSearcher(indexReader);
-		QueryParser queryParser = new QueryParser(searchField, new EnglishAnalyzer());
+		QueryParser queryParser = new QueryParser(SEARCH_FIELD_SECTIONTEXT, new EnglishAnalyzer());
 		int totalMissedCategories = 0;
 		int totalFoundCategories = 0;
 		int totalDuplicateCollisions = 0;
@@ -367,7 +369,7 @@ public class QueryCategoryKShortestPathsEvaluation {
 		for (String queryString : queryStrings) {
 
 			org.apache.lucene.search.Query query = queryParser.parse(queryString);
-			TopDocs topDocs = indexSearcher.search(query, numTopDocs);
+			TopDocs topDocs = indexSearcher.search(query, numTopDocumentsToConsider);
 
 			int missedCategories = 0;
 			int foundCategories = 0;
@@ -408,10 +410,13 @@ public class QueryCategoryKShortestPathsEvaluation {
 		return listOfCategoryIds;
 	}
 
-	private void inflateCategoryTree() throws IOException {
-		logger.info("inflating tree from [" + Settings.RDFCategories.PATH + "]");
+	static void init() throws IOException {
+		// build graph from rdf file
+		logger.info("inflating tree from ["
+						+ eu.eexcess.diversityasurement.wikipedia.config.Settings.RDFCategories.PATH + "]");
 		GrphTupleCollector collector = new GrphTupleCollector(350000);
-		RDFCategoryExtractor extractor = new RDFCategoryExtractor(new File(Settings.RDFCategories.PATH), collector);
+		RDFCategoryExtractor extractor = new RDFCategoryExtractor(new File(
+						eu.eexcess.diversityasurement.wikipedia.config.Settings.RDFCategories.PATH), collector);
 		extractor.extract();
 		grph = collector.getGraph();
 		logger.info(extractor.getStatistics().toString());
@@ -434,6 +439,7 @@ public class QueryCategoryKShortestPathsEvaluation {
 			}
 		}
 
+		// construct top category string-id map
 		topCategoryIds = new HashMap<>();
 		int idx = 0;
 		topCategories = new int[topCategoryLabels.length];
@@ -449,7 +455,9 @@ public class QueryCategoryKShortestPathsEvaluation {
 
 		// try re-read estimator's cache
 		estimator = new MainCategoryRelevanceEstimator(grph, topCategories);
-		estimator.setKClosestNeighborsSubgraph(estimationArguments.numKClosestCategoryNeighborsToConsider);
+		estimator.setKClosestNeighborsSubgraph(Settings.RelevanceEvaluation.EstimationArguments.numKClosestCategoryNeighborsToConsider);
+
+		estimatedRelevances = new HashMap<>();
 	}
 
 	/**
@@ -469,7 +477,7 @@ public class QueryCategoryKShortestPathsEvaluation {
 	 * @param documentId2CategoryId
 	 *            document IDs that produced startCategoryIds
 	 */
-	private void evaluateKSortestPaths(ArrayList<Integer> startCategoryIds, int kShortestPaths,
+	private static void evaluateKSortestPaths(ArrayList<Integer> startCategoryIds, int kShortestPaths,
 					boolean distributeOverSiblingCategories) {
 
 		MainCategoryRelevanceEstimator
@@ -479,18 +487,25 @@ public class QueryCategoryKShortestPathsEvaluation {
 						startCategoryIds, kShortestPaths, concurrentSettings.totalThreads,
 						distributeOverSiblingCategories).entrySet()) {
 
-			HashMap<Integer, Double> relevances = entry.getValue();
 			Integer startCategoryId = entry.getKey();
+			HashMap<Integer, Double> relevances = entry.getValue();
 
-			CategoryRelevanceDetails category = new CategoryRelevanceDetails();
+			if (estimatedRelevances.containsKey(startCategoryId)) {
+				logger.severe("failed to accumulate relevance: found result for duplicate category id [id="
+								+ startCategoryId + " n=" + getCategoryName(startCategoryId) + "]");
+			} else {
+				estimatedRelevances.put(startCategoryId, relevances);
+			}
+
+			CategoryToTopCategoryRelevance category = new CategoryToTopCategoryRelevance();
 			category.categoryId = startCategoryId;
 			category.categoryName = getCategoryName(category.categoryId);
-			category.topCategoryRelevances = new TopCategoryRelevance[relevances.size()];
+			category.topCategoryRelevances = new CategoryRelevance[relevances.size()];
 
 			// category relevances
 			int idx = 0;
 			for (HashMap.Entry<Integer, Double> relEntry : relevances.entrySet()) {
-				CategoryRelevanceDetails.TopCategoryRelevance topCategory = new CategoryRelevanceDetails.TopCategoryRelevance();
+				CategoryToTopCategoryRelevance.CategoryRelevance topCategory = new CategoryToTopCategoryRelevance.CategoryRelevance();
 				Integer topCategoryId = relEntry.getKey();
 				topCategory.categoryId = topCategoryId;
 
@@ -516,7 +531,7 @@ public class QueryCategoryKShortestPathsEvaluation {
 		}
 	}
 
-	private String getCategoryName(Integer id) {
+	private static String getCategoryName(Integer id) {
 		return categoryIdToName.get(id);
 	}
 }

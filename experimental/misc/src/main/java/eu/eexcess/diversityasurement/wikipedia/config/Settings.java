@@ -60,14 +60,6 @@ public class Settings {
 		}
 	}
 
-	public static class Queries {
-		public static final String PATH = "/opt/iaselect/queriesEn-selected-diversity.json";
-
-		public static boolean isQueriesFileAvailable() {
-			return printWarning(PATH);
-		}
-	}
-
 	private static boolean printWarning(String path) {
 		if (!(new File(path).canRead())) {
 			System.err.println("resource does not exist [" + path + "]");

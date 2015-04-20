@@ -20,7 +20,9 @@
 
 package eu.eexcess.diversityasurement.wikipedia.querytocategoryrelevance;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -28,17 +30,16 @@ import java.io.IOException;
 
 import org.junit.Test;
 
-import eu.eexcess.diversityasurement.wikipedia.config.Settings;
-
 public class QueryJsonIOTest {
 
 	@Test
 	public void readQueries_givenRegularFile_expectCorrectAmountOfQueries() throws FileNotFoundException, IOException {
-		if (!Settings.Queries.isQueriesFileAvailable()) {
+		if (!eu.eexcess.diversityasurement.evaluation.config.Settings.Queries.isQueriesFileAvailable()) {
 			return;
 		}
 
-		Queries queries = QueryJsonIO.readQueries(new File(Settings.Queries.PATH));
+		Queries queries = QueryJsonIO.readQueries(new File(
+						eu.eexcess.diversityasurement.evaluation.config.Settings.Queries.PATH));
 		assertNotNull(queries);
 		assertTrue(queries.queries.length > 0);
 		assertEquals(76, queries.queries.length);
@@ -52,11 +53,12 @@ public class QueryJsonIOTest {
 
 	@Test
 	public void writeQueries_expectNotExceptional() throws IOException {
-		if (!Settings.Queries.isQueriesFileAvailable()) {
+		if (!eu.eexcess.diversityasurement.evaluation.config.Settings.Queries.isQueriesFileAvailable()) {
 			return;
 		}
 
-		Queries queries = QueryJsonIO.readQueries(new File(Settings.Queries.PATH));
+		Queries queries = QueryJsonIO.readQueries(new File(
+						eu.eexcess.diversityasurement.evaluation.config.Settings.Queries.PATH));
 		File temp = File.createTempFile("temp", ".txt");
 		QueryJsonIO.writeQueries(temp, queries);
 
