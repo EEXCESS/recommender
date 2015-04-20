@@ -20,7 +20,7 @@
 
 package eu.eexcess.diversityasurement.iaselect;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
 
 import java.util.HashSet;
 import java.util.Iterator;
@@ -29,22 +29,16 @@ import java.util.Set;
 
 import org.junit.Test;
 
-import eu.eexcess.diversityasurement.iaselect.Category;
-import eu.eexcess.diversityasurement.iaselect.Document;
-import eu.eexcess.diversityasurement.iaselect.DocumentQualityValueV;
-import eu.eexcess.diversityasurement.iaselect.IAselect;
-import eu.eexcess.diversityasurement.iaselect.Query;
-
 public class IASelectTest {
 
 	@Test
-	public void IASelect_givenTestData_expectCorrectdocumentOrder() {
+	public void IASelect_givenTestData_expectCorrectdocumentOrder() throws Exception {
 
 		Query q = new Query("foo");
 		q.addCategory(new Category("c1", 0.7));
 		q.addCategory(new Category("c2", 0.3));
 
-		DocumentQualityValueV V = new DocumentQualityValueV();
+		SimpleDocumentQualityValueV V = new SimpleDocumentQualityValueV();
 		addNewDocumentValue("d1", "c1", 0.5, "c2", 0.0, V);
 		addNewDocumentValue("d2", "c1", 0.2, "c2", 0.0, V);
 		addNewDocumentValue("d3", "c1", 0.15, "c2", 0.0, V);
@@ -64,13 +58,13 @@ public class IASelectTest {
 		expectedOrder.add(new Document("d9"));
 		expectedOrder.add(new Document("d10"));
 
-		IAselect diversityer = new IAselect();
+		IASelect diversifyer = new IASelect();
 		Set<Document> Rq = R(q);
 
-				Iterator<Document> expectedOrderIterator = expectedOrder.iterator();
-		for (Document d : diversityer.IASelect(5, q, Rq, V)) {
+		Iterator<Document> expectedOrderIterator = expectedOrder.iterator();
+		for (Document d : diversifyer.iaSelect(5, q, Rq, V)) {
 			assertEquals(expectedOrderIterator.next(), d);
-			System.out.print(d + " ");
+			System.out.print(d + "\n ");
 		}
 	}
 
@@ -100,7 +94,7 @@ public class IASelectTest {
 	 * @param category2Probability
 	 */
 	private void addNewDocumentValue(String documentName, String category1Name, double category1Probability,
-					String category2Name, double category2Probability, DocumentQualityValueV V) {
+					String category2Name, double category2Probability, SimpleDocumentQualityValueV V) {
 
 		Document d = new Document(documentName);
 		Category c1 = new Category(category1Name, category1Probability);

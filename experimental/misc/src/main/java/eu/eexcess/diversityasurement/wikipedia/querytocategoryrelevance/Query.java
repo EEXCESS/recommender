@@ -61,4 +61,9 @@ public class Query implements Serializable {
 		return true;
 	}
 
+	@Override
+	public String toString() {
+		return "Query [query=" + query + ", description=" + description + "]";
+	}
+
 }

@@ -21,6 +21,7 @@
 package eu.eexcess.diversityasurement.wikipedia.querytocategoryrelevance;
 
 import java.io.Serializable;
+import java.util.Arrays;
 import java.util.Comparator;
 
 /**
@@ -51,6 +52,12 @@ public class CategoryToTopCategoryRelevance implements Serializable {
 		public String categoryName = "";
 		public Integer categoryId = -1;
 		public Double categoryRelevance = Double.NaN;
+
+		@Override
+		public String toString() {
+			return "CategoryRelevance [categoryName=" + categoryName + ", categoryId=" + categoryId
+							+ ", categoryRelevance=" + categoryRelevance + "]";
+		}
 	};
 
 	public String categoryName;
@@ -66,4 +73,12 @@ public class CategoryToTopCategoryRelevance implements Serializable {
 	 * relevances to top most categories
 	 */
 	public CategoryRelevance[] topCategoryRelevances;
+
+	@Override
+	public String toString() {
+		return "CategoryToTopCategoryRelevance [categoryName=" + categoryName + ", categoryId=" + categoryId
+						+ ", query=" + query + ", queryDescription=" + queryDescription + ", topCategoryRelevances="
+						+ Arrays.toString(topCategoryRelevances) + "]";
+	}
+
 }

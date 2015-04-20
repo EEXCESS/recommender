@@ -78,7 +78,7 @@ public class QueryCategoryKShortestPathsEvaluationTest {
 
 		IndexReader ir;
 		try {
-			ir = DirectoryReader.open(FSDirectory.open(Settings.RelevanceEvaluation.IOFIles.outLuceneIndexDirectory));
+			ir = DirectoryReader.open(FSDirectory.open(Settings.RelevanceEvaluation.IOFiles.outLuceneIndexDirectory));
 		} catch (IOException e) {
 			System.out.println("unable to open index");
 			throw e;

@@ -19,7 +19,7 @@ GNU Affero General Public License for more details.
 
 You should have received a copy of the GNU Affero General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
-*/
+ */
 package eu.eexcess.diversityasurement.ndcg;
 
 /**
@@ -30,22 +30,22 @@ package eu.eexcess.diversityasurement.ndcg;
 public class NDCGIACategory {
 
 	private String categoryName;
-	private Double documentWeight;
+	// private Double documentWeight;
 	private Double queryWeight;
 
-	public NDCGIACategory(String categoryName, Double documentWeight, Double queryWeight) {
+	public NDCGIACategory(String categoryName, /* Double documentWeight, */Double queryWeight) {
 		this.categoryName = categoryName;
-		this.documentWeight = documentWeight;
+		// this.documentWeight = documentWeight;
 		this.queryWeight = queryWeight;
 	}
 
-	public Double getWeight() {
-		return documentWeight;
-	}
-
-	public void setWeight(Double weight) {
-		this.documentWeight = weight;
-	}
+	// public Double getWeight() {
+	// return documentWeight;
+	// }
+	//
+	// public void setWeight(Double weight) {
+	// this.documentWeight = weight;
+	// }
 
 	public String getCategoryName() {
 		return categoryName;
@@ -90,8 +90,11 @@ public class NDCGIACategory {
 
 	@Override
 	public String toString() {
-		return "NDCGIACategory [categoryName=" + categoryName + ", weight=" + documentWeight + ", queryWeight="
-						+ queryWeight + "]";
+		return "NDCGIACategory [categoryName=" + categoryName + /*
+																 * ", weight=" +
+																 * documentWeight
+																 * +
+																 */", queryWeight=" + queryWeight + "]";
 	}
 
 }

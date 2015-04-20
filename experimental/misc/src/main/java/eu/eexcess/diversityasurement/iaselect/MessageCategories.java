@@ -58,6 +58,18 @@ public class MessageCategories {
 		}
 		categories.add(c);
 	}
+	
+	/**
+	 * adds all c ∈ cats to categories if categories.contains(cats) == false.
+	 * 
+	 * @param cats
+	 * @throws IllegalArgumentException
+	 */
+	public void addCategories(Set<Category> cats) throws IllegalArgumentException {
+		for (Category c : cats) {
+			addCategory(c);
+		}
+	}
 
 	/**
 	 * returns category c* if c.equals(c*) == true.

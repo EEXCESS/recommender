@@ -87,8 +87,9 @@ public class ConditionalProbabilityU {
 	 * @param S set of already seen documents (treated as constant)
 	 * @param d the desired document to update U(c|q,S)
 	 * @param V document quality values 
+	 * @throws Exception 
 	 */
-	public void updateU(Category c, Query q, Set<Document> S, Document d, DocumentQualityValueV V) {
+	public void updateU(Category c, Query q, Set<Document> S, Document d, DocumentQualityValueV V) throws Exception {
 		double previousU = probabilitiesU.get(c);
 		double newU = (1 - V.V(d, q, c)) * previousU;
 		probabilitiesU.put(c, newU);

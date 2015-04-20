@@ -20,7 +20,7 @@ GNU Affero General Public License for more details.
 You should have received a copy of the GNU Affero General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
  * @author Raoul Rubien
-*/
+ */
 
 package eu.eexcess.diversityasurement.iaselect;
 
@@ -40,7 +40,16 @@ import java.util.Set;
  */
 public class Document extends MessageCategories {
 
+	public static double maxDocumentScore = 0.0f;
+	public double documentScore = 0.0f;
+
 	public String name;
+	public Integer documentId;
+
+	public Document(String name, Set<Category> categories, Integer documentId) {
+		this(name, categories);
+		this.documentId = documentId;
+	}
 
 	public Document(String name, Set<Category> categories) {
 		super(categories);
@@ -60,6 +69,7 @@ public class Document extends MessageCategories {
 	public int hashCode() {
 		final int prime = 31;
 		int result = 1;
+		result = prime * result + ((documentId == null) ? 0 : documentId.hashCode());
 		result = prime * result + ((name == null) ? 0 : name.hashCode());
 		return result;
 	}
@@ -73,6 +83,11 @@ public class Document extends MessageCategories {
 		if (getClass() != obj.getClass())
 			return false;
 		Document other = (Document) obj;
+		if (documentId == null) {
+			if (other.documentId != null)
+				return false;
+		} else if (!documentId.equals(other.documentId))
+			return false;
 		if (name == null) {
 			if (other.name != null)
 				return false;
@@ -83,6 +98,8 @@ public class Document extends MessageCategories {
 
 	@Override
 	public String toString() {
-		return "Document [name=" + name + "]";
+		return "Document [name=" + name + ", documentId=" + documentId + ", documentScore=" + documentScore
+						+ ", maxDocumentScore=" + maxDocumentScore + "]";
 	}
+
 }
