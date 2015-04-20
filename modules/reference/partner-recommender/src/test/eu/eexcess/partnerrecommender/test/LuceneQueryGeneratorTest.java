@@ -37,7 +37,7 @@ public class LuceneQueryGeneratorTest {
 		userProfile.contextKeywords.add(keyword7);
 		String result =gen.toQuery(userProfile );
 		System.out.println(result);
-		assertTrue(result.equals("\"k1\" \"k2\" \"k3\" \"k4\" OR (\"k5\" OR \"k6\" OR \"k7\")"));
+		assertTrue(result.equals("k1 OR k2 OR k3 OR k4 OR (\"k5\" OR \"k6\" OR \"k7\")"));
 	}
 
 	
@@ -53,7 +53,7 @@ public class LuceneQueryGeneratorTest {
 		userProfile.contextKeywords.add(keyword2);
 		String result =gen.toQuery(userProfile );
 		System.out.println(result);
-		assertTrue(result.equals("\"k1\" OR (\"k2\")"));
+		assertTrue(result.equals("k1 OR (\"k2\")"));
 	}
 	
 	@Test
@@ -82,7 +82,7 @@ public class LuceneQueryGeneratorTest {
 		userProfile.contextKeywords.add(keyword7);
 		String result =gen.toQuery(userProfile );
 		System.out.println(result);
-		assertTrue(result.equals("\"k1\" OR (\"k2\" OR \"k3\") OR \"k4\" OR (\"k5\" OR \"k6\" OR \"k7\")"));
+		assertTrue(result.equals("k1 OR (\"k2\" OR \"k3\") OR k4 OR (\"k5\" OR \"k6\" OR \"k7\")"));
 	}
 
 	@Test
@@ -111,7 +111,7 @@ public class LuceneQueryGeneratorTest {
 		userProfile.contextKeywords.add(keyword7);
 		String result =gen.toQuery(userProfile );
 		System.out.println(result);
-		assertTrue(result.equals("\"k1\" OR (\"k2\") OR \"k3\" \"k4\" OR (\"k5\" OR \"k6\" OR \"k7\")"));
+		assertTrue(result.equals("k1 OR (\"k2\") OR k3 OR k4 OR (\"k5\" OR \"k6\" OR \"k7\")"));
 	}
 
 	@Test
@@ -141,7 +141,7 @@ public class LuceneQueryGeneratorTest {
 		userProfile.contextKeywords.add(keyword7);
 		String result =gen.toQuery(userProfile );
 		System.out.println(result);
-		assertTrue(result.equals("(\"k1\" OR \"k2\" OR \"k3\") OR \"k4\" OR (\"k5\" OR \"k6\" OR \"k7\")"));
+		assertTrue(result.equals("(\"k1\" OR \"k2\" OR \"k3\") OR k4 OR (\"k5\" OR \"k6\" OR \"k7\")"));
 	}
 	@Test
 	public void multibleSerendipityStartTest() {
@@ -170,6 +170,6 @@ public class LuceneQueryGeneratorTest {
 		userProfile.contextKeywords.add(keyword7);
 		String result =gen.toQuery(userProfile );
 		System.out.println(result);
-		assertTrue(result.equals("(\"k1\" OR \"k2\" OR \"k3\") OR \"k4\" AND (\"k5\" OR \"k6\" OR \"k7\")"));
+		assertTrue(result.equals("(\"k1\" OR \"k2\" OR \"k3\") OR k4 AND (\"k5\" OR \"k6\" OR \"k7\")"));
 	}
 }
