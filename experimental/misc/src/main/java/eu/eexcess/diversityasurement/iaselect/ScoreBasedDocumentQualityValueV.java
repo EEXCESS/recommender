@@ -25,12 +25,10 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 package eu.eexcess.diversityasurement.iaselect;
 
 import java.io.IOException;
-import java.util.logging.Logger;
 
 import org.apache.lucene.queryparser.classic.ParseException;
 
 import book.InvalidStateException;
-import eu.eexcess.logger.PianoLogger;
 
 /**
  * V(d|q,c) - relevance of a document or the quality of a document d for query q

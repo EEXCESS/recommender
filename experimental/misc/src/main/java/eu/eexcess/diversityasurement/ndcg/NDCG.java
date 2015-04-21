@@ -35,6 +35,42 @@ import java.util.Comparator;
 public class NDCG {
 
 	/**
+	 * given a maximum rank this class maps ranks to {0,1,2,3,4}
+	 * 
+	 * @author Raoul Rubien
+	 *
+	 */
+	public static class RankToJudgementMapper {
+
+		private double maxRank = 0.0;
+
+		RankToJudgementMapper(double maxRank) {
+			this.maxRank = maxRank;
+		}
+
+		/**
+		 * map rank j to r ∈ {0,1,2,3,4}
+		 * 
+		 * @param j
+		 * @return 0 if j <= maxRank/5, 1 if j <= (2*maxRank)/5, 2 if j <=
+		 *         (3*maxRank)/5, 3 if j <= (4*maxRank)/5 and 4 if j >
+		 *         (3*maxRank)/5
+		 */
+		public int r(double j) {
+			if (j <= (1.0 / 5.0) * maxRank) {
+				return 0;
+			} else if (j <= (2.0 / 5.0) * maxRank) {
+				return 1;
+			} else if (j <= (3.0 / 5.0) * maxRank) {
+				return 2;
+			} else if (j <= (4.0 / 5.0) * maxRank) {
+				return 3;
+			}
+			return 4;
+		}
+	}
+
+	/**
 	 * Calculates the NDCG for a given input List
 	 * 
 	 * @param resultList
@@ -86,7 +122,7 @@ public class NDCG {
 
 	protected NDCGResultList getRelevanceSortedResultList(NDCGResultList resultList, NDCGIACategory category, int at) {
 		NDCGResultList sorted = new NDCGResultList();
-		Comparator<NDCGResult> resultListComperator = new Comparator<NDCGResult>() {
+		Comparator<NDCGResult> resultListComparator = new Comparator<NDCGResult>() {
 
 			@Override
 			public int compare(NDCGResult o1, NDCGResult o2) {
@@ -99,7 +135,7 @@ public class NDCG {
 			}
 		};
 		sorted.results = new ArrayList<NDCGResult>(resultList.results);
-		Collections.sort(sorted.results, resultListComperator);
+		Collections.sort(sorted.results, resultListComparator);
 
 		if (category != null) { // TODO: that is not performant at all
 			ArrayList<NDCGResult> categorySortedResult = new ArrayList<NDCGResult>();

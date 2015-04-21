@@ -46,7 +46,7 @@ import eu.eexcess.diversityasurement.wikipedia.querytocategoryrelevance.Category
 
 public class QueryCategoryKShortestPathsEvaluationTest {
 
-	// currently serialized objects are not stored to the index any more
+	// currently serialized objects are not written to the index any more
 	@Ignore 
 	@Test
 	public void writeToIndexTest_reconstructFromBinary_expectCorrectValues() throws IOException, ParseException,

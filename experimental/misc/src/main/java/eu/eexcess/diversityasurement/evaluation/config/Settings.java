@@ -69,7 +69,7 @@ public class Settings {
 							"/opt/iaselect/results/cache/category-id-to-name.bin");
 			public static final File inCategoryNameToId = new File(
 							"/opt/iaselect/results/cache/category-name-to-id.bin");
-			public static final File inRelevances = new File("/opt/iaselect/results/cache/category-relevances.bin");
+			public static final File inRelevances = new File("/opt/iaselect/results/cache/in-category-relevances.bin");
 		}
 	}
 

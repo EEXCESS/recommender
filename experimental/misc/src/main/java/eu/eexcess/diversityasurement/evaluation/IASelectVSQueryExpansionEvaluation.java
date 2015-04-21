@@ -71,15 +71,37 @@ public class IASelectVSQueryExpansionEvaluation {
 		open();
 
 		// run ia-select
-		int k = 5;
+		int k = 10;
 		Map<Query, LinkedHashSet<Document>> iasResult = iaSelect(queries, k);
 		Map<Query, LinkedHashSet<Document>> qexpResult = queryExpansion(queries);
-		
-		
-		// TODO: NDCG
+
+		int[] at = { 3, 4, 5 };
+		ndcgSummary(iasResult, qexpResult, at);
 
 		close();
 		System.out.println("total duration [" + (System.currentTimeMillis() - startTimestamp) + "]ms");
+	}
+
+	/**
+	 * compare results using ndcg for values in at
+	 * 
+	 * @param iasResult
+	 *            IA-Select results
+	 * @param qexpResult
+	 *            query expansion results
+	 * @param at
+	 *            array of values to calculate NDCG@at
+	 */
+	private static void ndcgSummary(Map<Query, LinkedHashSet<Document>> iasResult,
+					Map<Query, LinkedHashSet<Document>> qexpResult, int[] at) {
+		
+		// get categories of docs
+		// add relevance to categories
+
+		// calculate rank of docs from ideally sorted list
+
+		// run ndcd for each i in at
+
 	}
 
 	private static Map<Query, LinkedHashSet<Document>> iaSelect(Set<Query> queries, int k) throws Exception {
