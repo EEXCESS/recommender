@@ -51,11 +51,21 @@ public class NDCGIA extends NDCG {
 		}
 		for (NDCGIACategory cat : categories) {
 			Double nDCG = calcNDCG(resultList, cat, at);
-			nDCGIA += nDCG * cat.getQueryWeight();
+			nDCGIA += calcIAWeight(cat, nDCG);
 			// System.out.println(nDCG + " IA "+ cat.getQueryWeight()+" "+ nDCG*
 			// cat.getQueryWeight() );
 		}
 		return nDCGIA;
+	}
+
+	public double calcIAWeight(NDCGIACategory cat, Double nDCG) {
+		if(nDCG.isNaN()){
+			throw new IllegalArgumentException("NDCG value was NAN");
+		}
+		if(nDCG.isInfinite()){
+			throw new IllegalArgumentException("NDCG value was INF");
+		}
+		return nDCG * cat.getQueryWeight();
 	}
 
 }
