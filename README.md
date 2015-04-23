@@ -25,7 +25,8 @@ Deployment
 ===========
 
 To configure the project you should first modify the entries in the main configuration file:
-/modules/recommender/federated-recommender-web-service/src/main/resources/federatedRecommenderConfig.json
+
+    /modules/recommender/federated-recommender-web-service/src/main/resources/federatedRecommenderConfig.json
 
 Parameter               |   Explanation
 ------------------------|---------------
@@ -35,11 +36,17 @@ evaluationQueriesFile   |   not currently used
 statsLogDatabase        |   location of the sqlite db file for storing query statistics
 
 By default, the service will read this file from the resources folder in the .war file deployed when you build the project.
-However, you can also set the system variable EEXCESS_FEDERATED_RECOMMENDER_CONFIG_FILE
+However, you can also set the system variable
+
+    EEXCESS_FEDERATED_RECOMMENDER_CONFIG_FILE
+
 to set the path to an external config file which will override this default file.
 
-Set a system variable EEXCESS_PARTNER_KEY_FILE with a path to the key file that contains details of the partner system
-that the federated recommender can query.
+Set a system variable
+
+    EEXCESS_PARTNER_KEY_FILE
+
+with the path to the key file that contains details of the partner systems that the federated recommender can query.
 
 The EEXCESS_PARTNER_KEY_FILE is a JSON file with the following format for each partner:
 
