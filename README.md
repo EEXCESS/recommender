@@ -2,13 +2,15 @@ Recommender
 ===========
 
 This package includes both the federated recommender and partner recommender.
-Although every partner recommender can be build and installed on an appropriate system,
-partners will perhaps not return results since many partner APIs need a license with API key and password.
+Although each partner recommender can be built and installed on an appropriate system,
+most partners will probably not return results as partner APIs typically require a license with API key and password.
 If you need a license get in touch with the corresponding partner.
 
 The recommender is a REST-API based system which communicates over json.
 The appropriate calls and json formats are descripted in the wiki:
+
 https://github.com/EEXCESS/eexcess/wiki/Federated-Recommender-Service
+
 https://github.com/EEXCESS/eexcess/wiki/json-exchange-format
 
 
