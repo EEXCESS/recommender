@@ -30,8 +30,8 @@ To configure the project you should first modify the entries in the main configu
 
 Parameter               |   Explanation
 ------------------------|---------------
-solrServerUri           |   the endpoint to your own Solr server. However, this is currently used, so it can be left as it is.
-wikipediaIndexDir       |   the location of a Wikipedia index used for query expansion. Can be omitted or left as it is.
+solrServerUri           |   the endpoint to your own Solr server. However, this is not currently used, so it can be left as it is.
+wikipediaIndexDir       |   the location of a Wikipedia index used for query expansion. This is not currently used, so it can be omitted or left as it is.
 evaluationQueriesFile   |   not currently used
 statsLogDatabase        |   location of the sqlite db file for storing query statistics
 
