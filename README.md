@@ -86,7 +86,9 @@ Partner recommender
 --------------------
 
 To test an individual partner recommender, ensure valid userName/password/apiKey values are present in the partner-config.json file for that partner.
-You can then run the PartnerStandaloneServer in modules/partners/<partner>/src/main/java/eu/eexcess/<partner>/webservice/tool
+You can then run the PartnerStandaloneServer in
+
+    modules/partners/<partner>/src/main/java/eu/eexcess/<partner>/webservice/tool
 
 NB: If the federated recommender endpoint defined in federatedRecommenderURI in partner-config.json is not running (see below)
 then PartnerStandaloneServer will throw a 'Connection refused' exception but will otherwise continue to run.
