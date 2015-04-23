@@ -16,20 +16,16 @@ limitations under the License.
  */
 package eu.eexcess.dataformats;
 
-import java.io.Serializable;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Stack;
-
-import javax.xml.bind.annotation.XmlAccessType;
-import javax.xml.bind.annotation.XmlAccessorType;
-import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlElementWrapper;
-import javax.xml.bind.annotation.XmlRootElement;
+import eu.eexcess.dataformats.result.ResultStats;
 import org.apache.commons.math3.stat.descriptive.moment.StandardDeviation;
 import org.codehaus.jackson.annotate.JsonIgnoreProperties;
 
-import eu.eexcess.dataformats.result.ResultStats;
+import javax.xml.bind.annotation.*;
+import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Stack;
 
 
 @XmlRootElement(name = "eexcess-partner-badge")
@@ -67,7 +63,14 @@ public class PartnerBadge implements Serializable{
     private List<String> tags;
 
 
-	
+    @XmlElement(name="languageContent")
+    private List<String> languageContent = new ArrayList<String>();
+    public List<String> getLanguageContent() {
+        return languageContent;
+    }
+    public void setLanguageContent(List<String> languages) {
+        this.languageContent = languages;
+    }
 	
 	public String getPartnerConnectorEndpoint() {
 		return partnerConnectorEndpoint;
@@ -150,7 +153,7 @@ public class PartnerBadge implements Serializable{
 	public String toString() {
 		return "PartnerBadge [systemId=" + systemId + ", partnerKey="
 				+ partnerKey + ", description=" + description + ", endpoint="
-				+ partnerConnectorEndpoint + ", tags=" + tags + "]";
+				+ partnerConnectorEndpoint + ", tags=" + tags + ", languageContent=" + languageContent + "]";
 	}
 	public void setShortTimeResponsDeviation() {
 		// TODO Auto-generated method stub
