@@ -24,6 +24,10 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 package eu.eexcess.diversityasurement.iaselect;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.List;
 import java.util.Set;
 
 /**
@@ -40,11 +44,13 @@ import java.util.Set;
  */
 public class Document extends MessageCategories {
 
-	public static double maxDocumentScore = 0.0f;
+	// public static double maxDocumentScore = 0.0f;
 	public double documentScore = 0.0f;
 
 	public String name;
 	public Integer documentId;
+
+	public int priority;
 
 	public Document(String name, Set<Category> categories, Integer documentId) {
 		this(name, categories);
@@ -98,8 +104,25 @@ public class Document extends MessageCategories {
 
 	@Override
 	public String toString() {
-		return "Document [name=" + name + ", documentId=" + documentId + ", documentScore=" + documentScore
-						+ ", maxDocumentScore=" + maxDocumentScore + "]";
+		return "Document [name=" + name + ", documentId=" + documentId + ", documentScore=" + documentScore + "]";
+	}
+
+	public List<Category> getTopCategories(int size) {
+		List<Category> list = new ArrayList<Category>(categories());
+		Comparator<Category> comparator = new Comparator<Category>() {
+
+			@Override
+			public int compare(Category o1, Category o2) {
+				if (o1.probability < o2.probability) {
+					return -1;
+				} else if (o1.probability > o2.probability)
+					return 1;
+				return 0;
+			}
+		};
+		Collections.sort(list, comparator);
+		size = (size > list.size()) ? list.size() : size;
+		return list.subList(0, size);
 	}
 
 }

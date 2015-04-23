@@ -33,8 +33,9 @@ public class Settings {
 		}
 
 		public static class IOFiles {
-			public static final File inLuceneIndexParentDirectory = new File("/opt/data/wikipedia/eexcess/");
-			public static final File inLuceneIndexDirectory = new File("/opt/data/wikipedia/eexcess/enwiki-big/");
+			// TODO: remove tmp folder
+			public static final File inLuceneIndexParentDirectory = new File("/opt/data/wikipedia/eexcess/tmp");
+			public static final File inLuceneIndexDirectory = new File("/opt/data/wikipedia/eexcess/tmp/enwiki-big/");
 			
 			public static final File outLuceneIndexDirectory = new File(
 							"/opt/iaselect/results/category-relevance-index-big/");
