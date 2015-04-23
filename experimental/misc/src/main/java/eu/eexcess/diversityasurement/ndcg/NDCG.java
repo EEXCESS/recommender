@@ -44,7 +44,7 @@ public class NDCG {
 
 		private double maxRank = 0.0;
 
-		RankToJudgementMapper(double maxRank) {
+		public RankToJudgementMapper(double maxRank) {
 			this.maxRank = maxRank;
 		}
 
@@ -99,7 +99,7 @@ public class NDCG {
 				}
 				Double relI = 0.0;
 				Double nrelI = 0.0;
-				int a = i + 2;
+				double a = (double) i + 2.0;
 				Double log2I = Math.log10(a) / Math.log10(2.0);
 				if (categoryFlagRel) {
 					relI = resultList.results.get(i).nDCGRelevance;
@@ -107,15 +107,18 @@ public class NDCG {
 				if (categoryFlagNRel) {
 					nrelI = sortedByRelevance.results.get(i).nDCGRelevance;
 				}
-
-				if (log2I != null && log2I != 0.0) {
-					double d = (Math.pow(2, relI) - 1) / log2I;
+				if (categoryFlagNRel && categoryFlagRel && log2I != null && log2I != 0.0) {
+					double d = (Math.pow(2, relI) - 1.0) / log2I;
 					dCG += d;
-					double e = (Math.pow(2, nrelI) - 1) / log2I;
+					double e = (Math.pow(2, nrelI) - 1.0) / log2I;
 					iDCG += e;
 				}
 			}
-			ndcg = dCG / iDCG;
+			if (iDCG == 0.0) {
+				ndcg = 0.0;
+			} else {
+				ndcg = dCG / iDCG;
+			}
 		}
 		return ndcg;
 	}

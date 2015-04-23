@@ -146,7 +146,7 @@ public class QueryExpansionEvaluation {
 					result.append(") OR \"" + key.text + "\"");
 					expansion = false;
 				} else if (result.length() > 0)
-					result.append(" OR \"" + key.text + "\"");
+					result.append(" \"" + key.text + "\"");
 				else
 					result.append("\"" + key.text + "\"");
 			}

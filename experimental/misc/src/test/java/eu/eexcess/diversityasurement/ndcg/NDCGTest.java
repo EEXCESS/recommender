@@ -15,7 +15,7 @@ public class NDCGTest {
 	public void testSorting() {
 		NDCG ndcg = new NDCG();
 		NDCGResultList list = new NDCGResultList();
-		list.results = new ArrayList<NDCGResult>();
+//		list.results = new ArrayList<NDCGResult>();
 		NDCGResult nDCGResult1 = new NDCGResult();
 		nDCGResult1.nDCGRelevance = 1;
 		nDCGResult1.title = "T1";

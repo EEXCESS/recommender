@@ -22,6 +22,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 package eu.eexcess.diversityasurement.ndcg;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -30,7 +31,7 @@ import java.util.List;
  *
  */
 public class NDCGResultList {
-	List<NDCGResult> results;
+	public List<NDCGResult> results = new ArrayList<>();
 
 	@Override
 	public String toString() {

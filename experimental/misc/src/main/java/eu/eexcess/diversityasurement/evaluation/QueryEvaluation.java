@@ -33,6 +33,7 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.Vector;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.apache.lucene.analysis.en.EnglishAnalyzer;
@@ -493,16 +494,20 @@ public class QueryEvaluation {
 					// for all category to top category relations
 					HashMap<Integer, Double> topCategories = estimatedRelevances.get(categoryId);
 					ArrayList<CategoryRelevance> queryToTopCategoryRelevances = new ArrayList<>();
-					for (Map.Entry<Integer, Double> entry : topCategories.entrySet()) {
-						CategoryRelevance tr = new CategoryRelevance();
-						tr.categoryId = entry.getKey();
-						tr.categoryName = categoryIdToName.get(tr.categoryId);
-						tr.categoryRelevance = entry.getValue();
-						queryToTopCategoryRelevances.add(tr);
+					if(topCategories==null){
+						logger.log(Level.SEVERE,"Could not find Category:"+categoryToTopCategoriesRelevance.categoryName);
+					}else{
+						for (Map.Entry<Integer, Double> entry : topCategories.entrySet()) {
+							CategoryRelevance tr = new CategoryRelevance();
+							tr.categoryId = entry.getKey();
+							tr.categoryName = categoryIdToName.get(tr.categoryId);
+							tr.categoryRelevance = entry.getValue();
+							queryToTopCategoryRelevances.add(tr);
+						}
+						categoryToTopCategoriesRelevance.topCategoryRelevances = queryToTopCategoryRelevances
+										.toArray(new CategoryRelevance[queryToTopCategoryRelevances.size()]);
+						categoriesToTopCategoriesRelevanceCollector.add(categoryToTopCategoriesRelevance);
 					}
-					categoryToTopCategoriesRelevance.topCategoryRelevances = queryToTopCategoryRelevances
-									.toArray(new CategoryRelevance[queryToTopCategoryRelevances.size()]);
-					categoriesToTopCategoriesRelevanceCollector.add(categoryToTopCategoriesRelevance);
 				} else {
 					duplicateCollisions++;
 				}

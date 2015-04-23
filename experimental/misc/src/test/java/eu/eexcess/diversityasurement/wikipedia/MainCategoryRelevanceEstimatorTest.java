@@ -675,7 +675,7 @@ public class MainCategoryRelevanceEstimatorTest {
 		ArrayList<Integer> startCategories = new ArrayList<Integer>(Arrays.asList(21, 25, 22, 26, 23, 27, 24, 28));
 		Map<Integer, HashMap<Integer, Double>> relevances = estimator.estimateRelevancesConcurrent(startCategories, 1,
 						4, false);
-		
+
 		// test works for:
 		// Map<Integer, HashMap<Integer, Double>> relevances =
 		// estimator.estimateRelevancesConcurrent(startCategories, 1, 4, false);
@@ -691,11 +691,10 @@ public class MainCategoryRelevanceEstimatorTest {
 		// assertEquals(0.5, relevances.get(21).get(101));
 		// assertEquals(0.125, relevances.get(21).get(102));
 
-		// correct result: single threaded  
+		// correct result: single threaded
 		assertEquals(1.0 / 4.0, relevances.get(21).get(101));
 		assertEquals((1.0 / 16.0) / 2.0, relevances.get(21).get(102));
 
-		// tests never been fucked up
 		assertEquals(0.0625, relevances.get(21).get(103));
 		assertEquals(0.03125, relevances.get(21).get(104));
 		assertEquals(Double.NaN, relevances.get(21).get(105));
