@@ -14,9 +14,9 @@ https://github.com/EEXCESS/eexcess/wiki/json-exchange-format
 
 Tools needed
 -------------
-Tomcat: to deploy the generated war files
-Maven (>3.0.5): to build the project
-A Java IDE such as IntelliJ IDEA to debug and modify the project
+- Tomcat: to deploy the generated war files
+- Maven (>3.0.5): to build the project
+- A Java IDE such as IntelliJ IDEA to debug and modify the project
 
 
 Deployment
@@ -39,8 +39,10 @@ to set the path to an external config file which will override this default file
 Set a system variable EEXCESS_PARTNER_KEY_FILE with a path to the key file that contains details of the partner system
 that the federated recommender can query.
 
-The EEXCESS_PARTNER_KEY_FILE is a JSON file with the following format for each partner
+The EEXCESS_PARTNER_KEY_FILE is a JSON file with the following format for each partner:
 
+Parameter               |   Explanation
+------------------------|---------------
 systemId                |   The unique partner identifier. This must match the systemId used in the corresponding partner-config.json file for that partner
 userName                |   If the partner has username/password access to its API, specify the user name here
 password                |   If the partner has username/password access to its API, specify the password here
@@ -48,27 +50,27 @@ apiKey                  |   If the partner has provided an API key, enter this h
 
 Here's an example EEXCESS_PARTNER_KEY_FILE:
 
-{"partners":[
+    {"partners":[
 
-{"systemId":"Wissenmedia",
+    {"systemId":"Wissenmedia",
 
-"userName": "wissenmedia-api-user",
+    "userName": "wissenmedia-api-user",
 
-"password": "wissenmedia-api-user-password"},
+    "password": "wissenmedia-api-user-password"},
 
 
-{"systemId":"Europeana",
+    {"systemId":"Europeana",
 
-"apiKey": "your-europeana-api-key"
+    "apiKey": "your-europeana-api-key"
 
-},
+    },
 
-{"systemId":"Mendeley",
+    {"systemId":"Mendeley",
 
-"userName": "mendeley-api-user",
+    "userName": "mendeley-api-user",
 
-"password": "mendeley-api-password"}]
-}
+    "password": "mendeley-api-password"}]
+    }
 
 
 Partner recommender
@@ -85,21 +87,21 @@ then PartnerStandaloneServer will throw a 'Dictionary path does not exist: /word
 
 You can then query the PartnerStandaloneServer, for example if you have the Mendeley PartnerStandaloneServer running on port 8100 then
 
-localhost:8100/eexcess-partner-mendeley-1.0-SNAPSHOT/partner/debugDumpProfile
+    localhost:8100/eexcess-partner-mendeley-1.0-SNAPSHOT/partner/debugDumpProfile
 
 will generate a sample profile query XML file, which you can then POST to
 
-localhost:8100/eexcess/eexcess-partner-mendeley-1.0-SNAPSHOT/partner/recommend
+    localhost:8100/eexcess/eexcess-partner-mendeley-1.0-SNAPSHOT/partner/recommend
 
 to get recommendations from Mendeley.
 
 For example, using curl to get the sample profile:
 
-curl http://127.0.0.1:8100/eexcess-partner-mendeley-1.0-SNAPSHOT/partner/debugDumpProfile > debugDumpProfile.xml
+    curl http://127.0.0.1:8100/eexcess-partner-mendeley-1.0-SNAPSHOT/partner/debugDumpProfile > debugDumpProfile.xml
 
 And then using curl to POST the profile to the partner recommender:
 
-curl -H 'Content-Type: application/xml' -X POST -d @debugDumpProfile.xml http://127.0.0.1:8100/eexcess-partner-mendeley-1.0-SNAPSHOT/partner/recommend
+    curl -H 'Content-Type: application/xml' -X POST -d @debugDumpProfile.xml http://127.0.0.1:8100/eexcess-partner-mendeley-1.0-SNAPSHOT/partner/recommend
 
 
 Federated recommender
@@ -107,28 +109,29 @@ Federated recommender
 To build the complete project, change into the project's root directory (i.e. the location of this README)
 Execute the following maven command:
 
-mvn package -Dmaven.test.skip=true
+    mvn package -Dmaven.test.skip=true
 
 If your maven is already set up to use a different repository then you can create a separate Maven settings.xml file
 for this project, containing the EEXCESS Maven repo url
 
-<mirrors>
-    <mirror>
-        <id>kc_external</id>
-        <mirrorOf>*</mirrorOf>
-        <url>http://nexus.know-center.tugraz.at/content/repositories/public/</url>
-    </mirror>
-</mirrors>
+    <mirrors>
+        <mirror>
+            <id>kc_external</id>
+            <mirrorOf>*</mirrorOf>
+            <url>http://nexus.know-center.tugraz.at/content/repositories/public/</url>
+        </mirror>
+    </mirrors>
 
 and point to this during the build process via
 
-mvn -s /path/to/eexcess/settings/settings.xml  package -Dmaven.test.skip=true
+    mvn -s /path/to/eexcess/settings/settings.xml  package -Dmaven.test.skip=true
 
 Once the build is complete, you can deploy the generated .war files to the webapps directory in your Tomcat instance.
 Keep in mind that the following fields
 
-partnerConnectorEndpoint
-federatedRecommenderURI
+    partnerConnectorEndpoint
+
+    federatedRecommenderURI
 
 in partner-config.json for each partner has to be changed to point to the correct host and port for each partner service.
 Or, for convenience, leave these values at their defaults and just have Tomcat run on port "80".
