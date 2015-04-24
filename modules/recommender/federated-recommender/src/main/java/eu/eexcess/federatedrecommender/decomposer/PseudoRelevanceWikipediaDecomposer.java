@@ -55,6 +55,10 @@ public class PseudoRelevanceWikipediaDecomposer implements SecureUserProfileDeco
 	private Map<String, WikipediaQueryExpansion> localeToQueryExpansion;
 	private String[] supportedLocales;
 
+	/**
+	 * number of terms to be expanded in {@link #decompose(SecureUserProfile)}
+	 */
+	private int numTermsToExpand = 5;
 
 	/**
 	 * 
@@ -112,13 +116,13 @@ public class PseudoRelevanceWikipediaDecomposer implements SecureUserProfileDeco
 //				System.out.println("TypedTerm: "+ typedTerm.getText() +" Type: "+typedTerm.getType() +" Weight: " +typedTerm.getWeight());
 //			}
 //			System.out.println(query  +" query #############################");
-			terms.addAll(queryExpansionTerms.getTopTerms(5));
+			terms.addAll(queryExpansionTerms.getTopTerms(numTermsToExpand));
 		} catch (IOException e) {
 			logger.log(Level.SEVERE, "Cannot expand the query using Wikipedia", e);
 		}
 		
 		ArrayList<ContextKeyword> newContextKeywords = new ArrayList<ContextKeyword>();
-		for (TypedTerm typedTerm : terms.getTopTerms(5)) {
+		for (TypedTerm typedTerm : terms.getTopTerms(numTermsToExpand)) {
 			newContextKeywords.add(new ContextKeyword(typedTerm.getText(),ExpansionType.EXPANSION));
 		}
 		inputSecureUserProfile.contextKeywords.addAll(newContextKeywords);
@@ -126,5 +130,13 @@ public class PseudoRelevanceWikipediaDecomposer implements SecureUserProfileDeco
 		return inputSecureUserProfile;
 
 		//return null;
+	}
+	
+	/**
+	 * Set number of terms to be expanded on future calls to {@link #decompose(SecureUserProfile)} default: {@link #numTermsToExpand}
+	 * @param numTerms
+	 */
+	public void setMaxNumTermsToExpand(int numTerms) {
+		numTermsToExpand = numTerms;
 	}
 }

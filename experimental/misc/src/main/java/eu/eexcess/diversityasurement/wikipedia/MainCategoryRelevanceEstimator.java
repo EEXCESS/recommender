@@ -350,6 +350,11 @@ public class MainCategoryRelevanceEstimator {
 			return estimateRelevances(startCategories, topKShortestPathes, distributeOverSiblingCategories);
 		}
 
+		// TODO mt impl has bug/s: if true == distributeOverSiblingCategories, numtotalthreads > 1
+//		[8] total, siblings consider siblings [false]
+//						p[1.0] path [v21 v24 v101] <-- p[0.5] would be correct
+//						p[0.5] @id[21]
+//						p[0.25] @id[24]
 		ArrayList<Integer> toBeConsumed = new ArrayList<Integer>();
 		for (int startCategory : startCategories) {
 			toBeConsumed.add(startCategory);
@@ -497,8 +502,8 @@ public class MainCategoryRelevanceEstimator {
 			categoryProbability = 1.0 / (double) numTotalStartCategories;
 		}
 
-		// System.out.println("[" + numTotalStartCategories +
-		// "] total siblings");
+		System.out.println("[" + numTotalStartCategories + "] total, siblings consider siblings ["
+						+ distributeOverSiblingCategories + "]");
 		// for each target distribute remaining probability over all paths to
 		// the target
 		int targetIdx = 0;
@@ -508,14 +513,12 @@ public class MainCategoryRelevanceEstimator {
 			for (ArrayListPath targetPath : targetPaths) {
 				double pathProbability = categoryProbability;
 				int[] vertexArray = targetPath.toVertexArray();
-				// System.out.println("p[" + categoryProbability + "] path [" +
-				// targetPath + "]");
+				System.out.println("p[" + categoryProbability + "] path [" + targetPath + "]");
 				// distribute remaining probability over current path
 				for (int idx = 0; idx < (vertexArray.length - 1); idx++) {
 					Integer categoryId = vertexArray[idx];
 					pathProbability = pathProbability / (double) (getNodeData(categoryId).numOutgoingEdges);
-					// System.out.println("p[" + pathProbability + "] @id[" +
-					// categoryId + "]");
+					System.out.println("p[" + pathProbability + "] @id[" + categoryId + "]");
 				}
 
 				// update top category probability with currently calculated
@@ -523,13 +526,12 @@ public class MainCategoryRelevanceEstimator {
 				Double previousProbability = maintopicsProbability.get(mainTopic);
 				if (previousProbability.isNaN()) {
 					maintopicsProbability.put(mainTopic, pathProbability);
-					// System.out.println("new probability [" + pathProbability
-					// + "]");
+					 System.out.println("new probability [" + pathProbability
+					 + "]");
 				} else {
 					maintopicsProbability.put(mainTopic, previousProbability + pathProbability);
-					// System.out.println("probability [" + previousProbability
-					// + pathProbability + "] was ["
-					// + previousProbability + pathProbability + "]");
+					System.out.println("probability [" + previousProbability + pathProbability + "] was ["
+									+ previousProbability + pathProbability + "]");
 				}
 			}
 			targetIdx++;
@@ -595,13 +597,12 @@ public class MainCategoryRelevanceEstimator {
 			List<List<ArrayListPath>> sourceTargetsPaths = new ArrayList<List<ArrayListPath>>();
 			for (int target : topCategories) {
 
-				// long startTimestamp = System.currentTimeMillis();
+				long startTimestamp = System.currentTimeMillis();
 
 				List<ArrayListPath> grphPaths = getCachedOrCalculate(graph, source, target, topKShortestPathes);
-				// logger.info("kshortest in [" + (System.currentTimeMillis() -
-				// startTimestamp) + "]ms for [" + source
-				// + "] to target [" + target + "] k [" + topKShortestPathes +
-				// "]");
+				logger.info("kshortest in [" + (System.currentTimeMillis() - startTimestamp) + "]ms for [" + source
+								+ "] to target [" + target + "] k [" + topKShortestPathes + "]: path[" + grphPaths
+								+ "]");
 				sourceTargetsPaths.add(grphPaths);
 			}
 			sourcesTotargetsPaths.add(sourceTargetsPaths);

@@ -20,7 +20,7 @@ GNU Affero General Public License for more details.
 You should have received a copy of the GNU Affero General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
  * @author Raoul Rubien
-*/
+ */
 
 package eu.eexcess.diversityasurement.iaselect;
 
@@ -38,7 +38,7 @@ import org.apache.commons.lang.StringUtils;
  * 
  * @author Raoul Rubien
  */
-public class IAselect {
+public class IASelect {
 
 	private Document maxMarginalUtilityDocument = null;
 	private double maxMarginalUtility = -1;
@@ -52,29 +52,31 @@ public class IAselect {
 	 * @param q
 	 *            query for ranking documents
 	 * @param Cq
-	 *            C(q) - set of categories query belongs to
+	 *            C({@link q}) - set of categories query belongs to
 	 * @param Rq
-	 *            R(q) - top k ranked documents
-	 * @̶p̶a̶r̶a̶m̶ ̶D̶q̶ ̶C̶(̶d̶)̶ ̶-̶ ̶s̶e̶t̶ ̶o̶f̶ ̶c̶a̶t̶e̶g̶o̶r̶i̶e̶s̶
+	 *            R({@link q}) - top k ranked documents
+	 * @̶p̶a̶r̶a̶m̶ ̶C̶d̶ ̶C̶(̶d̶)̶ ̶-̶ ̶s̶e̶t̶ ̶o̶f̶ ̶c̶a̶t̶e̶g̶o̶r̶i̶e̶s̶
 	 *              ̶d̶o̶c̶u̶m̶e̶n̶t̶s̶ ̶b̶e̶l̶o̶n̶g̶s̶ ̶t̶o̶
 	 * @̶p̶a̶r̶a̶m̶ ̶P̶c̶q̶ ̶P̶(̶c̶|̶q̶)̶ ̶-̶ ̶d̶i̶s̶t̶r̶i̶b̶u̶t̶i̶o̶n̶ ̶o̶f̶
 	 *              ̶p̶r̶o̶b̶a̶b̶i̶l̶i̶t̶y̶ ̶t̶h̶a̶t̶ ̶c̶a̶t̶e̶g̶o̶r̶y̶ ̶c̶
 	 *              ̶b̶e̶l̶o̶n̶g̶s̶ ̶t̶o̶ ̶q̶u̶e̶r̶y̶ ̶q̶
 	 * @param Vdqc
-	 *            V(d|q,c) - document quality for query q qhen intended category
-	 *            is c
-	 * @return resorted list of k documents out of R(q)
+	 *            V({@link d}|{@link q},c) - document quality for query q when
+	 *            intended category is c
+	 * @return resorted list of {@link k} documents out of {@link Rq}
+	 * @throws Exception 
 	 */
-	Set<Document> IASelect(int k, Query q, Set<Category> Cq, Set<Document> Rq, DocumentQualityValueV V) {
+	LinkedHashSet<Document> iaSelect(int k, Query q, Set<Category> Cq, Set<Document> Rq, DocumentQualityValueV V) throws Exception {
 		Set<Document> R = Rq;
-		Set<Document> S = new LinkedHashSet<Document>(k);
+		LinkedHashSet<Document> S = new LinkedHashSet<Document>(k);
 
 		ConditionalProbabilityU U = new ConditionalProbabilityU(Cq);
-		System.out.println(U);
+//		System.out.println(U);
 
 		while (S.size() < k) {
-			System.out.println("\n[" + S.size() + "] out of [" + k + "] needed documents selected");
-			System.out.println(sToString(S));
+//			System.out.println("[" + S.size() + "] out of [" + k + "] needed documents selected from total ["
+//							+ Rq.size() + "] documents");
+//			System.out.println(sToString(S));
 
 			clearMaxMarginalUtility();
 			for (Document d : R) {
@@ -83,7 +85,7 @@ public class IAselect {
 			Document dMax = argmax();
 			S.add(dMax);
 
-			System.out.println("select maxarg(g(d|q,c,S=" + sToString(S) + ")=" + maxMarginalUtility + ")=" + dMax.name);
+//			System.out.println("select maxarg(g(d|q,c,S=" + sToString(S) + ")=" + maxMarginalUtility + ")=" + dMax.name);
 			/**
 			 * for all c ∈ C(d*) AND "c ∈ C(q)" because but P(c|q) always refers
 			 * to c ∈ C(q), see 3.1
@@ -91,7 +93,7 @@ public class IAselect {
 			for (Category c : C(dMax)) {
 				if (Cq.contains(c)) {
 					U.updateU(q.getCategory(c), q, S, dMax, V);
-					System.out.println(U);
+//					System.out.println(U);
 				}
 			}
 			R.remove(dMax);
@@ -134,13 +136,15 @@ public class IAselect {
 	 * @param V
 	 *            document qualities for ∀ d ∈ R(q)
 	 * @return re-ranked document list with |R(q)| = k
+	 * @throws Exception 
 	 */
-	public Set<Document> IASelect(int k, Query q, Set<Document> Rq, DocumentQualityValueV V) {
-		return IASelect(k, q, C(q), Rq, V);
+	public LinkedHashSet<Document> iaSelect(int k, Query q, Set<Document> Rq, DocumentQualityValueV V) throws Exception {
+		return iaSelect(k, q, C(q), Rq, V);
 	}
 
 	/**
-	 * C(m) - fetches the set of categories to which a query|document m belongs to
+	 * C(m) - fetches the set of categories to which a query|document m belongs
+	 * to
 	 * 
 	 * @param m
 	 *            also known as q (query) or d (document)
@@ -161,8 +165,9 @@ public class IAselect {
 	 *            query
 	 * @param S
 	 *            already selected documents
+	 * @throws Exception 
 	 */
-	void g(Document d, Query q, Set<Document> S, ConditionalProbabilityU U, DocumentQualityValueV V) {
+	void g(Document d, Query q, Set<Document> S, ConditionalProbabilityU U, DocumentQualityValueV V) throws Exception {
 		double sum = 0;
 
 		/**
@@ -177,7 +182,7 @@ public class IAselect {
 		if (maxMarginalUtility < sum) {
 			maxMarginalUtility = sum;
 			maxMarginalUtilityDocument = d;
-			System.out.println("argmx=" + maxMarginalUtility + " d=" + d.name);
+//			System.out.println("argmx=" + maxMarginalUtility + " d=" + d.name);
 		}
 	}
 }

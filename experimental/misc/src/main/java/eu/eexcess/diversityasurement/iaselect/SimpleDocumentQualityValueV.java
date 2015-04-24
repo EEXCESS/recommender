@@ -24,9 +24,16 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 package eu.eexcess.diversityasurement.iaselect;
 
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+
 /**
  * V(d|q,c) - relevance of a document or the quality of a document d for query q
  * when the intended category is c
+ * <p>
+ * TODO: this implementation is just a lookup; good for testing but does not
+ * consider document to query relevance/score
  * <p>
  * See also [Agrawal, R., Gollapudi, S., Halverson, A., & Ieong, S. (2009).
  * Diversifying search results. In Proceedings of the Second ACM International
@@ -36,7 +43,12 @@ package eu.eexcess.diversityasurement.iaselect;
  * @author Raoul Rubien
  *
  */
-public interface DocumentQualityValueV {
+public class SimpleDocumentQualityValueV implements DocumentQualityValueV {
+
+	Map<Document, HashSet<Category>> documentQualities = new HashMap<Document, HashSet<Category>>();
+
+	public SimpleDocumentQualityValueV() {
+	}
 
 	/**
 	 * V(d|q,c) - relevance of a document or the quality of a document d for
@@ -49,6 +61,16 @@ public interface DocumentQualityValueV {
 	 * @param c
 	 *            category the document belongs to
 	 * @return document relevance
+	 * @throws IllegalArgumentException
+	 *             if document or category is not found
 	 */
-	public double V(Document d, Query q, Category c) throws Exception;
+	public double V(Document d, Query q, Category c) throws IllegalArgumentException {
+		for (Category documentCategory : documentQualities.get(d)) {
+			if (documentCategory.equals(c)) {
+				return documentCategory.probability;
+			}
+		}
+		throw new IllegalArgumentException("failed fetching document quality value: category[" + c.name
+						+ "] for document[" + d.name + "] not found");
+	}
 }

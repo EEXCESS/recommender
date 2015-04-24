@@ -16,26 +16,6 @@ limitations under the License.
  */
 package eu.eexcess.mendeley.recommender;
 
-import java.io.IOException;
-import java.io.UnsupportedEncodingException;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-
-import javax.ws.rs.core.MediaType;
-
-import net.sf.json.JSONObject;
-import net.sf.json.JSONSerializer;
-
-import org.apache.commons.codec.binary.Base64;
-import org.apache.commons.lang.CharEncoding;
-import org.apache.commons.lang.text.StrSubstitutor;
-import org.codehaus.jackson.map.ObjectMapper;
-import org.w3c.dom.Document;
-
 import com.sun.jersey.api.client.Client;
 import com.sun.jersey.api.client.ClientResponse;
 import com.sun.jersey.api.client.UniformInterfaceException;
@@ -43,7 +23,6 @@ import com.sun.jersey.api.client.config.ClientConfig;
 import com.sun.jersey.api.client.config.DefaultClientConfig;
 import com.sun.jersey.api.client.filter.LoggingFilter;
 import com.sun.jersey.api.json.JSONConfiguration;
-
 import eu.eexcess.config.PartnerConfiguration;
 import eu.eexcess.dataformats.result.ResultList;
 import eu.eexcess.dataformats.userprofile.SecureUserProfile;
@@ -56,14 +35,31 @@ import eu.eexcess.partnerrecommender.api.PartnerConfigurationEnum;
 import eu.eexcess.partnerrecommender.api.PartnerConnectorApi;
 import eu.eexcess.partnerrecommender.reference.PartnerConnectorBase;
 import eu.eexcess.utils.URLParamEncoder;
+import net.sf.json.JSONObject;
+import net.sf.json.JSONSerializer;
+import org.apache.commons.codec.binary.Base64;
+import org.apache.commons.lang.CharEncoding;
+import org.apache.commons.lang.text.StrSubstitutor;
+import org.codehaus.jackson.map.ObjectMapper;
+import org.w3c.dom.Document;
+
+import javax.ws.rs.core.MediaType;
+import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Query generator for Mendeley.
  *
  * To exercise this, start the standalone server on say port 8000
- * and then make a GET request to localhost:8000/eexcess/partner/debugDumpProfile
+ * and then make a GET request to http://localhost:8000/eexcess-partner-mendeley-1.0-SNAPSHOT/partner/debugDumpProfile
  * to get a sample "profile" i.e. a query. You can then make a POST request
- * to localhost:8000/eexcess/partner/recommend, sending the query as the payload.
+ * to http://localhost:8000/eexcess/eexcess-partner-mendeley-1.0-SNAPSHOT/partner/recommend, sending the query as the payload.
  * 
  * @author mark.levy@mendeley.com
  * 

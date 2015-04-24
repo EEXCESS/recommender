@@ -25,8 +25,18 @@ import java.io.File;
 public class Settings {
 
 	public static class RelevanceEvaluation {
-		public static class IOFIles {
-			public static final File inLuceneIndexDirectory = new File("/opt/data/wikipedia/eexcess/enwiki-big/");
+
+		public static class Lucene {
+			public static final String SEARCH_FIELD_SECTIONTEXT = "sectionText";
+			public static final String SEARCH_FIELD_CATEGORY = "category";
+			public static final String SEARCH_FIELD_TITLE = "title";
+		}
+
+		public static class IOFiles {
+			// TODO: remove tmp folder
+			public static final File inLuceneIndexParentDirectory = new File("/opt/data/wikipedia/eexcess/tmp");
+			public static final File inLuceneIndexDirectory = new File("/opt/data/wikipedia/eexcess/tmp/enwiki-big/");
+			
 			public static final File outLuceneIndexDirectory = new File(
 							"/opt/iaselect/results/category-relevance-index-big/");
 
@@ -38,6 +48,11 @@ public class Settings {
 			public static final File outCategoryNameToId = new File(
 							"/opt/iaselect/results/cache/category-name-to-id.bin");
 			public static final File outRelevances = new File("/opt/iaselect/results/cache/category-relevances.bin");
+
+			public static final File inManuallySelectedWeightedNotNormalizedQueries = new File(
+							"/opt/iaselect/results/queries/queriesEn-with-categories-filtered-weighted-not-normalized.json");
+			
+			public static final File additionalDefinedCategoryIDs = new File ("/opt/iaselect/results/queries/in-additional-category-ids.json");
 		}
 
 		public static class EstimationArguments {
@@ -55,7 +70,7 @@ public class Settings {
 							"/opt/iaselect/results/cache/category-id-to-name.bin");
 			public static final File inCategoryNameToId = new File(
 							"/opt/iaselect/results/cache/category-name-to-id.bin");
-			public static final File inRelevances = new File("/opt/iaselect/results/cache/category-relevances.bin");
+			public static final File inRelevances = new File("/opt/iaselect/results/cache/in-category-relevances.bin");
 		}
 	}
 
@@ -67,6 +82,15 @@ public class Settings {
 		}
 	}
 
+	public static class QueryExpansionEvaluation {
+		public static final int NUM_TOP_DOCS_TO_CONSIDER = 10;
+		public static final int MAX_TERMS_TO_EXPAND_QUERY = 20;	
+		
+		public static class IOFiles {
+			public static final File outExpandedCategoryIDs = new File("/opt/iaselect/results/queries/out-additional-category-ids.json");
+		}
+	}
+	
 	private static boolean printWarning(String path) {
 		if (!(new File(path).canRead())) {
 			System.err.println("resource does not exist [" + path + "]");

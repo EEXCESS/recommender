@@ -21,22 +21,22 @@
 package eu.eexcess.diversityasurement.evaluation;
 
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.FileWriter;
+import java.io.FileReader;
 import java.io.IOException;
-import java.io.ObjectInputStream;
+import java.lang.reflect.Type;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
+import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.logging.Logger;
 
 import org.apache.lucene.analysis.en.EnglishAnalyzer;
-import org.apache.lucene.index.IndexableField;
 import org.apache.lucene.queryparser.classic.ParseException;
 import org.apache.lucene.queryparser.classic.QueryParser;
 import org.apache.lucene.search.IndexSearcher;
@@ -45,419 +45,696 @@ import org.apache.lucene.search.TopDocs;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.google.gson.reflect.TypeToken;
+import com.google.gson.stream.JsonReader;
 
+import eu.eexcess.dataformats.userprofile.SecureUserProfile;
 import eu.eexcess.diversityasurement.evaluation.config.Settings;
+import eu.eexcess.diversityasurement.iaselect.Category;
+import eu.eexcess.diversityasurement.iaselect.Document;
+import eu.eexcess.diversityasurement.iaselect.IASelect;
+import eu.eexcess.diversityasurement.iaselect.Query;
+import eu.eexcess.diversityasurement.iaselect.ScoreBasedDocumentQualityValueV;
+import eu.eexcess.diversityasurement.ndcg.NDCG;
+import eu.eexcess.diversityasurement.ndcg.NDCGIA;
+import eu.eexcess.diversityasurement.ndcg.NDCGIACategory;
+import eu.eexcess.diversityasurement.ndcg.NDCGResult;
+import eu.eexcess.diversityasurement.ndcg.NDCGResultList;
 import eu.eexcess.diversityasurement.wikipedia.querytocategoryrelevance.CategoryToTopCategoryRelevance;
 import eu.eexcess.diversityasurement.wikipedia.querytocategoryrelevance.CategoryToTopCategoryRelevance.CategoryRelevance;
-import eu.eexcess.diversityasurement.wikipedia.querytocategoryrelevance.Queries;
-import eu.eexcess.diversityasurement.wikipedia.querytocategoryrelevance.Query;
-import eu.eexcess.diversityasurement.wikipedia.querytocategoryrelevance.QueryJsonIO;
 import eu.eexcess.logger.PianoLogger;
 
 public class IASelectVSQueryExpansionEvaluation {
 
 	private static Logger logger = PianoLogger.getLogger(IASelectVSQueryExpansionEvaluation.class);
 
-	private static Map<Integer, String> categoryIdToName;
-	private static Map<String, Integer> categoryNameToId;
-	// Map<subCategoryId, HashMap<topCategoryId, relevance>>
-	private static HashMap<Integer, HashMap<Integer, Double>> estimatedRelevances;
+	// Map<Document, HashSet<Category>> documentQualities = new
+	// HashMap<Document, HashSet<Category>>();
 
-	public static class DataStatistics {
-		// Map<numberTopCategories, numberCategoriesHavingNumberTopCategories>
-		Map<Integer, Integer> topCategoriesPerCategoryDistibution = new HashMap<>();
+	private static class EvaluationResult {
 
-		HashSet<Integer> withNumtopCategories = new HashSet<>(Arrays.asList(30, 31, 32, 33, 34, 35, 36, 37));
-		// Map<withNTopCategories, Map<section[%]{0-10,11-20,...91-100},
-		// numOccurences>>
-		Map<Integer, HashMap<Integer, Integer>> probabilityDistribution = new HashMap<>();
+		Set<Query> queries = new LinkedHashSet<>();
 
-		Queries inQueries = new Queries();
-		Queries outQueries = new Queries();
+		Map<Query, LinkedHashSet<Document>> luceneSearchResultList = new HashMap<>();
+		Map<Query, LinkedHashSet<Document>> iaSelectResultList = new HashMap<>();
+		Map<Query, LinkedHashSet<Document>> queryExpansionResultList = new HashMap<>();
 
-		Map<Query, ArrayList<CategoryToTopCategoryRelevance>> queryRelevances;
-		// accumulated and normalized query relevances
-		Map<Query, ArrayList<CategoryRelevance>> queryRelevancesNormalized = new HashMap<>();
+		// Map<query, Map<k, NDCGResultList>> for ndcg of iaselect (as "ideal"
+		// resutl) and query expansion (as "other" result)
+		// Map<Query, Map<Integer, NDCGResultList>> NDCGArguments_IaQe = new
+		// HashMap<>();
+
+		Map<Query, Map<Integer, Double>> ndcg_LuQe = new HashMap<>();
+		Map<Query, Map<Integer, Double>> ndcgIa_LuQe = new HashMap<>();
+		// Map<Query, Map<Integer, Double>> spearmanRho_IaQe = new HashMap<>();
+		// Map<Query, Map<Integer, Double>> kendallTao_IaQe = new HashMap<>();
+
+		// Map<query, Map<k, NDCGResultList>> for ndcg of iaselect (as "ideal"
+		// resutl) and lucene result (as "other" result)
+		// Map<Query, Map<Integer, NDCGResultList>> NDCGArguments_IaL = new
+		// HashMap<>();
+
+		Map<Query, Map<Integer, Double>> ndcg_LuIa = new HashMap<>();
+		Map<Query, Map<Integer, Double>> ndcgIa_LuIa = new HashMap<>();
+		// Map<Query, Map<Integer, Double>> spearmanRho_IaL = new HashMap<>();
+		// Map<Query, Map<Integer, Double>> kendallTao_IaL = new HashMap<>();
+
+		int[] atKs = { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 };
 	}
 
-	private static DataStatistics stats = new DataStatistics();
+	public static void main(String[] args) throws Exception {
+		long startTimestamp = System.currentTimeMillis();
+		Set<Query> queries = getNormalizedManuallyProcessedQueries();
+		System.out.println("read #queries [" + queries.size() + "]");
 
-	public static void main(String[] args) throws IOException, ParseException {
-		restoreCache();
+		EvaluationResult result = new EvaluationResult();
 
-		collectCategoryDistribution();
-		System.out.println("categories to topCategories distribution:");
-		System.out.println("#cat, #topcat");
-		for (Map.Entry<Integer, Integer> entry : stats.topCategoriesPerCategoryDistibution.entrySet()) {
-			System.out.println(entry.getValue() + ", " + entry.getKey());
-		}
-		System.out.println();
+		QueryEvaluation.restoreCache();
+		open();
 
-		collectProbabilityDistribution(10, stats.withNumtopCategories);
-		System.out.println("probability distribution:");
-		for (Map.Entry<Integer, HashMap<Integer, Integer>> entry : stats.probabilityDistribution.entrySet()) {
-			Integer numTopCategories = entry.getKey();
-			System.out.println("probability distribution of categories having exact [" + numTopCategories
-							+ "] topCategories:");
-			System.out.println("withNTopC, #range, #count");
-			for (Map.Entry<Integer, Integer> probabilityEntry : entry.getValue().entrySet()) {
-				System.out.println(numTopCategories + ", " + probabilityEntry.getKey() + ", "
-								+ probabilityEntry.getValue());
-			}
-		}
-		System.out.println();
-		System.out.println("query relevances");
-		filterQueryProbabilities();
+		evaluateNDCG(queries, result);
+		printResult(result);
 
+		close();
+		System.out.println("total duration [" + (System.currentTimeMillis() - startTimestamp) + "]ms");
 	}
 
-	private static void filterQueryProbabilities() throws FileNotFoundException, IOException, ParseException {
+	private static void printResult(EvaluationResult result) {
+		int maxResultsToPrint = Settings.QueryExpansionEvaluation.NUM_TOP_DOCS_TO_CONSIDER;
+		//
+		int queryNumbering = 0;
+		System.out.println("qeuryNumber, ndcg, ndcgIA, k, query, idealName, otherName");
+		for (Query q : result.queries) {
+			printNDCGs(result.ndcg_LuIa, result.ndcgIa_LuIa, q, queryNumbering, "lucene", "ia-select", false, null);
 
-		stats.inQueries = QueryJsonIO.readQueries(new File(Settings.Queries.PATH));
-		QueryCategoryKShortestPathsEvaluation.openInIndex();
+		}
+		queryNumbering = 0;
+		System.out.println("qeuryNumber, ndcg, ndcgIA, k, query, idealName, otherName");
+		for (Query q : result.queries) {
+			printNDCGs(result.ndcg_LuQe, result.ndcgIa_LuQe, q, queryNumbering, "lucene", "qeury-exp", false, null);
+			queryNumbering++;
+		}
 
-		// for each query fetch all top docs categories relevance
-		stats.queryRelevances = collectTopDocsCategoryRelevances(stats.inQueries,
-						Settings.RelevanceEvaluation.EstimationArguments.numTopDocumentsToConsider);
-
-		// sum up total probability and normalize for each top category
-		System.out.println();
-		for (Map.Entry<Query, ArrayList<CategoryToTopCategoryRelevance>> entry : stats.queryRelevances.entrySet()) {
-			ArrayList<CategoryRelevance> queryTopCategoryRelevances = accumulateTopCategoryRelevance(entry.getValue());
-			stats.queryRelevancesNormalized.put(entry.getKey(), queryTopCategoryRelevances);
-			System.out.println("query [" + entry.getKey().query + "] relevances [" + queryTopCategoryRelevances.size()
-							+ "]:");
-			System.out.println("id, p, name");
-			for (CategoryRelevance queryRelevance : queryTopCategoryRelevances) {
-				System.out.println(queryRelevance.categoryId + ", " + queryRelevance.categoryRelevance + ", "
-								+ queryRelevance.categoryName);
+		//
+		for (Integer k : result.atKs) {
+			queryNumbering = 0;
+			System.out.println("NDCG-IA for k [" + k + "]");
+			System.out.println("qeuryNumber, ndcg, ndcgIA, k, query, idealName, otherName");
+			for (Query q : result.queries) {
+				printNDCGs(result.ndcg_LuQe, result.ndcgIa_LuIa, q, queryNumbering, "lucene", "ia-select", false, k);
+				queryNumbering++;
 			}
 		}
-
-		// take best 7 categories out of all per query
-		Map<Query, ArrayList<CategoryRelevance>> shortenedCategoryRelevances = new HashMap<>();
-		int numTopCategories = 7;
-		for (Map.Entry<Query, ArrayList<CategoryRelevance>> entry : stats.queryRelevancesNormalized.entrySet()) {
-			ArrayList<CategoryRelevance> sortedRelevances = new ArrayList<>(entry.getValue());
-			Collections.sort(sortedRelevances, new CategoryRelevance.DescRelevanceComparator());
-			int maxIdx = (numTopCategories > sortedRelevances.size()) ? sortedRelevances.size() : numTopCategories;
-			shortenedCategoryRelevances.put(entry.getKey(),
-							new ArrayList<CategoryRelevance>(sortedRelevances.subList(0, maxIdx)));
-		}
-
-		// re-normalize shortened relevances
-		for (Map.Entry<Query, ArrayList<CategoryRelevance>> entry : shortenedCategoryRelevances.entrySet()) {
-			ArrayList<CategoryRelevance> normalized = toNormalizedRelevance(entry.getValue());
-			stats.queryRelevancesNormalized.put(entry.getKey(), normalized);
-			
-			System.out.println("normalized shortened relevance list query [" + entry.getKey().query + "] size ["
-							+ normalized.size() + "]:");
-			System.out.println("id, p, name");
-			for (CategoryRelevance relevance : normalized) {
-				System.out.println(relevance.categoryId + "," + relevance.categoryRelevance + ","
-								+ relevance.categoryName);
+		for (Integer k : result.atKs) {
+			queryNumbering = 0;
+			System.out.println("NDCG for k ["+k+"]");
+			System.out.println("qeuryNumber, ndcg, ndcgIA, k, query, idealName, otherName");
+			for (Query q : result.queries) {
+				printNDCGs(result.ndcg_LuQe, result.ndcgIa_LuQe, q, queryNumbering, "lucene", "qeury-exp", false, k);
+				queryNumbering++;
 			}
 		}
+		
+		//
+		queryNumbering = 0;
+		for (Query q : result.queries) {
+			System.out.println();
+			System.out.println("query [" + q.query + "]");
 
-		
-		
-		
-			FileWriter writer = new FileWriter("/home/rrubien/Desktop/foobar.json");
-			Gson gson = new GsonBuilder().enableComplexMapKeySerialization().create();
-			gson.toJson(stats.queryRelevancesNormalized, writer);
-			writer.close();
-		
-		
-		// write as JSON
-		// process queries manually!!
+			printNDCGs(result.ndcg_LuIa, result.ndcgIa_LuIa, q, queryNumbering, "lucene", "ia-select", true, null);
+			printNDCGs(result.ndcg_LuQe, result.ndcgIa_LuQe, q, queryNumbering, "lucene", "qeury-exp", true, null);
+			queryNumbering++;
 
-		QueryCategoryKShortestPathsEvaluation.closeInIndex();
+			// print ia selected results
+			if (null == result.iaSelectResultList.get(q)) {
+				System.err.println("no iaselected documents for query [" + q.query + "] available");
+			} else {
+				int printed = 0;
+				for (Document d : result.iaSelectResultList.get(q)) {
+					if (printed++ > maxResultsToPrint) {
+						break;
+					}
+					System.out.println("ias: " + d);
+				}
+			}
+			// print query expanded results
+			if (null == result.queryExpansionResultList.get(q)) {
+				System.err.println("no query expanded documents for query [" + q.query + "] available");
+			} else {
+				int printed = 0;
+				for (Document d : result.queryExpansionResultList.get(q)) {
+					if (printed++ > maxResultsToPrint) {
+						break;
+					}
+					System.out.println("qex: " + d);
+				}
+			}
+			// print lucene results
+			if (null == result.luceneSearchResultList.get(q)) {
+				System.err.println("no standard lucene documents for query [" + q.query + "] available");
+			} else {
+				int printed = 0;
+				for (Document d : result.luceneSearchResultList.get(q)) {
+					if (printed++ > maxResultsToPrint) {
+						break;
+					}
+					System.out.println("luc: " + d);
+				}
+			}
+		}
+	}
+
+	private static void printNDCGs(Map<Query, Map<Integer, Double>> ndcg, Map<Query, Map<Integer, Double>> ndcgIa,
+					Query q, int queryNumber, String idealName, String otherName, boolean withTitle, Integer onlyK) {
+		if (null == ndcg.get(q)) {
+			System.err.println("no ndcg: [" + idealName + "(=ideal)]-[" + otherName + "(=other)] found for query ["
+							+ q.query + "]");
+		} else {
+			if (null == ndcgIa.get(q)) {
+				System.err.println("no ndcgIA: [" + idealName + "(=ideal)]-[" + otherName
+								+ "(=other)] found for query [" + q.query + "]");
+			} else {
+				if (withTitle) {
+					System.out.println("NDCG: [" + idealName + "(=ideal)]-[" + otherName + "(=other)] for query ["
+									+ q.query + "]");
+					System.out.println("qeuryNumber, ndcg, ndcgIA, k, query, idealName, otherName");
+				}
+				for (Map.Entry<Integer, Double> entry : ndcg.get(q).entrySet()) {
+					int k = entry.getKey();
+					if (onlyK != null) {
+						if (k == onlyK) {
+							double ndcgValue = entry.getValue();
+							double ndcgIaValue = ndcgIa.get(q).get(k);
+							System.out.println(queryNumber + "," + ndcgValue + ", " + ndcgIaValue + ", " + k + ", "
+											+ q.query + ", " + idealName + ", " + otherName);
+						}
+					} else {
+						double ndcgValue = entry.getValue();
+						double ndcgIaValue = ndcgIa.get(q).get(k);
+						System.out.println(queryNumber + "," + ndcgValue + ", " + ndcgIaValue + ", " + k + ", "
+										+ q.query + ", " + idealName + ", " + otherName);
+					}
+				}
+			}
+		}
 	}
 
 	/**
-	 * Accumulate and normalize relevance values of each list entry.
+	 * run evaluation
 	 * 
-	 * @param topCategoryRelevance
-	 *            list of relevances; one relevance has n relevances to n top
-	 *            categories
-	 * @return
+	 * @param queries
+	 * @param resultCollector
+	 * @throws Exception
 	 */
-	private static ArrayList<CategoryRelevance> accumulateTopCategoryRelevance(
-					ArrayList<CategoryToTopCategoryRelevance> topCategoryRelevance) {
+	private static void evaluateNDCG(Set<Query> queries, EvaluationResult resultCollector) throws Exception {
 
-		HashMap<Integer, CategoryRelevance> accumulatedTopCategoryRelevances = new HashMap<>();
+		// have an overview of queries in result
+		for (Query q : queries) {
+			resultCollector.queries.add(q);
+		}
 
-		// accumulate probabilities
-		// for each category
-		for (CategoryToTopCategoryRelevance category : topCategoryRelevance) {
-			// for each category relevance
-			for (CategoryRelevance relevance : category.topCategoryRelevances) {
-				Double topCatRelevance = relevance.categoryRelevance;
+		int k = 10;
+		resultCollector.iaSelectResultList = iaSelect(queries, k, resultCollector.luceneSearchResultList);
+		resultCollector.queryExpansionResultList = queryExpansion(queries);
 
-				if (!topCatRelevance.isNaN() && topCatRelevance > 0) {
-					Integer topCatId = relevance.categoryId;
+		Map<Query, LinkedHashSet<Document>> otherResultIa = resultCollector.iaSelectResultList;
+		Map<Query, LinkedHashSet<Document>> otherResultQE = resultCollector.queryExpansionResultList;
+		Map<Query, LinkedHashSet<Document>> idealResultLu = resultCollector.luceneSearchResultList;
+		Map<Query, LinkedHashSet<Document>> idealResult = idealResultLu;
 
-					CategoryRelevance accumulatedTopCategoryRelevance = accumulatedTopCategoryRelevances.get(topCatId);
-					if (null == accumulatedTopCategoryRelevance) {
-						accumulatedTopCategoryRelevance = new CategoryRelevance();
-						accumulatedTopCategoryRelevance.categoryId = topCatId;
-						accumulatedTopCategoryRelevance.categoryName = relevance.categoryName;
-						accumulatedTopCategoryRelevance.categoryRelevance = 0.0;
-					}
-					accumulatedTopCategoryRelevance.categoryRelevance += topCatRelevance;
-					accumulatedTopCategoryRelevances.put(topCatId, accumulatedTopCategoryRelevance);
+		// run ndcg against iaselect
+		for (Query q : queries) {
+
+			LinkedHashSet<Document> idealResultList = idealResult.get(q);
+			LinkedHashSet<Document> otherResultList = otherResultIa.get(q);
+
+			if (null == idealResultList) {
+				logger.severe("ndcg-ia-lucene failed find query [" + q.query + "]: not in optimal result list");
+				continue;
+			}
+			if (null == otherResultList) {
+				logger.severe("ndcg-ia-lucene failed find query [" + q.query + "]: not in other result list");
+				continue;
+			}
+
+			ArrayList<NDCGIACategory> queryCategories = new ArrayList<NDCGIACategory>();
+			for (Category cat : q.categories()) {
+				queryCategories.add(new NDCGIACategory(cat.name, cat.probability));
+			}
+
+			System.out.println("ndcgSummary idealResultLu(=ideal)-otherResultIa(=other) at query [" + q + "]");
+			Map<Integer, List<Double>> ndcgIaQe_AtK_NCDG_NDCGIA = ndcgSummary(idealResultList, otherResultList,
+							queryCategories, resultCollector.atKs);
+			Map<Integer, Double> ndcgMap = new HashMap<>();
+			Map<Integer, Double> ndcgIaMap = new HashMap<>();
+
+			for (Map.Entry<Integer, List<Double>> entry : ndcgIaQe_AtK_NCDG_NDCGIA.entrySet()) {
+				Iterator<Double> iter = entry.getValue().iterator();
+				double ndcg = iter.next();
+				double ndcgIa = iter.next();
+				Integer atK = entry.getKey();
+				ndcgMap.put(atK, ndcg);
+				ndcgIaMap.put(atK, ndcgIa);
+			}
+			resultCollector.ndcg_LuIa.put(q, ndcgMap);
+			resultCollector.ndcgIa_LuIa.put(q, ndcgIaMap);
+		}
+
+		// run ndcg against expansion
+		for (Query q : queries) {
+
+			LinkedHashSet<Document> idealResultList = idealResult.get(q);
+			LinkedHashSet<Document> otherResultList = otherResultQE.get(q);
+
+			if (null == idealResultList) {
+				logger.severe("ndcg-ia-qe failed find query [" + q.query + "]: not in optimal result list");
+				continue;
+			}
+			if (null == otherResultList) {
+				logger.severe("ndcg-ia-qe failed find query [" + q.query + "]: not in other result list");
+				continue;
+			}
+
+			ArrayList<NDCGIACategory> queryCategories = new ArrayList<NDCGIACategory>();
+			for (Category cat : q.categories()) {
+				queryCategories.add(new NDCGIACategory(cat.name, cat.probability));
+			}
+
+			System.out.println("ndcgSummary idealResultLu(ideal)-otherResultQE(other) at query [" + q + "]");
+			Map<Integer, List<Double>> ndcg_AtK_NCDG_NDCGIA = ndcgSummary(idealResultList, otherResultList,
+							queryCategories, resultCollector.atKs);
+			Map<Integer, Double> ndcgMap = new HashMap<>();
+			Map<Integer, Double> ndcgIaMap = new HashMap<>();
+
+			for (Map.Entry<Integer, List<Double>> entry : ndcg_AtK_NCDG_NDCGIA.entrySet()) {
+				Iterator<Double> iter = entry.getValue().iterator();
+				double ndcg = iter.next();
+				double ndcgIa = iter.next();
+				Integer atK = entry.getKey();
+				ndcgMap.put(atK, ndcg);
+				ndcgIaMap.put(atK, ndcgIa);
+			}
+			resultCollector.ndcg_LuQe.put(q, ndcgMap);
+			resultCollector.ndcgIa_LuQe.put(q, ndcgIaMap);
+		}
+	}
+
+	/**
+	 * calculate NDCG for all k ∈ at
+	 * 
+	 * @param idealResultList
+	 *            ideal ordered result list
+	 * @param otherResultList
+	 *            an other result list
+	 * @param at
+	 *            array of values to calculate NDCG@k
+	 * @throws IOException
+	 * @return Map<k, List<Double>> with ap value 1st=ndcg 2nd=ndcgia
+	 */
+	private static Map<Integer, List<Double>> ndcgSummary(LinkedHashSet<Document> idealResultList,
+					LinkedHashSet<Document> otherResultList, ArrayList<NDCGIACategory> queryCategory, int[] at)
+					throws IOException {
+
+		int maxK = 0;
+		for (int k : at) {
+			maxK = (k > maxK) ? k : maxK;
+		}
+
+		Map<Integer, ArrayList<CategoryRelevance>> documentToCategoriesRelevance = new HashMap<>();
+
+		// for each ideal sorted document: collect categories and relevances
+		for (Document document : idealResultList) {
+			if (!documentToCategoriesRelevance.containsKey(document.documentId)) {
+				documentToCategoriesRelevance.put(document.documentId, getDocumentRelevances(document));
+				// System.out.println("ideal: " + document.name);
+			}
+		}
+		// for each other document: collect categories and relevances
+		for (Document document : otherResultList) {
+			if (!documentToCategoriesRelevance.containsKey(document.documentId)) {
+				documentToCategoriesRelevance.put(document.documentId, getDocumentRelevances(document));
+				// System.out.println("other: " + document.name);
+			}
+		}
+
+		// int volatileDocumentOrderRank =
+		int maxCategoryRank = getMaxCategoryOverlap(queryCategory, idealResultList);
+		System.out.println("CatCount for all :" + maxCategoryRank);
+
+		// calculate document rank based on ideally sorted result list
+		NDCG.RankToJudgementMapper rankMapper = new NDCG.RankToJudgementMapper(maxCategoryRank);
+		Map<Integer, Integer> documentRankMapping = new HashMap<>(idealResultList.size());
+		for (Document document : idealResultList) {
+			int section = rankMapper.r(document.priority);
+			document.priority = section;
+			documentRankMapping.put(document.documentId, section);
+		}
+
+		// build an ndcg result list in same order as otherResultList (not
+		// ideally sorted list)
+		NDCGResultList ndcgList = new NDCGResultList();
+		System.out.println("ndcg argument list (NDCGResultList):");
+		int takenDocs = 0;
+		for (Document document : otherResultList) {
+			if (takenDocs++ >= maxK) {
+				break;
+			}
+
+			NDCGResult ndcgDoc = new NDCGResult();
+
+			// add order dependent relevance
+			Integer rank = documentRankMapping.get(document.documentId);
+			if (null == rank) {
+				ndcgDoc.nDCGRelevance = 0;
+			} else {
+				ndcgDoc.nDCGRelevance = rank;
+			}
+
+			// add categories if available
+			List<CategoryRelevance> categories = documentToCategoriesRelevance.get(document.documentId);
+			if (null != categories) {
+				for (CategoryRelevance docCatgory : documentToCategoriesRelevance.get(document.documentId)) {
+					ndcgDoc.categories.add(new NDCGIACategory(docCatgory.categoryName, docCatgory.categoryRelevance));
 				}
 			}
+			ndcgList.results.add(ndcgDoc);
 		}
 
-		// normalize probabilities
-		double sum = 0.0;
-		for (HashMap.Entry<Integer, CategoryRelevance> entry : accumulatedTopCategoryRelevances.entrySet()) {
-			Double relevance = entry.getValue().categoryRelevance;
-			if (!relevance.isNaN() && relevance > 0) {
-				sum += relevance;
+		System.out.println("--->");
+		System.out.println("ndcg args:");
+		for (NDCGResult r : ndcgList.results) {
+			System.out.println("ndcg-arg:" + r);
+		}
+
+		int printed = 0;
+		System.out.println("ndcg args ideal list:");
+		for (Document d : idealResultList) {
+			if (printed++ >= maxK) {
+				break;
 			}
+			System.out.println("ideal-doc:" + d);
 		}
 
-		for (HashMap.Entry<Integer, CategoryRelevance> entry : accumulatedTopCategoryRelevances.entrySet()) {
-			Double relevance = entry.getValue().categoryRelevance;
-			if (!relevance.isNaN() && relevance > 0) {
-				entry.getValue().categoryRelevance = relevance / sum;
+		printed = 0;
+		System.out.println("ndcg args other list:");
+		for (Document d : otherResultList) {
+			if (printed++ >= maxK) {
+				break;
 			}
+			System.out.println("other-doc:" + d);
 		}
 
-		return new ArrayList<CategoryRelevance>(accumulatedTopCategoryRelevances.values());
+		// run ndcg for each i in at
+		Map<Integer, List<Double>> ndcgATKResults = new HashMap<>();
+		for (Integer k : at) {
+			List<Double> results = new LinkedList<>();
+			// 1st ndcg
+			NDCG ndcgCalc = new NDCG();
+			double ndcg = ndcgCalc.calcNDCG(ndcgList, null, k);
+			results.add(ndcg);
+			// 2nd ndcgia
+			NDCGIA ndcgIaCalc = new NDCGIA();
+			double ndcgIa = ndcgIaCalc.calcNDCGIA(ndcgList, queryCategory, k);
+			results.add(ndcgIa);
+
+			ndcgATKResults.put(k, results);
+
+			System.out.println("ndcg@" + k + "=" + ndcg);
+			System.out.println("ndcgIa@" + k + "=" + ndcgIa);
+		}
+		System.out.println("<---");
+
+		return ndcgATKResults;
 	}
 
-	private static Map<Integer, Double> toNormalizedRelevance(Map<Integer, Double> relevances) {
-		double sum = 0;
-		for (Map.Entry<Integer, Double> entry : relevances.entrySet()) {
-			Double relevance = entry.getValue();
-			if (!relevance.isNaN() && relevance > 0) {
-				sum += relevance;
+	private static int getMaxCategoryOverlap(ArrayList<NDCGIACategory> queryCategory,
+					LinkedHashSet<Document> idealResultList) {
+		int maxCategoryRank = 0;
+
+		for (Document document : idealResultList) {
+			int catCount = 0;
+			for (Category c : document.getTopCategories(queryCategory.size() * 5)) {
+				blub: for (NDCGIACategory ndcgiaCategory : queryCategory) {
+					if (ndcgiaCategory.getCategoryName().equals(c.name)) {
+						catCount++;
+						break blub;
+					}
+				}
 			}
+
+			System.out.println("CatCount found Cat " + document.name + " :" + catCount);
+			document.priority = catCount;
+			if (maxCategoryRank < catCount)
+				maxCategoryRank = catCount;
 		}
-	
-		HashMap<Integer, Double> normalized = new HashMap<>(relevances.size());
-		for (Map.Entry<Integer, Double> entry : relevances.entrySet()) {
-			normalized.put(entry.getKey(), entry.getValue() / sum);
-		}
-	
-		return normalized;
+		return maxCategoryRank;
 	}
 
-	private static ArrayList<CategoryRelevance> toNormalizedRelevance(ArrayList<CategoryRelevance> relevances) {
-		double sum = 0.0;
-		ArrayList<CategoryRelevance> normalized = new ArrayList<>(relevances);
-		for (CategoryRelevance relevance : normalized) {
-			if (!relevance.categoryRelevance.isNaN() && relevance.categoryRelevance > 0) {
-				sum += relevance.categoryRelevance;
-			}
-		}
-	
-		for (CategoryRelevance relevance : normalized) {
-			if (!relevance.categoryRelevance.isNaN() && relevance.categoryRelevance > 0) {
-				relevance.categoryRelevance = relevance.categoryRelevance / sum;
-			}
-		}
-		return normalized;
-	}
+	/**
+	 * return a list of category relevances for this document to all top
+	 * categories
+	 * 
+	 * @param document
+	 * @return
+	 * @throws IOException
+	 */
+	private static ArrayList<CategoryRelevance> getDocumentRelevances(Document document) throws IOException {
 
-	private static Map<Query, ArrayList<CategoryToTopCategoryRelevance>> collectTopDocsCategoryRelevances(
-					Queries queries, int numTopDocumentsToConsider) throws ParseException, IOException {
-		ArrayList<Integer> seenCategoryIds = new ArrayList<>();
 		IndexSearcher indexSearcher = new IndexSearcher(QueryCategoryKShortestPathsEvaluation.indexReader);
-		QueryParser queryParser = new QueryParser(QueryCategoryKShortestPathsEvaluation.SEARCH_FIELD_SECTIONTEXT,
-						new EnglishAnalyzer());
-		int totalMissedCategories = 0;
-		int totalFoundCategories = 0;
-		int totalDuplicateCollisions = 0;
+		org.apache.lucene.document.Document doc = indexSearcher.doc(document.documentId);
 
-		// for each query
-		HashMap<Query, ArrayList<CategoryToTopCategoryRelevance>> result = new HashMap<>();
-		for (Query q : queries.queries) {
+		eu.eexcess.diversityasurement.wikipedia.querytocategoryrelevance.Query empty = new eu.eexcess.diversityasurement.wikipedia.querytocategoryrelevance.Query();
+		empty.query = "-";
 
-			org.apache.lucene.search.Query query = queryParser.parse(q.query);
-			TopDocs topDocs = indexSearcher.search(query, numTopDocumentsToConsider);
+		ArrayList<Integer> seenCategoryIds = new ArrayList<>();
+		ArrayList<CategoryToTopCategoryRelevance> categoriesToTopCategoriesRelevanceCollector = new ArrayList<>();
 
-			int missedCategories = 0;
-			int foundCategories = 0;
-			int duplicateCollisions = 0;
-			ArrayList<CategoryToTopCategoryRelevance> categoryRelevancesDetails = new ArrayList<>();
+		QueryEvaluation.collectDocTopCategoryRelevances(doc, empty, seenCategoryIds,
+						categoriesToTopCategoriesRelevanceCollector);
+		return QueryEvaluation.collapseTopCategoryRelevances(categoriesToTopCategoriesRelevanceCollector);
+	}
 
-			// for all top docs
-			for (ScoreDoc sDoc : topDocs.scoreDocs) {
-				org.apache.lucene.document.Document doc = indexSearcher.doc(sDoc.doc);
-				IndexableField[] categories = doc.getFields("category");
+	/**
+	 * run iaselect for each query @k
+	 * 
+	 * @param queries
+	 * @param k
+	 * @param luceneResultDocumentCollector
+	 * @return
+	 * @throws Exception
+	 */
+	private static Map<Query, LinkedHashSet<Document>> iaSelect(Set<Query> queries, int k,
+					Map<Query, LinkedHashSet<Document>> luceneResultDocumentCollector) throws Exception {
 
-				// for all top doc categories
-				for (IndexableField category : categories) {
-					String categoryName = category.stringValue().replace(" ", "_");
-					Integer categoryId = categoryNameToId.get(categoryName);
-					if (categoryId == null) {
-						missedCategories++;
-					} else {
+		Map<Query, LinkedHashSet<Document>> result = new LinkedHashMap<>();
+		int qIdx = 0;
 
-						// if category not seen so far
-						if (!seenCategoryIds.contains(categoryId)) {
-							seenCategoryIds.add(categoryId);
-							foundCategories++;
-
-							CategoryToTopCategoryRelevance categoryRelevanceDetail = new CategoryToTopCategoryRelevance();
-							categoryRelevanceDetail.categoryId = categoryId;
-							categoryRelevanceDetail.categoryName = categoryIdToName.get(categoryId);
-							categoryRelevanceDetail.query = q.query;
-
-							// for all category to top category relations
-							HashMap<Integer, Double> topCategories = estimatedRelevances.get(categoryId);
-							ArrayList<CategoryRelevance> queryToTopCategoryRelevances = new ArrayList<>();
-							for (Map.Entry<Integer, Double> entry : topCategories.entrySet()) {
-								CategoryRelevance tr = new CategoryRelevance();
-								tr.categoryId = entry.getKey();
-								tr.categoryName = categoryIdToName.get(tr.categoryId);
-								tr.categoryRelevance = entry.getValue();
-								queryToTopCategoryRelevances.add(tr);
-							}
-							categoryRelevanceDetail.topCategoryRelevances = queryToTopCategoryRelevances
-											.toArray(new CategoryRelevance[0]);
-							categoryRelevancesDetails.add(categoryRelevanceDetail);
-						} else {
-							duplicateCollisions++;
-						}
-					}
-				}
+		for (Query q : queries) {
+			LinkedHashSet<Document> documents = new LinkedHashSet<>();
+			R(q, documents, Settings.RelevanceEvaluation.EstimationArguments.numTopDocumentsToConsider);
+			if (documents.size() <= 0) {
+				logger.severe("query [" + q + "] [" + qIdx + "/" + queries.size() + "] generates no documents");
+				continue;
+			}
+			if (k > documents.size()) {
+				logger.severe("query [" + q + "] [" + qIdx + "/" + queries.size() + "] generates too less documents ["
+								+ documents.size() + "]");
+				continue;
 			}
 
-			result.put(q, categoryRelevancesDetails);
+			LinkedHashSet<Document> documentsToCollect = new LinkedHashSet<>();
+			for (Document d : documents) {
+				documentsToCollect.add(d);
+			}
 
-			logger.info("found [" + foundCategories + "] missed [" + missedCategories
-							+ "] categories duplicate collisions [" + duplicateCollisions + "] out of ["
-							+ (foundCategories + missedCategories + duplicateCollisions) + "] categories for query ["
-							+ q.query + "] ");
-			totalMissedCategories += missedCategories;
-			totalFoundCategories += foundCategories;
-			totalDuplicateCollisions += duplicateCollisions;
+			luceneResultDocumentCollector.put(q, documentsToCollect);
+			result.put(q, iaSelect(k, q, documents));
+			qIdx++;
 		}
-		logger.info("totals: found [" + totalFoundCategories + "] missed [" + totalMissedCategories
-						+ "] categories duplicate collisions [" + totalDuplicateCollisions + "] out of ["
-						+ (totalFoundCategories + totalMissedCategories + totalDuplicateCollisions)
-						+ "] categories for [" + queries.queries.length + "] queries");
 		return result;
 	}
 
 	/**
-	 * Increment counter for each probability within a section for categories
-	 * having exact number of top categories.
+	 * select top k documents from a set of documents acording to the ia-select
+	 * implementation: {@link IASelect}
 	 * 
-	 * @param numSections
-	 *            number of sections the probability should be classified to
-	 * @param withNumtopCategories
-	 *            consider only categories having exact number of top categories
-	 *            enumerated in the set
+	 * @param k
+	 *            num docs to select
+	 * @param q
+	 *            the query
+	 * @param Rq
+	 *            list of documents of which to select k docs
+	 * @return
+	 * @throws Exception
 	 */
-	private static void collectProbabilityDistribution(int numSections, Set<Integer> withNumtopCategories) {
-		for (Map.Entry<Integer, HashMap<Integer, Double>> relevance : estimatedRelevances.entrySet()) {
-			HashMap<Integer, Double> relevances = relevance.getValue();
-			int numProbabilities = getNumProbabilitiesGTZero(relevances);
+	private static LinkedHashSet<Document> iaSelect(int k, Query q, Set<Document> Rq) throws Exception {
+		ScoreBasedDocumentQualityValueV V = new ScoreBasedDocumentQualityValueV();
+		IASelect diversifyer = new IASelect();
+		LinkedHashSet<Document> diverdified = diversifyer.iaSelect(k, q, Rq, V);
+		return diverdified;
+	}
 
-			if (withNumtopCategories.contains(numProbabilities)) {
-				Map<Integer, Double> normalized = toNormalizedRelevance(relevances);
-				for (Map.Entry<Integer, Double> normalizedEntry : normalized.entrySet()) {
-					int section = getSection(numSections, normalizedEntry.getValue());
-					incrementNormalizedRelevance(numProbabilities, section, 1);
-				}
+	private static Map<Query, LinkedHashSet<Document>> queryExpansion(Set<Query> queries) throws IOException,
+					ParseException {
+		Map<Query, LinkedHashSet<Document>> result = new HashMap<>();
+		for (Query q : queries) {
+			result.put(q, queryExpansion(q));
+		}
+		return result;
+	}
+
+	/**
+	 * run lucene searcher with expanded queries
+	 * 
+	 * @param q
+	 *            the query
+	 * @return a more diverse result list according to a usual search with non
+	 *         expanded q
+	 * @throws IOException
+	 * @throws ParseException
+	 */
+	private static LinkedHashSet<Document> queryExpansion(Query q) throws IOException, ParseException {
+
+		SecureUserProfile expandedSPQuery = QueryExpansionEvaluation.expandQuery(q,
+						Settings.QueryExpansionEvaluation.MAX_TERMS_TO_EXPAND_QUERY);
+		Query expandedQuery = new Query(QueryExpansionEvaluation.toQuery(expandedSPQuery));
+
+		LinkedHashSet<Document> documentCollector = new LinkedHashSet<>();
+		R(expandedQuery, documentCollector, Settings.QueryExpansionEvaluation.NUM_TOP_DOCS_TO_CONSIDER);
+		return documentCollector;
+	}
+
+	/**
+	 * Read manualy processed queries from
+	 * {@link Settings.RelevanceEvaluation.IOFiles.inManuallySelectedWeightedNotNormalizedQueries}
+	 * and normalize relevances
+	 * 
+	 * @return normalized queries
+	 * @throws IOException
+	 */
+	private static Set<Query> getNormalizedManuallyProcessedQueries() throws IOException {
+
+		Set<Query> result = new LinkedHashSet<Query>();
+		File queries = Settings.RelevanceEvaluation.IOFiles.inManuallySelectedWeightedNotNormalizedQueries;
+		Map<eu.eexcess.diversityasurement.wikipedia.querytocategoryrelevance.Query, ArrayList<CategoryRelevance>> inQueries = readQueries(queries);
+
+		for (Map.Entry<eu.eexcess.diversityasurement.wikipedia.querytocategoryrelevance.Query, ArrayList<CategoryRelevance>> entry : inQueries
+						.entrySet()) {
+			ArrayList<CategoryRelevance> catetoryRelevances = entry.getValue();
+
+			double sum = 0.0;
+			for (CategoryRelevance cr : catetoryRelevances) {
+				sum += cr.categoryRelevance;
 			}
-		}
-	}
 
-	private static void incrementNormalizedRelevance(int numProbabilities, int section, int increment) {
-		HashMap<Integer, Integer> sectionHits = stats.probabilityDistribution.get(numProbabilities);
-
-		if (null == sectionHits) {
-			sectionHits = new HashMap<Integer, Integer>();
-			stats.probabilityDistribution.put(numProbabilities, sectionHits);
-		}
-
-		Integer hits = sectionHits.get(section);
-
-		if (null == hits) {
-			hits = new Integer(0);
-			sectionHits.put(section, hits);
-		}
-
-		sectionHits.put(section, hits + increment);
-	}
-
-	private static int getSection(int numSections, double normalizedValue) {
-		return new Double(Math.floor(numSections * normalizedValue)).intValue();
-	}
-
-	private static int getNumProbabilitiesGTZero(HashMap<Integer, Double> relevances) {
-		int numEntries = 0;
-		for (HashMap.Entry<Integer, Double> relevance : relevances.entrySet()) {
-			Double probability = relevance.getValue();
-			if (!probability.isNaN() && probability > 0) {
-				numEntries++;
+			Query q = new Query(entry.getKey().query);
+			for (CategoryRelevance cr : catetoryRelevances) {
+				q.addCategory(new Category(cr.categoryName, cr.categoryRelevance / sum));
 			}
+
+			result.add(q);
 		}
-		return numEntries;
+		return result;
 	}
 
-	private static void collectCategoryDistribution() {
-		for (Map.Entry<Integer, HashMap<Integer, Double>> entry : estimatedRelevances.entrySet()) {
-			HashMap<Integer, Double> relevances = entry.getValue();
+	/**
+	 * reads unnormalized query map
+	 * 
+	 * @param file
+	 * @return
+	 * @throws IOException
+	 */
+	private static Map<eu.eexcess.diversityasurement.wikipedia.querytocategoryrelevance.Query, ArrayList<CategoryRelevance>> readQueries(
+					File file) throws IOException {
+		JsonReader reader = new JsonReader(new FileReader(file));
+		Type type = new TypeToken<Map<eu.eexcess.diversityasurement.wikipedia.querytocategoryrelevance.Query, ArrayList<CategoryRelevance>>>() {
+		}.getType();
+		Gson gson = new GsonBuilder().enableComplexMapKeySerialization().create();
+		Map<eu.eexcess.diversityasurement.wikipedia.querytocategoryrelevance.Query, ArrayList<CategoryRelevance>> inQueries = gson
+						.fromJson(reader, type);
+		reader.close();
+		return inQueries;
+	}
 
-			int nCategories = getNumProbabilitiesGTZero(relevances);
+	/**
+	 * fetch top documents for query q and determine category and document
+	 * probabilities to all top categories
+	 * 
+	 * @param q
+	 *            query
+	 * @param documentCollector
+	 *            set where documents will be stored to
+	 * @param documentToCategoryCollector
+	 *            map where document category sets will be stored to
+	 * @throws IOException
+	 * @throws ParseException
+	 */
+	private static void R(Query q, LinkedHashSet<Document> documentCollector, int numTopDocsToconsider)
+					throws IOException, ParseException {
 
-			Integer numNodesHavingNCategories = stats.topCategoriesPerCategoryDistibution.get(nCategories);
-			if (null == numNodesHavingNCategories) {
-				stats.topCategoriesPerCategoryDistibution.put(nCategories, 1);
-			} else {
-				stats.topCategoriesPerCategoryDistibution.put(nCategories, numNodesHavingNCategories + 1);
+		IndexSearcher indexSearcher = new IndexSearcher(QueryCategoryKShortestPathsEvaluation.indexReader);
+		QueryParser queryParser = new QueryParser(Settings.RelevanceEvaluation.Lucene.SEARCH_FIELD_SECTIONTEXT,
+						new EnglishAnalyzer());
+		org.apache.lucene.search.Query query = queryParser.parse(q.query);
+
+		// / NUM_TOP_DOCS_TO_CONSIDER
+
+		// all docs of query
+		TopDocs docs = indexSearcher.search(query, numTopDocsToconsider);
+
+		eu.eexcess.diversityasurement.wikipedia.querytocategoryrelevance.Query iaQuery = new eu.eexcess.diversityasurement.wikipedia.querytocategoryrelevance.Query();
+		iaQuery.query = q.query;
+
+		// docs top category relevances
+		for (ScoreDoc sDoc : docs.scoreDocs) {
+			org.apache.lucene.document.Document doc = indexSearcher.doc(sDoc.doc);
+
+			ArrayList<Integer> seenCategoryIds = new ArrayList<>();
+			ArrayList<CategoryToTopCategoryRelevance> categoriesToTopCategoriesRelevanceCollector = new ArrayList<>();
+
+			QueryEvaluation.collectDocTopCategoryRelevances(doc, iaQuery, seenCategoryIds,
+							categoriesToTopCategoriesRelevanceCollector);
+
+			ArrayList<CategoryRelevance> collapsedNormalizedTopCategoriesRelevance = QueryEvaluation
+							.collapseTopCategoryRelevances(categoriesToTopCategoriesRelevanceCollector);
+
+			// store all top categories relevances of a document
+			Set<Category> iaCategories = new HashSet<>(collapsedNormalizedTopCategoriesRelevance.size());
+			for (CategoryRelevance cRelevance : collapsedNormalizedTopCategoriesRelevance) {
+				Category iaCategory = new Category(cRelevance.categoryName, cRelevance.categoryRelevance);
+				iaCategories.add(iaCategory);
 			}
+			Document iaDocument = new Document(doc.getField(Settings.RelevanceEvaluation.Lucene.SEARCH_FIELD_TITLE)
+							.stringValue(), iaCategories, sDoc.doc);
+			iaDocument.documentScore = (double) sDoc.score / (double) docs.getMaxScore();
+
+			documentCollector.add(iaDocument);
 		}
 
+		// // query top categories relevance
+		// ArrayList<CategoryToTopCategoryRelevance>
+		// queryCategoriesToTopCategoriesRelevance = QueryEvaluation
+		// .collectTopDocsCategoryRelevances(iaQuery,
+		// Settings.RelevanceEvaluation.EstimationArguments.numTopDocumentsToConsider);
+		//
+		// ArrayList<CategoryRelevance>
+		// collapsedNormalizedQueryTopCategoriesRelevance = QueryEvaluation
+		// .collapseTopCategoryRelevances(queryCategoriesToTopCategoriesRelevance);
+		//
+		// for (CategoryRelevance cRelevance :
+		// collapsedNormalizedQueryTopCategoriesRelevance) {
+		// Category iaCategory = new Category(cRelevance.categoryName,
+		// cRelevance.categoryRelevance);
+		// q.addCategory(iaCategory);
+		// }
 	}
 
-	@SuppressWarnings("unchecked")
-	private static void restoreCache() {
-		try {
-			FileInputStream fis = new FileInputStream(Settings.ContrastEvaluation.IOFIles.inRelevances);
-			ObjectInputStream ois = new ObjectInputStream(fis);
-			estimatedRelevances = (HashMap<Integer, HashMap<Integer, Double>>) ois.readObject();
-			ois.close();
-			fis.close();
-			logger.info("read [" + estimatedRelevances.size() + "] relevances from file ["
-							+ Settings.ContrastEvaluation.IOFIles.inRelevances.getAbsolutePath() + "]");
-		} catch (Exception e) {
-			logger.severe("failed loading relevances from file ["
-							+ Settings.ContrastEvaluation.IOFIles.inRelevances.getAbsolutePath() + "]");
-		}
-
-		try {
-			FileInputStream fis = new FileInputStream(Settings.ContrastEvaluation.IOFIles.inCategoryIdToName);
-			ObjectInputStream ois = new ObjectInputStream(fis);
-			categoryIdToName = (Map<Integer, String>) ois.readObject();
-			ois.close();
-			fis.close();
-			logger.info("read [" + categoryIdToName.size() + "] category IDs from file ["
-							+ Settings.ContrastEvaluation.IOFIles.inCategoryIdToName.getAbsolutePath() + "]");
-		} catch (Exception e) {
-			logger.severe("failed loading category-id-to-name from file ["
-							+ Settings.ContrastEvaluation.IOFIles.inCategoryIdToName.getAbsolutePath() + "]");
-		}
-
-		try {
-			FileInputStream fis = new FileInputStream(Settings.ContrastEvaluation.IOFIles.inCategoryNameToId);
-			ObjectInputStream ois = new ObjectInputStream(fis);
-			categoryNameToId = (Map<String, Integer>) ois.readObject();
-			ois.close();
-			fis.close();
-			logger.info("read [" + categoryNameToId.size() + "] category names from file ["
-							+ Settings.ContrastEvaluation.IOFIles.inCategoryNameToId.getAbsolutePath() + "]");
-		} catch (Exception e) {
-			logger.severe("failed loading category-name-to-id from file ["
-							+ Settings.ContrastEvaluation.IOFIles.inCategoryNameToId.getAbsolutePath() + "]");
-		}
+	private static void close() throws IOException {
+		QueryEvaluation.close();
 	}
+
+	private static void open() throws IOException {
+		QueryEvaluation.open();
+	}
+
 }

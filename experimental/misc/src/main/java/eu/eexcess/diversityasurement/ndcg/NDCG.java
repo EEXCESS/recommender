@@ -35,6 +35,42 @@ import java.util.Comparator;
 public class NDCG {
 
 	/**
+	 * given a maximum rank this class maps ranks to {0,1,2,3,4}
+	 * 
+	 * @author Raoul Rubien
+	 *
+	 */
+	public static class RankToJudgementMapper {
+
+		private double maxRank = 0.0;
+
+		public RankToJudgementMapper(double maxRank) {
+			this.maxRank = maxRank;
+		}
+
+		/**
+		 * map rank j to r ∈ {0,1,2,3,4}
+		 * 
+		 * @param j
+		 * @return 0 if j <= maxRank/5, 1 if j <= (2*maxRank)/5, 2 if j <=
+		 *         (3*maxRank)/5, 3 if j <= (4*maxRank)/5 and 4 if j >
+		 *         (3*maxRank)/5
+		 */
+		public int r(double j) {
+			if (j <= (1.0 / 5.0) * maxRank) {
+				return 0;
+			} else if (j <= (2.0 / 5.0) * maxRank) {
+				return 1;
+			} else if (j <= (3.0 / 5.0) * maxRank) {
+				return 2;
+			} else if (j <= (4.0 / 5.0) * maxRank) {
+				return 3;
+			}
+			return 4;
+		}
+	}
+
+	/**
 	 * Calculates the NDCG for a given input List
 	 * 
 	 * @param resultList
@@ -63,7 +99,7 @@ public class NDCG {
 				}
 				Double relI = 0.0;
 				Double nrelI = 0.0;
-				int a = i + 2;
+				double a = (double) i + 2.0;
 				Double log2I = Math.log10(a) / Math.log10(2.0);
 				if (categoryFlagRel) {
 					relI = resultList.results.get(i).nDCGRelevance;
@@ -71,22 +107,25 @@ public class NDCG {
 				if (categoryFlagNRel) {
 					nrelI = sortedByRelevance.results.get(i).nDCGRelevance;
 				}
-
-				if (log2I != null && log2I != 0.0) {
-					double d = (Math.pow(2, relI) - 1) / log2I;
+				if (categoryFlagNRel && categoryFlagRel && log2I != null && log2I != 0.0) {
+					double d = (Math.pow(2, relI) - 1.0) / log2I;
 					dCG += d;
-					double e = (Math.pow(2, nrelI) - 1) / log2I;
+					double e = (Math.pow(2, nrelI) - 1.0) / log2I;
 					iDCG += e;
 				}
 			}
-			ndcg = dCG / iDCG;
+			if (iDCG == 0.0) {
+				ndcg = 0.0;
+			} else {
+				ndcg = dCG / iDCG;
+			}
 		}
 		return ndcg;
 	}
 
 	protected NDCGResultList getRelevanceSortedResultList(NDCGResultList resultList, NDCGIACategory category, int at) {
 		NDCGResultList sorted = new NDCGResultList();
-		Comparator<NDCGResult> resultListComperator = new Comparator<NDCGResult>() {
+		Comparator<NDCGResult> resultListComparator = new Comparator<NDCGResult>() {
 
 			@Override
 			public int compare(NDCGResult o1, NDCGResult o2) {
@@ -99,7 +138,7 @@ public class NDCG {
 			}
 		};
 		sorted.results = new ArrayList<NDCGResult>(resultList.results);
-		Collections.sort(sorted.results, resultListComperator);
+		Collections.sort(sorted.results, resultListComparator);
 
 		if (category != null) { // TODO: that is not performant at all
 			ArrayList<NDCGResult> categorySortedResult = new ArrayList<NDCGResult>();
