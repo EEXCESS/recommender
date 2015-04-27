@@ -86,23 +86,23 @@ public class IASelectVSQueryExpansionEvaluation {
 
 		Map<Query, Map<Integer, Double>> ndcg_LuQe = new HashMap<>();
 		Map<Query, Map<Integer, Double>> ndcgIa_LuQe = new HashMap<>();
-		// Map<Query, Map<Integer, Double>> spearmanRho_IaQe = new HashMap<>();
-		// Map<Query, Map<Integer, Double>> kendallTao_IaQe = new HashMap<>();
-
-		// Map<query, Map<k, NDCGResultList>> for ndcg of iaselect (as "ideal"
-		// resutl) and lucene result (as "other" result)
-		// Map<Query, Map<Integer, NDCGResultList>> NDCGArguments_IaL = new
-		// HashMap<>();
-
 		Map<Query, Map<Integer, Double>> ndcg_LuIa = new HashMap<>();
 		Map<Query, Map<Integer, Double>> ndcgIa_LuIa = new HashMap<>();
-		// Map<Query, Map<Integer, Double>> spearmanRho_IaL = new HashMap<>();
-		// Map<Query, Map<Integer, Double>> kendallTao_IaL = new HashMap<>();
 
-		int[] atKs = { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 };
+		Map<Query, Map<Integer, Double>> ndcg_LuIaNoBrackets = new HashMap<>();
+		Map<Query, Map<Integer, Double>> ndcgIa_LuIaNoBrackets = new HashMap<>();
+
+		int[] atKs = { 3, 5, 10 };
+
+		public Map<Query, LinkedHashSet<Document>> queryExpansionWithoutORBracketList;
 	}
 
 	public static void main(String[] args) throws Exception {
+
+		System.out.println("\nsettings:  NUM_TOP_DOCS_TO_CONSIDER=["
+						+ Settings.QueryExpansionEvaluation.NUM_TOP_DOCS_TO_CONSIDER + "]  MAX_TERMS_TO_EXPAND_QUERY=["
+						+ Settings.QueryExpansionEvaluation.MAX_TERMS_TO_EXPAND_QUERY + "]\n");
+
 		long startTimestamp = System.currentTimeMillis();
 		Set<Query> queries = getNormalizedManuallyProcessedQueries();
 		System.out.println("read #queries [" + queries.size() + "]");
@@ -123,38 +123,64 @@ public class IASelectVSQueryExpansionEvaluation {
 		int maxResultsToPrint = Settings.QueryExpansionEvaluation.NUM_TOP_DOCS_TO_CONSIDER;
 		//
 		int queryNumbering = 0;
-		System.out.println("qeuryNumber, ndcg, ndcgIA, k, query, idealName, otherName");
+		System.out.println("CSV: ia-select");
+		System.out.println("qeuryNumber, query, ndcg, ndcgIA, k, idealName, otherName");
 		for (Query q : result.queries) {
 			printNDCGs(result.ndcg_LuIa, result.ndcgIa_LuIa, q, queryNumbering, "lucene", "ia-select", false, null);
 
 		}
+		System.out.println();
 		queryNumbering = 0;
-		System.out.println("qeuryNumber, ndcg, ndcgIA, k, query, idealName, otherName");
+		System.out.println("CSV: qeury-exp");
+		System.out.println("qeuryNumber, query, ndcg, ndcgIA, k, idealName, otherName");
 		for (Query q : result.queries) {
 			printNDCGs(result.ndcg_LuQe, result.ndcgIa_LuQe, q, queryNumbering, "lucene", "qeury-exp", false, null);
 			queryNumbering++;
 		}
+		System.out.println();
+		queryNumbering = 0;
+		System.out.println("CSV: qeury-exp-no-brackets");
+		System.out.println("qeuryNumber, query, ndcg, ndcgIA, k, idealName, otherName");
+		for (Query q : result.queries) {
+			printNDCGs(result.ndcg_LuIaNoBrackets, result.ndcgIa_LuIaNoBrackets, q, queryNumbering, "lucene",
+							"qeury-exp-no-brackets", false, null);
+			queryNumbering++;
+		}
+		System.out.println();
 
 		//
 		for (Integer k : result.atKs) {
 			queryNumbering = 0;
-			System.out.println("NDCG-IA for k [" + k + "]");
-			System.out.println("qeuryNumber, ndcg, ndcgIA, k, query, idealName, otherName");
+			System.out.println("NDCG lucene - ia-select for k [" + k + "]");
+			System.out.println("qeuryNumber, query, ndcg, ndcgIA, k, idealName, otherName");
 			for (Query q : result.queries) {
 				printNDCGs(result.ndcg_LuQe, result.ndcgIa_LuIa, q, queryNumbering, "lucene", "ia-select", false, k);
 				queryNumbering++;
 			}
 		}
+		System.out.println();
 		for (Integer k : result.atKs) {
 			queryNumbering = 0;
-			System.out.println("NDCG for k ["+k+"]");
-			System.out.println("qeuryNumber, ndcg, ndcgIA, k, query, idealName, otherName");
+			System.out.println("NDCG lucene - query-exp k [" + k + "]");
+			System.out.println("qeuryNumber, query, ndcg, ndcgIA, k, idealName, otherName");
 			for (Query q : result.queries) {
 				printNDCGs(result.ndcg_LuQe, result.ndcgIa_LuQe, q, queryNumbering, "lucene", "qeury-exp", false, k);
 				queryNumbering++;
 			}
 		}
-		
+		System.out.println();
+		for (Integer k : result.atKs) {
+			queryNumbering = 0;
+			System.out.println("NDCG lucene - query-exp-noBrackets k [" + k + "]");
+			System.out.println("qeuryNumber, query, ndcg, ndcgIA, k, idealName, otherName");
+			for (Query q : result.queries) {
+				printNDCGs(result.ndcg_LuIaNoBrackets, result.ndcgIa_LuIaNoBrackets, q, queryNumbering, "lucene",
+								"qeury-exp-noBrackets", false, k);
+				queryNumbering++;
+			}
+		}
+		System.out.println();
+
 		//
 		queryNumbering = 0;
 		for (Query q : result.queries) {
@@ -206,6 +232,7 @@ public class IASelectVSQueryExpansionEvaluation {
 
 	private static void printNDCGs(Map<Query, Map<Integer, Double>> ndcg, Map<Query, Map<Integer, Double>> ndcgIa,
 					Query q, int queryNumber, String idealName, String otherName, boolean withTitle, Integer onlyK) {
+
 		if (null == ndcg.get(q)) {
 			System.err.println("no ndcg: [" + idealName + "(=ideal)]-[" + otherName + "(=other)] found for query ["
 							+ q.query + "]");
@@ -217,7 +244,7 @@ public class IASelectVSQueryExpansionEvaluation {
 				if (withTitle) {
 					System.out.println("NDCG: [" + idealName + "(=ideal)]-[" + otherName + "(=other)] for query ["
 									+ q.query + "]");
-					System.out.println("qeuryNumber, ndcg, ndcgIA, k, query, idealName, otherName");
+					System.out.println("qeuryNumber, query, ndcg, ndcgIA, k, idealName, otherName");
 				}
 				for (Map.Entry<Integer, Double> entry : ndcg.get(q).entrySet()) {
 					int k = entry.getKey();
@@ -225,14 +252,14 @@ public class IASelectVSQueryExpansionEvaluation {
 						if (k == onlyK) {
 							double ndcgValue = entry.getValue();
 							double ndcgIaValue = ndcgIa.get(q).get(k);
-							System.out.println(queryNumber + "," + ndcgValue + ", " + ndcgIaValue + ", " + k + ", "
-											+ q.query + ", " + idealName + ", " + otherName);
+							System.out.println(queryNumber + "," + q.query + ", " + ndcgValue + ", " + ndcgIaValue
+											+ ", " + k + ", " + idealName + ", " + otherName);
 						}
 					} else {
 						double ndcgValue = entry.getValue();
 						double ndcgIaValue = ndcgIa.get(q).get(k);
-						System.out.println(queryNumber + "," + ndcgValue + ", " + ndcgIaValue + ", " + k + ", "
-										+ q.query + ", " + idealName + ", " + otherName);
+						System.out.println(queryNumber + "," + q.query + ", " + ndcgValue + ", " + ndcgIaValue + ", "
+										+ k + ", " + idealName + ", " + otherName);
 					}
 				}
 			}
@@ -257,10 +284,53 @@ public class IASelectVSQueryExpansionEvaluation {
 		resultCollector.iaSelectResultList = iaSelect(queries, k, resultCollector.luceneSearchResultList);
 		resultCollector.queryExpansionResultList = queryExpansion(queries);
 
+		resultCollector.queryExpansionWithoutORBracketList = queryExpansionNoBrackets(queries);
+
 		Map<Query, LinkedHashSet<Document>> otherResultIa = resultCollector.iaSelectResultList;
 		Map<Query, LinkedHashSet<Document>> otherResultQE = resultCollector.queryExpansionResultList;
+		Map<Query, LinkedHashSet<Document>> otherResultQENoBrackets = resultCollector.queryExpansionWithoutORBracketList;
 		Map<Query, LinkedHashSet<Document>> idealResultLu = resultCollector.luceneSearchResultList;
 		Map<Query, LinkedHashSet<Document>> idealResult = idealResultLu;
+
+		// run ndcg against query-expansion-with-no-brackets
+		for (Query q : queries) {
+			LinkedHashSet<Document> idealResultList = idealResult.get(q);
+			LinkedHashSet<Document> otherResultList = otherResultQENoBrackets.get(q);
+
+			if (null == idealResultList) {
+				logger.severe("ndcg-ia - q-exp-noBrackets failed find query [" + q.query
+								+ "]: not in optimal result list");
+				continue;
+			}
+			if (null == otherResultList) {
+				logger.severe("ndcg-ia - q-exp-noBrackets failed find query [" + q.query
+								+ "]: not in other result list");
+				continue;
+			}
+
+			ArrayList<NDCGIACategory> queryCategories = new ArrayList<NDCGIACategory>();
+			for (Category cat : q.categories()) {
+				queryCategories.add(new NDCGIACategory(cat.name, cat.probability));
+			}
+
+			System.out.println("ndcgSummary idealResultLu(=ideal)-otherResultQENoBrackets(=other) at query [" + q + "]");
+			Map<Integer, List<Double>> ndcgIaQe_AtK_NCDG_NDCGIA = ndcgSummary(idealResultList, otherResultList,
+							queryCategories, resultCollector.atKs);
+			Map<Integer, Double> ndcgMap = new HashMap<>();
+			Map<Integer, Double> ndcgIaMap = new HashMap<>();
+
+			for (Map.Entry<Integer, List<Double>> entry : ndcgIaQe_AtK_NCDG_NDCGIA.entrySet()) {
+				Iterator<Double> iter = entry.getValue().iterator();
+				double ndcg = iter.next();
+				double ndcgIa = iter.next();
+				Integer atK = entry.getKey();
+				ndcgMap.put(atK, ndcg);
+				ndcgIaMap.put(atK, ndcgIa);
+			}
+
+			resultCollector.ndcg_LuIaNoBrackets.put(q, ndcgMap);
+			resultCollector.ndcgIa_LuIaNoBrackets.put(q, ndcgIaMap);
+		}
 
 		// run ndcg against iaselect
 		for (Query q : queries) {
@@ -415,6 +485,10 @@ public class IASelectVSQueryExpansionEvaluation {
 			if (null != categories) {
 				for (CategoryRelevance docCatgory : documentToCategoriesRelevance.get(document.documentId)) {
 					ndcgDoc.categories.add(new NDCGIACategory(docCatgory.categoryName, docCatgory.categoryRelevance));
+				}
+				if (ndcgDoc.categories.size() <= 0) {
+					System.err.println("document [" + document + "] has no top category relevances");
+					System.err.println();
 				}
 			}
 			ndcgList.results.add(ndcgDoc);
@@ -576,9 +650,19 @@ public class IASelectVSQueryExpansionEvaluation {
 
 	private static Map<Query, LinkedHashSet<Document>> queryExpansion(Set<Query> queries) throws IOException,
 					ParseException {
+		return queryExpansion(queries, false);
+	}
+
+	private static Map<Query, LinkedHashSet<Document>> queryExpansionNoBrackets(Set<Query> queries) throws IOException,
+					ParseException {
+		return queryExpansion(queries, true);
+	}
+
+	private static Map<Query, LinkedHashSet<Document>> queryExpansion(Set<Query> queries, boolean doRemoveBracket)
+					throws IOException, ParseException {
 		Map<Query, LinkedHashSet<Document>> result = new HashMap<>();
 		for (Query q : queries) {
-			result.put(q, queryExpansion(q));
+			result.put(q, queryExpansion(q, doRemoveBracket));
 		}
 		return result;
 	}
@@ -588,16 +672,25 @@ public class IASelectVSQueryExpansionEvaluation {
 	 * 
 	 * @param q
 	 *            the query
+	 * @param doRemoveBracket
+	 *            true if brackets have to be removed from expanded query
+	 * 
 	 * @return a more diverse result list according to a usual search with non
 	 *         expanded q
 	 * @throws IOException
 	 * @throws ParseException
 	 */
-	private static LinkedHashSet<Document> queryExpansion(Query q) throws IOException, ParseException {
+	private static LinkedHashSet<Document> queryExpansion(Query q, boolean doRemoveBracket) throws IOException,
+					ParseException {
 
 		SecureUserProfile expandedSPQuery = QueryExpansionEvaluation.expandQuery(q,
 						Settings.QueryExpansionEvaluation.MAX_TERMS_TO_EXPAND_QUERY);
-		Query expandedQuery = new Query(QueryExpansionEvaluation.toQuery(expandedSPQuery));
+
+		String queryString = QueryExpansionEvaluation.toQuery(expandedSPQuery);
+		if (doRemoveBracket) {
+			queryString = queryString.replace(")", " ").replace("(", " ");
+		}
+		Query expandedQuery = new Query(queryString);
 
 		LinkedHashSet<Document> documentCollector = new LinkedHashSet<>();
 		R(expandedQuery, documentCollector, Settings.QueryExpansionEvaluation.NUM_TOP_DOCS_TO_CONSIDER);
