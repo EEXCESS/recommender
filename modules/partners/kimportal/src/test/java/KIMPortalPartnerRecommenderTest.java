@@ -83,7 +83,7 @@ public class KIMPortalPartnerRecommenderTest {
 	    
         assertNotNull(resultList);
         assertTrue(resultList.results.size() > 0 );
-        assertEquals(12, resultList.results.size());
+        assertEquals(1, resultList.results.size());
 
 	}
 
