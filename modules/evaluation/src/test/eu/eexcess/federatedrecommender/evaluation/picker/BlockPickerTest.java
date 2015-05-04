@@ -5,6 +5,7 @@ import org.junit.Test;
 
 import eu.eexcess.dataformats.evaluation.EvaluationResultList;
 import eu.eexcess.dataformats.evaluation.EvaluationResultLists;
+import eu.eexcess.dataformats.result.DocumentBadge;
 import eu.eexcess.dataformats.result.Result;
 import eu.eexcess.dataformats.result.ResultList;
 import eu.eexcess.dataformats.userprofile.SecureUserProfile;
@@ -25,7 +26,8 @@ public class BlockPickerTest extends TestCase {
 		ResultList parent = new ResultList();
 		Result e = new Result();
 		e.title="test1";
-		e.id="test1";
+		e.documentBadge=new DocumentBadge("test1");
+		
 		parent.results.add(e);
 		EvaluationResultList list = new EvaluationResultList(parent);
 		SecureUserProfile secureUserProfile = null;

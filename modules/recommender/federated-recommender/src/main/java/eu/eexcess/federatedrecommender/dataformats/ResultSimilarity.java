@@ -38,16 +38,16 @@ public class ResultSimilarity extends Result implements Serializable {
 	 */
 
 	public ResultSimilarity(Result result) {
-		this.collectionName = result.collectionName;
-		this.creator = result.creator;
+		this.date =result.date;
+		this.documentBadge=result.documentBadge;
+		this.language=result.language;
+		this.licence=result.licence;
+		this.mediaType=result.mediaType;
+		
 		this.description = result.description;
-		this.eexcessURI = result.eexcessURI;
-		this.facets = result.facets;
-		this.id = result.id;
 		this.previewImage = result.previewImage;
-		this.rdf = result.rdf;
 		this.title = result.title;
-		this.uri = result.uri;
+		
 	}
 
 	public double getSimilarity() {
@@ -61,24 +61,18 @@ public class ResultSimilarity extends Result implements Serializable {
 	public double calcSimilarity(Result result) {
 		Double returnValue = 0.0;
 		Double valueCount = 0.0;
-		if (this.collectionName != null && result.collectionName != null){
-			returnValue += this.collectionName.compareTo(result.collectionName) == 0 ? 1.0 : 0.0;
-			valueCount+=1.0;
-		}	
-		if (this.creator != null && result.creator != null){
-			returnValue += this.creator.compareTo(result.creator) == 0 ? 1.0 : 0.0;
+	 
+		if (this.documentBadge.provider  != null && result.documentBadge.provider != null){
+			returnValue += this.documentBadge.provider.compareTo(result.documentBadge.provider) == 0 ? 1.0 : 0.0;
 			valueCount+=1.0;
 		}
 		if (this.description != null && result.description != null){
 			returnValue += this.description.compareTo(result.description) == 0 ? 1.0 : 0.0;
 			valueCount+=1.0;
 		}
-		if (this.facets != null && result.facets != null){
-			returnValue += calcFacetSimilarity(result);
-			valueCount+=1.0;
-		}
-		if (this.id != null && result.id != null){ 
-			returnValue += this.id.compareTo(result.id) == 0 ? 3.0 : 0.0; //higher weight for id -> should mean same result was returned twice
+	
+		if (this.documentBadge.id != null && result.documentBadge.id != null){ 
+			returnValue += this.documentBadge.id.compareTo(result.documentBadge.id) == 0 ? 3.0 : 0.0; //higher weight for id -> should mean same result was returned twice
 			valueCount+=3.0;
 		}
 		
@@ -86,32 +80,4 @@ public class ResultSimilarity extends Result implements Serializable {
 			return 0.0;
 		return returnValue/valueCount;
 	}
-
-	private Double calcFacetSimilarity(Result result) {
-		Double returnValue = 0.0;
-		Double valueCount = 0.0;
-		if (result.facets != null && this.facets != null) {
-// 			Leaving out the language as it perhabs isn't the best similarity factor (in context of diversity)			
-//			if (result.facets.language != null && this.facets.language != null) {
-//				returnValue += result.facets.language.compareTo(this.facets.language) == 0 ? 1.0 : 0.0;
-//				valueCount += 1.0;
-//			}
-			if (result.facets.provider != null && this.facets.provider != null) {
-				returnValue += result.facets.provider.compareTo(this.facets.provider) == 0 ? 1.0 : 0.0;
-				valueCount += 1.0;
-			}
-			if (result.facets.type != null && this.facets.type != null) {
-				returnValue += result.facets.type.compareTo(this.facets.type) == 0 ? 1.0 : 0.0;
-				valueCount += 1.0;
-			}
-			if (result.facets.year != null && this.facets.year != null) {
-				returnValue += result.facets.year.compareTo(this.facets.year) == 0 ? 1.0 : 0.0;
-				valueCount += 1.0;
-			}
-		}
-		if(valueCount==0.0)
-			return 0.0;
-		return returnValue/valueCount;
-	}
-
 }
