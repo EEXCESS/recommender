@@ -18,6 +18,16 @@ package eu.eexcess.partnerdata.reference.enrichment;
 
 public class EnrichmentResult {
 
+	protected String enrichmentSource;
+	
+	public String getEnrichmentSource() {
+		return enrichmentSource;
+	}
+
+	public void setEnrichmentSource(String enrichmentSource) {
+		this.enrichmentSource = enrichmentSource;
+	}
+
 	protected String word;
 	
 	protected String language;

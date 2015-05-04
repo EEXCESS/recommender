@@ -376,16 +376,21 @@ public class XmlParser {
 					NodeList resourcesChilds = resourcesElement.getChildNodes();
 					if(resourcesChilds != null && resourcesChilds.getLength() > 0) {
 						for(int k = 0 ; k < resourcesChilds.getLength();k++) {
-							Node resourceElement = resourcesChilds.item(j);
+							Node resourceElement = resourcesChilds.item(k);
 							if (resourceElement.getNodeType() == Node.ELEMENT_NODE) {
 								
 								DbpediaSpotlightResult result = new DbpediaSpotlightResult();
-								result.setName(text);
 								if (resourceElement.getAttributes() != null && resourceElement.getAttributes().getNamedItem("URI") != null)
 								{
 									String uri = resourceElement.getAttributes().getNamedItem("URI").getNodeValue();
 									result.setUri(uri);
-								}								
+								}
+								if (resourceElement.getAttributes() != null && resourceElement.getAttributes().getNamedItem("surfaceForm") != null)
+								{
+									String surfaceForm = resourceElement.getAttributes().getNamedItem("surfaceForm").getNodeValue();
+									result.setName(surfaceForm);
+								}
+								
 								if (resourceElement.getAttributes() != null && resourceElement.getAttributes().getNamedItem("types") != null)
 								{
 									String types = resourceElement.getAttributes().getNamedItem("types").getNodeValue();
