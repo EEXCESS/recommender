@@ -83,8 +83,8 @@ public class Settings {
 	}
 
 	public static class QueryExpansionEvaluation {
-		public static final int NUM_TOP_DOCS_TO_CONSIDER = 10;
-		public static final int MAX_TERMS_TO_EXPAND_QUERY = 20;	
+		public static final int NUM_TOP_DOCS_TO_CONSIDER = 10; // max 10
+		public static final int MAX_TERMS_TO_EXPAND_QUERY = 5; // 5 10 15 20
 		
 		public static class IOFiles {
 			public static final File outExpandedCategoryIDs = new File("/opt/iaselect/results/queries/out-additional-category-ids.json");

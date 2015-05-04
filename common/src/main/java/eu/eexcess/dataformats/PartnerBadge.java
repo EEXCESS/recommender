@@ -28,9 +28,12 @@ import java.util.List;
 import java.util.Stack;
 
 
+import org.codehaus.jackson.map.annotate.JsonSerialize;
+
 @XmlRootElement(name = "eexcess-partner-badge")
 @XmlAccessorType(XmlAccessType.FIELD)
 @JsonIgnoreProperties(ignoreUnknown = true)
+@JsonSerialize(include=JsonSerialize.Inclusion.NON_NULL) 
 public class PartnerBadge implements Serializable{
 	
 	private static final long serialVersionUID = -6411801334911587483L;
@@ -42,6 +45,8 @@ public class PartnerBadge implements Serializable{
     public String partnerKey;
 	@XmlElement(name="description")
     private String description;
+	@XmlElement(name="favIconURI")
+    private String favIconURI;
 	@XmlElement(name="partnerConnectorEndpoint")
     private String partnerConnectorEndpoint;
 	

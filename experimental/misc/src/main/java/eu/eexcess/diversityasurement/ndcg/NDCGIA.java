@@ -50,6 +50,8 @@ public class NDCGIA extends NDCG {
 //			}
 //		}
 		for (NDCGIACategory cat : queryCategories) {
+			if(cat==null)
+				cat=new NDCGIACategory("", 0.0);
 			Double nDCG = calcNDCG(resultList, cat, at);
 			nDCGIA += calcIAWeight(cat, nDCG);
 			// System.out.println(nDCG + " IA "+ cat.getQueryWeight()+" "+ nDCG*
