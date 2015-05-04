@@ -99,6 +99,8 @@ public class Transformer implements ITransformer{
 	"  </xsl:if>" + 
 	"</xsl:template>" + 
 	"</xsl:stylesheet>";
+	protected Query sparqlQueryForToResultList;
+	protected String sparqlQueryForToResultListString;
 	
 	
 	public boolean hasEEXCESSRDFResponseResults(Document eexcessResults ) {
@@ -176,6 +178,10 @@ public class Transformer implements ITransformer{
 			}
 		}
    		model = ModelFactory.createOntologyModel();
+		sparqlQueryForToResultListString = createSPARQLqueryForToResultList();
+
+		sparqlQueryForToResultList = QueryFactory.create(sparqlQueryForToResultListString);	
+
 	}
 
 	protected Document transformInternal(Document input, javax.xml.transform.Transformer transformer, PartnerdataLogger logger) throws EEXCESSDataTransformationException {
@@ -253,19 +259,17 @@ public class Transformer implements ITransformer{
    		StringReader stream = new StringReader(inputString);
    		model.read(stream,null);
 
-		String queryContent = createSPARQLqueryForToResultList();
 
 		if (this.partnerConfig.partnerDataRequestsTrace){// for debugging:
-			PartnerdataTracer.debugTrace(this.partnerConfig, "createSPARQLqueryForToResultList:\n"+ queryContent);
-			Query queryDebug = QueryFactory.create(queryContent);	
+			PartnerdataTracer.debugTrace(this.partnerConfig, "createSPARQLqueryForToResultList:\n"+ sparqlQueryForToResultListString);
+			Query queryDebug = QueryFactory.create(sparqlQueryForToResultListString);	
 			QueryExecution qeDebug = QueryExecutionFactory.create(queryDebug, model);
 			ResultSet queryResultsDebug =  qeDebug.execSelect();
 			log.info("createSPARQLqueryForToResultList Result:\n" + ResultSetFormatter.asText(queryResultsDebug));
 			qeDebug.close();
 			
 		}
-		Query query = QueryFactory.create(queryContent);	
-		QueryExecution qe = QueryExecutionFactory.create(query, model);
+		QueryExecution qe = QueryExecutionFactory.create(sparqlQueryForToResultList, model);
 
 		ResultSet queryResults =  qe.execSelect();
 		

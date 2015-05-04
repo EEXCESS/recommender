@@ -71,12 +71,12 @@ public class IASelect {
 		LinkedHashSet<Document> S = new LinkedHashSet<Document>(k);
 
 		ConditionalProbabilityU U = new ConditionalProbabilityU(Cq);
-		System.out.println(U);
+//		System.out.println(U);
 
 		while (S.size() < k) {
-			System.out.println("[" + S.size() + "] out of [" + k + "] needed documents selected from total ["
-							+ Rq.size() + "] documents");
-			System.out.println(sToString(S));
+//			System.out.println("[" + S.size() + "] out of [" + k + "] needed documents selected from total ["
+//							+ Rq.size() + "] documents");
+//			System.out.println(sToString(S));
 
 			clearMaxMarginalUtility();
 			for (Document d : R) {
@@ -85,7 +85,7 @@ public class IASelect {
 			Document dMax = argmax();
 			S.add(dMax);
 
-			System.out.println("select maxarg(g(d|q,c,S=" + sToString(S) + ")=" + maxMarginalUtility + ")=" + dMax.name);
+//			System.out.println("select maxarg(g(d|q,c,S=" + sToString(S) + ")=" + maxMarginalUtility + ")=" + dMax.name);
 			/**
 			 * for all c ∈ C(d*) AND "c ∈ C(q)" because but P(c|q) always refers
 			 * to c ∈ C(q), see 3.1
@@ -93,7 +93,7 @@ public class IASelect {
 			for (Category c : C(dMax)) {
 				if (Cq.contains(c)) {
 					U.updateU(q.getCategory(c), q, S, dMax, V);
-					System.out.println(U);
+//					System.out.println(U);
 				}
 			}
 			R.remove(dMax);
@@ -182,7 +182,7 @@ public class IASelect {
 		if (maxMarginalUtility < sum) {
 			maxMarginalUtility = sum;
 			maxMarginalUtilityDocument = d;
-			System.out.println("argmx=" + maxMarginalUtility + " d=" + d.name);
+//			System.out.println("argmx=" + maxMarginalUtility + " d=" + d.name);
 		}
 	}
 }

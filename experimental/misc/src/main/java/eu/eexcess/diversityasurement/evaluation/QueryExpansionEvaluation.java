@@ -48,6 +48,9 @@ import eu.eexcess.logger.PianoLogger;
 public class QueryExpansionEvaluation {
 
 	private static Logger logger = PianoLogger.getLogger(QueryExpansionEvaluation.class);
+	public static long totalTime = 0;
+	public static long decomposeCounts = 0;
+	private static PseudoRelevanceWikipediaDecomposer decomposer = newDecomposer();
 
 	/**
 	 * expand queries, fetch all categories in every query's top documents and
@@ -58,16 +61,26 @@ public class QueryExpansionEvaluation {
 	 */
 	public static void main(String[] args) throws Exception {
 
-		Set<SecureUserProfile> expandedQueries = getExpandedQueries();
+		int[] termExpansions = { 5, 10, 15, 20 };
+		Set<SecureUserProfile> expandedQueries = getExpandedQueries(termExpansions);
 
 		QueryCategoryKShortestPathsEvaluation.openInIndex();
 		QueryCategoryKShortestPathsEvaluation.init();
 		QueryCategoryKShortestPathsEvaluation.restoreCache();
-		Set<Integer> categories = getAllCategories(expandedQueries);
-		storeCategories(categories);
+
+		Set<Integer> newExpandedcategories = new HashSet<>();
+
+		// get all cat. for expanded queries
+		getAllCategories(expandedQueries, newExpandedcategories,
+						Settings.QueryExpansionEvaluation.NUM_TOP_DOCS_TO_CONSIDER, false);
+		// get all cat. for expanded queries wit removed brackets
+		getAllCategories(expandedQueries, newExpandedcategories,
+						Settings.QueryExpansionEvaluation.NUM_TOP_DOCS_TO_CONSIDER, true);
+
+		storeCategories(newExpandedcategories);
 		QueryCategoryKShortestPathsEvaluation.closeInIndex();
 	}
-
+	
 	private static void storeCategories(Set<Integer> categories) throws IllegalStateException, IOException {
 
 		Map<String, Integer> mapping = new LinkedHashMap<>();
@@ -79,6 +92,8 @@ public class QueryExpansionEvaluation {
 			mapping.put(name, id);
 		}
 
+		System.out.println("storing [" + categories.size() + "] categories to file ["
+						+ Settings.QueryExpansionEvaluation.IOFiles.outExpandedCategoryIDs.getAbsoluteFile() + "]");
 		FileWriter writer = new FileWriter(
 						Settings.QueryExpansionEvaluation.IOFiles.outExpandedCategoryIDs.getAbsoluteFile());
 		Gson gson = new GsonBuilder().enableComplexMapKeySerialization().setPrettyPrinting().create();
@@ -86,12 +101,16 @@ public class QueryExpansionEvaluation {
 		writer.close();
 	}
 
-	private static Set<SecureUserProfile> getExpandedQueries() throws FileNotFoundException, IOException {
+	private static Set<SecureUserProfile> getExpandedQueries(int[] termExpansions) throws FileNotFoundException,
+					IOException {
 		Set<SecureUserProfile> expandedQueries = new LinkedHashSet<>();
 		for (String q : QueryCategoryKShortestPathsEvaluation.getQueries()) {
 			logger.info("expanding query [" + q + "]");
 			Query iasQuery = new Query(q);
-			expandedQueries.add(expandQuery(iasQuery, Settings.QueryExpansionEvaluation.MAX_TERMS_TO_EXPAND_QUERY));
+
+			for (int k : termExpansions) {
+				expandedQueries.add(expandQuery(iasQuery, k));
+			}
 		}
 		return expandedQueries;
 	}
@@ -101,18 +120,27 @@ public class QueryExpansionEvaluation {
 	 * {@link SecureUserProfile} that appear in top documents
 	 * 
 	 * @param queries
-	 * @return
 	 */
-	private static Set<Integer> getAllCategories(Set<SecureUserProfile> queries) throws IOException, ParseException {
+	private static void getAllCategories(Set<SecureUserProfile> queries, Set<Integer> categoryCollector,
+					int numTopDocumentsToConsider, boolean doRemoveBracket) throws IOException, ParseException {
 		ArrayList<String> queryStrings = new ArrayList<>(queries.size());
 
 		for (SecureUserProfile q : queries) {
 			String queryString = toQuery(q);
-			System.out.println("query generator: [" + queryString + "]");
+			if (doRemoveBracket) {
+				queryString = queryString.replace(")", " ").replace("(", " ");
+			}
+
+			System.out.println("query generator: [" + queryString + "] doReplaceBracket=[" + doRemoveBracket + "]");
 			queryStrings.add(queryString);
 		}
-		return new HashSet<>(QueryCategoryKShortestPathsEvaluation.collectTopDocsCategories(queryStrings,
-						Settings.QueryExpansionEvaluation.NUM_TOP_DOCS_TO_CONSIDER));
+
+		for (Integer categoryID : QueryCategoryKShortestPathsEvaluation.collectTopDocsCategories(queryStrings,
+						numTopDocumentsToConsider)) {
+			if (!categoryCollector.contains(categoryID)) {
+				categoryCollector.add(categoryID);
+			}
+		}
 	}
 
 	/**
@@ -146,7 +174,7 @@ public class QueryExpansionEvaluation {
 					result.append(") OR \"" + key.text + "\"");
 					expansion = false;
 				} else if (result.length() > 0)
-					result.append(" OR \"" + key.text + "\"");
+					result.append(" \"" + key.text + "\"");
 				else
 					result.append("\"" + key.text + "\"");
 			}
@@ -165,11 +193,24 @@ public class QueryExpansionEvaluation {
 	 * @return
 	 */
 	static SecureUserProfile expandQuery(Query q, int maxTermsToExpand) {
-		PseudoRelevanceWikipediaDecomposer decomposer = newDecomposer();
+
 		SecureUserProfile expandedSecureProfile = null;
 		SecureUserProfile userProfile = newSecureUserProfile(q);
 		decomposer.setMaxNumTermsToExpand(maxTermsToExpand);
+
+		long timestamp = System.currentTimeMillis();
 		expandedSecureProfile = (SecureUserProfile) decomposer.decompose(userProfile);
+		double localDuration = System.currentTimeMillis() - timestamp;
+
+		totalTime += localDuration;
+		decomposeCounts++;
+		double mean = (double) totalTime / (double) decomposeCounts;
+
+		if (decomposeCounts % 20 == 0) {
+			System.out.println("decomposer: mean [" + mean + "] total [" + decomposeCounts + "] calls [" + totalTime
+							+ "]ms numTerms[" + maxTermsToExpand + "] last call [" + localDuration + "]");
+		}
+
 		return expandedSecureProfile;
 	}
 

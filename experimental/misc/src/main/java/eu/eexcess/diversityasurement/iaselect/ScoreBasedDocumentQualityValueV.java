@@ -81,7 +81,7 @@ public class ScoreBasedDocumentQualityValueV implements DocumentQualityValueV {
 		for (Category documentCategory : d.categories()) {
 			if (documentCategory.equals(c)) {
 				// return documentScore(d, q) * documentCategory.probability;
-				return (d.documentScore / Document.maxDocumentScore) * documentCategory.probability;
+				return d.documentScore * documentCategory.probability;
 			}
 		}
 		throw new IllegalArgumentException("failed fetching document quality value: category[" + c.name
