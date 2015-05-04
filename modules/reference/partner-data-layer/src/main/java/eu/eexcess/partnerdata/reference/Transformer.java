@@ -317,6 +317,11 @@ public class Transformer implements ITransformer{
 				result.facets.language = proxyLanguage.toString();
 			}
 			
+			Literal proxyType = querySol.getLiteral("proxyType");
+			if (proxyType != null) {
+				result.facets.type = proxyType.toString();
+			}
+			
 			Literal proxyRights = querySol.getLiteral("proxyRights");
 			if (proxyRights != null) {
 				result.facets.license = proxyRights.toString();
@@ -429,7 +434,7 @@ public class Transformer implements ITransformer{
 		queryContent += getRDFPrefixes();
 		
 		
-		queryContent += "SELECT ?edmAggregatedCHO ?proxyIdentifier ?proxyTitle ?oreIsShownAt ?proxyDescription ?proxyCreator ?edmProviderName ?oreCollectionName ?proxyLanguage ?proxyRights ?date ?edmPreview ";
+		queryContent += "SELECT ?edmAggregatedCHO ?proxyIdentifier ?proxyTitle ?oreIsShownAt ?proxyDescription ?proxyCreator ?edmProviderName ?oreCollectionName ?proxyLanguage ?proxyType ?proxyRights ?date ?edmPreview ";
 		queryContent += "WHERE {  ";
 		queryContent += "?eexcessProxy rdf:type eexcess:Proxy . ";
 		queryContent += "?eexcessProxy ore:proxyIn ?oreAggregation . ";
@@ -442,6 +447,7 @@ public class Transformer implements ITransformer{
 		queryContent += "OPTIONAL { ?eexcessProxy dc:description ?proxyDescription . }  ";
 		queryContent += "OPTIONAL { ?eexcessProxy dcterms:date ?date . }  ";
 		queryContent += "OPTIONAL { ?eexcessProxy edm:language ?proxyLanguage . }  ";
+		queryContent += "OPTIONAL { ?eexcessProxy edm:type ?proxyType . }  ";
 		queryContent += "OPTIONAL { ?eexcessProxy edm:rights ?proxyRights . }  ";
 		queryContent += "OPTIONAL { ?oreAggregation edm:isShownAt ?oreIsShownAt . } "; 
 		queryContent += "OPTIONAL { ?oreAggregation edm:preview ?edmPreview . } "; 
