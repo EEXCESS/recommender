@@ -44,7 +44,7 @@ public class EnrichmentServicesProxy {
 		Set<EnrichmentResult> words = new HashSet<EnrichmentResult>();
 		
 		
-		FreeBase freebase = new FreeBase(this.partnerConfig);
+//		FreeBase freebase = new FreeBase(this.partnerConfig);
 		GeoNames geonames = new GeoNames(this.partnerConfig);
 
 		StringTokenizer st = new StringTokenizer(text);
@@ -77,7 +77,7 @@ public class EnrichmentServicesProxy {
 						}
 
 					}
-					
+					/*
 					ArrayList<FreebaseResult> responseFreebase = freebase.getEntitiesFreeBase(actSynonym, logger);
 					for (FreebaseResult freebaseResult : responseFreebase) {
 						EnrichmentResult enrichmentResult = new EnrichmentResult();
@@ -99,6 +99,7 @@ public class EnrichmentServicesProxy {
 							words.addAll(responseGeonames);
 						}
 					}
+					*/
 				}
 			}
 		}

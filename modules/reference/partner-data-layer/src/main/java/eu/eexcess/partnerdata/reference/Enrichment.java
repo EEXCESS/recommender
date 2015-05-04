@@ -221,49 +221,49 @@ public class Enrichment implements IEnrichment{
 		return input;
 	}
 
-		protected String createSPARQLqueryForToEnrichment() {
-			String queryContent = "";
-			queryContent += getRDFPrefixes();
-			
-			// ?eexcessObject
-			queryContent += "SELECT ?eexcessProxy ?oreAggregation ?edmAggregatedCHO  ?proxyIdentifier ?proxyTitle ?oreIsShownAt ?proxyDescription ?proxyCreator ?edmProviderName ?oreCollectionName ?proxyLanguage ?date ?edmPreview ";
-			queryContent += "WHERE {  ";
-			queryContent += "?eexcessProxy rdf:type eexcess:Proxy . ";
-			queryContent += "?eexcessProxy ore:proxyIn ?oreAggregation . ";
-			queryContent += "?oreAggregation rdf:type ore:Aggregation . ";
-			queryContent += "?oreAggregation edm:provider ?edmProvider . ";
-			queryContent += "?edmProvider foaf:name ?edmProviderName . ";
-			queryContent += "?oreAggregation edm:aggregatedCHO ?edmAggregatedCHO . ";
-			
-			queryContent += "OPTIONAL { ?eexcessProxy dc:identifier ?proxyIdentifier . } "; 
-			queryContent += "OPTIONAL { ?eexcessProxy dc:title ?proxyTitle . }  ";
-			queryContent += "OPTIONAL { ?eexcessProxy dc:description ?proxyDescription . }  ";
-			queryContent += "OPTIONAL { ?eexcessProxy dcterms:date ?date . }  ";
-			queryContent += "OPTIONAL { ?eexcessProxy edm:language ?proxyLanguage . }  ";
-			queryContent += "OPTIONAL { ?oreAggregation edm:isShownAt ?oreIsShownAt . } "; 
-			queryContent += "OPTIONAL { ?oreAggregation edm:preview ?edmPreview . } "; 
-			queryContent += "OPTIONAL { ?oreAggregation edm:collectionName ?oreCollectionName . } "; 
-			
-			queryContent += "OPTIONAL { ?eexcessProxy dc:creator ?proxyCreator . }  ";
-
-			queryContent += " } ";
-			
-			return queryContent;
-		}
-
+	protected String createSPARQLqueryForToEnrichment() {
+		String queryContent = "";
+		queryContent += getRDFPrefixes();
 		
-		private String getRDFPrefixes() {
-			String queryContent  = "";
-			queryContent += "PREFIX eexcess: <http://eexcess.eu/schema/> ";
-			queryContent += "PREFIX dcterms: <http://purl.org/dc/terms/> ";
-			queryContent += "PREFIX dc: <http://purl.org/dc/elements/1.1/> ";
-			queryContent += "PREFIX ore: <http://www.openarchives.org/ore/terms/> ";
-			queryContent += "PREFIX edm: <http://www.europeana.eu/schemas/edm/> ";
-			queryContent += "PREFIX foaf: <http://xmlns.com/foaf/0.1/> ";
-			queryContent += "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> ";
-			queryContent += "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#> ";
-			queryContent += "PREFIX dbpedia: <http://dbpedia.org/ontology/> ";
-			return queryContent;
-		}
+		// ?eexcessObject
+		queryContent += "SELECT ?eexcessProxy ?oreAggregation ?edmAggregatedCHO  ?proxyIdentifier ?proxyTitle ?oreIsShownAt ?proxyDescription ?proxyCreator ?edmProviderName ?oreCollectionName ?proxyLanguage ?date ?edmPreview ";
+		queryContent += "WHERE {  ";
+		queryContent += "?eexcessProxy rdf:type eexcess:Proxy . ";
+		queryContent += "?eexcessProxy ore:proxyIn ?oreAggregation . ";
+		queryContent += "?oreAggregation rdf:type ore:Aggregation . ";
+		queryContent += "?oreAggregation edm:provider ?edmProvider . ";
+		queryContent += "?edmProvider foaf:name ?edmProviderName . ";
+		queryContent += "?oreAggregation edm:aggregatedCHO ?edmAggregatedCHO . ";
+		
+		queryContent += "OPTIONAL { ?eexcessProxy dc:identifier ?proxyIdentifier . } "; 
+		queryContent += "OPTIONAL { ?eexcessProxy dc:title ?proxyTitle . }  ";
+		queryContent += "OPTIONAL { ?eexcessProxy dc:description ?proxyDescription . }  ";
+		queryContent += "OPTIONAL { ?eexcessProxy dcterms:date ?date . }  ";
+		queryContent += "OPTIONAL { ?eexcessProxy edm:language ?proxyLanguage . }  ";
+		queryContent += "OPTIONAL { ?oreAggregation edm:isShownAt ?oreIsShownAt . } "; 
+		queryContent += "OPTIONAL { ?oreAggregation edm:preview ?edmPreview . } "; 
+		queryContent += "OPTIONAL { ?oreAggregation edm:collectionName ?oreCollectionName . } "; 
+		
+		queryContent += "OPTIONAL { ?eexcessProxy dc:creator ?proxyCreator . }  ";
+
+		queryContent += " } ";
+		
+		return queryContent;
+	}
+
+	
+	private String getRDFPrefixes() {
+		String queryContent  = "";
+		queryContent += "PREFIX eexcess: <http://eexcess.eu/schema/> ";
+		queryContent += "PREFIX dcterms: <http://purl.org/dc/terms/> ";
+		queryContent += "PREFIX dc: <http://purl.org/dc/elements/1.1/> ";
+		queryContent += "PREFIX ore: <http://www.openarchives.org/ore/terms/> ";
+		queryContent += "PREFIX edm: <http://www.europeana.eu/schemas/edm/> ";
+		queryContent += "PREFIX foaf: <http://xmlns.com/foaf/0.1/> ";
+		queryContent += "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> ";
+		queryContent += "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#> ";
+		queryContent += "PREFIX dbpedia: <http://dbpedia.org/ontology/> ";
+		return queryContent;
+	}
 
 }
