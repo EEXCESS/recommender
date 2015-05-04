@@ -26,8 +26,10 @@ import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlElementWrapper;
 import javax.xml.bind.annotation.XmlRootElement;
+
 import org.apache.commons.math3.stat.descriptive.moment.StandardDeviation;
 import org.codehaus.jackson.annotate.JsonIgnoreProperties;
+import org.codehaus.jackson.map.annotate.JsonSerialize;
 
 import eu.eexcess.dataformats.result.ResultStats;
 
@@ -35,6 +37,7 @@ import eu.eexcess.dataformats.result.ResultStats;
 @XmlRootElement(name = "eexcess-partner-badge")
 @XmlAccessorType(XmlAccessType.FIELD)
 @JsonIgnoreProperties(ignoreUnknown = true)
+@JsonSerialize(include=JsonSerialize.Inclusion.NON_NULL) 
 public class PartnerBadge implements Serializable{
 	
 	private static final long serialVersionUID = -6411801334911587483L;
@@ -46,6 +49,8 @@ public class PartnerBadge implements Serializable{
     public String partnerKey;
 	@XmlElement(name="description")
     private String description;
+	@XmlElement(name="favIconURI")
+    private String favIconURI;
 	@XmlElement(name="partnerConnectorEndpoint")
     private String partnerConnectorEndpoint;
 	

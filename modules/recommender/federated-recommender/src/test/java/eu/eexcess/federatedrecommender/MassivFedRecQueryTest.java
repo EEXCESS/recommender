@@ -28,8 +28,8 @@ import eu.eexcess.dataformats.userprofile.SecureUserProfile;
 
 
 public class MassivFedRecQueryTest {
-	//private static final String searchRequest = "http://eexcess.joanneum.at/eexcess-federated-recommender-web-service-1.0-SNAPSHOT/recommender/recommend";
-	private static final String searchRequest = "http://localhost/eexcess-federated-recommender-web-service-1.0-SNAPSHOT/recommender/recommend";
+	private static final String searchRequest = "http://eexcess-dev.joanneum.at/eexcess-federated-recommender-web-service-1.0-SNAPSHOT/recommender/recommend";
+//	private static final String searchRequest = "http://localhost/eexcess-federated-recommender-web-service-1.0-SNAPSHOT/recommender/recommend";
 	private final ExecutorService threadPool;
 	public  MassivFedRecQueryTest() {
 		threadPool= Executors.newFixedThreadPool(30);
@@ -56,7 +56,7 @@ public class MassivFedRecQueryTest {
 
 				futures.put(string + i, future);
 				try {
-					Thread.sleep(300);
+					Thread.sleep(500);
 				} catch (InterruptedException e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();

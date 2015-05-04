@@ -30,7 +30,44 @@ import java.util.Set;
 import org.junit.Test;
 
 public class IASelectTest {
+	@Test
+	public void IASelect_newTestData_expectCorrectdocumentOrder() throws Exception {
 
+		Query q = new Query("foo");
+		q.addCategory(new Category("c1", 0.7));
+		q.addCategory(new Category("c2", 0.3));
+
+		SimpleDocumentQualityValueV V = new SimpleDocumentQualityValueV();
+		addNewDocumentValue("d1", "c1", 0.1, "c2", 0.3, V);
+		addNewDocumentValue("d2", "c1", 0.0, "c2", 0.3, V);
+		addNewDocumentValue("d3", "c1", 0.3, "c2", 0.0, V);
+		addNewDocumentValue("d4", "c1", 0.05, "c2", 0.0, V);
+		addNewDocumentValue("d5", "c1", 0.0, "c2", 0.1, V);
+	
+	
+
+		IASelect diversifyer = new IASelect();
+		Set<Document> Rq = R_5(q);
+
+	
+		for (Document d : diversifyer.iaSelect(5, q, Rq, V)) {
+			System.out.print(d + "\n ");
+		}
+		assert(true);
+	}
+	private Set<Document> R_5(Query q) {
+		Set<Document> selectedDocuments = new LinkedHashSet<Document>();
+		Set<Category> categories = new HashSet<Category>();
+		categories.add(new Category("c1"));
+		categories.add(new Category("c2"));
+		selectedDocuments.add(new Document("d1", categories));
+		selectedDocuments.add(new Document("d2", new Category("c1")));
+		selectedDocuments.add(new Document("d3", new Category("c1")));
+		selectedDocuments.add(new Document("d4", new Category("c1")));
+		selectedDocuments.add(new Document("d5", new Category("c1")));
+
+		return selectedDocuments;
+	}
 	@Test
 	public void IASelect_givenTestData_expectCorrectdocumentOrder() throws Exception {
 
@@ -83,6 +120,8 @@ public class IASelectTest {
 
 		return selectedDocuments;
 	}
+	
+
 
 	/**
 	 * add new document quality

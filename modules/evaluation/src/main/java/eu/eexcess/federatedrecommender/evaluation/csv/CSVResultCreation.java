@@ -19,22 +19,27 @@ GNU Affero General Public License for more details.
 
 You should have received a copy of the GNU Affero General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
-*/
+ */
 package eu.eexcess.federatedrecommender.evaluation.csv;
 
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.Writer;
 import java.util.ArrayList;
 import java.util.function.LongToDoubleFunction;
 
 import javax.ws.rs.core.MediaType;
 
+import org.codehaus.jackson.map.ObjectMapper;
+
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.stream.JsonReader;
+import com.google.gson.stream.JsonWriter;
 import com.sun.jersey.api.client.Client;
 import com.sun.jersey.api.client.WebResource;
 import com.sun.jersey.api.client.config.ClientConfig;
@@ -51,60 +56,65 @@ import eu.eexcess.dataformats.userprofile.SecureUserProfileEvaluation;
 import eu.eexcess.federatedrecommender.evaluation.evaluation.EvaluationQuery;
 
 public class CSVResultCreation {
-	final static String directoryPath = "/home/hziak/Datasets/EExcess/schloett-datacollection-785deb288e36/";
+	public final static String directoryPath = "/media/hziak/494c2958-e0d7-4ac1-8337-2c3240b5b5b2/home/hziak/Datasets/EExcess/schloett-datacollection-785deb288e36/";
 
-	private final  WebResource wRBlock;
-//	private final  WebResource wRDefault; 
+	private final WebResource wRBlock;
+
+	// private final WebResource wRDefault;
 	public CSVResultCreation() {
 		ClientConfig clientConfig = new DefaultClientConfig();
 		clientConfig.getFeatures().put(JSONConfiguration.FEATURE_POJO_MAPPING,
 				Boolean.TRUE);
 		Client client = Client.create(clientConfig);
-		wRBlock   = client.resource("http://eexcess-demo.know-center.tugraz.at/eexcess-federated-recommender-web-service-evaluation-1.0-SNAPSHOT/evaluation/blockEvaluation");
-//		wRDefault = client.resource("http://localhost:8099/excess-federated-recommender-web-service-evaluation-1.0-SNAPSHOT/evaluation/evaluation");
+		wRBlock = client
+				.resource("http://eexcess-demo.know-center.tugraz.at/eexcess-federated-recommender-web-service-evaluation-1.0-SNAPSHOT/evaluation/blockEvaluation");
+		// wRDefault =
+		// client.resource("http://localhost:8099/excess-federated-recommender-web-service-evaluation-1.0-SNAPSHOT/evaluation/evaluation");
 
 	}
+
 	public static void main(String args[]) {
 		CSVResultCreation creation = new CSVResultCreation();
-		EvaluationQueryList queries = creation.getEvaluationQueriesFromJson();
+		EvaluationQueryList queries = creation
+				.getEvaluationQueriesFromJson("finalSelectedQueries.json");
 
-
-		//creation.writeQueriesToQueryCSVFile(queries);
+		// creation.writeQueriesToQueryCSVFile(queries);
 
 		creation.createCSVResultsFile(queries);
 
 	}
-	private void createCSVResultsFile(
-			EvaluationQueryList queries) {
+
+	private void createCSVResultsFile(EvaluationQueryList queries) {
 		FileWriter ofrw = null;
 		try {
 			ofrw = new FileWriter(new File(directoryPath + "queryresult.csv"));
 		} catch (IOException e1) {
 			e1.printStackTrace();
 		}
-	
-		
-	
-			for (EvaluationQuery query : queries.getQueries()) {
-				 SecureUserProfileEvaluation secureUserProfileEvaluation=	convertEvalQueryToSecUserProfile(query);
-				String blockResultString = getQueryResultCSV(getwRBlock(), 
-						secureUserProfileEvaluation);
-				String defaultResultString = null; //Todo: Get default string from get queyr resultCSV
-				// defaultResultString = getQueryResultCSV(getwRDefault(),
-					//	secureUserProfileEvaluation);
-				String queryCSV =getQueryCSV(query);
-				String finalCSVString=null;
-				if(queryCSV!=null&&blockResultString!=null&&defaultResultString!=null)
-					finalCSVString= queryCSV+","+blockResultString+","+defaultResultString;
-				if(finalCSVString!=null)
-					try {
-						ofrw.write(finalCSVString);
-						System.out.println(finalCSVString);
-					} catch (IOException e) {
-						e.printStackTrace();
-					}
-			}
-	
+
+		for (EvaluationQuery query : queries.getQueries()) {
+			SecureUserProfileEvaluation secureUserProfileEvaluation = convertEvalQueryToSecUserProfile(query);
+			String blockResultString = getQueryResultCSV(getwRBlock(),
+					secureUserProfileEvaluation);
+			String defaultResultString = null; // Todo: Get default string from
+												// get queyr resultCSV
+			// defaultResultString = getQueryResultCSV(getwRDefault(),
+			// secureUserProfileEvaluation);
+			String queryCSV = getQueryCSV(query);
+			String finalCSVString = null;
+			if (queryCSV != null && blockResultString != null
+					&& defaultResultString != null)
+				finalCSVString = queryCSV + "," + blockResultString + ","
+						+ defaultResultString;
+			if (finalCSVString != null)
+				try {
+					ofrw.write(finalCSVString);
+					System.out.println(finalCSVString);
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+		}
+
 		try {
 			ofrw.flush();
 			ofrw.close();
@@ -112,12 +122,12 @@ public class CSVResultCreation {
 			e.printStackTrace();
 		}
 	}
-	private  EvaluationQueryList getEvaluationQueriesFromJson() {
+
+	public EvaluationQueryList getEvaluationQueriesFromJson(String fileName) {
 		JsonReader reader = null;
 		try {
 
-			reader = new JsonReader(new FileReader(directoryPath
-					+ "queriesEn-selected.json"));
+			reader = new JsonReader(new FileReader(directoryPath + fileName));
 		} catch (FileNotFoundException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -129,7 +139,7 @@ public class CSVResultCreation {
 		queries = gson.fromJson(reader, EvaluationQueryList.class);
 		return queries;
 	}
-	
+
 	private void writeQueriesToQueryCSVFile(EvaluationQueryList queries) {
 		FileWriter ofqw = null;
 		try {
@@ -155,7 +165,7 @@ public class CSVResultCreation {
 		}
 	}
 
-	private  String getQueryCSV(EvaluationQuery evalQueries) {
+	private String getQueryCSV(EvaluationQuery evalQueries) {
 		StringBuilder builder = new StringBuilder();
 		builder.append("\"");
 		builder.append(evalQueries.query.replaceAll(",|\"|\n|\r", ""));
@@ -164,26 +174,30 @@ public class CSVResultCreation {
 		builder.append("\"");
 		builder.append(evalQueries.description.replaceAll(",|\"|\n|\r", ""));
 		builder.append("\"");
-//		builder.append(System.lineSeparator());
+		// builder.append(System.lineSeparator());
 		return builder.toString();
 	}
 
-	private  SecureUserProfileEvaluation convertEvalQueryToSecUserProfile(
+	private SecureUserProfileEvaluation convertEvalQueryToSecUserProfile(
 			EvaluationQuery query) {
 		SecureUserProfileEvaluation profile = new SecureUserProfileEvaluation();
 		for (String queryPart : query.query.split(" ")) {
 			if (!queryPart.trim().isEmpty())
 				profile.contextKeywords.add(new ContextKeyword(queryPart, 0.5));
 		}
+		profile.queryID = "query"+profile.hashCode();
 		profile.interestList.addAll(query.interests);
-		PartnerBadge partner = new PartnerBadge();
-		partner.longTimeStats= new PartnerBadgeStats();
-		
-		partner.shortTimeStats = new PartnerBadgeStats();
-		partner.systemId="Mendeley";
-	//	profile.partnerList.add(partner );	
-		profile.picker="FiFoPicker";
-		profile.numResults=10;
+		PartnerBadge mendeley = new PartnerBadge();
+		mendeley.systemId = "Mendeley";
+		PartnerBadge europeana = new PartnerBadge();
+		europeana.systemId = "Europeana";
+		PartnerBadge wikipedia = new PartnerBadge();
+		wikipedia.systemId = "Wikipedia-Local";
+		profile.partnerList.add(wikipedia);
+//		profile.partnerList.add(mendeley);
+//		profile.partnerList.add(europeana);
+		profile.picker = "FiFoPicker";
+		profile.numResults = 10;
 		return profile;
 	}
 
@@ -191,48 +205,63 @@ public class CSVResultCreation {
 			SecureUserProfileEvaluation secureUserProfileEvaluation) {
 		StringBuilder builder = new StringBuilder();
 		EvaluationResultLists resp = null;
-		secureUserProfileEvaluation.numResults=10;
+		secureUserProfileEvaluation.numResults = 10;
 		resp = wresource.accept(MediaType.APPLICATION_JSON)
 				.type(MediaType.APPLICATION_JSON)
 				.post(EvaluationResultLists.class, secureUserProfileEvaluation);
-		
-		if(resp.results.get(0).results.size()<10){
-			System.out.println("query did not return enough results! 10!="+resp.results.get(0).results.size()+ " "+ secureUserProfileEvaluation.contextKeywords.toString());
-		return null;
+
+//		if (resp.results.get(0).results.size() < 10) {
+//			System.out.println("query did not return enough results! 10!="
+//					+ resp.results.get(0).results.size() + " "
+//					+ secureUserProfileEvaluation.contextKeywords.toString());
+//			return null;
+//		}
+	
+		ObjectMapper mapper = new ObjectMapper();
+
+		try {
+			File file = new File(directoryPath+"results/"+secureUserProfileEvaluation.queryID+".json");
+			mapper.defaultPrettyPrintingWriter().writeValue(file, resp);
+			System.out.println("Writing to file:" + file.getAbsolutePath());
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
 		}
-		
+//		JsonWriter writer= new JsonWriter(new FileWriter(directoryPath+""+secureUserProfileEvaluation.queryID+".json"));
+	
 		for (EvaluationResultList resultList : resp.results) {
-			System.out.println("RL "+resultList);
-			int counter=0;
+			// System.out.println("RL "+resultList);
+			int counter = 0;
 			for (Result result : resultList.results) {
-				
-				if(result.title!=null){
-				builder.append("\"");
-				
-				builder.append(result.title.replaceAll(",|\"|\n|\r", ""));
-				builder.append("\",");
-//				if (result.description != null)
-//					if (!result.description.isEmpty()) {
-//						builder.append(",");
-//						builder.append("\"");
-//						builder.append(result.description.replaceAll(
-//								",|\"|\n|\r", " "));
-//						builder.append("\"");
-//					}
-		//		builder.append(System.lineSeparator());
-				}else if( resp.results.get(0).results.size()-(++counter)<10)
+
+				if (result.title != null) {
+					builder.append("\"");
+
+					builder.append(result.title.replaceAll(",|\"|\n|\r", ""));
+					builder.append("\",");
+					// if (result.description != null)
+					// if (!result.description.isEmpty()) {
+					// builder.append(",");
+					// builder.append("\"");
+					// builder.append(result.description.replaceAll(
+					// ",|\"|\n|\r", " "));
+					// builder.append("\"");
+					// }
+					// builder.append(System.lineSeparator());
+				} else if (resp.results.get(0).results.size() - (++counter) < 10)
 					return null;
 			}
 			builder.append(",");
 		}
 		String string = builder.toString();
-		System.out.println("returned "+string);
+		System.out.println("returned " + string);
 		return string;
 	}
+
 	public WebResource getwRBlock() {
 		return wRBlock;
 	}
-//	public WebResource getwRDefault() {
-//		return wRDefault;
-//	}
+	// public WebResource getwRDefault() {
+	// return wRDefault;
+	// }
 }

@@ -16,6 +16,7 @@ limitations under the License.
  */
 package eu.eexcess.dataformats;
 
+import java.io.Serializable;
 import java.util.LinkedList;
 import java.util.Stack;
 
@@ -23,21 +24,24 @@ import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlTransient;
 
 import org.codehaus.jackson.annotate.JsonIgnoreProperties;
+import org.codehaus.jackson.map.annotate.JsonSerialize;
 
 import eu.eexcess.dataformats.result.ResultStats;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class PartnerBadgeStats {
+@JsonSerialize(include=JsonSerialize.Inclusion.NON_NULL)
+public class PartnerBadgeStats implements Serializable {
 	
-	
+	private static final long serialVersionUID = -227986625685031717L;
+
 	@XmlElement(name="requestCount")
-	public int requestCount=0;
+	public Integer requestCount=0;
 
 	@XmlElement(name="failedRequestCount")
-	public int failedRequestCount=0;
+	public Integer failedRequestCount=0;
 
 	@XmlElement(name="failedRequestTimeoutCount")
-	public int failedRequestTimeoutCount=0;
+	public Integer failedRequestTimeoutCount=0;
 	
 	@XmlElement(name="lastQueries")
 	public LinkedList<ResultStats> lastQueries = new LinkedList<ResultStats>();

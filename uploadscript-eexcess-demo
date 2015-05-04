@@ -1,7 +1,7 @@
 #sudo mv /var/lib/tomcat6/webapps/eexcess-federated-recommender-web-service-1.0-SNAPSHOT/FederatedRecommenderStats.db  /FederatedRecommenderStats.db      
 #sudo rm /var/lib/tomcat6/webapps/* -r
 #sudo /etc/init.d/tomcat6 stop 
-
+#
 #mvn clean
 mvn package  -Dmaven.test.skip=true   -o
 #mvn package  -Dmaven.test.skip=true   
@@ -14,6 +14,7 @@ sshpass -p "%139!~4GiaAl#GMVtMOg" scp modules/partners/zbw/target/eexcess-partne
 sshpass -p "%139!~4GiaAl#GMVtMOg" scp modules/partners/ddb/target/eexcess-partner-ddb-1.0-SNAPSHOT.war hziak@kcs-eexcess-demo:
 sshpass -p "%139!~4GiaAl#GMVtMOg" scp modules/partners/opensearch/target/eexcess-partner-reference-opensearch-1.0-SNAPSHOT.war hziak@kcs-eexcess-demo:
 sshpass -p "%139!~4GiaAl#GMVtMOg" scp modules/partners/wikipedialocal/target/eexcess-partner-reference-wikipedia-local-1.0-SNAPSHOT.war hziak@kcs-eexcess-demo:
+sshpass -p "%139!~4GiaAl#GMVtMOg" scp modules/partners/kimportal/target/eexcess-partner-kimportal-1.0-SNAPSHOT.war hziak@kcs-eexcess-demo:
 #sudo cp modules/partners/kimcollect/target/eexcess-partner-kim-collect-1.0-SNAPSHOT.war hziak@kcs-eexcess-demo:
 #sudo /etc/init.d/tomcat6 start 
 #sudo mkdir /var/lib/tomcat6/webapps/eexcess-federated-recommender-web-service-1.0-SNAPSHOT/
