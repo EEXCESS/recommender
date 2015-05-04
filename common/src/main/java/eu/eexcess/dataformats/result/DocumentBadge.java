@@ -7,7 +7,6 @@ import javax.xml.bind.annotation.XmlElement;
  * Document identifier for each document.
  * Can be returned as list to get the details of the documents back from the server.
  * @author hziak
- *
  */
 public class DocumentBadge implements Serializable {
 
