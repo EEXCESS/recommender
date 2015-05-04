@@ -33,7 +33,7 @@ public class DocumentBadge implements Serializable {
 	public String provider;
 	
 	@XmlElement(name = "detail")
-	public String detail = null;
+	public String details = null;
 	
 	@Override
 	public String toString() {

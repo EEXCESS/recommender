@@ -18,6 +18,7 @@ package eu.eexcess.partnerwebservice;
 
 import java.io.IOException;
 import java.util.Date;
+import java.util.List;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
@@ -27,8 +28,10 @@ import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
+
 import org.w3c.dom.Document;
 
+import eu.eexcess.dataformats.result.DocumentBadge;
 import eu.eexcess.dataformats.result.Result;
 import eu.eexcess.dataformats.result.ResultList;
 import eu.eexcess.dataformats.userprofile.ContextKeyword;
@@ -71,7 +74,20 @@ public class PartnerRecommenderService {
 			throws IOException {
 		return partnerRecommender.recommend(userProfile);
 	}
-
+	/**
+	 * gets details for the given list of documents
+	 * @param documents
+	 * @return
+	 * @throws IOException
+	 */
+	@POST
+	@Path("/getDetails")
+	@Consumes({MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})
+	@Produces({MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})
+	public List<DocumentBadge> getDetails(List<DocumentBadge> documents)
+			throws IOException {
+		return partnerRecommender.getDetails(documents);
+	}
 
 	
 	/**
@@ -124,19 +140,20 @@ public class PartnerRecommenderService {
 	@Produces({MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})
 	public Result debugDumpRecommendedItem() {
 		Result recommendedItem = new Result();
-
-		recommendedItem.id = "/15503/E627F23EF13FA8E6584AF8706A95DB85908413BE";
+		DocumentBadge db=new DocumentBadge();
+		db.id=  "/15503/E627F23EF13FA8E6584AF8706A95DB85908413BE";
+		db.uri = "http://www.europeana.eu/portal/record/15503/E627F23EF13FA8E6584AF8706A95DB85908413BE.html?utm_source=api&utm_medium=api&utm_campaign=uJrvLB6xd";
+		db.provider= "Europeana";
 		recommendedItem.title = "Gustaf Gründgens";
 		recommendedItem.previewImage = "http://europeanastatic.eu/api/image?uri=http%3A%2F%2Fbilddatenbank.khm.at%2Fimages%2F500%2FFS_PM133355alt.jpg&size=LARGE&type=IMAGE";
-		recommendedItem.uri = "http://www.europeana.eu/portal/record/15503/E627F23EF13FA8E6584AF8706A95DB85908413BE.html?utm_source=api&utm_medium=api&utm_campaign=uJrvLB6xd";
-		recommendedItem.creator = "anonym";
-		recommendedItem.collectionName = "15503_Ag_AT_Kulturpool_khm_fs";
-
-		recommendedItem.facets.provider = "Europeana";
-		recommendedItem.facets.language = "de";
-		recommendedItem.facets.type = "IMAGE";
-		recommendedItem.facets.year = "2004";
-
+		recommendedItem.documentBadge=db;
+		recommendedItem.date="1980";
+		recommendedItem.language="de";
+		recommendedItem.licence="Apache2";
+		recommendedItem.mediaType="image";
+		recommendedItem.description="Lorem Ipsum ....";
+		
+		
 		return recommendedItem;
 	}
 
@@ -150,27 +167,9 @@ public class PartnerRecommenderService {
 	@Path("/debugDumpResultList")
 	@Produces({MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})
 	public ResultList debugDumpResultList() {
-
-		Result result = new Result();
-
-		result.id = "/15503/E627F23EF13FA8E6584AF8706A95DB85908413BE";
-		result.title = "Gustaf Gründgens";
-
-		result.previewImage = "http://europeanastatic.eu/api/image?uri=http%3A%2F%2Fbilddatenbank.khm.at%2Fimages%2F500%2FFS_PM133355alt.jpg&size=LARGE&type=IMAGE";
-		result.uri = "http://www.europeana.eu/portal/record/15503/E627F23EF13FA8E6584AF8706A95DB85908413BE.html?utm_source=api&utm_medium=api&utm_campaign=uJrvLB6xd";
-
-		result.creator = "anonym";
-
-		result.collectionName = "15503_Ag_AT_Kulturpool_khm_fs";
-
-		result.facets.provider = "Europeana";
-		result.facets.type = "IMAGE";
-		result.facets.language = "de";
-		result.facets.year = "2004";
-
 		ResultList resultList = new ResultList();
 		resultList.totalResults = 1;
-		resultList.results.add(result);
+		resultList.results.add(debugDumpRecommendedItem());
 		return resultList;
 	}
 
