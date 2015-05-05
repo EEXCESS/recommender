@@ -366,12 +366,13 @@ public class FederatedRecommenderCore {
 			futures.put(partner, future);	
 		}
 		List<DocumentBadge> resultDocs = new ArrayList<DocumentBadge>();
+		long timeout = federatedRecConfiguration.partnersTimeout;
 		for (PartnerBadge partner : futures.keySet()) {
 			try {
-				resultDocs.addAll(futures.get(partner).get());
-			} catch (InterruptedException e) {
+				resultDocs.addAll(futures.get(partner).get(timeout,	TimeUnit.MILLISECONDS));
+			} catch ( TimeoutException e) {
 				logger.log(Level.WARNING,"Parnter "+partner.systemId +" timed out for document detail call",e);
-			} catch (ExecutionException e) {
+			} catch (ExecutionException|InterruptedException e) {
 				logger.log(Level.WARNING,"Can not get detail results from parnter:"+partner.systemId,e);
 			}
 		}
