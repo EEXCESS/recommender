@@ -17,14 +17,17 @@ limitations under the License.
 package eu.eexcess.federatedrecommenderservice;
 
 import com.sun.jersey.spi.resource.Singleton;
+
 import eu.eexcess.config.FederatedRecommenderConfiguration;
 import eu.eexcess.dataformats.PartnerBadge;
 import eu.eexcess.dataformats.PartnerBadgeList;
 import eu.eexcess.dataformats.RecommenderStats;
+import eu.eexcess.dataformats.result.DocumentBadge;
 import eu.eexcess.dataformats.result.ResultList;
 import eu.eexcess.dataformats.userprofile.*;
 import eu.eexcess.federatedrecommender.FederatedRecommenderCore;
 import eu.eexcess.federatedrecommender.utils.FederatedRecommenderException;
+
 import org.codehaus.jackson.JsonParseException;
 import org.codehaus.jackson.JsonParser;
 import org.codehaus.jackson.map.JsonMappingException;
@@ -34,6 +37,7 @@ import javax.annotation.PostConstruct;
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+
 import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
@@ -182,6 +186,21 @@ public class FederatedRecommenderService {
 		return resultList;
 	}
 
+	/**
+	 * gets details for the given list of documents
+	 * @param documents
+	 * @return
+	 * @throws IOException
+	 */
+	@POST
+	@Path("/getDetails")
+	@Consumes({MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})
+	@Produces({MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})
+	public List<DocumentBadge> getDetails(List<DocumentBadge> documents)
+			throws IOException {
+		return fRC.getDocumentDetails(documents);
+	}
+	
 	@GET
 	@Path("/getRegisteredPartners")
 	@Produces({ MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON })

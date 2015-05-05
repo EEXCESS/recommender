@@ -17,57 +17,54 @@ limitations under the License.
 package eu.eexcess.dataformats.result;
 
 import java.io.Serializable;
+import java.util.LinkedList;
 
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 
 /**
- * Basic information about a recommended item in EEXCESS data format.
- * 
- * @author plopez@know-center.at
+ * Object representation of the returned documents bei the federated recommender
+ * @author hziak@know-center.at
  */
 @XmlRootElement(name = "eexcess-result")
 public class Result implements Serializable {
 
 	private static final long serialVersionUID = -3095633945245542398L;
 
-	@XmlElement(name = "id")
-	public String id;
+    @XmlElement(name="resultGroup")
+    public LinkedList<Result> resultGroup = new LinkedList<Result>();
+	
+    @XmlElement(name="documentBadge")
+    public DocumentBadge documentBadge = new DocumentBadge();
 
+	@XmlElement(name = "mediaType")
+	public String mediaType;
+	
+	@XmlElement(name = "previewImage")
+	public String previewImage;
 	
 	@XmlElement(name = "title")
 	public String title;
 
-	@XmlElement(name = "previewImage")
-	public String previewImage;
-
-	@XmlElement(name = "uri")
-	public String uri;
-
-	@XmlElement(name = "eexcessURI")
-	public String eexcessURI;
-
-	@XmlElement(name = "creator")
-	public String creator;
-
 	@XmlElement(name = "description")
 	public String description;
 
-	@XmlElement(name = "collectionName")
-	public String collectionName;
-
-	/* Fields that should be returned as facets (provider, type, language, year) */
-
-	@XmlElement(name = "facets")
-	public ResultFacets facets = new ResultFacets();
-
-	@XmlElement(name = "rdf")
-	public Object rdf = null;
+	@XmlElement(name = "date")
+	public String date;
+	
+	@XmlElement(name = "language")
+	public String language;
+	
+	@XmlElement(name = "licence")
+	public String licence;
 
 	@Override
 	public String toString() {
-		return id + " " + title + " " + previewImage + " " + uri + " "
-				+ creator + " " + description + " " + collectionName;
+		return "Result [resultGroup=" + resultGroup + ", documentBadge="
+				+ documentBadge + ", mediaType=" + mediaType
+				+ ", previewImage=" + previewImage + ", title=" + title
+				+ ", description=" + description + ", date=" + date
+				+ ", language=" + language + ", licence=" + licence + "]";
 	}
 
 	@Override
@@ -75,19 +72,20 @@ public class Result implements Serializable {
 		final int prime = 31;
 		int result = 1;
 		result = prime * result
-				+ ((collectionName == null) ? 0 : collectionName.hashCode());
-		result = prime * result + ((creator == null) ? 0 : creator.hashCode());
-		result = prime * result
 				+ ((description == null) ? 0 : description.hashCode());
 		result = prime * result
-				+ ((eexcessURI == null) ? 0 : eexcessURI.hashCode());
-		result = prime * result + ((facets == null) ? 0 : facets.hashCode());
-		result = prime * result + ((id == null) ? 0 : id.hashCode());
+				+ ((documentBadge == null) ? 0 : documentBadge.hashCode());
+		result = prime * result
+				+ ((language == null) ? 0 : language.hashCode());
+		result = prime * result + ((licence == null) ? 0 : licence.hashCode());
+		result = prime * result
+				+ ((mediaType == null) ? 0 : mediaType.hashCode());
 		result = prime * result
 				+ ((previewImage == null) ? 0 : previewImage.hashCode());
-		result = prime * result + ((rdf == null) ? 0 : rdf.hashCode());
+		result = prime * result
+				+ ((resultGroup == null) ? 0 : resultGroup.hashCode());
 		result = prime * result + ((title == null) ? 0 : title.hashCode());
-		result = prime * result + ((uri == null) ? 0 : uri.hashCode());
+		result = prime * result + ((date == null) ? 0 : date.hashCode());
 		return result;
 	}
 
@@ -100,58 +98,58 @@ public class Result implements Serializable {
 		if (getClass() != obj.getClass())
 			return false;
 		Result other = (Result) obj;
-		if (collectionName == null) {
-			if (other.collectionName != null)
-				return false;
-		} else if (!collectionName.equals(other.collectionName))
-			return false;
-		if (creator == null) {
-			if (other.creator != null)
-				return false;
-		} else if (!creator.equals(other.creator))
-			return false;
 		if (description == null) {
 			if (other.description != null)
 				return false;
 		} else if (!description.equals(other.description))
 			return false;
-		if (eexcessURI == null) {
-			if (other.eexcessURI != null)
+		if (documentBadge == null) {
+			if (other.documentBadge != null)
 				return false;
-		} else if (!eexcessURI.equals(other.eexcessURI))
+		} else if (!documentBadge.equals(other.documentBadge))
 			return false;
-		if (facets == null) {
-			if (other.facets != null)
+		if (language == null) {
+			if (other.language != null)
 				return false;
-		} else if (!facets.equals(other.facets))
+		} else if (!language.equals(other.language))
 			return false;
-		if (id == null) {
-			if (other.id != null)
+		if (licence == null) {
+			if (other.licence != null)
 				return false;
-		} else if (!id.equals(other.id))
+		} else if (!licence.equals(other.licence))
+			return false;
+		if (mediaType == null) {
+			if (other.mediaType != null)
+				return false;
+		} else if (!mediaType.equals(other.mediaType))
 			return false;
 		if (previewImage == null) {
 			if (other.previewImage != null)
 				return false;
 		} else if (!previewImage.equals(other.previewImage))
 			return false;
-		if (rdf == null) {
-			if (other.rdf != null)
+		if (resultGroup == null) {
+			if (other.resultGroup != null)
 				return false;
-		} else if (!rdf.equals(other.rdf))
+		} else if (!resultGroup.equals(other.resultGroup))
 			return false;
 		if (title == null) {
 			if (other.title != null)
 				return false;
 		} else if (!title.equals(other.title))
 			return false;
-		if (uri == null) {
-			if (other.uri != null)
+		if (date == null) {
+			if (other.date != null)
 				return false;
-		} else if (!uri.equals(other.uri))
+		} else if (!date.equals(other.date))
 			return false;
 		return true;
 	}
+	
+	
+	
+
+	
 
 
 	

@@ -23,10 +23,12 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 package eu.eexcess.partnerrecommender.reference;
 
 import java.io.IOException;
+import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.w3c.dom.Document;
+
 
 //import com.hp.hpl.jena.ontology.OntModel;
 //import com.hp.hpl.jena.query.Query;
@@ -41,6 +43,7 @@ import org.w3c.dom.Document;
 //import com.hp.hpl.jena.rdf.model.Resource;
 //import com.hp.hpl.jena.rdf.model.Statement;
 import eu.eexcess.config.PartnerConfiguration;
+import eu.eexcess.dataformats.result.DocumentBadge;
 import eu.eexcess.dataformats.result.ResultList;
 import eu.eexcess.dataformats.result.ResultStats;
 import eu.eexcess.dataformats.userprofile.SecureUserProfile;
@@ -148,7 +151,17 @@ public class PartnerRecommender implements PartnerRecommenderApi {
             throw new IOException("Partner system is not working correctly ", e);
         }
     }
-    
+    /**
+     * Fetch the details of the documents.
+     * @returns list of DocumentBadges including the details
+     * @throws IOException
+     */
+	@Override
+	public List<DocumentBadge> getDetails(List<DocumentBadge> documents)
+			throws IOException {
+		partnerConnector.queryPartnerDetails(partnerConfiguration, documents, null); //TODO: do we need the logger?
+		return documents;
+	}
 
     /** 
      * Returns the EEXCESS user profile for a given user.
@@ -159,6 +172,10 @@ public class PartnerRecommender implements PartnerRecommenderApi {
     public Document getUserProfile(String userId) throws IOException {
         return null;
     }
+
+
+
+
 
 
 

@@ -176,9 +176,6 @@ public class FederatedRecommenderEvaluationCore   {
 			resultList = new EvaluationResultList(
 					fRCore.useOccurenceProbabilityPicker(userProfileEvaluation));
 		}
-		for (Result result : resultList.results) {
-			result.rdf = null;
-		}
 		resultList.provider = userProfile.decomposer + " partners:" + userProfile.picker
 				+ " expansion source partners:" + userProfile.queryExpansionSourcePartner;
 		return resultList;

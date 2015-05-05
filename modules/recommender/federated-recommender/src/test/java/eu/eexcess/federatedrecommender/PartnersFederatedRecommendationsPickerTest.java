@@ -5,6 +5,7 @@ import static org.junit.Assert.assertEquals;
 import org.junit.Test;
 
 import eu.eexcess.dataformats.PartnerBadge;
+import eu.eexcess.dataformats.result.DocumentBadge;
 import eu.eexcess.dataformats.result.Result;
 import eu.eexcess.dataformats.result.ResultList;
 import eu.eexcess.federatedrecommender.dataformats.PFRChronicle;
@@ -21,22 +22,23 @@ public class PartnersFederatedRecommendationsPickerTest {
 		PartnersFederatedRecommendations partnersFederatedRecommendations=new PartnersFederatedRecommendations();
 		PartnersFederatedRecommendations partnersFederatedRecommendations2=new PartnersFederatedRecommendations();
 		Result result1 = new Result();
-		result1.collectionName="a";
+		result1.documentBadge= new DocumentBadge("","","a");
 		result1.description=" description result1";
 		Result result2 = new Result();
-		result2.collectionName="b";
+		result2.documentBadge= new DocumentBadge("","","b");
 		result2.description=" description result2";
 		Result result3 = new Result();
-		result3.collectionName="c";
+		result3.documentBadge= new DocumentBadge("","","c");
 		result3.description=" description result3";
 		Result result5 = new Result();
-		result5.collectionName="d";
+		result5.documentBadge= new DocumentBadge("","","d");
 		result5.description=" description result5";
+		
 		Result result6 = new Result();
-		result6.collectionName="e";
+		result6.documentBadge= new DocumentBadge("","","e");
 		result6.description=" description result6";
 		Result result7 = new Result();
-		result7.collectionName="f";
+		result7.documentBadge= new DocumentBadge("","","f");
 		result7.description=" description result7";
 		
 		ResultList rList = new ResultList();
@@ -86,22 +88,23 @@ public class PartnersFederatedRecommendationsPickerTest {
 		PartnersFederatedRecommendations partnersFederatedRecommendations=new PartnersFederatedRecommendations();
 		PartnersFederatedRecommendations partnersFederatedRecommendations2=new PartnersFederatedRecommendations();
 		Result result1 = new Result();
-		result1.collectionName="a";
+		result1.documentBadge= new DocumentBadge("","","a");
 		result1.description=" description result1";
 		Result result2 = new Result();
-		result2.collectionName="b";
+		result2.documentBadge= new DocumentBadge("","","b");
 		result2.description=" description result2";
 		Result result3 = new Result();
-		result3.collectionName="c";
+		result3.documentBadge= new DocumentBadge("","","c");
 		result3.description=" description result3";
 		Result result5 = new Result();
-		result5.collectionName="d";
+		result5.documentBadge= new DocumentBadge("","","d");
 		result5.description=" description result5";
+		
 		Result result6 = new Result();
-		result6.collectionName="e";
+		result6.documentBadge= new DocumentBadge("","","e");
 		result6.description=" description result6";
 		Result result7 = new Result();
-		result7.collectionName="f";
+		result7.documentBadge= new DocumentBadge("","","f");
 		result7.description=" description result7";
 		
 		ResultList rList = new ResultList();

@@ -20,6 +20,7 @@ package eu.eexcess.wikipedialocal.recommender;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -42,6 +43,7 @@ import org.apache.lucene.util.Version;
 import org.w3c.dom.Document;
 
 import eu.eexcess.config.PartnerConfiguration;
+import eu.eexcess.dataformats.result.DocumentBadge;
 import eu.eexcess.dataformats.result.Result;
 import eu.eexcess.dataformats.result.ResultList;
 import eu.eexcess.dataformats.userprofile.SecureUserProfile;
@@ -99,6 +101,7 @@ public class PartnerConnector extends PartnerConnectorBase implements PartnerCon
 		TopDocs topDocs = indexSearcher.search(query, userProfile.numResults);
 		for (ScoreDoc sDocs : topDocs.scoreDocs) {
 			Result result = new Result();
+			result.documentBadge=new DocumentBadge("", "", PartnerConfigurationEnum.CONFIG.getBadge().systemId);
 			org.apache.lucene.document.Document  doc=indexSearcher.doc(sDocs.doc);
 			if(doc!=null){
 				IndexableField title = doc.getField("title");
@@ -108,8 +111,6 @@ public class PartnerConnector extends PartnerConnectorBase implements PartnerCon
 				if(sectionText!=null)
 					result.description= sectionText.stringValue();
 				if(category!=null){
-					result.facets.type=category.stringValue();
-					result.facets.provider="Category";
 				}
 				if(title!=null && sectionTitle!=null)				
 					result.title = title.stringValue() +" - " + sectionTitle.stringValue();
@@ -126,6 +127,15 @@ public class PartnerConnector extends PartnerConnectorBase implements PartnerCon
 	public Document queryPartner(PartnerConfiguration partnerConfiguration, SecureUserProfile userProfile, PartnerdataLogger logger)
 					throws IOException {
 
+		return null;
+	}
+
+	@Override
+	public Document queryPartnerDetails(
+			PartnerConfiguration partnerConfiguration,
+			List<DocumentBadge> documents, PartnerdataLogger logger)
+			throws IOException {
+		// TODO Auto-generated method stub
 		return null;
 	}
 

@@ -17,10 +17,12 @@ limitations under the License.
 package eu.eexcess.partnerrecommender.api;
 
 import java.io.IOException;
+import java.util.List;
 
 import org.w3c.dom.Document;
 
 import eu.eexcess.config.PartnerConfiguration;
+import eu.eexcess.dataformats.result.DocumentBadge;
 import eu.eexcess.dataformats.result.ResultList;
 import eu.eexcess.dataformats.userprofile.SecureUserProfile;
 import eu.eexcess.partnerdata.reference.PartnerdataLogger;
@@ -41,6 +43,16 @@ public interface PartnerConnectorApi {
 	     */
 	    public Document queryPartner(PartnerConfiguration partnerConfiguration, SecureUserProfile userProfile, PartnerdataLogger logger) throws IOException;
 
+	    /** 
+	     * Queries a partner
+	     * @param partnerConfiguration
+	     * @param userProfile
+	     * @return the search request as string
+	     * @throws IOException 
+	     */
+	    public Document queryPartnerDetails(PartnerConfiguration partnerConfiguration, List<DocumentBadge> documents,PartnerdataLogger logger) throws IOException;
+
+	    
 	    /**
 	     * Queries a partner and directly returns a ResultList instance.
 	     * @param partnerConfiguration
