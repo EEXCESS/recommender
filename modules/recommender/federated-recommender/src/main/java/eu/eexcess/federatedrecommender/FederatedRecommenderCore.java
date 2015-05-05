@@ -27,10 +27,13 @@ import java.io.IOException;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
@@ -48,6 +51,7 @@ import eu.eexcess.config.FederatedRecommenderConfiguration;
 import eu.eexcess.dataformats.PartnerBadge;
 import eu.eexcess.dataformats.PartnerBadgeStats;
 import eu.eexcess.dataformats.RecommenderStats;
+import eu.eexcess.dataformats.result.DocumentBadge;
 import eu.eexcess.dataformats.result.ResultList;
 import eu.eexcess.dataformats.result.ResultStats;
 import eu.eexcess.dataformats.userprofile.SecureUserProfile;
@@ -184,7 +188,7 @@ public class FederatedRecommenderCore {
 								if (client != null) {
 									try {
 										WebResource resource = client.resource(partner
-												.getPartnerConnectorEndpoint());
+												.getPartnerConnectorEndpoint()+"recommend");
 										resource.accept(MediaType.APPLICATION_JSON);
 										resultList = resource.post(
 												ResultList.class,
@@ -308,6 +312,88 @@ public class FederatedRecommenderCore {
 		return resultList;
 
 	}
+	/**
+	 * Distributes the documents to each of the 
+	 * @param documents
+	 * @return
+	 */
+	public List<DocumentBadge> getDocumentDetails(List<DocumentBadge> documents) {
+		Map<PartnerBadge, Future<List<DocumentBadge>>> futures = new HashMap<>();
+		for (PartnerBadge partner : getPartnerRegister().getPartners()) {
+			final Client tmpClient = partnerRegister.getClient(partner);
+			List<DocumentBadge> currentDocs=filterDocuments(documents, (DocumentBadge document)-> partner.systemId.equals(document.provider));
+			Future<List<DocumentBadge>> future = threadPool
+					.submit(new Callable< List<DocumentBadge>>() {
+						@Override
+						public List<DocumentBadge> call() throws Exception {
+
+							List<DocumentBadge> resultList = getDocsResult(
+									partner, tmpClient, currentDocs);
+							return resultList;
+						}
+
+						/**
+						 * trys to recieve the results from the partners
+						 * 
+						 * @param partner
+						 * @param currentDocs
+						 * @return
+						 */
+						private List<DocumentBadge> getDocsResult(
+								PartnerBadge partner, Client client,
+								List<DocumentBadge> currentDocs) {
+							List<DocumentBadge> docList = new ArrayList<>();
+							if (client != null) {
+								try {
+									WebResource resource = client.resource(partner
+											.getPartnerConnectorEndpoint()+"getDetails");
+									resource.accept(MediaType.APPLICATION_JSON);
+									docList = resource.post(
+											(new ArrayList<DocumentBadge>()).getClass(),
+											currentDocs);
+								} catch (Exception e) {
+									logger.log(Level.WARNING, "Partner: "
+											+ partner.getSystemId()
+											+ " is not working currently.",
+											e);
+									throw e;
+								}
+							}
+							client.destroy();
+							return docList;
+						}
+					});
+			futures.put(partner, future);	
+		}
+		List<DocumentBadge> resultDocs = new ArrayList<DocumentBadge>();
+		for (PartnerBadge partner : futures.keySet()) {
+			try {
+				resultDocs.addAll(futures.get(partner).get());
+			} catch (InterruptedException e) {
+				logger.log(Level.WARNING,"Parnter "+partner.systemId +" timed out for document detail call",e);
+			} catch (ExecutionException e) {
+				logger.log(Level.WARNING,"Can not get detail results from parnter:"+partner.systemId,e);
+			}
+		}
+		return resultDocs;
+	}
+
+	/**
+	 * Helper function to filter the documents
+	 * @param documents
+	 * @param predicate
+	 * @return
+	 */
+	private List<DocumentBadge> filterDocuments(List<DocumentBadge> documents, DocumentBadgePredicate predicate) {
+		List<DocumentBadge> result = new ArrayList<>();
+		for (DocumentBadge docs : documents){
+			if (predicate.test(docs)){
+				result.add(docs);
+			}
+		}
+		return result;
+	}
+
 
 	/**
 	 * calls the OccurrenceProbabilityPicker to aggregate results between the
@@ -430,7 +516,7 @@ public class FederatedRecommenderCore {
 		}
 		if (sUPDecomposer == null)
 			return (SecureUserProfile) userProfile;
-		return (SecureUserProfile) sUPDecomposer.decompose(userProfile);
+		return sUPDecomposer.decompose(userProfile);
 
 	}
 
@@ -686,5 +772,6 @@ public class FederatedRecommenderCore {
 		return "Partner Added";
 
 	}
+
 
 }
