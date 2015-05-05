@@ -29,7 +29,6 @@
     <module>modules/recommender/federated-recommender-web-service/</module>
     <module>modules/evaluation/</module>
     <module>experimental/misc/</module>
-    
   </modules>
   <developers>
     <developer>
