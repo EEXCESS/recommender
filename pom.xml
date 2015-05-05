@@ -9,7 +9,7 @@
   <description>Parent for all EEXCESS related projects.
   </description>
   <properties>
-      <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
   </properties>
   <modules>
     <module>common/</module>
