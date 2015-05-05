@@ -32,6 +32,7 @@ import org.json.JSONArray;
 import org.junit.Before;
 import org.junit.Test;
 
+import eu.eexcess.dataformats.result.DocumentBadge;
 import eu.eexcess.dataformats.result.Result;
 import eu.eexcess.dataformats.result.ResultList;
 import eu.eexcess.opensearch.opensearchDescriptionDocument.OpensearchDescription;
@@ -71,15 +72,14 @@ public class JsonOpensearchResponsebuilderTest {
 		Result r = new Result();
 		r.title = "short desc. 1";
 		r.description = "description 1";
-		r.uri = "link 1";
-		r.facets.provider = osDescriptionShortName;
+		r.documentBadge= new DocumentBadge("","link 1",osDescriptionShortName);
 		results.add(r);
 
 		r = new Result();
 		r.title = "short desc. 2";
 		r.description = "description 2";
-		r.uri = "link 2";
-		r.facets.provider = osDescriptionShortName;
+		r.documentBadge= new DocumentBadge("","link 2",osDescriptionShortName);
+		
 		results.add(r);
 
 		assertThat(osResponse.results, equalTo(results));
@@ -145,15 +145,13 @@ public class JsonOpensearchResponsebuilderTest {
 		Result r = new Result();
 		r.title = "short desc. 1";
 		r.description = "description 1";
-		r.uri = "link 1";
-		r.facets.provider = osDescriptionShortName;
+		r.documentBadge= new DocumentBadge("","link 1",osDescriptionShortName);
 		results.add(r);
 
 		r = new Result();
 		r.title = "short desc. 2";
 		r.description = "description 2";
-		r.uri = "link 2";
-		r.facets.provider = osDescriptionShortName;
+		r.documentBadge= new DocumentBadge("","link 2",osDescriptionShortName);
 		results.add(r);
 
 		assertThat(osResponse.results, equalTo(results));
@@ -189,7 +187,7 @@ public class JsonOpensearchResponsebuilderTest {
 		ResultList osResponse = builder.build();
 		assertNotNull(osResponse);
 
-		assertEquals(osDescriptionLongName, osResponse.results.get(0).facets.provider);
+		assertEquals(osDescriptionLongName, osResponse.results.get(0).documentBadge.provider);
 
 	}
 
@@ -206,7 +204,7 @@ public class JsonOpensearchResponsebuilderTest {
 		ResultList osResponse = builder.build();
 		assertNotNull(osResponse);
 
-		assertEquals(osDescriptionLongName, osResponse.results.get(0).facets.provider);
+		assertEquals(osDescriptionLongName, osResponse.results.get(0).documentBadge.provider);
 
 	}
 
@@ -223,7 +221,7 @@ public class JsonOpensearchResponsebuilderTest {
 		ResultList osResponse = builder.build();
 		assertNotNull(osResponse);
 
-		assertEquals(osDescriptionShortName, osResponse.results.get(0).facets.provider);
+		assertEquals(osDescriptionShortName, osResponse.results.get(0).documentBadge.provider);
 	}
 
 	@Test
@@ -239,7 +237,7 @@ public class JsonOpensearchResponsebuilderTest {
 		ResultList osResponse = builder.build();
 		assertNotNull(osResponse);
 
-		assertEquals(osDescriptionShortName, osResponse.results.get(0).facets.provider);
+		assertEquals(osDescriptionShortName, osResponse.results.get(0).documentBadge.provider);
 	}
 
 	@Test
@@ -256,6 +254,6 @@ public class JsonOpensearchResponsebuilderTest {
 		ResultList osResponse = builder.build();
 		assertNotNull(osResponse);
 
-		assertEquals("", osResponse.results.get(0).facets.provider);
+		assertEquals("", osResponse.results.get(0).documentBadge.provider);
 	}
 }

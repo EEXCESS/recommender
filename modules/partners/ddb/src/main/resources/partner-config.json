@@ -11,6 +11,6 @@
   "partnerDataRequestsTrace":"false",
   "enableEnriching":"false",
   "makeCleanupBeforeTransformation":"false",
-  "partnerConnectorEndpoint": "http://127.0.0.1/eexcess-partner-ddb-1.0-SNAPSHOT/partner/recommend",
+  "partnerConnectorEndpoint": "http://127.0.0.1/eexcess-partner-ddb-1.0-SNAPSHOT/partner/",
   "federatedRecommenderURI":"http://127.0.0.1/eexcess-federated-recommender-web-service-1.0-SNAPSHOT/recommender/"
 }

@@ -24,6 +24,7 @@ import java.util.logging.Logger;
 import org.json.JSONArray;
 import org.json.JSONException;
 
+import eu.eexcess.dataformats.result.DocumentBadge;
 import eu.eexcess.dataformats.result.Result;
 import eu.eexcess.dataformats.result.ResultList;
 import eu.eexcess.opensearch.opensearchDescriptionDocument.OpensearchDescription;
@@ -105,8 +106,7 @@ public class JsonOpensearchResultListBuilder implements OpensearchResultListBuil
 			Result resultEntry = new Result();
 			resultEntry.title = shortDescription;
 			resultEntry.description = description;
-			resultEntry.uri = url;
-			resultEntry.facets.provider = getProviderName();
+			resultEntry.documentBadge = new DocumentBadge("",url,getProviderName());
 			response.results.add(resultEntry);
 		}
 		response.totalResults = response.results.size();
