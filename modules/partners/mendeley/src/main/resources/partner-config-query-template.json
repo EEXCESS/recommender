@@ -5,7 +5,8 @@
   "queryTemplate": "${field}=${query}",
   "FIELD_MANUAL": "query",
   "FIELD_WHO": "author",
-  "FIELD_WHAT": ["title", "source"],
+  "FIELD_WHERE": "source",
+  "FIELD_WHAT": "title",
   "FIELD_WHEN_FROM": "min_year",
   "FIELD_WHEN_TO": "max_year",
   "phrase_wrap": "()"
