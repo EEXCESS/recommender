@@ -3,7 +3,7 @@
   "searchEndpoint": "https://kgapi.bl.ch/solr/kim-portal.objects/select/xml",
   "numResults": "rows=${numResults}",
   "queryTemplate": "q=${field}:${query}",
-  "FIELD_MANUAL": "_fulltext_",
+  "defaultQueryString": "q=_fulltext_:${query}",
   "FIELD_WHO": "personen",
   "FIELD_WHAT": ["objektbezeichnung",
     "alternative_objektbezeichnung",

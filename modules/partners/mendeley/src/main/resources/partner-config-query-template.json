@@ -3,7 +3,7 @@
   "searchEndpoint": "https://api.mendeley.com/search/catalog",
   "numResults": "limit=${numResults}",
   "queryTemplate": "${field}=${query}",
-  "FIELD_MANUAL": "query",
+  "defaultQueryString": "query=${query}",
   "FIELD_WHO": "author",
   "FIELD_WHERE": "source",
   "FIELD_WHAT": "title",
