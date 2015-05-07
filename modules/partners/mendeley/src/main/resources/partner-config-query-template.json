@@ -1,0 +1,12 @@
+{
+  "systemId": "Mendeley",
+  "searchEndpoint": "https://api.mendeley.com/search/catalog",
+  "numResults": "limit=${numResults}",
+  "queryTemplate": "${field}=${query}",
+  "FIELD_MANUAL": "query",
+  "FIELD_WHO": "author",
+  "FIELD_WHAT": ["title", "source"],
+  "FIELD_WHEN_FROM": "min_year",
+  "FIELD_WHEN_TO": "max_year",
+  "phrase_wrap": "()"
+}
