@@ -52,6 +52,7 @@ import eu.eexcess.dataformats.PartnerBadge;
 import eu.eexcess.dataformats.PartnerBadgeStats;
 import eu.eexcess.dataformats.RecommenderStats;
 import eu.eexcess.dataformats.result.DocumentBadge;
+import eu.eexcess.dataformats.result.DocumentBadgePredicate;
 import eu.eexcess.dataformats.result.ResultList;
 import eu.eexcess.dataformats.result.ResultStats;
 import eu.eexcess.dataformats.userprofile.SecureUserProfile;

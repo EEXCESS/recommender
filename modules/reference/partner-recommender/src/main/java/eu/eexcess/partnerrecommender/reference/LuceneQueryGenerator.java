@@ -57,14 +57,14 @@ public class LuceneQueryGenerator implements QueryGeneratorApi {
 				}
 			} else{
 				if(expansion){
-					result.append(") OR "+key.text+"");
+					result.append(") OR \""+key.text+"\"");
 					expansion=false;
 				}	
 				else
 					if(result.length()>0)
-						result.append(" OR "+key.text+"");
+						result.append(" OR \""+key.text+"\"");
 					else
-						result.append(""+key.text+"");
+						result.append("\""+key.text+"\"");
 			}
 		}
 		if(expansion)
