@@ -37,12 +37,14 @@ import org.apache.lucene.queryparser.classic.ParseException;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
+import eu.eexcess.config.FederatedRecommenderConfiguration;
 import eu.eexcess.dataformats.userprofile.ContextKeyword;
 import eu.eexcess.dataformats.userprofile.ExpansionType;
 import eu.eexcess.dataformats.userprofile.SecureUserProfile;
 import eu.eexcess.diversityasurement.evaluation.config.Settings;
 import eu.eexcess.diversityasurement.iaselect.Query;
 import eu.eexcess.federatedrecommender.decomposer.PseudoRelevanceWikipediaDecomposer;
+import eu.eexcess.federatedrecommender.utils.FederatedRecommenderException;
 import eu.eexcess.logger.PianoLogger;
 
 public class QueryExpansionEvaluation {
@@ -234,10 +236,11 @@ public class QueryExpansionEvaluation {
 	private static PseudoRelevanceWikipediaDecomposer newDecomposer() {
 		PseudoRelevanceWikipediaDecomposer sUPDecomposer = null;
 		try {
-			sUPDecomposer = new PseudoRelevanceWikipediaDecomposer(
-							Settings.RelevanceEvaluation.IOFiles.inLuceneIndexParentDirectory.getAbsolutePath(),
-							new String[] { "en" });
-		} catch (IOException e) {
+			sUPDecomposer = new PseudoRelevanceWikipediaDecomposer();
+			FederatedRecommenderConfiguration fedRecConfig = new FederatedRecommenderConfiguration();
+			fedRecConfig.wikipediaIndexDir = 	Settings.RelevanceEvaluation.IOFiles.inLuceneIndexParentDirectory.getAbsolutePath();
+			sUPDecomposer.setConfiguration(fedRecConfig );
+		} catch (IOException | FederatedRecommenderException e) {
 			logger.log(Level.SEVERE, "Wikipedia index directory could be wrong or not readable: "
 							+ Settings.RelevanceEvaluation.IOFiles.inLuceneIndexParentDirectory.getAbsolutePath(), e);
 		}
