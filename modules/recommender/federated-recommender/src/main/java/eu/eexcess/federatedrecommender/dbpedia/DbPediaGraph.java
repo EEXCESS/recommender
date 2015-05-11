@@ -51,10 +51,8 @@ public class DbPediaGraph {
     private ExecutorService threadPool;
 	
 	public DbPediaGraph(DbPediaSolrIndex dbPediaSolrIndex) {
-
 		 threadPool = Executors.newFixedThreadPool(10); //TODO: value in the config file
 			this.dbPediaIndex  =dbPediaSolrIndex;
-
 	}
 	
 	/**

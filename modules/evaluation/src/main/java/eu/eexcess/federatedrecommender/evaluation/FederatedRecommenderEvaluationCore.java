@@ -101,15 +101,15 @@ public class FederatedRecommenderEvaluationCore   {
 			switch (userProfile.sourceSelect) {
 			case "langModel":
 				userProfileEvaluation = (SecureUserProfileEvaluation) fRCore
-						.sourceSelectionLanguageModel(userProfile);
+						.sourceSelection(userProfile,"Model");
 				break;
 			case "wordnet":
 				userProfileEvaluation = (SecureUserProfileEvaluation) fRCore
-						.sourceSelectionWordnet(userProfile);
+						.sourceSelection(userProfile,"Model");
 				break;
 			case "wikipedia":
 				userProfileEvaluation = (SecureUserProfileEvaluation) fRCore
-						.sourceSelectionWikipedia(userProfile);
+						.sourceSelection(userProfile,"Model");
 				break;
 			default:
 				logger.log(Level.WARNING,
@@ -121,20 +121,21 @@ public class FederatedRecommenderEvaluationCore   {
 		if (userProfile.decomposer != null)
 			switch (userProfile.decomposer) {
 			case "wikipedia":
-				userProfileEvaluation = (SecureUserProfileEvaluation) fRCore
-						.generateFederatedRecommendationQEWikipedia(userProfile);
+				userProfileEvaluation = (SecureUserProfileEvaluation) fRCore.
+						addQueryExpansionTerms(userProfileEvaluation, "eu.eexcess.federatedrecommender.decomposer.PseudoRelevanceWikipediaDecomposer");
 				break;
 			case "source":
-				userProfileEvaluation = (SecureUserProfileEvaluation) fRCore
-						.generateFederatedRecommendationQESources(userProfile);
+				userProfileEvaluation = (SecureUserProfileEvaluation) fRCore.
+				addQueryExpansionTerms(userProfileEvaluation, "eu.eexcess.federatedrecommender.decomposer.PseudoRelevanceSourcesDecomposer");
+
 				break;
 			case "dbpediagraph":
-				userProfileEvaluation = (SecureUserProfileEvaluation) fRCore
-						.generateFederatedRecommendationDBPedia(userProfile);
+				userProfileEvaluation = (SecureUserProfileEvaluation) fRCore.
+				addQueryExpansionTerms(userProfileEvaluation, "eu.eexcess.federatedrecommender.decomposer.DBPediaDecomposer");
 				break;
 			case "serendipity":
-				userProfileEvaluation = (SecureUserProfileEvaluation) fRCore
-						.generateFederatedRecommendationSerendipity(userProfile);
+				userProfileEvaluation = (SecureUserProfileEvaluation) fRCore.
+				addQueryExpansionTerms(userProfileEvaluation, "eu.eexcess.federatedrecommender.decomposer.SerendiptiyDecomposer");
 				break;
 			default:
 				logger.log(Level.WARNING,
@@ -161,20 +162,25 @@ public class FederatedRecommenderEvaluationCore   {
 		// }
 		if (userProfile.picker == null)
 			userProfile.picker = "occurenceprobability";
+		try {
 		switch (userProfile.picker) {
 
 		case "simdiversification":
-			resultList = new EvaluationResultList(
-					fRCore.useSimDiversificationPicker(userProfileEvaluation));
+		
+				resultList = new EvaluationResultList(
+						fRCore.getAndAggregateResults(userProfileEvaluation, "eu.eexcess.federatedrecommender.picker.SimilarityDiversificationPicker"));
 			break;
 		case "FiFoPicker":
 			resultList = new EvaluationResultList(
-					fRCore.useFiFoPicker(userProfileEvaluation));
+					fRCore.getAndAggregateResults(userProfileEvaluation, "eu.eexcess.federatedrecommender.picker.FiFoPicker"));
 			break;
 		case "occurenceprobability":
 		default:
 			resultList = new EvaluationResultList(
-					fRCore.useOccurenceProbabilityPicker(userProfileEvaluation));
+					fRCore.getAndAggregateResults(userProfileEvaluation, "eu.eexcess.federatedrecommender.picker.OccurrenceProbabilityPicker"));
+		}
+		} catch (FederatedRecommenderException e) {
+			logger.log(Level.SEVERE,"Could get or aggregate results!",e);
 		}
 		resultList.provider = userProfile.decomposer + " partners:" + userProfile.picker
 				+ " expansion source partners:" + userProfile.queryExpansionSourcePartner;
@@ -435,7 +441,7 @@ public class FederatedRecommenderEvaluationCore   {
 	 */
 	public D3GraphDocument getGraph(SecureUserProfile userProfile) throws FederatedRecommenderException {
 		
-		DbPediaGraph dbPediaGraph = new DbPediaGraph(fRCore.getDbPediaSolrIndex());
+		DbPediaGraph dbPediaGraph = new DbPediaGraph(new DbPediaSolrIndex(federatedRecommenderConfiguration));
 		List<String> keynodes = new ArrayList<String>();
 		int hitsLimit = federatedRecommenderConfiguration.graphHitsLimitPerQuery;
 		int depthLimit = federatedRecommenderConfiguration.graphQueryDepthLimit;

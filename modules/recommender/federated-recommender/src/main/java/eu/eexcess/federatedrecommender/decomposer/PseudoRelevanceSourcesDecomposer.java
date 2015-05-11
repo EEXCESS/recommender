@@ -47,6 +47,7 @@ import org.apache.lucene.store.Directory;
 import org.apache.lucene.store.RAMDirectory;
 import org.apache.lucene.util.Version;
 
+import eu.eexcess.config.FederatedRecommenderConfiguration;
 import eu.eexcess.dataformats.PartnerBadge;
 import eu.eexcess.dataformats.result.Result;
 import eu.eexcess.dataformats.result.ResultList;
@@ -187,6 +188,11 @@ public class PseudoRelevanceSourcesDecomposer implements
 			doc.add(new Field("content", content, fieldType));
 			writer.addDocument(doc);
 		}
+	}
+	@Override
+	public void setConfiguration(FederatedRecommenderConfiguration fedRecConfig)
+			throws FederatedRecommenderException {
+		logger.log(Level.INFO,"Nothing todo with FederatedRecommenderConfiguration, not needed.");
 	}
 
 	

@@ -22,7 +22,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 package eu.eexcess.federatedrecommender.interfaces;
 
+import eu.eexcess.config.FederatedRecommenderConfiguration;
 import eu.eexcess.dataformats.userprofile.SecureUserProfile;
+import eu.eexcess.federatedrecommender.utils.FederatedRecommenderException;
 
 /**
  * SecureUserProfileDecomposer Interface
@@ -31,10 +33,17 @@ import eu.eexcess.dataformats.userprofile.SecureUserProfile;
  *
  */
 public interface SecureUserProfileDecomposer <T extends SecureUserProfile, E extends SecureUserProfile> {
+	
 	/**
 	 * @param inputSecureUserProfile
 	 * @return
 	 */
 	public  T decompose(E inputSecureUserProfile);
-
+	
+	/**
+	 * @param FederatedRecommenderConfiguration;
+	 * @return
+	 * @throws FederatedRecommenderException 
+	 */
+	public void setConfiguration(FederatedRecommenderConfiguration fedRecConfig) throws FederatedRecommenderException;
 }
