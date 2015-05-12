@@ -29,13 +29,13 @@ public class OrQueryGeneratorTest {
 			ContextKeyword keyword4 = new ContextKeyword("k4");
 			userProfile.contextKeywords.add(keyword4);
 			ContextKeyword keyword5 = new ContextKeyword("k5");
-			keyword5.expansion=ExpansionType.EXPANSION;
+			keyword5.expansion=ExpansionType.PSEUDORELEVANCEWP;
 			userProfile.contextKeywords.add(keyword5);
 			ContextKeyword keyword6 = new ContextKeyword("k6");
-			keyword6.expansion=ExpansionType.EXPANSION;
+			keyword6.expansion=ExpansionType.PSEUDORELEVANCEWP;
 			userProfile.contextKeywords.add(keyword6);
 			ContextKeyword keyword7 = new ContextKeyword("k7");
-			keyword7.expansion=ExpansionType.EXPANSION;
+			keyword7.expansion=ExpansionType.PSEUDORELEVANCEWP;
 			userProfile.contextKeywords.add(keyword7);
 			String result =gen.toQuery(userProfile );
 			System.out.println(result);

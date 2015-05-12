@@ -40,12 +40,12 @@ public class LuceneQueryGenerator implements QueryGeneratorApi {
 		boolean expansion= false;
 		for (ContextKeyword key : userProfile.contextKeywords) {
 			
-			if(key.expansion!=null && (key.expansion ==ExpansionType.EXPANSION||key.expansion ==ExpansionType.SERENDIPITY))
+			if(key.expansion!=null && (key.expansion ==ExpansionType.PSEUDORELEVANCEWP||key.expansion ==ExpansionType.SERENDIPITY))
 			{
 				if(!expansion){
 					expansion=true;
 					if(result.length()>0){
-						if(key.expansion==ExpansionType.EXPANSION)
+						if(key.expansion==ExpansionType.PSEUDORELEVANCEWP)
 							result.append(" OR (\""+key.text+"\"");
 						else
 							result.append(" AND (\""+key.text+"\"");
