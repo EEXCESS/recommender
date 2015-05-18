@@ -72,7 +72,21 @@ public class KIMPortalPartnerRecommenderTest {
         assertEquals(12, resultList.results.size());
 
 	}
+	
+	@Test
+	public void singleQueryHuelftenschanz() {
+		ArrayList<String> keywords = new ArrayList<String>();
+		keywords.add("Hülftenschanz");
+        ResultList resultList = PartnerRecommenderTestHelper.getRecommendations("eexcess-partner-kimportal-1.0-SNAPSHOT",	
+        		port, 
+        		PartnerRecommenderTestHelper.createParamsForPartnerRecommender(20,keywords ));
+	    
+        assertNotNull(resultList);
+        assertTrue(resultList.results.size() > 0 );
+        assertEquals(12, resultList.results.size());
 
+	}
+	
 	@Test
 	public void singleQueryBierglasOneResult() {
 		ArrayList<String> keywords = new ArrayList<String>();

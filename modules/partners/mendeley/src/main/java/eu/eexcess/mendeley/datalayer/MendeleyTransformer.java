@@ -35,7 +35,7 @@ public class MendeleyTransformer extends Transformer implements ITransformer{
 
 	@Override
 	protected Result postProcessResult(Document orgPartnerResult, Result result, QuerySolution querySol) {
-		result.facets.license = "https://creativecommons.org/licenses/by/3.0/legalcode";
+		result.licence = "https://creativecommons.org/licenses/by/3.0/legalcode";
 		return result;
 	}
 

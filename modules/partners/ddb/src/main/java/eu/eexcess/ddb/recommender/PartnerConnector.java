@@ -22,6 +22,7 @@ import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -32,6 +33,7 @@ import org.apache.commons.lang.text.StrSubstitutor;
 import org.w3c.dom.Document;
 
 import eu.eexcess.config.PartnerConfiguration;
+import eu.eexcess.dataformats.result.DocumentBadge;
 import eu.eexcess.dataformats.result.ResultList;
 import eu.eexcess.dataformats.userprofile.SecureUserProfile;
 import eu.eexcess.partnerdata.api.EEXCESSDataTransformationException;
@@ -282,6 +284,17 @@ public class PartnerConnector extends PartnerConnectorBase implements PartnerCon
 		isr.close();
 		conn.disconnect();
 		return sb.toString();
+	}
+
+
+
+	@Override
+	public Document queryPartnerDetails(
+			PartnerConfiguration partnerConfiguration,
+			List<DocumentBadge> documents, PartnerdataLogger logger)
+			throws IOException {
+		// TODO Auto-generated method stub
+		return null;
 	}
 }
 

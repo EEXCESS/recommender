@@ -39,7 +39,7 @@ public class EuropeanaTransformer extends Transformer implements ITransformer{
 	
 	@Override
 	protected Result postProcessResult(Document orgPartnerResult, Result result, QuerySolution querySol) {
-		result.uri = "http://europeana.eu/resolve/record"+ result.id;
+		result.documentBadge.uri = "http://europeana.eu/resolve/record"+ result.documentBadge.id;
 		return result;
 	}
 

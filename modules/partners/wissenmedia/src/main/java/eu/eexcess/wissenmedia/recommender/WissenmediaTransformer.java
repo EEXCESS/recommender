@@ -35,7 +35,7 @@ public class WissenmediaTransformer extends Transformer{
 	
 	@Override
 	protected Result postProcessResult(Document orgPartnerResult, Result result, QuerySolution querySol) {
-		result.uri = result.uri + "&v=eexcess&w=EEXCESS";
+		result.documentBadge.uri = result.documentBadge.uri + "&v=eexcess&w=EEXCESS";
 		if (result.previewImage != null && !result.previewImage.isEmpty())
 			result.previewImage = result.previewImage.replace("&amp;", "&");
 		return result;

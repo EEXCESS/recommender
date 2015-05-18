@@ -106,7 +106,7 @@ public class Enrichment implements IEnrichment{
 			
 			Literal proxyIdentifier = querySol.getLiteral("proxyIdentifier");
 			if (proxyIdentifier != null)
-				result.id = proxyIdentifier.toString();
+				result.documentBadge.id = proxyIdentifier.toString();
 
 			Literal proxyTitle = querySol.getLiteral("proxyTitle");
 			if (proxyTitle != null) {
@@ -123,36 +123,33 @@ public class Enrichment implements IEnrichment{
 						"http://purl.org/dc/elements/1.1/subject", logger);
 
 			}
+			/*
 			Literal proxyCreator = querySol.getLiteral("proxyCreator");
 			if (proxyCreator != null)
 				result.creator = proxyCreator.toString();
-					
+				*/	
 			Literal dctermsDate = querySol.getLiteral("date");
 			if (dctermsDate != null)
-				result.facets.year = dctermsDate.toString();
+				result.date = dctermsDate.toString();
 	
 			Literal edmProviderName = querySol.getLiteral("edmProviderName");
 			if (edmProviderName != null) {
-				result.facets.provider = edmProviderName.toString();
+				result.documentBadge.provider = edmProviderName.toString();
 			}
 			
 			Literal proxyLanguage = querySol.getLiteral("proxyLanguage");
 			if (proxyLanguage != null) {
-				result.facets.language = proxyLanguage.toString();
+				result.language = proxyLanguage.toString();
 			}
 
 			Resource oreIsShownAt = querySol.getResource("oreIsShownAt");
 			if (oreIsShownAt != null) {
-				result.uri = oreIsShownAt.toString();
+				result.documentBadge.uri = oreIsShownAt.toString();
 			}
 			Resource edmPreview = querySol.getResource("edmPreview");
 			if (edmPreview != null) {
 				if (!edmPreview.toString().equalsIgnoreCase("http://www.europeana.eu/edm/"))
 					result.previewImage = edmPreview.toString();
-			}
-			Literal oreCollectionName = querySol.getLiteral("oreCollectionName");
-			if (oreCollectionName != null) {
-				result.collectionName = oreCollectionName.toString();
 			}
 		}
 

@@ -23,7 +23,9 @@ import com.sun.jersey.api.client.config.ClientConfig;
 import com.sun.jersey.api.client.config.DefaultClientConfig;
 import com.sun.jersey.api.client.filter.LoggingFilter;
 import com.sun.jersey.api.json.JSONConfiguration;
+
 import eu.eexcess.config.PartnerConfiguration;
+import eu.eexcess.dataformats.result.DocumentBadge;
 import eu.eexcess.dataformats.result.ResultList;
 import eu.eexcess.dataformats.userprofile.SecureUserProfile;
 import eu.eexcess.mendeley.recommender.dataformat.MendeleyAuthors;
@@ -37,6 +39,7 @@ import eu.eexcess.partnerrecommender.reference.PartnerConnectorBase;
 import eu.eexcess.utils.URLParamEncoder;
 import net.sf.json.JSONObject;
 import net.sf.json.JSONSerializer;
+
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.lang.CharEncoding;
 import org.apache.commons.lang.text.StrSubstitutor;
@@ -44,6 +47,7 @@ import org.codehaus.jackson.map.ObjectMapper;
 import org.w3c.dom.Document;
 
 import javax.ws.rs.core.MediaType;
+
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.util.Arrays;
@@ -192,5 +196,14 @@ public class PartnerConnector extends PartnerConnectorBase implements PartnerCon
             }
 		
 		return authorsString;
+	}
+
+	@Override
+	public Document queryPartnerDetails(
+			PartnerConfiguration partnerConfiguration,
+			List<DocumentBadge> documents, PartnerdataLogger logger)
+			throws IOException {
+		// TODO Auto-generated method stub
+		return null;
 	}
 }

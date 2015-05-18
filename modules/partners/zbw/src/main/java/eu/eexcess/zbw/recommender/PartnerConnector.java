@@ -20,6 +20,7 @@ import java.io.IOException;
 import java.io.StringReader;
 import java.net.URLEncoder;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -45,6 +46,7 @@ import com.sun.jersey.api.client.WebResource;
 import com.sun.jersey.api.client.WebResource.Builder;
 
 import eu.eexcess.config.PartnerConfiguration;
+import eu.eexcess.dataformats.result.DocumentBadge;
 import eu.eexcess.dataformats.result.ResultList;
 import eu.eexcess.dataformats.userprofile.SecureUserProfile;
 import eu.eexcess.partnerdata.reference.PartnerdataLogger;
@@ -187,6 +189,14 @@ public class PartnerConnector implements PartnerConnectorApi {
 			e1.printStackTrace();
 		}
 		return "";
+	}
+	@Override
+	public Document queryPartnerDetails(
+			PartnerConfiguration partnerConfiguration,
+			List<DocumentBadge> documents, PartnerdataLogger logger)
+			throws IOException {
+		// TODO Auto-generated method stub
+		return null;
 	}
 
 }

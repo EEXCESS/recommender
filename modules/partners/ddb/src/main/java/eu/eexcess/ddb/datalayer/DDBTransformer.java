@@ -31,9 +31,8 @@ public class DDBTransformer extends Transformer implements ITransformer{
 	
 	@Override
 	protected Result postProcessResult(Document orgPartnerResult, Result result, QuerySolution querySol) {
-		result.uri = "https://www.deutsche-digitale-bibliothek.de/item/"+ result.id;
-		if (result.facets != null)
-			result.facets.license = "https://creativecommons.org/publicdomain/zero/1.0/";
+		result.documentBadge.uri = "https://www.deutsche-digitale-bibliothek.de/item/"+ result.documentBadge.id;
+		result.licence = "https://creativecommons.org/publicdomain/zero/1.0/";
 		return result;
 	}
 

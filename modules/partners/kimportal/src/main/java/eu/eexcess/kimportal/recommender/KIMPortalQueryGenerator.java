@@ -16,23 +16,28 @@ limitations under the License.
  */
 package eu.eexcess.kimportal.recommender;
 
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
+
 import eu.eexcess.dataformats.userprofile.ContextKeyword;
 import eu.eexcess.dataformats.userprofile.SecureUserProfile;
 import eu.eexcess.partnerrecommender.api.QueryGeneratorApi;
-import eu.eexcess.utils.URLParamEncoder;
 
 public class KIMPortalQueryGenerator implements QueryGeneratorApi {
 
-	
     @Override
     public String toQuery(SecureUserProfile userProfile) {
         StringBuilder builder = new StringBuilder();
         for (ContextKeyword context : userProfile.contextKeywords) {
             if (builder.length() > 0) { builder.append("%20OR%20"); }
-            builder.append(URLParamEncoder.encode(context.text));
+            try {
+				builder.append(URLEncoder.encode(context.text,"UTF-8"));
+			} catch (UnsupportedEncodingException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
         }
         return  "("+builder.toString()+")";
-        
     }
 
 }

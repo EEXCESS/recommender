@@ -61,7 +61,7 @@ import eu.eexcess.partnerdata.api.ITransformer;
 
 public class Transformer implements ITransformer{
 
-	private static final String EEXCESS_FACETS_VALUE_DEFAULT_LICENSE = "restricted";
+	private static final String EEXCESS_FACETS_VALUE_DEFAULT_LICENCE = "restricted";
 	private static final String EEXCESS_FACETS_VALUE_UNKNOWN = "unknown";
 	protected PartnerConfiguration partnerConfig;
 	protected String resultListTransformationFilename;
@@ -281,15 +281,17 @@ public class Transformer implements ITransformer{
 //			Resource proxyUri = querySol.getResource("proxyUri");
 			
 			Result result = new Result();
-			
+
+			/*
 			Resource edmAggregatedCHO = querySol.getResource("edmAggregatedCHO");
 			if (edmAggregatedCHO != null) {
 				result.eexcessURI = edmAggregatedCHO.toString();
 			}
+			*/
 			// TODO if result.eexcessURI is empty skip this entry
 			Literal proxyIdentifier = querySol.getLiteral("proxyIdentifier");
 			if (proxyIdentifier != null)
-				result.id = proxyIdentifier.toString();
+				result.documentBadge.id = proxyIdentifier.toString();
 
 			Literal proxyTitle = querySol.getLiteral("proxyTitle");
 			if (proxyTitle != null)
@@ -299,39 +301,40 @@ public class Transformer implements ITransformer{
 			if (proxyDescription != null)
 				result.description = proxyDescription.toString();
 
+			/*
 			Literal proxyCreator = querySol.getLiteral("proxyCreator");
 			if (proxyCreator != null)
 				result.creator = proxyCreator.toString();
-					
+				*/	
 			Literal dctermsDate = querySol.getLiteral("date");
 			if (dctermsDate != null)
-				result.facets.year = dctermsDate.toString();
+				result.date = dctermsDate.toString();
 	
 			Literal edmProviderName = querySol.getLiteral("edmProviderName");
 			if (edmProviderName != null) {
-				result.facets.provider = edmProviderName.toString();
+				result.documentBadge.provider = edmProviderName.toString();
 			}
 			
 			Literal proxyLanguage = querySol.getLiteral("proxyLanguage");
 			if (proxyLanguage != null) {
-				result.facets.language = proxyLanguage.toString();
+				result.language = proxyLanguage.toString();
 			}
 			
 			Literal proxyType = querySol.getLiteral("proxyType");
 			if (proxyType != null) {
-				result.facets.type = proxyType.toString();
+				result.mediaType = proxyType.toString();
 			}
 			
 			Literal proxyRights = querySol.getLiteral("proxyRights");
 			if (proxyRights != null) {
-				result.facets.license = proxyRights.toString();
+				result.licence = proxyRights.toString();
 			} else {
-				result.facets.license = EEXCESS_FACETS_VALUE_DEFAULT_LICENSE;
+				result.licence = EEXCESS_FACETS_VALUE_DEFAULT_LICENCE;
 			}
 			
 			Resource oreIsShownAt = querySol.getResource("oreIsShownAt");
 			if (oreIsShownAt != null) {
-				result.uri = oreIsShownAt.toString();
+				result.documentBadge.uri = oreIsShownAt.toString();
 			}
 			Resource edmPreview = querySol.getResource("edmPreview");
 			if (edmPreview != null) {
@@ -339,41 +342,41 @@ public class Transformer implements ITransformer{
 				if (!edmPreview.toString().equalsIgnoreCase(xmlBase))
 					result.previewImage = edmPreview.toString();
 			}
-			Literal oreCollectionName = querySol.getLiteral("oreCollectionName");
-			if (oreCollectionName != null) {
-				result.collectionName = oreCollectionName.toString();
-			}
+//			Literal oreCollectionName = querySol.getLiteral("oreCollectionName");
+//			if (oreCollectionName != null) {
+//				result.collectionName = oreCollectionName.toString();
+//			}
 			//result.rdf = extractRDFForOneObject(result, inputString);
 			// fillup empty values in the facets
-			if (result.facets.language == null ||
-				result.facets.language.isEmpty() ||
-				result.facets.language.trim().isEmpty() )
+			if (result.language == null ||
+				result.language.isEmpty() ||
+				result.language.trim().isEmpty() )
 			{
-				result.facets.language=EEXCESS_FACETS_VALUE_UNKNOWN;
+				result.language=EEXCESS_FACETS_VALUE_UNKNOWN;
 			}
-			if (result.facets.license == null ||
-					result.facets.license.isEmpty() ||
-					result.facets.license.trim().isEmpty() )
+			if (result.licence == null ||
+					result.licence.isEmpty() ||
+					result.licence.trim().isEmpty() )
 			{
-					result.facets.license=EEXCESS_FACETS_VALUE_UNKNOWN;
+					result.licence=EEXCESS_FACETS_VALUE_UNKNOWN;
 			}
-			if (result.facets.provider == null ||
-					result.facets.provider.isEmpty() ||
-					result.facets.provider.trim().isEmpty() )
+			if (result.documentBadge.provider == null ||
+					result.documentBadge.provider.isEmpty() ||
+					result.documentBadge.provider.trim().isEmpty() )
 			{
-					result.facets.provider=EEXCESS_FACETS_VALUE_UNKNOWN;
+					result.documentBadge.provider=EEXCESS_FACETS_VALUE_UNKNOWN;
 			}
-			if (result.facets.type == null ||
-					result.facets.type.isEmpty() ||
-					result.facets.type.trim().isEmpty() )
+			if (result.mediaType == null ||
+					result.mediaType.isEmpty() ||
+					result.mediaType.trim().isEmpty() )
 			{
-					result.facets.type=EEXCESS_FACETS_VALUE_UNKNOWN;
+					result.mediaType=EEXCESS_FACETS_VALUE_UNKNOWN;
 			}
-			if (result.facets.year == null ||
-					result.facets.year.isEmpty() ||
-					result.facets.year.trim().isEmpty() )
+			if (result.date == null ||
+					result.date.isEmpty() ||
+					result.date.trim().isEmpty() )
 			{
-					result.facets.year=EEXCESS_FACETS_VALUE_UNKNOWN;
+					result.date=EEXCESS_FACETS_VALUE_UNKNOWN;
 			}
 
 			
@@ -394,7 +397,8 @@ public class Transformer implements ITransformer{
 		String queryString = getRDFPrefixes() + 
 				"DESCRIBE ?x " + 
 				"WHERE {"
-				+ "{?x ?y <" + result.eexcessURI + "> }" + 
+//				+ "{?x ?y <" + result.eexcessURI + "> }" + 
+				+ "{?x ?y <" + result.documentBadge.uri + "> }" + 
 				" }" ;
 
 		com.hp.hpl.jena.query.Query query = QueryFactory.create(queryString);
