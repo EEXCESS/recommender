@@ -18,7 +18,6 @@ limitations under the License.
 package eu.eexcess.partnerrecommender.test;
 
 import java.io.StringReader;
-import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 
 import javax.xml.bind.JAXBContext;
@@ -40,19 +39,14 @@ public class PartnerRecommenderTestHelper {
 	static public StringEntity createParamsForPartnerRecommender(int records, ArrayList<String> keywords)
 	{
 		StringEntity params = null;
-		try {
-			String userprofile = "<eexcess-secure-user-profile numResults=\""+
-					records+
-					"\" firstName=\"Hugo\" lastName=\"Boss\" birthDate=\"2013-10-14T05:06:44.550+02:00\">   <contextKeywords>      ";
-			for (int i = 0; i < keywords.size(); i++) {
-				userprofile +="<contextKeywords><text>"+keywords.get(i)+"</text></contextKeywords>";
-			}
-			userprofile +=" </contextKeywords></eexcess-secure-user-profile>";
-			params = new StringEntity(userprofile);
-		} catch (UnsupportedEncodingException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+		String userprofile = "<eexcess-secure-user-profile numResults=\""+
+				records+
+				"\" firstName=\"Hugo\" lastName=\"Boss\" birthDate=\"2013-10-14T05:06:44.550+02:00\">   <contextKeywords>      ";
+		for (int i = 0; i < keywords.size(); i++) {
+			userprofile +="<contextKeywords><text>"+keywords.get(i)+"</text></contextKeywords>";
 		}
+		userprofile +=" </contextKeywords></eexcess-secure-user-profile>";
+		params = new StringEntity(userprofile,"UTF-8");
 		return params;
 	}
 
