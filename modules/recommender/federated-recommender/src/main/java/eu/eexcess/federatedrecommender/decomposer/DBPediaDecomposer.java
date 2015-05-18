@@ -53,17 +53,10 @@ public class DBPediaDecomposer implements SecureUserProfileDecomposer<SecureUser
 	 * Parameters to build the DBpedia graph -> to be tuned up
 	 */
 
-	private final int hitsLimit; // Number of hits per node
-	private final int depthLimit; // Depth traversal for graph creation
+	private int hitsLimit; // Number of hits per node
+	private int depthLimit; // Depth traversal for graph creation
 	private int semanticDistanceThreshold;
 	private DbPediaSolrIndex dbPediaSolrIndex;
-
-	public DBPediaDecomposer(FederatedRecommenderConfiguration config, DbPediaSolrIndex dbPediaSolrIndex, int semanticDistanceThreshold) {
-		this.hitsLimit = config.graphHitsLimitPerQuery;
-		this.depthLimit = config.graphMaxPathLength;
-		this.dbPediaSolrIndex = dbPediaSolrIndex;
-		this.semanticDistanceThreshold = semanticDistanceThreshold;
-	}
 
 	/**
 	 * 
@@ -170,6 +163,16 @@ public class DBPediaDecomposer implements SecureUserProfileDecomposer<SecureUser
 
 	public void setSemanticDistanceThreshold(int semanticDistanceThreshold) {
 		this.semanticDistanceThreshold = semanticDistanceThreshold;
+	}
+
+	@Override
+	public void setConfiguration(FederatedRecommenderConfiguration fedRecConfig)
+			throws FederatedRecommenderException {
+		this.hitsLimit = fedRecConfig.graphHitsLimitPerQuery;
+		this.depthLimit = fedRecConfig.graphMaxPathLength;
+		this.dbPediaSolrIndex = new DbPediaSolrIndex(fedRecConfig);
+		this.semanticDistanceThreshold = fedRecConfig.graphQueryDepthLimit;
+		
 	}
 
 }

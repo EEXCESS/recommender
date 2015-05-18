@@ -37,5 +37,6 @@ public class FederatedRecommenderConfiguration {
 	public long partnersTimeout;
 	public int numRecommenderThreads;
 	public String statsLogDatabase;
+	public String defaultPickerName;
 
 }

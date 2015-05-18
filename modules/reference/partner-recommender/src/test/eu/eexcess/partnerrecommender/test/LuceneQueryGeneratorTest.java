@@ -27,17 +27,17 @@ public class LuceneQueryGeneratorTest {
 		ContextKeyword keyword4 = new ContextKeyword("k4");
 		userProfile.contextKeywords.add(keyword4);
 		ContextKeyword keyword5 = new ContextKeyword("k5");
-		keyword5.expansion=ExpansionType.EXPANSION;
+		keyword5.expansion=ExpansionType.PSEUDORELEVANCEWP;
 		userProfile.contextKeywords.add(keyword5);
 		ContextKeyword keyword6 = new ContextKeyword("k6");
-		keyword6.expansion=ExpansionType.EXPANSION;
+		keyword6.expansion=ExpansionType.PSEUDORELEVANCEWP;
 		userProfile.contextKeywords.add(keyword6);
 		ContextKeyword keyword7 = new ContextKeyword("k7");
-		keyword7.expansion=ExpansionType.EXPANSION;
+		keyword7.expansion=ExpansionType.PSEUDORELEVANCEWP;
 		userProfile.contextKeywords.add(keyword7);
 		String result =gen.toQuery(userProfile );
 		System.out.println(result);
-		assertTrue(result.equals("k1 OR k2 OR k3 OR k4 OR (\"k5\" OR \"k6\" OR \"k7\")"));
+		assertTrue(result.equals("\"k1\" OR \"k2\" OR \"k3\" OR \"k4\" OR (\"k5\" OR \"k6\" OR \"k7\")"));
 	}
 
 	
@@ -49,11 +49,11 @@ public class LuceneQueryGeneratorTest {
 		ContextKeyword keyword1 = new ContextKeyword("k1");
 		userProfile.contextKeywords.add(keyword1);
 		ContextKeyword keyword2 = new ContextKeyword("k2");
-		keyword2.expansion=ExpansionType.EXPANSION;
+		keyword2.expansion=ExpansionType.PSEUDORELEVANCEWP;
 		userProfile.contextKeywords.add(keyword2);
 		String result =gen.toQuery(userProfile );
 		System.out.println(result);
-		assertTrue(result.equals("k1 OR (\"k2\")"));
+		assertTrue(result.equals("\"k1\" OR (\"k2\")"));
 	}
 	
 	@Test
@@ -64,25 +64,25 @@ public class LuceneQueryGeneratorTest {
 		ContextKeyword keyword1 = new ContextKeyword("k1");
 		userProfile.contextKeywords.add(keyword1);
 		ContextKeyword keyword2 = new ContextKeyword("k2");
-		keyword2.expansion=ExpansionType.EXPANSION;
+		keyword2.expansion=ExpansionType.PSEUDORELEVANCEWP;
 		userProfile.contextKeywords.add(keyword2);
 		ContextKeyword keyword3 = new ContextKeyword("k3");
-		keyword3.expansion=ExpansionType.EXPANSION;
+		keyword3.expansion=ExpansionType.PSEUDORELEVANCEWP;
 		userProfile.contextKeywords.add(keyword3);
 		ContextKeyword keyword4 = new ContextKeyword("k4");
 		userProfile.contextKeywords.add(keyword4);
 		ContextKeyword keyword5 = new ContextKeyword("k5");
-		keyword5.expansion=ExpansionType.EXPANSION;
+		keyword5.expansion=ExpansionType.PSEUDORELEVANCEWP;
 		userProfile.contextKeywords.add(keyword5);
 		ContextKeyword keyword6 = new ContextKeyword("k6");
-		keyword6.expansion=ExpansionType.EXPANSION;
+		keyword6.expansion=ExpansionType.PSEUDORELEVANCEWP;
 		userProfile.contextKeywords.add(keyword6);
 		ContextKeyword keyword7 = new ContextKeyword("k7");
-		keyword7.expansion=ExpansionType.EXPANSION;
+		keyword7.expansion=ExpansionType.PSEUDORELEVANCEWP;
 		userProfile.contextKeywords.add(keyword7);
 		String result =gen.toQuery(userProfile );
 		System.out.println(result);
-		assertTrue(result.equals("k1 OR (\"k2\" OR \"k3\") OR k4 OR (\"k5\" OR \"k6\" OR \"k7\")"));
+		assertTrue(result.equals("\"k1\" OR (\"k2\" OR \"k3\") OR \"k4\" OR (\"k5\" OR \"k6\" OR \"k7\")"));
 	}
 
 	@Test
@@ -93,7 +93,7 @@ public class LuceneQueryGeneratorTest {
 		ContextKeyword keyword1 = new ContextKeyword("k1");
 		userProfile.contextKeywords.add(keyword1);
 		ContextKeyword keyword2 = new ContextKeyword("k2");
-		keyword2.expansion=ExpansionType.EXPANSION;
+		keyword2.expansion=ExpansionType.PSEUDORELEVANCEWP;
 		userProfile.contextKeywords.add(keyword2);
 		ContextKeyword keyword3 = new ContextKeyword("k3");
 		
@@ -101,17 +101,17 @@ public class LuceneQueryGeneratorTest {
 		ContextKeyword keyword4 = new ContextKeyword("k4");
 		userProfile.contextKeywords.add(keyword4);
 		ContextKeyword keyword5 = new ContextKeyword("k5");
-		keyword5.expansion=ExpansionType.EXPANSION;
+		keyword5.expansion=ExpansionType.PSEUDORELEVANCEWP;
 		userProfile.contextKeywords.add(keyword5);
 		ContextKeyword keyword6 = new ContextKeyword("k6");
-		keyword6.expansion=ExpansionType.EXPANSION;
+		keyword6.expansion=ExpansionType.PSEUDORELEVANCEWP;
 		userProfile.contextKeywords.add(keyword6);
 		ContextKeyword keyword7 = new ContextKeyword("k7");
-		keyword7.expansion=ExpansionType.EXPANSION;
+		keyword7.expansion=ExpansionType.PSEUDORELEVANCEWP;
 		userProfile.contextKeywords.add(keyword7);
 		String result =gen.toQuery(userProfile );
 		System.out.println(result);
-		assertTrue(result.equals("k1 OR (\"k2\") OR k3 OR k4 OR (\"k5\" OR \"k6\" OR \"k7\")"));
+		assertTrue(result.equals("\"k1\" OR (\"k2\") OR \"k3\" OR \"k4\" OR (\"k5\" OR \"k6\" OR \"k7\")"));
 	}
 
 	@Test
@@ -120,28 +120,28 @@ public class LuceneQueryGeneratorTest {
 		LuceneQueryGenerator gen = new LuceneQueryGenerator();
 		SecureUserProfile userProfile = new SecureUserProfile();
 		ContextKeyword keyword1 = new ContextKeyword("k1");
-		keyword1.expansion=ExpansionType.EXPANSION;
+		keyword1.expansion=ExpansionType.PSEUDORELEVANCEWP;
 		userProfile.contextKeywords.add(keyword1);
 		ContextKeyword keyword2 = new ContextKeyword("k2");
-		keyword2.expansion=ExpansionType.EXPANSION;
+		keyword2.expansion=ExpansionType.PSEUDORELEVANCEWP;
 		userProfile.contextKeywords.add(keyword2);
 		ContextKeyword keyword3 = new ContextKeyword("k3");
-		keyword3.expansion=ExpansionType.EXPANSION;
+		keyword3.expansion=ExpansionType.PSEUDORELEVANCEWP;
 		userProfile.contextKeywords.add(keyword3);
 		ContextKeyword keyword4 = new ContextKeyword("k4");
 		userProfile.contextKeywords.add(keyword4);
 		ContextKeyword keyword5 = new ContextKeyword("k5");
-		keyword5.expansion=ExpansionType.EXPANSION;
+		keyword5.expansion=ExpansionType.PSEUDORELEVANCEWP;
 		userProfile.contextKeywords.add(keyword5);
 		ContextKeyword keyword6 = new ContextKeyword("k6");
-		keyword6.expansion=ExpansionType.EXPANSION;
+		keyword6.expansion=ExpansionType.PSEUDORELEVANCEWP;
 		userProfile.contextKeywords.add(keyword6);
 		ContextKeyword keyword7 = new ContextKeyword("k7");
-		keyword7.expansion=ExpansionType.EXPANSION;
+		keyword7.expansion=ExpansionType.PSEUDORELEVANCEWP;
 		userProfile.contextKeywords.add(keyword7);
 		String result =gen.toQuery(userProfile );
 		System.out.println(result);
-		assertTrue(result.equals("(\"k1\" OR \"k2\" OR \"k3\") OR k4 OR (\"k5\" OR \"k6\" OR \"k7\")"));
+		assertTrue(result.equals("(\"k1\" OR \"k2\" OR \"k3\") OR \"k4\" OR (\"k5\" OR \"k6\" OR \"k7\")"));
 	}
 	@Test
 	public void multibleSerendipityStartTest() {
@@ -170,6 +170,6 @@ public class LuceneQueryGeneratorTest {
 		userProfile.contextKeywords.add(keyword7);
 		String result =gen.toQuery(userProfile );
 		System.out.println(result);
-		assertTrue(result.equals("(\"k1\" OR \"k2\" OR \"k3\") OR k4 AND (\"k5\" OR \"k6\" OR \"k7\")"));
+		assertTrue(result.equals("(\"k1\" OR \"k2\" OR \"k3\") OR \"k4\" AND (\"k5\" OR \"k6\" OR \"k7\")"));
 	}
 }
