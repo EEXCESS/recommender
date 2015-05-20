@@ -16,16 +16,12 @@ limitations under the License.
  */
 package eu.eexcess.partnerdata.reference.enrichment;
 
-import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
-import java.util.StringTokenizer;
 
 import eu.eexcess.config.PartnerConfiguration;
 import eu.eexcess.partnerdata.reference.PartnerdataLogger;
-import eu.eexcess.partnerdata.reference.PartnerdataTracer;
-import eu.eexcess.partnerdata.reference.PartnerdataTracer.FILETYPE;
 
 public class EnrichmentServicesProxy {
 	

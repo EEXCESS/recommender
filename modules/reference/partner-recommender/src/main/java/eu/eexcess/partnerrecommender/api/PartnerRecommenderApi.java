@@ -17,11 +17,10 @@ limitations under the License.
 package eu.eexcess.partnerrecommender.api;
 
 import java.io.IOException;
-import java.util.List;
 
 import org.w3c.dom.Document;
 
-import eu.eexcess.dataformats.result.DocumentBadge;
+import eu.eexcess.dataformats.result.DocumentBadgeList;
 import eu.eexcess.dataformats.result.ResultList;
 import eu.eexcess.dataformats.userprofile.SecureUserProfile;
 
@@ -53,7 +52,7 @@ public interface PartnerRecommenderApi {
      * @return
      * @throws IOException
      */
-    public abstract List<DocumentBadge> getDetails(List<DocumentBadge> documents) throws IOException;
+    public abstract DocumentBadgeList getDetails(DocumentBadgeList documents) throws IOException;
     
     /** 
      * Returns the EEXCESS user profile for a given user.

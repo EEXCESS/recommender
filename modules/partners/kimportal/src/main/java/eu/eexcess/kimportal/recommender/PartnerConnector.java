@@ -18,7 +18,6 @@ package eu.eexcess.kimportal.recommender;
 
 import java.io.IOException;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import javax.ws.rs.core.MediaType;
@@ -95,12 +94,31 @@ public class PartnerConnector implements PartnerConnectorApi {
 	}
 
 	@Override
-	public Document queryPartnerDetails(
-			PartnerConfiguration partnerConfiguration,
-			List<DocumentBadge> documents, PartnerdataLogger logger)
+	public Document queryPartnerDetails(PartnerConfiguration partnerConfiguration,
+			DocumentBadge document, PartnerdataLogger logger)
 			throws IOException {
-		// TODO Auto-generated method stub
-		return null;
+		// Configure
+		try {	
+	        Client client = new Client(PartnerConfigurationEnum.CONFIG.getClientDefault());
+	
+	        queryGenerator = PartnerConfigurationEnum.CONFIG.getQueryGenerator();
+			
+	        String detailQuery = getQueryGenerator().toDetailQuery(document);
+	        
+	        Map<String, String> valuesMap = new HashMap<String, String>();
+	        valuesMap.put("detailQuery", detailQuery);
+	        
+	        String searchRequest = StrSubstitutor.replace(partnerConfiguration.detailEndpoint, valuesMap);
+	        
+	        WebResource service = client.resource(searchRequest);
+	       
+	        Builder builder = service.accept(MediaType.APPLICATION_XML);
+	        client.destroy();
+	        return builder.get(Document.class);
+		}
+		catch (Exception e) {
+				throw new IOException("Cannot query partner REST API!", e);
+		}
 	}
 
 }

@@ -31,10 +31,11 @@ public class DocumentBadge implements Serializable {
 	public String uri;
 	@XmlElement(name = "provider")
 	public String provider;
-	
+
 	@XmlElement(name = "detail")
 	public String details = null;
 	
+
 	@Override
 	public String toString() {
 		return "DocumentBadge [id=" + id + ", uri=" + uri + ", provider="

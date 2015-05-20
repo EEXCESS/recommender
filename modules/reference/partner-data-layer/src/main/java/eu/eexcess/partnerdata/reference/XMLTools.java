@@ -57,13 +57,20 @@ public class XMLTools {
 	
 	
 	public static String writeModel(Model model) {
-		String syntax = "RDF/XML-ABBREV"; // also try "N-TRIPLE" and "TURTLE"
+		String syntax = "RDF/XML-ABBREV"; 
 		StringWriter out = new StringWriter();
 		model.write(out, syntax);
 		String ret = out.toString();
 		return ret;
 	}
 	
+	public static String writeModelJsonLD(Model model) {
+		String syntax = "RDF/JSON"; 
+		StringWriter out = new StringWriter();
+		model.write(out, syntax);
+		String ret = out.toString();
+		return ret;
+	}
 	
 	public static Document convertStringToDocument(String xmlStr) {
         DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();  

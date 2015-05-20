@@ -24,6 +24,7 @@ import java.util.ArrayList;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
+import eu.eexcess.dataformats.result.DocumentBadgeList;
 import eu.eexcess.dataformats.result.ResultList;
 import eu.eexcess.kimportal.webservice.tool.PartnerStandaloneServer;
 import eu.eexcess.partnerrecommender.test.PartnerRecommenderTestHelper;
@@ -83,7 +84,7 @@ public class KIMPortalPartnerRecommenderTest {
 	    
         assertNotNull(resultList);
         assertTrue(resultList.results.size() > 0 );
-        assertEquals(12, resultList.results.size());
+        assertEquals(6, resultList.results.size());
 
 	}
 	
@@ -125,7 +126,7 @@ public class KIMPortalPartnerRecommenderTest {
 	    
         assertNotNull(resultList);
         assertTrue(resultList.results.size() > 0 );
-        assertEquals(7, resultList.results.size());
+        assertEquals(20, resultList.results.size());
 
 	}
 
@@ -141,7 +142,59 @@ public class KIMPortalPartnerRecommenderTest {
 	    
         assertNotNull(resultList);
         assertTrue(resultList.results.size() > 0 );
-        assertEquals(1, resultList.results.size());
+        assertEquals(20, resultList.results.size());
+	}
+	
+	@Test
+	public void detailCall() {
+		ArrayList<String> documents = new ArrayList<String>();
+		documents.add("Hülftenschanz");
+        ArrayList<String> ids = new ArrayList<String>();
+		ArrayList<String> uris = new ArrayList<String>();
+        ids.add("E1.6882");
+        uris.add("http://www.kim.bl.openinteractive.ch/sammlungen#f19e71ca-4dc6-48b8-858c-60a1710066f0");
+        ids.add("E1.6880");
+        uris.add("http://www.kim.bl.openinteractive.ch/sammlungen#f04ae6c5-45fd-ff40-333c-f3b50dffbe3d");
+        DocumentBadgeList documentDetails = PartnerRecommenderTestHelper.getDetails("eexcess-partner-kimportal-1.0-SNAPSHOT",	
+        		port, 
+        		PartnerRecommenderTestHelper.createParamsForPartnerRecommenderDetailCall(ids, uris, "KIM.Portal"));
+	    
+        assertNotNull(documentDetails);
+        assertTrue(documentDetails.documentBadges.size() > 0 );
+        assertEquals(2, documentDetails.documentBadges.size());
 
 	}
+
+	@Test
+	public void singleQueryBierglasZiegelhofKalenderbildWithDetails() {
+		ArrayList<String> keywords = new ArrayList<String>();
+		keywords.add("bierglas");
+		keywords.add("ziegelhof");
+		keywords.add("Kalenderbild");
+        ResultList resultList = PartnerRecommenderTestHelper.getRecommendations("eexcess-partner-kimportal-1.0-SNAPSHOT",	
+        		port, 
+        		PartnerRecommenderTestHelper.createParamsForPartnerRecommender(20,keywords ));
+	    
+        assertNotNull(resultList);
+        assertTrue(resultList.results.size() > 0 );
+        assertEquals(20, resultList.results.size());
+        for (int i = 0; i < resultList.results.size(); i++) {
+    		ArrayList<String> documents = new ArrayList<String>();
+    		documents.add("Hülftenschanz");
+            ArrayList<String> ids = new ArrayList<String>();
+    		ArrayList<String> uris = new ArrayList<String>();
+            ids.add(resultList.results.get(i).documentBadge.id);
+            uris.add(resultList.results.get(i).documentBadge.uri);
+            DocumentBadgeList documentDetails = PartnerRecommenderTestHelper.getDetails("eexcess-partner-kimportal-1.0-SNAPSHOT",	
+            		port, 
+            		PartnerRecommenderTestHelper.createParamsForPartnerRecommenderDetailCall(ids, uris, "KIM.Portal"));
+    	    
+            assertNotNull(documentDetails);
+            assertTrue(documentDetails.documentBadges.size() > 0 );
+            assertEquals(1, documentDetails.documentBadges.size());
+        	
+			
+		}
+	}
+
 }

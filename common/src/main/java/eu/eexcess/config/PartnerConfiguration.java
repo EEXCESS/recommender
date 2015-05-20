@@ -35,6 +35,7 @@ public class PartnerConfiguration extends PartnerBadge {
 
 	//public String systemId; 
     public String searchEndpoint; // e.g."http://localhost:8080/search/${query}";
+	public String detailEndpoint;
 	
     public String partnerConnectorClass;
     public String queryGeneratorClass; // = LuceneQueryGenerator.class.getName();   

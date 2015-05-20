@@ -34,11 +34,7 @@ public interface ITransformer {
 
 	public boolean hasEEXCESSRDFResponseResults(Document searchResultsEexcess);
 
-	//public Document transformResultObject(Document input) throws EEXCESSDataTransformationException;
-	
-	//public void setResultListTransformation(String filename);
-	
-	//public void setResultObjectTransformation(String filename);
+	public Document transformDetail(Document input, PartnerdataLogger logger) throws EEXCESSDataTransformationException;
 	
 	
 }

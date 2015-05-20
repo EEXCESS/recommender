@@ -240,7 +240,7 @@ public class Transformer implements ITransformer{
 		return transformInternal(input, transformerResultList, logger);
 	}
 
-	public Document transformResultObject(Document input, PartnerdataLogger logger)  throws EEXCESSDataTransformationException{
+	public Document transformDetail(Document input, PartnerdataLogger logger)  throws EEXCESSDataTransformationException{
 		return transformInternal(input, transformerResultObject, logger);
 	}
 

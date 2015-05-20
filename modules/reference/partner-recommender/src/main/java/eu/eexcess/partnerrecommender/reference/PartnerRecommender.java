@@ -23,12 +23,28 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 package eu.eexcess.partnerrecommender.reference;
 
 import java.io.IOException;
-import java.util.List;
+import java.io.StringReader;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.w3c.dom.Document;
 
+
+
+
+
+
+
+import com.github.jsonldjava.core.JsonLdError;
+import com.github.jsonldjava.core.RDFDataset;
+import com.github.jsonldjava.impl.TurtleRDFParser;
+
+
+
+
+import com.hp.hpl.jena.ontology.OntModel;
+
+import com.hp.hpl.jena.rdf.model.ModelFactory;
 
 //import com.hp.hpl.jena.ontology.OntModel;
 //import com.hp.hpl.jena.query.Query;
@@ -44,13 +60,16 @@ import org.w3c.dom.Document;
 //import com.hp.hpl.jena.rdf.model.Statement;
 import eu.eexcess.config.PartnerConfiguration;
 import eu.eexcess.dataformats.result.DocumentBadge;
+import eu.eexcess.dataformats.result.DocumentBadgeList;
 import eu.eexcess.dataformats.result.ResultList;
 import eu.eexcess.dataformats.result.ResultStats;
 import eu.eexcess.dataformats.userprofile.SecureUserProfile;
+import eu.eexcess.partnerdata.api.EEXCESSDataTransformationException;
 import eu.eexcess.partnerdata.api.IEnrichment;
 import eu.eexcess.partnerdata.api.ITransformer;
 import eu.eexcess.partnerdata.reference.PartnerdataLogger;
 import eu.eexcess.partnerdata.reference.PartnerdataTracer;
+import eu.eexcess.partnerdata.reference.XMLTools;
 import eu.eexcess.partnerrecommender.api.PartnerConfigurationEnum;
 import eu.eexcess.partnerrecommender.api.PartnerConnectorApi;
 import eu.eexcess.partnerrecommender.api.PartnerRecommenderApi;
@@ -157,10 +176,51 @@ public class PartnerRecommender implements PartnerRecommenderApi {
      * @throws IOException
      */
 	@Override
-	public List<DocumentBadge> getDetails(List<DocumentBadge> documents)
+	public DocumentBadgeList getDetails(DocumentBadgeList documents)
 			throws IOException {
-		partnerConnector.queryPartnerDetails(partnerConfiguration, documents, null); //TODO: do we need the logger?
-		return documents;
+        PartnerdataLogger partnerdataLogger = new PartnerdataLogger(partnerConfiguration);
+    	partnerdataLogger.getActLogEntry().start();
+
+    	
+    	for (int i = 0; i < documents.documentBadges.size(); i++) {
+            try {
+	    		DocumentBadge document = documents.documentBadges.get(i);
+	    		Document detailResultNative = partnerConnector.queryPartnerDetails(partnerConfiguration, document, partnerdataLogger);
+	        	/*
+	        	 *  Transform Document in partner format to EEXCESS RDF format
+	        	 */
+	            long startTransform1 = System.currentTimeMillis();
+				//partnerdataLogger.addQuery(userProfile);
+				Document detailResultEexcess = transformer.transformDetail(detailResultNative, partnerdataLogger);
+				document.details = XMLTools.getStringFromDocument(detailResultEexcess);
+				
+		   		StringReader stream = new StringReader(document.details);
+		   		OntModel model = ModelFactory.createOntologyModel(); 
+				model.read(stream,null);
+				String jsonLD = XMLTools.writeModelJsonLD(model);
+				document.details = jsonLD;
+	            long endTransform1 = System.currentTimeMillis();
+			} catch (EEXCESSDataTransformationException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+
+		}
+    	
+    	partnerdataLogger.getActLogEntry().end();
+        partnerdataLogger.save();
+/*
+		DocumentBadgeList returnList = new DocumentBadgeList();
+		returnList.documentBadges = new LinkedList<DocumentBadge>();
+		DocumentBadge e =  new DocumentBadge("id", "uri", "provider");
+		returnList.documentBadges.add(e );
+		DocumentBadge e2 =  new DocumentBadge("id1", "uri1", "provider1");
+		returnList.documentBadges.add(e2 );
+		return returnList ;
+		*/
+        PartnerdataTracer.dumpFile(this.getClass(), this.partnerConfiguration, documents, "partner-recommender-results-details", PartnerdataTracer.FILETYPE.XML, partnerdataLogger);
+
+        return documents;
 	}
 
     /** 

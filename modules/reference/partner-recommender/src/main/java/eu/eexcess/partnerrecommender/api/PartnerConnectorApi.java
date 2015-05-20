@@ -17,7 +17,6 @@ limitations under the License.
 package eu.eexcess.partnerrecommender.api;
 
 import java.io.IOException;
-import java.util.List;
 
 import org.w3c.dom.Document;
 
@@ -50,7 +49,7 @@ public interface PartnerConnectorApi {
 	     * @return the search request as string
 	     * @throws IOException 
 	     */
-	    public Document queryPartnerDetails(PartnerConfiguration partnerConfiguration, List<DocumentBadge> documents,PartnerdataLogger logger) throws IOException;
+	    public Document queryPartnerDetails(PartnerConfiguration partnerConfiguration, DocumentBadge document,PartnerdataLogger logger) throws IOException;
 
 	    
 	    /**
