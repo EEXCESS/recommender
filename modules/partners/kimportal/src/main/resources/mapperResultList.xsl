@@ -151,50 +151,50 @@
 	  <!-- <xsl:template name="Main.Language" /> -->
 	  <xsl:template name="Main.Title">
       <apply-templates xmlns="http://www.w3.org/1999/XSL/Transform"
-                       mode="m2"
+                       mode="m4"
                        select="str[@name='_display_']"/>
    </xsl:template>
 	  <xsl:template name="Main.Description">
       <apply-templates xmlns="http://www.w3.org/1999/XSL/Transform"
-                       mode="m4"
+                       mode="m6"
                        select="str[@name='beschreibung']"/>
    </xsl:template>
 	  <xsl:template name="Main.Date"/>
 	  <xsl:template name="Main.Identifier">
       <apply-templates xmlns="http://www.w3.org/1999/XSL/Transform"
-                       mode="m1"
+                       mode="m7"
                        select="str[@name='inventarnummer']"/>
    </xsl:template>
 	  <xsl:template name="Main.isShownAt">
       <apply-templates xmlns="http://www.w3.org/1999/XSL/Transform"
-                       mode="m3"
+                       mode="m0"
                        select="eexcessURI"/>
    </xsl:template>
 	  <xsl:template name="Main.previewImage">
       <apply-templates xmlns="http://www.w3.org/1999/XSL/Transform"
-                       mode="m6"
-                       select="arr[@name='_thumbs_']/str"/>
+                       mode="m5"
+                       select="arr[@name='_thumbs_']/str[1]"/>
    </xsl:template>
 	  <xsl:template name="Main.URI">
       <apply-templates xmlns="http://www.w3.org/1999/XSL/Transform"
-                       mode="m5"
+                       mode="m3"
                        select="eexcessURI"/>
    </xsl:template>
 	  <xsl:template name="Main.collectionName">
       <apply-templates xmlns="http://www.w3.org/1999/XSL/Transform"
-                       mode="m0"
+                       mode="m1"
                        select="str[@name='sammlung']"/>
    </xsl:template>
 	  <xsl:template name="Main.Subject">
       <apply-templates xmlns="http://www.w3.org/1999/XSL/Transform"
-                       mode="m7"
+                       mode="m2"
                        select="str[@name='klassifikation_sachgruppe']/str"/>
    </xsl:template>
 
    <template xmlns="http://www.w3.org/1999/XSL/Transform"
-             match="str[@name='sammlung']"
+             match="eexcessURI"
              mode="m0">
-      <element name="edm:collectionName">
+      <element name="uri">
          <call-template name="StringToString"/>
       </element>
    </template>
@@ -202,16 +202,16 @@
       <xsl:value-of select="."/>
    </xsl:template>
    <template xmlns="http://www.w3.org/1999/XSL/Transform"
-             match="str[@name='inventarnummer']"
+             match="str[@name='sammlung']"
              mode="m1">
-      <element name="dc:identifier">
+      <element name="edm:collectionName">
          <call-template name="StringToString"/>
       </element>
    </template>
    <template xmlns="http://www.w3.org/1999/XSL/Transform"
-             match="str[@name='_display_']"
+             match="str[@name='klassifikation_sachgruppe']/str"
              mode="m2">
-      <element name="dc:title">
+      <element name="dc:subject">
          <call-template name="StringToString"/>
       </element>
    </template>
@@ -223,22 +223,15 @@
       </element>
    </template>
    <template xmlns="http://www.w3.org/1999/XSL/Transform"
-             match="str[@name='beschreibung']"
+             match="str[@name='_display_']"
              mode="m4">
-      <element name="dc:description">
+      <element name="dc:title">
          <call-template name="StringToString"/>
       </element>
    </template>
    <template xmlns="http://www.w3.org/1999/XSL/Transform"
-             match="eexcessURI"
+             match="arr[@name='_thumbs_']/str[1]"
              mode="m5">
-      <element name="uri">
-         <call-template name="StringToString"/>
-      </element>
-   </template>
-   <template xmlns="http://www.w3.org/1999/XSL/Transform"
-             match="arr[@name='_thumbs_']/str"
-             mode="m6">
       <element name="edm:preview">
          <attribute name="resource">
             <call-template name="StringToString"/>
@@ -246,9 +239,16 @@
       </element>
    </template>
    <template xmlns="http://www.w3.org/1999/XSL/Transform"
-             match="str[@name='klassifikation_sachgruppe']/str"
+             match="str[@name='beschreibung']"
+             mode="m6">
+      <element name="dc:description">
+         <call-template name="StringToString"/>
+      </element>
+   </template>
+   <template xmlns="http://www.w3.org/1999/XSL/Transform"
+             match="str[@name='inventarnummer']"
              mode="m7">
-      <element name="dc:subject">
+      <element name="dc:identifier">
          <call-template name="StringToString"/>
       </element>
    </template>
