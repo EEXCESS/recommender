@@ -111,8 +111,8 @@ public class KIMPortalPartnerRecommenderTest {
         		PartnerRecommenderTestHelper.createParamsForPartnerRecommender(20,keywords ));
 	    
         assertNotNull(resultList);
-        assertTrue(resultList.results.size() > 0 );
-        assertEquals(12, resultList.results.size());
+        assertNotNull(resultList.results);
+        assertTrue(resultList.results.size() == 0 );
 
 	}
 
@@ -147,8 +147,6 @@ public class KIMPortalPartnerRecommenderTest {
 	
 	@Test
 	public void detailCall() {
-		ArrayList<String> documents = new ArrayList<String>();
-		documents.add("Hülftenschanz");
         ArrayList<String> ids = new ArrayList<String>();
 		ArrayList<String> uris = new ArrayList<String>();
         ids.add("E1.6882");
@@ -179,8 +177,6 @@ public class KIMPortalPartnerRecommenderTest {
         assertTrue(resultList.results.size() > 0 );
         assertEquals(20, resultList.results.size());
         for (int i = 0; i < resultList.results.size(); i++) {
-    		ArrayList<String> documents = new ArrayList<String>();
-    		documents.add("Hülftenschanz");
             ArrayList<String> ids = new ArrayList<String>();
     		ArrayList<String> uris = new ArrayList<String>();
             ids.add(resultList.results.get(i).documentBadge.id);
@@ -192,9 +188,32 @@ public class KIMPortalPartnerRecommenderTest {
             assertNotNull(documentDetails);
             assertTrue(documentDetails.documentBadges.size() > 0 );
             assertEquals(1, documentDetails.documentBadges.size());
-        	
-			
 		}
 	}
 
+	@Test
+	public void singleQuerySpWithDetails() {
+		ArrayList<String> keywords = new ArrayList<String>();
+		keywords.add("sp");
+        ResultList resultList = PartnerRecommenderTestHelper.getRecommendations("eexcess-partner-kimportal-1.0-SNAPSHOT",	
+        		port, 
+        		PartnerRecommenderTestHelper.createParamsForPartnerRecommender(20,keywords ));
+	    
+        assertNotNull(resultList);
+        assertTrue(resultList.results.size() > 0 );
+        assertEquals(20, resultList.results.size());
+        for (int i = 0; i < resultList.results.size(); i++) {
+            ArrayList<String> ids = new ArrayList<String>();
+    		ArrayList<String> uris = new ArrayList<String>();
+            ids.add(resultList.results.get(i).documentBadge.id);
+            uris.add(resultList.results.get(i).documentBadge.uri);
+            DocumentBadgeList documentDetails = PartnerRecommenderTestHelper.getDetails("eexcess-partner-kimportal-1.0-SNAPSHOT",	
+            		port, 
+            		PartnerRecommenderTestHelper.createParamsForPartnerRecommenderDetailCall(ids, uris, "KIM.Portal"));
+    	    
+            assertNotNull(documentDetails);
+            assertTrue(documentDetails.documentBadges.size() > 0 );
+            assertEquals(1, documentDetails.documentBadges.size());
+		}
+	}
 }
