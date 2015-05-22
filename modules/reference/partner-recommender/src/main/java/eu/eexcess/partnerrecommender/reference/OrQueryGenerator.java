@@ -48,8 +48,7 @@ public class OrQueryGenerator implements QueryGeneratorApi{
 
 	@Override
 	public String toDetailQuery(DocumentBadge document) {
-		// TODO Auto-generated method stub
-		return null;
+		return document.id;
 	}
 
 }

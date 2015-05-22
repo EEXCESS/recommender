@@ -104,9 +104,6 @@ public class ZBWPartnerRecommenderTest {
 
 	}
 	
-	
-	
-	
 	@Test
 	public void detailCall() {
         ArrayList<String> ids = new ArrayList<String>();
