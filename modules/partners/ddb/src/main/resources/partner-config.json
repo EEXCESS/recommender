@@ -5,6 +5,7 @@
   "isTransformedNative": "false",
   "transformerClass": "eu.eexcess.ddb.datalayer.DDBTransformer",
   "searchEndpoint": "https://api.deutsche-digitale-bibliothek.de/search?query=${query}&rows=${numResults}&facet=place_fct",
+  "detailEndpoint": "https://api.deutsche-digitale-bibliothek.de/search?query=${query}&rows=${numResults}&facet=place_fct   ${detailQuery}",
   "apiKey": "",
   "mappingListTransformationFile":"mapperResultList.xsl",
   "mappingObjectTransformationFile":"mapperObject.xsl",

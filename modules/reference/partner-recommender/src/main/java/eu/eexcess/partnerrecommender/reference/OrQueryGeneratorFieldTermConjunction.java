@@ -25,6 +25,7 @@ package eu.eexcess.partnerrecommender.reference;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import eu.eexcess.dataformats.result.DocumentBadge;
 import eu.eexcess.dataformats.userprofile.ContextKeyword;
 import eu.eexcess.dataformats.userprofile.SecureUserProfile;
 import eu.eexcess.partnerrecommender.api.QueryGeneratorApi;
@@ -53,5 +54,11 @@ public class OrQueryGeneratorFieldTermConjunction implements QueryGeneratorApi{
         }
 		return builder.toString();
 	}
+
+	@Override
+	public String toDetailQuery(DocumentBadge document) {
+		return document.id;
+	}
+
 
 }
