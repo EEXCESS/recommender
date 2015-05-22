@@ -262,6 +262,7 @@ public class PartnerRecommender implements PartnerRecommenderApi {
 				json = json.replaceAll("\"rdfs:", "\"rdfs");
 				json = json.replaceAll("\"eexcess:", "\"eexcess");
 				json = json.replaceAll("\"dc:", "\"dc");
+				json = json.replaceAll("\"dcterms:", "\"dcterms");
 				json = json.replaceAll("\"edm:", "\"edm");
 				json = json.replaceAll("\"ore:", "\"ore");
 				json = json.replaceAll("\"owl:", "\"owl");
@@ -269,7 +270,8 @@ public class PartnerRecommender implements PartnerRecommenderApi {
 				json = json.replaceAll("\"xsd:", "\"xsd");
 				json = json.replaceAll("\"xmlns:", "\"xmlns");
 				json = json.replaceAll("\"xml:", "\"xml");
-				
+				json = json.replaceAll("\"wgs84:", "\"wgs84");
+
 				document.details = json; 
 						
 				/*
