@@ -140,7 +140,7 @@ public class PseudoRelevanceSourcesDecomposer implements
 					if (keywords.add(utf8String.toLowerCase())) {
 							inputSecureUserProfile.contextKeywords
 									.add(new ContextKeyword(utf8String,
-											termStats.docFreq / 100.0,ExpansionType.EXPANSION));
+											termStats.docFreq / 100.0,ExpansionType.PSEUDORELEVANCEWP));
 					}
 			}
 			}

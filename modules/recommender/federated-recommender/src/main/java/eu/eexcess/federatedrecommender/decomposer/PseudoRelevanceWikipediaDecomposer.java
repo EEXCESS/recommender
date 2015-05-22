@@ -119,7 +119,7 @@ public class PseudoRelevanceWikipediaDecomposer implements SecureUserProfileDeco
 		
 		ArrayList<ContextKeyword> newContextKeywords = new ArrayList<ContextKeyword>();
 		for (TypedTerm typedTerm : terms.getTopTerms(numTermsToExpand)) {
-			newContextKeywords.add(new ContextKeyword(typedTerm.getText(),ExpansionType.EXPANSION));
+			newContextKeywords.add(new ContextKeyword(typedTerm.getText(),ExpansionType.PSEUDORELEVANCEWP));
 		}
 		inputSecureUserProfile.contextKeywords.addAll(newContextKeywords);
 		logger.log(Level.INFO, "Wikipedia Expansion: " + newContextKeywords.toString());

@@ -80,7 +80,6 @@ public class FederatedRecommenderCore {
 
 	private PartnerRegister partnerRegister = new PartnerRegister();
 	private ExecutorService threadPool;
-//	private final DbPediaSolrIndex dbPediaSolrIndex;
 	private RecommenderStats recommenderStats;
 
 	private FederatedRecommenderCore(
@@ -222,6 +221,7 @@ public class FederatedRecommenderCore {
 				entry.getKey().shortTimeStats.failedRequestCount++;
 				entry.getKey().shortTimeStats.failedRequestTimeoutCount++;
 				entry.getValue().cancel(true);
+				
 				timeout -= System.currentTimeMillis() - startT;
 				logger.log(Level.WARNING,
 						"Waited too long for partner system '" + entry.getKey()
