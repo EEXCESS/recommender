@@ -45,6 +45,7 @@ import eu.eexcess.dataformats.result.ResultList;
 import eu.eexcess.dataformats.userprofile.SecureUserProfile;
 import eu.eexcess.partnerdata.api.EEXCESSDataTransformationException;
 import eu.eexcess.partnerdata.reference.PartnerdataLogger;
+import eu.eexcess.partnerdata.reference.XMLTools;
 import eu.eexcess.partnerrecommender.api.PartnerConfigurationEnum;
 import eu.eexcess.partnerrecommender.api.PartnerConnectorApi;
 import eu.eexcess.partnerrecommender.api.QueryGeneratorApi;
@@ -61,10 +62,10 @@ public class PartnerConnector extends PartnerConnectorBase implements PartnerCon
 	private final Logger log = Logger.getLogger(PartnerConnector.class.getName());
     private QueryGeneratorApi queryGenerator;
     
+
     //private boolean makeDetailRequests = false;
     
     public PartnerConnector(){
-    
     }
     
     
@@ -85,9 +86,9 @@ public class PartnerConnector extends PartnerConnectorBase implements PartnerCon
     
 	@Override
 	public Document queryPartner(PartnerConfiguration partnerConfiguration, SecureUserProfile userProfile, PartnerdataLogger logger) throws IOException {
-		
+    	String key= PartnerConfigurationEnum.CONFIG.getPartnerConfiguration().apiKey;
+
 //	       final String url = "https://api.deutsche-digitale-bibliothek.de/items/OAXO2AGT7YH35YYHN3YKBXJMEI77W3FF/view";
-	        final String key = PartnerConfigurationEnum.CONFIG.getPartnerConfiguration().apiKey;
 	         
 	        // get XML data via HTTP request header authentication
 	         /*
@@ -139,20 +140,7 @@ public class PartnerConnector extends PartnerConnectorBase implements PartnerCon
         	numResultsRequest  = userProfile.numResults;
         valuesMap.put("numResults", numResultsRequest+"");
         String searchRequest = StrSubstitutor.replace(partnerConfiguration.searchEndpoint, valuesMap);
-        String httpJSONResult = httpGet(searchRequest, new HashMap<String, String>() {
-            /**
-			 * 
-			 */
-			private static final long serialVersionUID = -5911519512191023737L;
-
-			{
-                put("Authorization", "OAuth oauth_consumer_key=\"" + key + "\"");
-//                put("Accept", "application/xml");
-                put("Accept", "application/json");
-
-            }
-        });
-        log.info(httpJSONResult); // print results
+        String httpJSONResult = callDDBAPI(key, searchRequest, "application/json"); // print results
         //ObjectMapper mapper = new ObjectMapper();
         //DDBResponse ddbResponse = mapper.readValue(httpJSONResult, DDBResponse.class);
 
@@ -235,6 +223,27 @@ public class PartnerConnector extends PartnerConnectorBase implements PartnerCon
         return newResponse;
 		
 	}
+
+
+
+	private String callDDBAPI(final String key, String searchRequest,String acceptType)
+			throws IOException {
+		String httpJSONResult = httpGet(searchRequest, new HashMap<String, String>() {
+            /**
+			 * 
+			 */
+			private static final long serialVersionUID = -5911519512191023737L;
+
+			{
+                put("Authorization", "OAuth oauth_consumer_key=\"" + key + "\"");
+//                put("Accept", );
+				put("Accept", acceptType);
+
+            }
+        });
+        log.info(httpJSONResult);
+		return httpJSONResult;
+	}
 	/*
 	protected EuropeanaDocDetail fetchDocumentDetails( String objectId, PartnerConfiguration partnerConfiguration) throws EEXCESSDataTransformationException {
 		try {
@@ -300,8 +309,8 @@ public class PartnerConnector extends PartnerConnectorBase implements PartnerCon
 			throws IOException {
 		// Configure
 		try {	
-	        Client client = new Client(PartnerConfigurationEnum.CONFIG.getClientDefault());
-	
+	    	String key= PartnerConfigurationEnum.CONFIG.getPartnerConfiguration().apiKey;
+
 	        queryGenerator = PartnerConfigurationEnum.CONFIG.getQueryGenerator();
 			
 	        String detailQuery = getQueryGenerator().toDetailQuery(document);
@@ -311,11 +320,9 @@ public class PartnerConnector extends PartnerConnectorBase implements PartnerCon
 	        
 	        String searchRequest = StrSubstitutor.replace(partnerConfiguration.detailEndpoint, valuesMap);
 	        
-	        WebResource service = client.resource(searchRequest);
+	        String httpXMLResult = callDDBAPI(key, searchRequest, "application/xml"); // print results
 	       
-	        Builder builder = service.accept(MediaType.APPLICATION_XML);
-	        client.destroy();
-	        return builder.get(Document.class);
+	        return XMLTools.convertStringToDocument(httpXMLResult);
 		}
 		catch (Exception e) {
 				throw new IOException("Cannot query partner REST API!", e);
