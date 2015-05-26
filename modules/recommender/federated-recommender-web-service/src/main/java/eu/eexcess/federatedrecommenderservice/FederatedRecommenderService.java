@@ -23,6 +23,7 @@ import eu.eexcess.dataformats.PartnerBadge;
 import eu.eexcess.dataformats.PartnerBadgeList;
 import eu.eexcess.dataformats.RecommenderStats;
 import eu.eexcess.dataformats.result.DocumentBadge;
+import eu.eexcess.dataformats.result.DocumentBadgeList;
 import eu.eexcess.dataformats.result.ResultList;
 import eu.eexcess.dataformats.userprofile.*;
 import eu.eexcess.federatedrecommender.FederatedRecommenderCore;
@@ -196,7 +197,7 @@ public class FederatedRecommenderService {
 	@Path("/getDetails")
 	@Consumes({MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})
 	@Produces({MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})
-	public List<DocumentBadge> getDetails(List<DocumentBadge> documents)
+	public DocumentBadgeList getDetails(DocumentBadgeList documents)
 			throws IOException {
 		return fRC.getDocumentDetails(documents);
 	}

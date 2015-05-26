@@ -52,13 +52,13 @@ import eu.eexcess.dataformats.PartnerBadge;
 import eu.eexcess.dataformats.PartnerBadgeStats;
 import eu.eexcess.dataformats.RecommenderStats;
 import eu.eexcess.dataformats.result.DocumentBadge;
+import eu.eexcess.dataformats.result.DocumentBadgeList;
 import eu.eexcess.dataformats.result.DocumentBadgePredicate;
 import eu.eexcess.dataformats.result.ResultList;
 import eu.eexcess.dataformats.result.ResultStats;
 import eu.eexcess.dataformats.userprofile.SecureUserProfile;
 import eu.eexcess.dataformats.userprofile.SecureUserProfileEvaluation;
 import eu.eexcess.federatedrecommender.dataformats.PartnersFederatedRecommendations;
-
 import eu.eexcess.federatedrecommender.interfaces.PartnersFederatedRecommendationsPicker;
 import eu.eexcess.federatedrecommender.interfaces.SecureUserProfileDecomposer;
 import eu.eexcess.federatedrecommender.registration.PartnerRegister;
@@ -315,19 +315,19 @@ public class FederatedRecommenderCore {
 	 * @param documents
 	 * @return
 	 */
-	public List<DocumentBadge> getDocumentDetails(List<DocumentBadge> documents) {
-		Map<PartnerBadge, Future<List<DocumentBadge>>> futures = new HashMap<>();
+	public DocumentBadgeList getDocumentDetails(DocumentBadgeList documents) {
+		Map<PartnerBadge, Future<DocumentBadgeList>> futures = new HashMap<>();
 		for (PartnerBadge partner : getPartnerRegister().getPartners()) {
 			final Client tmpClient = partnerRegister.getClient(partner);
-			List<DocumentBadge> currentDocs = filterDocuments(documents,
+			DocumentBadgeList currentDocs = filterDocuments(documents,
 					(DocumentBadge document) -> partner.systemId
 							.equals(document.provider));
-			Future<List<DocumentBadge>> future = threadPool
-					.submit(new Callable<List<DocumentBadge>>() {
+			Future<DocumentBadgeList> future = threadPool
+					.submit(new Callable<DocumentBadgeList>() {
 						@Override
-						public List<DocumentBadge> call() throws Exception {
+						public DocumentBadgeList call() throws Exception {
 
-							List<DocumentBadge> resultList = getDocsResult(
+							DocumentBadgeList resultList = getDocsResult(
 									partner, tmpClient, currentDocs);
 							return resultList;
 						}
@@ -339,10 +339,10 @@ public class FederatedRecommenderCore {
 						 * @param currentDocs
 						 * @return
 						 */
-						private List<DocumentBadge> getDocsResult(
+						private DocumentBadgeList getDocsResult(
 								PartnerBadge partner, Client client,
-								List<DocumentBadge> currentDocs) {
-							List<DocumentBadge> docList = new ArrayList<>();
+								DocumentBadgeList currentDocs) {
+							DocumentBadgeList docList = new DocumentBadgeList();
 							if (client != null) {
 								try {
 									WebResource resource = client.resource(partner
@@ -350,8 +350,7 @@ public class FederatedRecommenderCore {
 											+ "getDetails");
 									resource.accept(MediaType.APPLICATION_JSON);
 									docList = resource.post(
-											(new ArrayList<DocumentBadge>())
-													.getClass(), currentDocs);
+											DocumentBadgeList.class, currentDocs);
 								} catch (Exception e) {
 									logger.log(Level.WARNING, "Partner: "
 											+ partner.getSystemId()
@@ -365,12 +364,12 @@ public class FederatedRecommenderCore {
 					});
 			futures.put(partner, future);
 		}
-		List<DocumentBadge> resultDocs = new ArrayList<DocumentBadge>();
+		DocumentBadgeList resultDocs = new DocumentBadgeList();
 		long timeout = federatedRecConfiguration.partnersTimeout;
 		for (PartnerBadge partner : futures.keySet()) {
 			try {
-				resultDocs.addAll(futures.get(partner).get(timeout,
-						TimeUnit.MILLISECONDS));
+				resultDocs.documentBadges.addAll(futures.get(partner).get(timeout,
+						TimeUnit.MILLISECONDS).documentBadges);
 			} catch (TimeoutException e) {
 				logger.log(Level.WARNING, "Parnter " + partner.systemId
 						+ " timed out for document detail call", e);
@@ -390,12 +389,12 @@ public class FederatedRecommenderCore {
 	 * @param predicate
 	 * @return
 	 */
-	private List<DocumentBadge> filterDocuments(List<DocumentBadge> documents,
+	private DocumentBadgeList filterDocuments(DocumentBadgeList documents,
 			DocumentBadgePredicate predicate) {
-		List<DocumentBadge> result = new ArrayList<>();
-		for (DocumentBadge docs : documents) {
-			if (predicate.test(docs)) {
-				result.add(docs);
+		DocumentBadgeList result = new DocumentBadgeList();
+		for (DocumentBadge docs : documents.documentBadges) {
+			if (predicate.isPartnerDocument(docs)) {
+				result.documentBadges.add(docs);
 			}
 		}
 		return result;
