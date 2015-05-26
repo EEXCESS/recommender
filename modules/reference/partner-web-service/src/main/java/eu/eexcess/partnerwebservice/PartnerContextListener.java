@@ -9,7 +9,7 @@ import javax.servlet.ServletContextAttributeListener;
 import javax.servlet.ServletContextEvent;
 import javax.servlet.ServletContextListener;
 
-import eu.eexcess.partnerrecommender.api.PartnerConfigurationEnum;
+import eu.eexcess.partnerrecommender.api.PartnerConfigurationCache;
 /**
  * ContextListener to start the partner registration thread
  * @author hziak
@@ -20,14 +20,14 @@ public class PartnerContextListener implements ServletContextAttributeListener, 
 	
 	@Override
 	public void contextDestroyed(ServletContextEvent arg0) {
-		PartnerConfigurationEnum.CONFIG.unregisterPartnerAtServer();
+		PartnerConfigurationCache.CONFIG.unregisterPartnerAtServer();
 	}
 
 	
 	@Override
 	public void contextInitialized(ServletContextEvent arg0) {
-		logger.log(Level.INFO,"Starting Partner Helper Thread:"+PartnerConfigurationEnum.CONFIG.getPartnerConfiguration().systemId);
-		PartnerConfigurationEnum.CONFIG.registerPartnerAtServer();
+		logger.log(Level.INFO,"Starting Partner Helper Thread:"+PartnerConfigurationCache.CONFIG.getPartnerConfiguration().systemId);
+		PartnerConfigurationCache.CONFIG.registerPartnerAtServer();
 	}
 
 	@Override

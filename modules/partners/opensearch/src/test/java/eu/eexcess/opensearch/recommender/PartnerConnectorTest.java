@@ -34,14 +34,14 @@ import eu.eexcess.config.PartnerConfiguration;
 import eu.eexcess.dataformats.result.ResultList;
 import eu.eexcess.dataformats.userprofile.ContextKeyword;
 import eu.eexcess.dataformats.userprofile.SecureUserProfile;
-import eu.eexcess.partnerrecommender.api.PartnerConfigurationEnum;
+import eu.eexcess.partnerrecommender.api.PartnerConfigurationCache;
 
 public class PartnerConnectorTest {
 
 	@Test
 	public void queryPartnerNative_queryThreeTimes_expectOneTimeBoostrapping() {
 
-		PartnerConfiguration configuration = PartnerConfigurationEnum.CONFIG.getPartnerConfiguration();
+		PartnerConfiguration configuration = PartnerConfigurationCache.CONFIG.getPartnerConfiguration();
 		ContextKeyword schroedinger = new ContextKeyword("Erwin Schrödinger");
 		SecureUserProfile userProfile = new SecureUserProfile();
 		userProfile.contextKeywords.add(schroedinger);

@@ -51,7 +51,7 @@ import eu.eexcess.dataformats.result.ResultList;
 import eu.eexcess.dataformats.userprofile.SecureUserProfile;
 import eu.eexcess.partnerdata.reference.PartnerdataLogger;
 import eu.eexcess.partnerdata.reference.PartnerdataTracer;
-import eu.eexcess.partnerrecommender.api.PartnerConfigurationEnum;
+import eu.eexcess.partnerrecommender.api.PartnerConfigurationCache;
 import eu.eexcess.partnerrecommender.api.PartnerConnectorApi;
 import eu.eexcess.partnerrecommender.api.QueryGeneratorApi;
 import eu.eexcess.zbw.recommender.dataformat.ZBWDocument;
@@ -90,8 +90,8 @@ public class PartnerConnector implements PartnerConnectorApi {
 		
 		// Configure
 		try {	
-			Client client = new Client(PartnerConfigurationEnum.CONFIG.getClientJAXBContext());
-	        queryGenerator = PartnerConfigurationEnum.CONFIG.getQueryGenerator();
+			Client client = new Client(PartnerConfigurationCache.CONFIG.getClientJAXBContext());
+	        queryGenerator = PartnerConfigurationCache.CONFIG.getQueryGenerator(partnerConfiguration.queryGeneratorClass);
 			
 	        String query = getQueryGenerator().toQuery(userProfile);
 	        query=query.replaceAll("\"", "");
@@ -157,7 +157,7 @@ public class PartnerConnector implements PartnerConnectorApi {
 
 	
 	protected Document fetchDocumentDetails( String id) {
-		Client client = PartnerConfigurationEnum.CONFIG.getClientJAXBContext();
+		Client client = PartnerConfigurationCache.CONFIG.getClientJAXBContext();
 		String request = "https://api.econbiz.de/v1/record/"+id+"?xml=true";
 		Document returnValue = null;
 		try {

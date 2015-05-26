@@ -51,7 +51,7 @@ import eu.eexcess.partnerdata.api.IEnrichment;
 import eu.eexcess.partnerdata.api.ITransformer;
 import eu.eexcess.partnerdata.reference.PartnerdataLogger;
 import eu.eexcess.partnerdata.reference.PartnerdataTracer;
-import eu.eexcess.partnerrecommender.api.PartnerConfigurationEnum;
+import eu.eexcess.partnerrecommender.api.PartnerConfigurationCache;
 import eu.eexcess.partnerrecommender.api.PartnerConnectorApi;
 import eu.eexcess.partnerrecommender.api.PartnerRecommenderApi;
 
@@ -63,10 +63,10 @@ import eu.eexcess.partnerrecommender.api.PartnerRecommenderApi;
  */
 public class PartnerRecommender implements PartnerRecommenderApi {
 	Logger log = Logger.getLogger(PartnerRecommender.class.getName());
-    private static PartnerConfiguration partnerConfiguration =PartnerConfigurationEnum.CONFIG.getPartnerConfiguration();
-    private static PartnerConnectorApi partnerConnector =PartnerConfigurationEnum.CONFIG.getPartnerConnector();
-    private static ITransformer transformer= PartnerConfigurationEnum.CONFIG.getTransformer();
-    private static IEnrichment enricher= PartnerConfigurationEnum.CONFIG.getEnricher();
+    private static PartnerConfiguration partnerConfiguration =PartnerConfigurationCache.CONFIG.getPartnerConfiguration();
+    private static PartnerConnectorApi partnerConnector =PartnerConfigurationCache.CONFIG.getPartnerConnector();
+    private static ITransformer transformer= PartnerConfigurationCache.CONFIG.getTransformer();
+    private static IEnrichment enricher= PartnerConfigurationCache.CONFIG.getEnricher();
     
     /**
      * Creates a new instance of this class.
@@ -97,7 +97,7 @@ public class PartnerRecommender implements PartnerRecommenderApi {
         	ResultList nativeResult = partnerConnector.queryPartnerNative(partnerConfiguration, userProfile, partnerdataLogger);
         	if (nativeResult != null) {
         		  long endCallPartnerApi = System.currentTimeMillis();
-        		  nativeResult.setResultStats(new ResultStats(PartnerConfigurationEnum.CONFIG.getQueryGenerator().toQuery(userProfile),endCallPartnerApi-startCallPartnerApi,0,0,0,nativeResult.totalResults));
+        		  nativeResult.setResultStats(new ResultStats(PartnerConfigurationCache.CONFIG.getQueryGenerator(null).toQuery(userProfile),endCallPartnerApi-startCallPartnerApi,0,0,0,nativeResult.totalResults));
                 
         		return nativeResult;
         	}
@@ -142,7 +142,8 @@ public class PartnerRecommender implements PartnerRecommenderApi {
             partnerdataLogger.save();
             long endTransform2 = System.currentTimeMillis();
             log.log(Level.INFO,"Call Parnter Api:"+(endCallPartnerApi-startCallPartnerApi)+"ms; First Transformation:"+(endTransform1-startTransform1)+"ms; Enrichment:"+(endEnrich-startEnrich)+"ms; Second Transformation:"+(endTransform2-startTransform2)+"ms");
-            recommendations.setResultStats(new ResultStats(PartnerConfigurationEnum.CONFIG.getQueryGenerator().toQuery(userProfile),endCallPartnerApi-startCallPartnerApi,endTransform1-startTransform1,endTransform2-startTransform2,endEnrich-startEnrich,recommendations.totalResults));
+            //TODO: refactor the next line!
+            recommendations.setResultStats(new ResultStats(PartnerConfigurationCache.CONFIG.getQueryGenerator(null).toQuery(userProfile),endCallPartnerApi-startCallPartnerApi,endTransform1-startTransform1,endTransform2-startTransform2,endEnrich-startEnrich,recommendations.totalResults));
             PartnerdataTracer.dumpFile(this.getClass(), this.partnerConfiguration, recommendations, "partner-recommender-results", PartnerdataTracer.FILETYPE.XML, partnerdataLogger);
             return recommendations;
             

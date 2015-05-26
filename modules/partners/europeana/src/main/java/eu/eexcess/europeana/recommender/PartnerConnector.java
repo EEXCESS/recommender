@@ -50,7 +50,7 @@ import eu.eexcess.europeana.recommender.dataformat.details.EuropeanaDocDetail;
 import eu.eexcess.partnerdata.api.EEXCESSDataTransformationException;
 import eu.eexcess.partnerdata.reference.PartnerdataLogger;
 import eu.eexcess.partnerdata.reference.PartnerdataTracer;
-import eu.eexcess.partnerrecommender.api.PartnerConfigurationEnum;
+import eu.eexcess.partnerrecommender.api.PartnerConfigurationCache;
 import eu.eexcess.partnerrecommender.api.PartnerConnectorApi;
 import eu.eexcess.partnerrecommender.api.QueryGeneratorApi;
 import eu.eexcess.partnerrecommender.reference.PartnerConnectorBase;
@@ -97,8 +97,8 @@ public class PartnerConnector extends PartnerConnectorBase implements PartnerCon
 //        ClientConfig config = new DefaultClientConfig();
 //        config.getClasses().add(JacksonJsonProvider.class);
 //        
-        final Client client = new Client(PartnerConfigurationEnum.CONFIG.getClientJacksonJson());
-        queryGenerator = PartnerConfigurationEnum.CONFIG.getQueryGenerator();
+        final Client client = new Client(PartnerConfigurationCache.CONFIG.getClientJacksonJson());
+        queryGenerator = PartnerConfigurationCache.CONFIG.getQueryGenerator(partnerConfiguration.queryGeneratorClass);
         String query = getQueryGenerator().toQuery(userProfile);
         long start = System.currentTimeMillis();
 		
@@ -187,7 +187,7 @@ public class PartnerConnector extends PartnerConnectorBase implements PartnerCon
 	
 	protected EuropeanaDocDetail fetchDocumentDetails( String objectId, PartnerConfiguration partnerConfiguration, String  eexcessRequestId) throws EEXCESSDataTransformationException {
 		try {
-			Client client = new Client(PartnerConfigurationEnum.CONFIG.getClientJacksonJson());
+			Client client = new Client(PartnerConfigurationCache.CONFIG.getClientJacksonJson());
 	        Map<String, String> valuesMap = new HashMap<String, String>();
 	        valuesMap.put("objectId", objectId);
 	        valuesMap.put("apiKey", partnerConfiguration.apiKey);		

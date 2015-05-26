@@ -38,7 +38,7 @@ import eu.eexcess.dataformats.result.ResultList;
 import eu.eexcess.dataformats.userprofile.SecureUserProfile;
 import eu.eexcess.partnerdata.api.EEXCESSDataTransformationException;
 import eu.eexcess.partnerdata.reference.PartnerdataLogger;
-import eu.eexcess.partnerrecommender.api.PartnerConfigurationEnum;
+import eu.eexcess.partnerrecommender.api.PartnerConfigurationCache;
 import eu.eexcess.partnerrecommender.api.PartnerConnectorApi;
 import eu.eexcess.partnerrecommender.api.QueryGeneratorApi;
 import eu.eexcess.partnerrecommender.reference.PartnerConnectorBase;
@@ -80,7 +80,7 @@ public class PartnerConnector extends PartnerConnectorBase implements PartnerCon
 	public Document queryPartner(PartnerConfiguration partnerConfiguration, SecureUserProfile userProfile, PartnerdataLogger logger) throws IOException {
 		
 //	       final String url = "https://api.deutsche-digitale-bibliothek.de/items/OAXO2AGT7YH35YYHN3YKBXJMEI77W3FF/view";
-	        final String key = PartnerConfigurationEnum.CONFIG.getPartnerConfiguration().apiKey;
+	        final String key = PartnerConfigurationCache.CONFIG.getPartnerConfiguration().apiKey;
 	         
 	        // get XML data via HTTP request header authentication
 	         /*
@@ -113,16 +113,8 @@ public class PartnerConnector extends PartnerConnectorBase implements PartnerCon
 //        config.getClasses().add(JacksonJsonProvider.class);
 //        
         //final Client client = new Client(PartnerConfigurationEnum.CONFIG.getClientJacksonJson());
-        try {
-			queryGenerator = (QueryGeneratorApi)Class.forName(partnerConfiguration.queryGeneratorClass).newInstance();
-		} catch (InstantiationException | IllegalAccessException
-				| ClassNotFoundException e) {
-			// TODO add logger!
-			log.log(Level.INFO,"Error getting Query Generator",e);
-			
-		}
-		
-        String query = getQueryGenerator().toQuery(userProfile);
+        queryGenerator = PartnerConfigurationCache.CONFIG.getQueryGenerator(partnerConfiguration.queryGeneratorClass);
+		String query = getQueryGenerator().toQuery(userProfile);
         long start = System.currentTimeMillis();
 		
         Map<String, String> valuesMap = new HashMap<String, String>();

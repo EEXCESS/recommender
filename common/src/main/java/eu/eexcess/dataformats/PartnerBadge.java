@@ -17,16 +17,17 @@ limitations under the License.
 package eu.eexcess.dataformats;
 
 import eu.eexcess.dataformats.result.ResultStats;
+
 import org.apache.commons.math3.stat.descriptive.moment.StandardDeviation;
 import org.codehaus.jackson.annotate.JsonIgnoreProperties;
 
 import javax.xml.bind.annotation.*;
+
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Stack;
-
 
 import org.codehaus.jackson.map.annotate.JsonSerialize;
 
@@ -41,6 +42,10 @@ public class PartnerBadge implements Serializable{
 	
 	@XmlElement(name="systemId")
     public String systemId;
+	
+	@XmlElement(name="queryGeneratorClass")
+	public String queryGeneratorClass; // = LuceneQueryGenerator.class.getName();   
+    
 	@XmlElement(name="partnerKey") //has to be the same value than in SecureUserProfile
     public String partnerKey;
 	@XmlElement(name="description")
@@ -50,8 +55,9 @@ public class PartnerBadge implements Serializable{
 	@XmlElement(name="partnerConnectorEndpoint")
     private String partnerConnectorEndpoint;
 	
-	@XmlElement(name="shortTimeStats", required=false)
+	@XmlElement(name="shortTimeStats", required=false) 
 	public PartnerBadgeStats shortTimeStats = new PartnerBadgeStats();
+	//TODO: Statistics should be moved somewere else! (Specially the logic for it)
 
 	@XmlElement(name="longTimeStats", required=false)
 	public PartnerBadgeStats longTimeStats = new PartnerBadgeStats();	
@@ -164,6 +170,7 @@ public class PartnerBadge implements Serializable{
 		// TODO Auto-generated method stub
 		
 	}
+	
 	/**
 	 * updates the partner response times (shortTime and longTime) and short time deviation
 	 * 

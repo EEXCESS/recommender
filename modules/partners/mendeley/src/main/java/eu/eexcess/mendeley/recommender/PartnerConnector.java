@@ -33,7 +33,7 @@ import eu.eexcess.mendeley.recommender.dataformat.MendeleyDocs;
 import eu.eexcess.mendeley.recommender.dataformat.MendeleyResponse;
 import eu.eexcess.partnerdata.api.EEXCESSDataTransformationException;
 import eu.eexcess.partnerdata.reference.PartnerdataLogger;
-import eu.eexcess.partnerrecommender.api.PartnerConfigurationEnum;
+import eu.eexcess.partnerrecommender.api.PartnerConfigurationCache;
 import eu.eexcess.partnerrecommender.api.PartnerConnectorApi;
 import eu.eexcess.partnerrecommender.reference.PartnerConnectorBase;
 import eu.eexcess.utils.URLParamEncoder;
@@ -101,7 +101,7 @@ public class PartnerConnector extends PartnerConnectorBase implements PartnerCon
             throw new IOException(e1);
         }
         client.destroy();
-        ObjectMapper mapper = PartnerConfigurationEnum.CONFIG.getObjectMapper();// can reuse, share globally
+        ObjectMapper mapper = PartnerConfigurationCache.CONFIG.getObjectMapper();// can reuse, share globally
         for (MendeleyDocs doc : mR.getDocuments()) {
             doc.authorsString  = getAuthorsString(doc.authors);
         }
@@ -120,7 +120,7 @@ public class PartnerConnector extends PartnerConnectorBase implements PartnerCon
 
 	protected MendeleyResponse fetchSearchResults(Client client, SecureUserProfile userProfile, AccessTokenResponse accessTokenResponse,
 			PartnerConfiguration partnerConfiguration) throws InstantiationException, IllegalAccessException, ClassNotFoundException {
-		String query = PartnerConfigurationEnum.CONFIG.getQueryGenerator().toQuery(userProfile);
+		String query = PartnerConfigurationCache.CONFIG.getQueryGenerator(partnerConfiguration.queryGeneratorClass).toQuery(userProfile);
 		Map<String, String> valuesMap = new HashMap<String, String>();
 		valuesMap.put("query", URLParamEncoder.encode(query));       
 		String searchRequest = StrSubstitutor.replace(partnerConfiguration.searchEndpoint, valuesMap);
