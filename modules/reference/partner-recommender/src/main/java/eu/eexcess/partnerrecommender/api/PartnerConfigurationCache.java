@@ -3,6 +3,7 @@ package eu.eexcess.partnerrecommender.api;
 import java.io.File;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -46,7 +47,7 @@ public enum PartnerConfigurationCache {
 	private Client clientJAXBContext;
 	private Client clientDefault;
 	private ObjectMapper objectMapper;
-	private Map<String,QueryGeneratorApi> queryGeneratorMapping;
+	private Map<String,QueryGeneratorApi> queryGeneratorMapping = new HashMap<String, QueryGeneratorApi>();
 	private QueryGeneratorApi defaultQueryGen;
 	private Thread regThread;
 	
