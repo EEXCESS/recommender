@@ -22,96 +22,12 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 package eu.eexcess.partnerrecommender.reference;
 
-import java.io.ByteArrayInputStream;
-import java.io.FileInputStream;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.StringReader;
-import java.net.URL;
 import java.util.LinkedList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-
-
-
-
-
-
-
-
-import javax.xml.parsers.SAXParser;
-import javax.xml.parsers.SAXParserFactory;
-
-import net.sf.json.JSON;
-import net.sf.json.JSONObject;
-import net.sf.json.JSONSerializer;
-import net.sf.json.util.JSONUtils;
-import net.sf.json.xml.XMLSerializer;
-
-import org.dom4j.io.DOMWriter;
-import org.dom4j.io.SAXReader;
 import org.json.XML;
 import org.w3c.dom.Document;
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-import com.github.jsonldjava.core.JsonLdError;
-import com.github.jsonldjava.core.JsonLdProcessor;
-import com.github.jsonldjava.core.RDFDataset;
-import com.github.jsonldjava.impl.TurtleRDFParser;
-
-
-
-
-import com.hp.hpl.jena.ontology.OntModel;
-import com.hp.hpl.jena.rdf.model.ModelFactory;
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-//import com.hp.hpl.jena.ontology.OntModel;
-//import com.hp.hpl.jena.query.Query;
-//import com.hp.hpl.jena.query.QueryExecution;
-//import com.hp.hpl.jena.query.QueryExecutionFactory;
-//import com.hp.hpl.jena.query.QueryFactory;
-//import com.hp.hpl.jena.query.QuerySolution;
-//import com.hp.hpl.jena.query.ResultSet;
-//import com.hp.hpl.jena.query.ResultSetFormatter;
-//import com.hp.hpl.jena.rdf.model.Literal;
-//import com.hp.hpl.jena.rdf.model.ModelFactory;
-//import com.hp.hpl.jena.rdf.model.Resource;
-//import com.hp.hpl.jena.rdf.model.Statement;
 import eu.eexcess.config.PartnerConfiguration;
 import eu.eexcess.dataformats.result.DocumentBadge;
 import eu.eexcess.dataformats.result.DocumentBadgeList;
@@ -125,7 +41,7 @@ import eu.eexcess.partnerdata.api.ITransformer;
 import eu.eexcess.partnerdata.reference.PartnerdataLogger;
 import eu.eexcess.partnerdata.reference.PartnerdataTracer;
 import eu.eexcess.partnerdata.reference.XMLTools;
-import eu.eexcess.partnerrecommender.api.PartnerConfigurationEnum;
+import eu.eexcess.partnerrecommender.api.PartnerConfigurationCache;
 import eu.eexcess.partnerrecommender.api.PartnerConnectorApi;
 import eu.eexcess.partnerrecommender.api.PartnerRecommenderApi;
 
@@ -137,10 +53,10 @@ import eu.eexcess.partnerrecommender.api.PartnerRecommenderApi;
  */
 public class PartnerRecommender implements PartnerRecommenderApi {
 	Logger log = Logger.getLogger(PartnerRecommender.class.getName());
-    private static PartnerConfiguration partnerConfiguration =PartnerConfigurationEnum.CONFIG.getPartnerConfiguration();
-    private static PartnerConnectorApi partnerConnector =PartnerConfigurationEnum.CONFIG.getPartnerConnector();
-    private static ITransformer transformer= PartnerConfigurationEnum.CONFIG.getTransformer();
-    private static IEnrichment enricher= PartnerConfigurationEnum.CONFIG.getEnricher();
+    private static PartnerConfiguration partnerConfiguration =PartnerConfigurationCache.CONFIG.getPartnerConfiguration();
+    private static PartnerConnectorApi partnerConnector =PartnerConfigurationCache.CONFIG.getPartnerConnector();
+    private static ITransformer transformer= PartnerConfigurationCache.CONFIG.getTransformer();
+    private static IEnrichment enricher= PartnerConfigurationCache.CONFIG.getEnricher();
     
     /**
      * Creates a new instance of this class.
@@ -171,7 +87,7 @@ public class PartnerRecommender implements PartnerRecommenderApi {
         	ResultList nativeResult = partnerConnector.queryPartnerNative(partnerConfiguration, userProfile, partnerdataLogger);
         	if (nativeResult != null) {
         		  long endCallPartnerApi = System.currentTimeMillis();
-        		  nativeResult.setResultStats(new ResultStats(PartnerConfigurationEnum.CONFIG.getQueryGenerator().toQuery(userProfile),endCallPartnerApi-startCallPartnerApi,0,0,0,nativeResult.totalResults));
+        		  nativeResult.setResultStats(new ResultStats(PartnerConfigurationCache.CONFIG.getQueryGenerator(null).toQuery(userProfile),endCallPartnerApi-startCallPartnerApi,0,0,0,nativeResult.totalResults));
                 
         		return nativeResult;
         	}
@@ -218,7 +134,8 @@ public class PartnerRecommender implements PartnerRecommenderApi {
             partnerdataLogger.save();
             long endTransform2 = System.currentTimeMillis();
             log.log(Level.INFO,"Call Parnter Api:"+(endCallPartnerApi-startCallPartnerApi)+"ms; First Transformation:"+(endTransform1-startTransform1)+"ms; Enrichment:"+(endEnrich-startEnrich)+"ms; Second Transformation:"+(endTransform2-startTransform2)+"ms");
-            recommendations.setResultStats(new ResultStats(PartnerConfigurationEnum.CONFIG.getQueryGenerator().toQuery(userProfile),endCallPartnerApi-startCallPartnerApi,endTransform1-startTransform1,endTransform2-startTransform2,endEnrich-startEnrich,recommendations.totalResults));
+            //TODO: refactor the next line!
+            recommendations.setResultStats(new ResultStats(PartnerConfigurationCache.CONFIG.getQueryGenerator(null).toQuery(userProfile),endCallPartnerApi-startCallPartnerApi,endTransform1-startTransform1,endTransform2-startTransform2,endEnrich-startEnrich,recommendations.totalResults));
             PartnerdataTracer.dumpFile(this.getClass(), this.partnerConfiguration, recommendations, "partner-recommender-results", PartnerdataTracer.FILETYPE.XML, partnerdataLogger);
             return recommendations;
             
@@ -305,7 +222,7 @@ public class PartnerRecommender implements PartnerRecommenderApi {
 		returnList.documentBadges.add(e2 );
 		return returnList ;
 		*/
-        PartnerdataTracer.dumpFile(this.getClass(), this.partnerConfiguration, documents, "partner-recommender-results-details", PartnerdataTracer.FILETYPE.XML, partnerdataLogger);
+        PartnerdataTracer.dumpFile(this.getClass(), partnerConfiguration, documents, "partner-recommender-results-details", PartnerdataTracer.FILETYPE.XML, partnerdataLogger);
 
         return documents;
 	}

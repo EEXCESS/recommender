@@ -2,6 +2,8 @@ package eu.eexcess.partnerrecommender.api;
 
 import java.io.File;
 import java.net.URL;
+import java.util.ArrayList;
+import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -32,7 +34,7 @@ import eu.eexcess.partnerrecommender.reference.PartnerRegistrationThread;
  * @author hziak
  *
  */
-public enum PartnerConfigurationEnum {
+public enum PartnerConfigurationCache {
 	CONFIG;
 	private final Logger logger;
 	private boolean intializedFlag;
@@ -44,12 +46,14 @@ public enum PartnerConfigurationEnum {
 	private Client clientJAXBContext;
 	private Client clientDefault;
 	private ObjectMapper objectMapper;
-	private QueryGeneratorApi queryGenerator;
+	private Map<String,QueryGeneratorApi> queryGeneratorMapping;
+	private QueryGeneratorApi defaultQueryGen;
 	private Thread regThread;
+	
 
-	private PartnerConfigurationEnum() {
+	private PartnerConfigurationCache() {
 
-		this.logger = Logger.getLogger(PartnerConfigurationEnum.class.getName());
+		this.logger = Logger.getLogger(PartnerConfigurationCache.class.getName());
 		this.objectMapper = new ObjectMapper();
 		ClientConfig configDefault = new DefaultClientConfig();
 		ClientConfig configJacksonJson = new DefaultClientConfig();
@@ -120,8 +124,10 @@ public enum PartnerConfigurationEnum {
 
 		}
 		try {
-			this.queryGenerator = (QueryGeneratorApi) Class.forName(
+			QueryGeneratorApi queryGen =(QueryGeneratorApi) Class.forName(
 					partnerConfiguration.queryGeneratorClass).newInstance();
+			this.defaultQueryGen = queryGen;
+			queryGeneratorMapping.put(partnerConfiguration.queryGeneratorClass,queryGen);
 		} catch (InstantiationException | IllegalAccessException
 				| ClassNotFoundException e1) {
 			logger.log(Level.SEVERE, "Cannot initialize partner recommender",
@@ -133,17 +139,17 @@ public enum PartnerConfigurationEnum {
 		logger.log(
 				Level.INFO,
 				"Starting Partner Helper Thread:"
-						+ PartnerConfigurationEnum.CONFIG
+						+ PartnerConfigurationCache.CONFIG
 								.getPartnerConfiguration().systemId);
 		this.regThread = new Thread(new PartnerRegistrationThread(
 				partnerConfiguration));
-		regThread.setName(PartnerConfigurationEnum.CONFIG.partnerConfiguration.systemId+" Registration Thread");
+		regThread.setName(PartnerConfigurationCache.CONFIG.partnerConfiguration.systemId+" Registration Thread");
 		regThread.start();
 	}
 
 	public void unregisterPartnerAtServer() {
 		regThread.stop();
-		PartnerBadge badge = PartnerConfigurationEnum.CONFIG.getBadge();
+		PartnerBadge badge = PartnerConfigurationCache.CONFIG.getBadge();
 		DefaultClientConfig jClientconfig = new DefaultClientConfig();
 		jClientconfig.getClasses().add(JacksonJsonProvider.class);
 		Client client = new Client(new URLConnectionClientHandler(),
@@ -199,9 +205,19 @@ public enum PartnerConfigurationEnum {
 	public ObjectMapper getObjectMapper() {
 		return objectMapper;
 	}
-
-	public QueryGeneratorApi getQueryGenerator() {
-		return queryGenerator;
+	/**
+	 * returns the query generator, if none is given it returns the default
+	 * @param queryGen
+	 * @return
+	 */
+	public QueryGeneratorApi getQueryGenerator(String queryGen) {
+		if(queryGen==null)
+			return this.defaultQueryGen;
+		QueryGeneratorApi returnGen = queryGeneratorMapping.get(queryGen);
+		if(returnGen==null)
+			return this.defaultQueryGen;
+		else
+			return returnGen;
 	}
 
 	public PartnerBadge getBadge() {

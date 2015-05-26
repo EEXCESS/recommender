@@ -45,7 +45,7 @@ import eu.eexcess.dataformats.result.Result;
 import eu.eexcess.dataformats.result.ResultList;
 import eu.eexcess.dataformats.userprofile.SecureUserProfile;
 import eu.eexcess.partnerdata.reference.PartnerdataLogger;
-import eu.eexcess.partnerrecommender.api.PartnerConfigurationEnum;
+import eu.eexcess.partnerrecommender.api.PartnerConfigurationCache;
 import eu.eexcess.partnerrecommender.api.PartnerConnectorApi;
 import eu.eexcess.partnerrecommender.reference.PartnerConnectorBase;
 
@@ -79,13 +79,13 @@ public class PartnerConnector extends PartnerConnectorBase implements PartnerCon
 		ResultList resultList = new ResultList();
 		
 		Analyzer analyzer = new EnglishAnalyzer();
-		File directoryPath = new File(PartnerConfigurationEnum.CONFIG.getPartnerConfiguration().searchEndpoint);
+		File directoryPath = new File(PartnerConfigurationCache.CONFIG.getPartnerConfiguration().searchEndpoint);
 		Directory directory = FSDirectory.open(directoryPath );
 		IndexReader indexReader = IndexReader.open(directory );
 		IndexSearcher indexSearcher = new IndexSearcher(indexReader);
 		QueryParser queryParser = new MultiFieldQueryParser(FIELD_CONTENTS,analyzer);
 		queryParser.setDefaultOperator(Operator.AND);
-		String queryString = PartnerConfigurationEnum.CONFIG.getQueryGenerator().toQuery(userProfile);
+		String queryString = PartnerConfigurationCache.CONFIG.getQueryGenerator(partnerConfiguration.queryGeneratorClass).toQuery(userProfile);
 		Query query = null;
 		try {
 			query = queryParser.parse(queryString);
@@ -98,7 +98,7 @@ public class PartnerConnector extends PartnerConnectorBase implements PartnerCon
 		TopDocs topDocs = indexSearcher.search(query, userProfile.numResults);
 		for (ScoreDoc sDocs : topDocs.scoreDocs) {
 			Result result = new Result();
-			result.documentBadge=new DocumentBadge("", "", PartnerConfigurationEnum.CONFIG.getBadge().systemId);
+			result.documentBadge=new DocumentBadge("", "", PartnerConfigurationCache.CONFIG.getBadge().systemId);
 			org.apache.lucene.document.Document  doc=indexSearcher.doc(sDocs.doc);
 			if(doc!=null){
 				IndexableField title = doc.getField("title");
@@ -130,7 +130,7 @@ public class PartnerConnector extends PartnerConnectorBase implements PartnerCon
 	@Override
 	public Document queryPartnerDetails(
 			PartnerConfiguration partnerConfiguration,
-			DocumentBadgeList documents, PartnerdataLogger logger)
+			DocumentBadge document, PartnerdataLogger logger)
 			throws IOException {
 		// TODO Auto-generated method stub
 		return null;

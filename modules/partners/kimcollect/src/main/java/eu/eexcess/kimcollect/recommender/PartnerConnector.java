@@ -36,7 +36,7 @@ import eu.eexcess.dataformats.result.DocumentBadgeList;
 import eu.eexcess.dataformats.result.ResultList;
 import eu.eexcess.dataformats.userprofile.SecureUserProfile;
 import eu.eexcess.partnerdata.reference.PartnerdataLogger;
-import eu.eexcess.partnerrecommender.api.PartnerConfigurationEnum;
+import eu.eexcess.partnerrecommender.api.PartnerConfigurationCache;
 import eu.eexcess.partnerrecommender.api.PartnerConnectorApi;
 import eu.eexcess.partnerrecommender.api.QueryGeneratorApi;
 
@@ -71,11 +71,11 @@ public class PartnerConnector implements PartnerConnectorApi {
 	try {	
 	    
 //        ClientConfig config = new DefaultClientConfig();
-        Client client = new Client(PartnerConfigurationEnum.CONFIG.getClientDefault());
+        Client client = new Client(PartnerConfigurationCache.CONFIG.getClientDefault());
 
 //        client.addFilter(new HTTPBasicAuthFilter(partnerConfiguration.userName, partnerConfiguration.password));
 
-        queryGenerator = PartnerConfigurationEnum.CONFIG.getQueryGenerator();
+        queryGenerator = PartnerConfigurationCache.CONFIG.getQueryGenerator(partnerConfiguration.queryGeneratorClass);
 		
         String query = getQueryGenerator().toQuery(userProfile);
         
@@ -103,7 +103,7 @@ public class PartnerConnector implements PartnerConnectorApi {
 	@Override
 	public Document queryPartnerDetails(
 			PartnerConfiguration partnerConfiguration,
-			DocumentBadgeList documents, PartnerdataLogger logger)
+			DocumentBadge document, PartnerdataLogger logger)
 			throws IOException {
 		// TODO Auto-generated method stub
 		return null;

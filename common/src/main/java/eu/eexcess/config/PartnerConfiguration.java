@@ -38,7 +38,6 @@ public class PartnerConfiguration extends PartnerBadge {
 	public String detailEndpoint;
 	
     public String partnerConnectorClass;
-    public String queryGeneratorClass; // = LuceneQueryGenerator.class.getName();   
     
     
     /** 

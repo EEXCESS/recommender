@@ -22,40 +22,34 @@ import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import javax.ws.rs.core.MediaType;
-
 import org.apache.commons.lang.text.StrSubstitutor;
 import org.w3c.dom.Document;
 
 import com.sun.jersey.api.client.Client;
-import com.sun.jersey.api.client.WebResource;
-import com.sun.jersey.api.client.WebResource.Builder;
 
 import eu.eexcess.config.PartnerConfiguration;
 import eu.eexcess.dataformats.result.DocumentBadge;
-import eu.eexcess.dataformats.result.DocumentBadgeList;
 import eu.eexcess.dataformats.result.ResultList;
 import eu.eexcess.dataformats.userprofile.SecureUserProfile;
 import eu.eexcess.partnerdata.api.EEXCESSDataTransformationException;
 import eu.eexcess.partnerdata.reference.PartnerdataLogger;
 import eu.eexcess.partnerdata.reference.XMLTools;
-import eu.eexcess.partnerrecommender.api.PartnerConfigurationEnum;
+import eu.eexcess.partnerrecommender.api.PartnerConfigurationCache;
 import eu.eexcess.partnerrecommender.api.PartnerConnectorApi;
 import eu.eexcess.partnerrecommender.api.QueryGeneratorApi;
 import eu.eexcess.partnerrecommender.reference.PartnerConnectorBase;
 import eu.eexcess.utils.URLParamEncoder;
 
 /**
- * Query generator for Europeana.
+ * Query generator for DDB.
  * 
- * @author plopez@know-center.at
+ * @author thomas.orgel@joanneum.at
  */
 
 public class PartnerConnector extends PartnerConnectorBase implements PartnerConnectorApi {
@@ -86,9 +80,9 @@ public class PartnerConnector extends PartnerConnectorBase implements PartnerCon
     
 	@Override
 	public Document queryPartner(PartnerConfiguration partnerConfiguration, SecureUserProfile userProfile, PartnerdataLogger logger) throws IOException {
-    	String key= PartnerConfigurationEnum.CONFIG.getPartnerConfiguration().apiKey;
 
 //	       final String url = "https://api.deutsche-digitale-bibliothek.de/items/OAXO2AGT7YH35YYHN3YKBXJMEI77W3FF/view";
+	        final String key = PartnerConfigurationCache.CONFIG.getPartnerConfiguration().apiKey;
 	         
 	        // get XML data via HTTP request header authentication
 	         /*
@@ -121,16 +115,8 @@ public class PartnerConnector extends PartnerConnectorBase implements PartnerCon
 //        config.getClasses().add(JacksonJsonProvider.class);
 //        
         //final Client client = new Client(PartnerConfigurationEnum.CONFIG.getClientJacksonJson());
-        try {
-			queryGenerator = (QueryGeneratorApi)Class.forName(partnerConfiguration.queryGeneratorClass).newInstance();
-		} catch (InstantiationException | IllegalAccessException
-				| ClassNotFoundException e) {
-			// TODO add logger!
-			log.log(Level.INFO,"Error getting Query Generator",e);
-			
-		}
-		
-        String query = getQueryGenerator().toQuery(userProfile);
+        queryGenerator = PartnerConfigurationCache.CONFIG.getQueryGenerator(partnerConfiguration.queryGeneratorClass);
+		String query = getQueryGenerator().toQuery(userProfile);
         long start = System.currentTimeMillis();
 		
         Map<String, String> valuesMap = new HashMap<String, String>();
@@ -309,9 +295,9 @@ public class PartnerConnector extends PartnerConnectorBase implements PartnerCon
 			throws IOException {
 		// Configure
 		try {	
-	    	String key= PartnerConfigurationEnum.CONFIG.getPartnerConfiguration().apiKey;
+	    	String key= PartnerConfigurationCache.CONFIG.getPartnerConfiguration().apiKey;
 
-	        queryGenerator = PartnerConfigurationEnum.CONFIG.getQueryGenerator();
+	        queryGenerator = PartnerConfigurationCache.CONFIG.getQueryGenerator(partnerConfiguration.queryGeneratorClass);;
 			
 	        String detailQuery = getQueryGenerator().toDetailQuery(document);
 	        

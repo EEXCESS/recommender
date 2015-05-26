@@ -36,6 +36,7 @@ import com.sun.jersey.api.client.ClientResponse;
 import com.sun.jersey.api.client.WebResource;
 
 import eu.eexcess.config.PartnerConfiguration;
+import eu.eexcess.dataformats.result.DocumentBadge;
 import eu.eexcess.dataformats.result.DocumentBadgeList;
 import eu.eexcess.dataformats.result.ResultList;
 import eu.eexcess.dataformats.userprofile.SecureUserProfile;
@@ -47,7 +48,7 @@ import eu.eexcess.opensearch.recommender.dataformat.OpensearchResultListBuilder;
 import eu.eexcess.opensearch.recommender.searchLink.SearchLinkFilter;
 import eu.eexcess.opensearch.recommender.searchLink.SearchLinkSelector;
 import eu.eexcess.partnerdata.reference.PartnerdataLogger;
-import eu.eexcess.partnerrecommender.api.PartnerConfigurationEnum;
+import eu.eexcess.partnerrecommender.api.PartnerConfigurationCache;
 import eu.eexcess.partnerrecommender.api.PartnerConnectorApi;
 import eu.eexcess.partnerrecommender.reference.PartnerConnectorBase;
 
@@ -78,12 +79,12 @@ public class PartnerConnector extends PartnerConnectorBase implements PartnerCon
 					throws IOException {
 		partnerConfig = partnerConfiguration;
 
-		if (PartnerConfigurationEnum.CONFIG.getIntializedFlag() == false) {
+		if (PartnerConfigurationCache.CONFIG.getIntializedFlag() == false) {
 			descriptionDocument = readOpensearchDescriptionDocument(partnerConfiguration.searchEndpoint);
-			PartnerConfigurationEnum.CONFIG.setIntializedFlag(bootstrapSearchEndpoint(descriptionDocument));
+			PartnerConfigurationCache.CONFIG.setIntializedFlag(bootstrapSearchEndpoint(descriptionDocument));
 		}
-
-		String query = PartnerConfigurationEnum.CONFIG.getQueryGenerator().toQuery(userProfile);
+		
+		String query = PartnerConfigurationCache.CONFIG.getQueryGenerator(partnerConfiguration.queryGeneratorClass).toQuery(userProfile);
 		return fetchSearchResults(query, descriptionDocument);
 	}
 
@@ -133,7 +134,7 @@ public class PartnerConnector extends PartnerConnectorBase implements PartnerCon
 	 */
 	private ResultList fetchSearchResults(String query, OpensearchDescription descriptionDocument) {
 
-		Client client = new Client(PartnerConfigurationEnum.CONFIG.getClientJacksonJson());
+		Client client = new Client(PartnerConfigurationCache.CONFIG.getClientJacksonJson());
 		String searchRequestUrl = injectSearchQuery(partnerConfig.searchEndpoint, query);
 
 		WebResource documentResource = client.resource(searchRequestUrl);
@@ -189,7 +190,7 @@ public class PartnerConnector extends PartnerConnectorBase implements PartnerCon
 		OpensearchDescription document = null;
 
 		try {
-			Client client = PartnerConfigurationEnum.CONFIG.getClientDefault();
+			Client client = PartnerConfigurationCache.CONFIG.getClientDefault();
 			WebResource documentResource = client.resource(searchEndpoint);
 			ClientResponse response = documentResource.accept(MediaType.APPLICATION_XML_TYPE).get(ClientResponse.class);
 
@@ -220,7 +221,7 @@ public class PartnerConnector extends PartnerConnectorBase implements PartnerCon
 	@Override
 	public Document queryPartnerDetails(
 			PartnerConfiguration partnerConfiguration,
-			DocumentBadgeList documents, PartnerdataLogger logger)
+			DocumentBadge document, PartnerdataLogger logger)
 			throws IOException {
 		// TODO Auto-generated method stub
 		return null;

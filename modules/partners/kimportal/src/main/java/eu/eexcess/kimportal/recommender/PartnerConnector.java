@@ -34,7 +34,7 @@ import eu.eexcess.dataformats.result.DocumentBadge;
 import eu.eexcess.dataformats.result.ResultList;
 import eu.eexcess.dataformats.userprofile.SecureUserProfile;
 import eu.eexcess.partnerdata.reference.PartnerdataLogger;
-import eu.eexcess.partnerrecommender.api.PartnerConfigurationEnum;
+import eu.eexcess.partnerrecommender.api.PartnerConfigurationCache;
 import eu.eexcess.partnerrecommender.api.PartnerConnectorApi;
 import eu.eexcess.partnerrecommender.api.QueryGeneratorApi;
 
@@ -66,9 +66,9 @@ public class PartnerConnector implements PartnerConnectorApi {
 	public Document queryPartner(PartnerConfiguration partnerConfiguration, SecureUserProfile userProfile, PartnerdataLogger logger) throws IOException {
 		// Configure
 		try {	
-	        Client client = new Client(PartnerConfigurationEnum.CONFIG.getClientDefault());
+	        Client client = new Client(PartnerConfigurationCache.CONFIG.getClientDefault());
 	
-	        queryGenerator = PartnerConfigurationEnum.CONFIG.getQueryGenerator();
+	        queryGenerator = PartnerConfigurationCache.CONFIG.getQueryGenerator(partnerConfiguration.queryGeneratorClass);
 			
 	        String query = getQueryGenerator().toQuery(userProfile);
 	        
@@ -99,9 +99,9 @@ public class PartnerConnector implements PartnerConnectorApi {
 			throws IOException {
 		// Configure
 		try {	
-	        Client client = new Client(PartnerConfigurationEnum.CONFIG.getClientDefault());
+	        Client client = new Client(PartnerConfigurationCache.CONFIG.getClientDefault());
 	
-	        queryGenerator = PartnerConfigurationEnum.CONFIG.getQueryGenerator();
+	        queryGenerator = PartnerConfigurationCache.CONFIG.getQueryGenerator(partnerConfiguration.queryGeneratorClass);
 			
 	        String detailQuery = getQueryGenerator().toDetailQuery(document);
 	        

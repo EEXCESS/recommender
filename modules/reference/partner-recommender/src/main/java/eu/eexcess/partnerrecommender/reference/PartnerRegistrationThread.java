@@ -14,7 +14,7 @@ import com.sun.jersey.client.urlconnection.URLConnectionClientHandler;
 
 import eu.eexcess.config.PartnerConfiguration;
 import eu.eexcess.dataformats.PartnerBadge;
-import eu.eexcess.partnerrecommender.api.PartnerConfigurationEnum;
+import eu.eexcess.partnerrecommender.api.PartnerConfigurationCache;
 
 public class PartnerRegistrationThread implements Runnable{
 	private static final long timeout = 2000000;
@@ -28,7 +28,7 @@ public class PartnerRegistrationThread implements Runnable{
 	@Override
 	public void run() {
 		
-		PartnerBadge badge =PartnerConfigurationEnum.CONFIG.getBadge();
+		PartnerBadge badge =PartnerConfigurationCache.CONFIG.getBadge();
 		DefaultClientConfig jClientconfig = new DefaultClientConfig();
 		jClientconfig.getClasses().add(JacksonJsonProvider.class);
 		
@@ -43,7 +43,7 @@ public class PartnerRegistrationThread implements Runnable{
 			builder.type(MediaType.APPLICATION_JSON).post( badge);
 			} 
 		catch (com.sun.jersey.api.client.UniformInterfaceException|com.sun.jersey.api.client.ClientHandlerException e) {
-				logger.log(Level.SEVERE,"Could not register client "+badge.getSystemId()+ " at "+PartnerConfigurationEnum.CONFIG.getPartnerConfiguration().federatedRecommenderURI +" retrying in "+timeout+"ms",e);
+				logger.log(Level.SEVERE,"Could not register client "+badge.getSystemId()+ " at "+PartnerConfigurationCache.CONFIG.getPartnerConfiguration().federatedRecommenderURI +" retrying in "+timeout+"ms",e);
 			}
 		try {
 			Thread.sleep(timeout);
