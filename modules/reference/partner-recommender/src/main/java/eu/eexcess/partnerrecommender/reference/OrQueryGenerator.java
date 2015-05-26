@@ -22,6 +22,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 package eu.eexcess.partnerrecommender.reference;
 
+import eu.eexcess.dataformats.result.DocumentBadge;
 import eu.eexcess.dataformats.userprofile.ContextKeyword;
 import eu.eexcess.dataformats.userprofile.SecureUserProfile;
 import eu.eexcess.partnerrecommender.api.QueryGeneratorApi;
@@ -43,6 +44,11 @@ public class OrQueryGenerator implements QueryGeneratorApi{
 	            builder.append('\"');
         }
 		return builder.toString();
+	}
+
+	@Override
+	public String toDetailQuery(DocumentBadge document) {
+		return document.id;
 	}
 
 }

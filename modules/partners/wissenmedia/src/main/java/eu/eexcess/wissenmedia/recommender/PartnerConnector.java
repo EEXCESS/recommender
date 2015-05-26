@@ -18,7 +18,6 @@ package eu.eexcess.wissenmedia.recommender;
 
 import java.io.IOException;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import javax.ws.rs.core.MediaType;
@@ -33,6 +32,7 @@ import com.sun.jersey.api.client.filter.HTTPBasicAuthFilter;
 
 import eu.eexcess.config.PartnerConfiguration;
 import eu.eexcess.dataformats.result.DocumentBadge;
+import eu.eexcess.dataformats.result.DocumentBadgeList;
 import eu.eexcess.dataformats.result.ResultList;
 import eu.eexcess.dataformats.userprofile.SecureUserProfile;
 import eu.eexcess.partnerdata.reference.PartnerdataLogger;
@@ -102,12 +102,34 @@ public class PartnerConnector implements PartnerConnectorApi {
 	}
 
 	@Override
-	public Document queryPartnerDetails(
-			PartnerConfiguration partnerConfiguration,
-			List<DocumentBadge> documents, PartnerdataLogger logger)
+	public Document queryPartnerDetails(PartnerConfiguration partnerConfiguration,
+			DocumentBadge document, PartnerdataLogger logger)
 			throws IOException {
-		// TODO Auto-generated method stub
-		return null;
+		// Configure
+		try {	
+	        Client client = new Client(PartnerConfigurationCache.CONFIG.getClientDefault());
+	
+	        client.addFilter(new HTTPBasicAuthFilter(partnerConfiguration.userName, partnerConfiguration.password));
+
+	        queryGenerator = PartnerConfigurationCache.CONFIG.getQueryGenerator(partnerConfiguration.queryGeneratorClass);;
+			
+	        String detailQuery = getQueryGenerator().toDetailQuery(document);
+	        
+	        Map<String, String> valuesMap = new HashMap<String, String>();
+	        valuesMap.put("detailQuery", detailQuery);
+	        
+	        String searchRequest = StrSubstitutor.replace(partnerConfiguration.detailEndpoint, valuesMap);
+	        
+	        WebResource service = client.resource(searchRequest);
+	       
+	        Builder builder = service.accept(MediaType.APPLICATION_XML);
+	        client.destroy();
+	        return builder.get(Document.class);
+		}
+		catch (Exception e) {
+				throw new IOException("Cannot query partner REST API!", e);
+		}
 	}
+
 
 }

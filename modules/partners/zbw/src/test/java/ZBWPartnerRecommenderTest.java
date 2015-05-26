@@ -24,6 +24,7 @@ import java.util.ArrayList;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
+import eu.eexcess.dataformats.result.DocumentBadgeList;
 import eu.eexcess.dataformats.result.ResultList;
 import eu.eexcess.zbw.webservice.tool.PartnerStandaloneServer;
 import eu.eexcess.partnerrecommender.test.PartnerRecommenderTestHelper;
@@ -31,6 +32,8 @@ import eu.eexcess.partnerrecommender.test.PartnerRecommenderTestHelper;
 
 public class ZBWPartnerRecommenderTest {
 
+	private static final String DEPLOYMENT_CONTEXT = "eexcess-partner-zbw-1.0-SNAPSHOT";
+	private static final String DATAPROVIDER = "ZBW";
 	private static int port = 8812;
 	private static PartnerStandaloneServer server;
 	
@@ -49,7 +52,7 @@ public class ZBWPartnerRecommenderTest {
 	public void singleQueryWomenWorkforceChina() {
 		ArrayList<String> keywords = new ArrayList<String>();
 		keywords.add("women workforce china");
-		ResultList resultList = PartnerRecommenderTestHelper.getRecommendations("eexcess-partner-zbw-1.0-SNAPSHOT",	
+		ResultList resultList = PartnerRecommenderTestHelper.getRecommendations(DEPLOYMENT_CONTEXT,	
 				port, PartnerRecommenderTestHelper.createParamsForPartnerRecommender(20, keywords));
 	    
         assertNotNull(resultList);
@@ -62,7 +65,7 @@ public class ZBWPartnerRecommenderTest {
 	public void singleQueryFrauenarbeit() {
 		ArrayList<String> keywords = new ArrayList<String>();
 		keywords.add("frauenarbeit");
-		ResultList resultList = PartnerRecommenderTestHelper.getRecommendations("eexcess-partner-zbw-1.0-SNAPSHOT",	
+		ResultList resultList = PartnerRecommenderTestHelper.getRecommendations(DEPLOYMENT_CONTEXT,	
 				port, PartnerRecommenderTestHelper.createParamsForPartnerRecommender(20, keywords));
 	    
         assertNotNull(resultList);
@@ -75,7 +78,7 @@ public class ZBWPartnerRecommenderTest {
 	public void singleQueryserendipity() {
 		ArrayList<String> keywords = new ArrayList<String>();
 		keywords.add("serendipity");
-		ResultList resultList = PartnerRecommenderTestHelper.getRecommendations("eexcess-partner-zbw-1.0-SNAPSHOT",	
+		ResultList resultList = PartnerRecommenderTestHelper.getRecommendations(DEPLOYMENT_CONTEXT,	
 				port, PartnerRecommenderTestHelper.createParamsForPartnerRecommender(20, keywords));
 	    
         assertNotNull(resultList);
@@ -92,7 +95,7 @@ public class ZBWPartnerRecommenderTest {
 		keywords.add("china");
 		keywords.add("Arbeitsbedingungen");
 		keywords.add("Geschlechterrolle");
-		ResultList resultList = PartnerRecommenderTestHelper.getRecommendations("eexcess-partner-zbw-1.0-SNAPSHOT",	
+		ResultList resultList = PartnerRecommenderTestHelper.getRecommendations(DEPLOYMENT_CONTEXT,	
 				port, PartnerRecommenderTestHelper.createParamsForPartnerRecommender(20, keywords));
 	    
         assertNotNull(resultList);
@@ -100,4 +103,53 @@ public class ZBWPartnerRecommenderTest {
         assertEquals(20, resultList.results.size());
 
 	}
+	
+	@Test
+	public void detailCall() {
+        ArrayList<String> ids = new ArrayList<String>();
+		ArrayList<String> uris = new ArrayList<String>();
+        ids.add("10010480352");
+        uris.add("http://www.econbiz.de/Record/10010480352");
+        ids.add("10010432231");
+        uris.add("http://www.econbiz.de/Record/10010432231");
+        DocumentBadgeList documentDetails = PartnerRecommenderTestHelper.getDetails(DEPLOYMENT_CONTEXT,	
+        		port, 
+        		PartnerRecommenderTestHelper.createParamsForPartnerRecommenderDetailCall(ids, uris, DATAPROVIDER));
+	    
+        assertNotNull(documentDetails);
+        assertTrue(documentDetails.documentBadges.size() > 0 );
+        assertEquals(2, documentDetails.documentBadges.size());
+
+	}
+
+	@Test
+	public void singleQueryFrauenarbeitChinaArbeitsbedingungenGeschlechterrolleWithDetails() {
+		ArrayList<String> keywords = new ArrayList<String>();
+		keywords.add("frauenarbeit");
+		keywords.add("china");
+		keywords.add("Arbeitsbedingungen");
+		keywords.add("Geschlechterrolle");
+        ResultList resultList = PartnerRecommenderTestHelper.getRecommendations(DEPLOYMENT_CONTEXT,	
+        		port, 
+        		PartnerRecommenderTestHelper.createParamsForPartnerRecommender(20,keywords ));
+	    
+        assertNotNull(resultList);
+        assertTrue(resultList.results.size() > 0 );
+        assertEquals(20, resultList.results.size());
+        for (int i = 0; i < resultList.results.size(); i++) {
+            ArrayList<String> ids = new ArrayList<String>();
+    		ArrayList<String> uris = new ArrayList<String>();
+            ids.add(resultList.results.get(i).documentBadge.id);
+            uris.add(resultList.results.get(i).documentBadge.uri);
+            DocumentBadgeList documentDetails = PartnerRecommenderTestHelper.getDetails(DEPLOYMENT_CONTEXT,	
+            		port, 
+            		PartnerRecommenderTestHelper.createParamsForPartnerRecommenderDetailCall(ids, uris, DATAPROVIDER));
+    	    
+            assertNotNull(documentDetails);
+            assertTrue(documentDetails.documentBadges.size() > 0 );
+            assertEquals(1, documentDetails.documentBadges.size());
+		}
+	}
+	
+	
 }

@@ -20,13 +20,10 @@ package eu.eexcess.wikipedialocal.recommender;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.List;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.analysis.en.EnglishAnalyzer;
-import org.apache.lucene.analysis.standard.StandardAnalyzer;
 import org.apache.lucene.index.IndexReader;
 import org.apache.lucene.index.IndexableField;
 import org.apache.lucene.queryparser.classic.MultiFieldQueryParser;
@@ -39,11 +36,11 @@ import org.apache.lucene.search.ScoreDoc;
 import org.apache.lucene.search.TopDocs;
 import org.apache.lucene.store.Directory;
 import org.apache.lucene.store.FSDirectory;
-import org.apache.lucene.util.Version;
 import org.w3c.dom.Document;
 
 import eu.eexcess.config.PartnerConfiguration;
 import eu.eexcess.dataformats.result.DocumentBadge;
+import eu.eexcess.dataformats.result.DocumentBadgeList;
 import eu.eexcess.dataformats.result.Result;
 import eu.eexcess.dataformats.result.ResultList;
 import eu.eexcess.dataformats.userprofile.SecureUserProfile;
@@ -133,7 +130,7 @@ public class PartnerConnector extends PartnerConnectorBase implements PartnerCon
 	@Override
 	public Document queryPartnerDetails(
 			PartnerConfiguration partnerConfiguration,
-			List<DocumentBadge> documents, PartnerdataLogger logger)
+			DocumentBadge document, PartnerdataLogger logger)
 			throws IOException {
 		// TODO Auto-generated method stub
 		return null;

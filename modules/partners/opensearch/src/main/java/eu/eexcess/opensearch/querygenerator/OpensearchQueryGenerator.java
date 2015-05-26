@@ -25,6 +25,7 @@ import java.util.logging.Logger;
 
 import org.apache.commons.lang.CharEncoding;
 
+import eu.eexcess.dataformats.result.DocumentBadge;
 import eu.eexcess.dataformats.userprofile.ContextKeyword;
 import eu.eexcess.dataformats.userprofile.SecureUserProfile;
 import eu.eexcess.opensearch.recommender.PartnerConnector;
@@ -71,6 +72,12 @@ public class OpensearchQueryGenerator implements QueryGeneratorApi {
 		}
 
 		return urlEncodedKeywords;
+	}
+
+	@Override
+	public String toDetailQuery(DocumentBadge document) {
+		// TODO Auto-generated method stub
+		return null;
 	}
 
 }

@@ -4,6 +4,7 @@
   "queryGeneratorClass": "eu.eexcess.partnerrecommender.reference.LuceneQueryGenerator",
   "isTransformedNative": "false",
   "searchEndpoint": "http://service.wissens-server.com/wissensserver/view.html?a=s&t=${query}&w=EEXCESS&l=${numResults}&fields=substanz-id,artikeltyp,first_published_date,geschlecht,last_published_date,lang,lat,long,searchtags,epoche,tempstart-iso8601,tempend-iso8601,dailyarticle_date,wservice-fachgebiet-texttree,ws-uri,preview-image&cdata=false&fq=wservice-searchtype:textsuche&p=intro&v=eexcess&r=CURRENT",
+  "detailEndpoint": "http://service.wissens-server.com/wissensserver/view.html?a=s&t=artikel-id:${detailQuery}&w=EEXCESS&fields=substanz-id,artikeltyp,first_published_date,geschlecht,last_published_date,lang,lat,long,searchtags,epoche,tempstart-iso8601,tempend-iso8601,dailyarticle_date,wservice-fachgebiet-texttree,ws-uri,preview-image&cdata=false&fq=wservice-searchtype:textsuche&p=intro&v=eexcess&r=CURRENT",
   "userName": "",
   "password": "",
   "transformerClass": "eu.eexcess.wissenmedia.recommender.WissenmediaTransformer",

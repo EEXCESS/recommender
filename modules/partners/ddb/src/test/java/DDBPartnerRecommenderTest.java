@@ -24,6 +24,7 @@ import java.util.ArrayList;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
+import eu.eexcess.dataformats.result.DocumentBadgeList;
 import eu.eexcess.dataformats.result.ResultList;
 import eu.eexcess.ddb.webservice.tool.PartnerStandaloneServer;
 import eu.eexcess.partnerrecommender.test.PartnerRecommenderTestHelper;
@@ -31,6 +32,8 @@ import eu.eexcess.partnerrecommender.test.PartnerRecommenderTestHelper;
 
 public class DDBPartnerRecommenderTest {
 
+	private static final String DEPLOYMENT_CONTEXT = "eexcess-partner-ddb-1.0-SNAPSHOT";
+	private static final String DATAPROVIDER = "Deutsche Digitale Bibliothek";
 	private static int port = 8812;
 	private static PartnerStandaloneServer server;
 	
@@ -49,7 +52,7 @@ public class DDBPartnerRecommenderTest {
 	public void singleQueryGoethe() {
 		ArrayList<String> keywords = new ArrayList<String>();
 		keywords.add("goethe");
-        ResultList resultList = PartnerRecommenderTestHelper.getRecommendations("eexcess-partner-ddb-1.0-SNAPSHOT",	
+        ResultList resultList = PartnerRecommenderTestHelper.getRecommendations(DEPLOYMENT_CONTEXT,	
         		port, 
         		PartnerRecommenderTestHelper.createParamsForPartnerRecommender(20,keywords ));
 	    
@@ -57,6 +60,51 @@ public class DDBPartnerRecommenderTest {
         assertTrue(resultList.results.size() > 0 );
         assertEquals(20, resultList.results.size());
 
+	}
+
+	
+	@Test
+	public void detailCall() {
+        ArrayList<String> ids = new ArrayList<String>();
+		ArrayList<String> uris = new ArrayList<String>();
+        ids.add("WV2X3T5D7ZIS4RJHRH3IDR367ERXT54X");
+        uris.add("https://www.deutsche-digitale-bibliothek.de/item/WV2X3T5D7ZIS4RJHRH3IDR367ERXT54X");
+        ids.add("LDXEDWTZB35GHAXYDNVTZBK2JDHIROPP");
+        uris.add("https://www.deutsche-digitale-bibliothek.de/item/LDXEDWTZB35GHAXYDNVTZBK2JDHIROPP");
+        DocumentBadgeList documentDetails = PartnerRecommenderTestHelper.getDetails(DEPLOYMENT_CONTEXT,	
+        		port, 
+        		PartnerRecommenderTestHelper.createParamsForPartnerRecommenderDetailCall(ids, uris, DATAPROVIDER));
+	    
+        assertNotNull(documentDetails);
+        assertTrue(documentDetails.documentBadges.size() > 0 );
+        assertEquals(2, documentDetails.documentBadges.size());
+
+	}
+	
+	@Test
+	public void singleGoetheWithDetails() {
+		ArrayList<String> keywords = new ArrayList<String>();
+		keywords.add("goethe");
+		ResultList resultList = PartnerRecommenderTestHelper.getRecommendations(DEPLOYMENT_CONTEXT,	
+        		port, 
+        		PartnerRecommenderTestHelper.createParamsForPartnerRecommender(20,keywords ));
+	    
+        assertNotNull(resultList);
+        assertTrue(resultList.results.size() > 0 );
+        assertEquals(20, resultList.results.size());
+        for (int i = 0; i < resultList.results.size(); i++) {
+            ArrayList<String> ids = new ArrayList<String>();
+    		ArrayList<String> uris = new ArrayList<String>();
+            ids.add(resultList.results.get(i).documentBadge.id);
+            uris.add("");//resultList.results.get(i).documentBadge.uri
+            DocumentBadgeList documentDetails = PartnerRecommenderTestHelper.getDetails(DEPLOYMENT_CONTEXT,	
+            		port, 
+            		PartnerRecommenderTestHelper.createParamsForPartnerRecommenderDetailCall(ids, uris, DATAPROVIDER));
+    	    
+            assertNotNull(documentDetails);
+            assertTrue(documentDetails.documentBadges.size() > 0 );
+            assertEquals(1, documentDetails.documentBadges.size());
+		}
 	}
 
 }

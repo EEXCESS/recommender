@@ -32,6 +32,7 @@ import com.sun.jersey.api.client.WebResource.Builder;
 
 import eu.eexcess.config.PartnerConfiguration;
 import eu.eexcess.dataformats.result.DocumentBadge;
+import eu.eexcess.dataformats.result.DocumentBadgeList;
 import eu.eexcess.dataformats.result.ResultList;
 import eu.eexcess.dataformats.userprofile.SecureUserProfile;
 import eu.eexcess.partnerdata.reference.PartnerdataLogger;
@@ -102,7 +103,7 @@ public class PartnerConnector implements PartnerConnectorApi {
 	@Override
 	public Document queryPartnerDetails(
 			PartnerConfiguration partnerConfiguration,
-			List<DocumentBadge> documents, PartnerdataLogger logger)
+			DocumentBadge document, PartnerdataLogger logger)
 			throws IOException {
 		// TODO Auto-generated method stub
 		return null;

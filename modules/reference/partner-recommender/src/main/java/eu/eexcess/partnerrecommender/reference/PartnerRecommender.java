@@ -23,34 +23,24 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 package eu.eexcess.partnerrecommender.reference;
 
 import java.io.IOException;
-import java.util.List;
+import java.util.LinkedList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-
+import org.json.XML;
 import org.w3c.dom.Document;
-
-
-//import com.hp.hpl.jena.ontology.OntModel;
-//import com.hp.hpl.jena.query.Query;
-//import com.hp.hpl.jena.query.QueryExecution;
-//import com.hp.hpl.jena.query.QueryExecutionFactory;
-//import com.hp.hpl.jena.query.QueryFactory;
-//import com.hp.hpl.jena.query.QuerySolution;
-//import com.hp.hpl.jena.query.ResultSet;
-//import com.hp.hpl.jena.query.ResultSetFormatter;
-//import com.hp.hpl.jena.rdf.model.Literal;
-//import com.hp.hpl.jena.rdf.model.ModelFactory;
-//import com.hp.hpl.jena.rdf.model.Resource;
-//import com.hp.hpl.jena.rdf.model.Statement;
 import eu.eexcess.config.PartnerConfiguration;
 import eu.eexcess.dataformats.result.DocumentBadge;
+import eu.eexcess.dataformats.result.DocumentBadgeList;
+import eu.eexcess.dataformats.result.Result;
 import eu.eexcess.dataformats.result.ResultList;
 import eu.eexcess.dataformats.result.ResultStats;
 import eu.eexcess.dataformats.userprofile.SecureUserProfile;
+import eu.eexcess.partnerdata.api.EEXCESSDataTransformationException;
 import eu.eexcess.partnerdata.api.IEnrichment;
 import eu.eexcess.partnerdata.api.ITransformer;
 import eu.eexcess.partnerdata.reference.PartnerdataLogger;
 import eu.eexcess.partnerdata.reference.PartnerdataTracer;
+import eu.eexcess.partnerdata.reference.XMLTools;
 import eu.eexcess.partnerrecommender.api.PartnerConfigurationCache;
 import eu.eexcess.partnerrecommender.api.PartnerConnectorApi;
 import eu.eexcess.partnerrecommender.api.PartnerRecommenderApi;
@@ -137,6 +127,8 @@ public class PartnerRecommender implements PartnerRecommenderApi {
             ResultList recommendations = new ResultList();
             if (queryHasResults)
             	recommendations = transformer.toResultList(searchResultsNative, enrichedResultsExcess, partnerdataLogger);
+            else 
+            	recommendations.results = new LinkedList<Result>();
             partnerdataLogger.addResults(recommendations);
         	partnerdataLogger.getActLogEntry().end();
             partnerdataLogger.save();
@@ -158,10 +150,81 @@ public class PartnerRecommender implements PartnerRecommenderApi {
      * @throws IOException
      */
 	@Override
-	public List<DocumentBadge> getDetails(List<DocumentBadge> documents)
+	public DocumentBadgeList getDetails(DocumentBadgeList documents)
 			throws IOException {
-		partnerConnector.queryPartnerDetails(partnerConfiguration, documents, null); //TODO: do we need the logger?
-		return documents;
+        PartnerdataLogger partnerdataLogger = new PartnerdataLogger(partnerConfiguration);
+    	partnerdataLogger.getActLogEntry().start();
+
+    	
+    	for (int i = 0; i < documents.documentBadges.size(); i++) {
+            try {
+	    		DocumentBadge document = documents.documentBadges.get(i);
+	    		Document detailResultNative = partnerConnector.queryPartnerDetails(partnerConfiguration, document, partnerdataLogger);
+	        	/*
+	        	 *  Transform Document in partner format to EEXCESS RDF format
+	        	 */
+	            long startTransform1 = System.currentTimeMillis();
+				//partnerdataLogger.addQuery(userProfile);
+				Document detailResultEexcess = transformer.transformDetail(detailResultNative, partnerdataLogger);
+				String rdfXML = XMLTools.getStringFromDocument(detailResultEexcess);
+				
+//		   		StringReader stream = new StringReader(document.details);
+//		   		OntModel model = ModelFactory.createOntologyModel(); 
+//				model.read(stream,null);
+//				document.detailsRDF = XMLTools.writeModel(model);
+//				document.detailsJSONLD = XMLTools.writeModelJsonLD(model);
+				
+				String json = XML.toJSONObject(rdfXML).toString();
+				json = json.replaceAll("\"rdf:", "\"rdf");
+				json = json.replaceAll("\"rdfs:", "\"rdfs");
+				json = json.replaceAll("\"eexcess:", "\"eexcess");
+				json = json.replaceAll("\"dc:", "\"dc");
+				json = json.replaceAll("\"dcterms:", "\"dcterms");
+				json = json.replaceAll("\"edm:", "\"edm");
+				json = json.replaceAll("\"ore:", "\"ore");
+				json = json.replaceAll("\"owl:", "\"owl");
+				json = json.replaceAll("\"foaf:", "\"foaf");
+				json = json.replaceAll("\"xsd:", "\"xsd");
+				json = json.replaceAll("\"xmlns:", "\"xmlns");
+				json = json.replaceAll("\"xml:", "\"xml");
+				json = json.replaceAll("\"wgs84:", "\"wgs84");
+
+				document.details = json; 
+						
+				/*
+				String contextJSON = "{\"@context\": {\"aggregatedCHO\": {\"@id\": \"http://www.europeana.eu/schemas/edm/aggregatedCHO\", \"@type\": \"@id\"}, \"collectionName\": \"http://www.europeana.eu/schemas/edm/collectionName\", \"dataProvider\": {\"@id\": \"http://www.europeana.eu/schemas/edm/dataProvider\", \"@type\": \"@id\"}, \"imports\": {\"@id\": \"http://www.w3.org/2002/07/owl#imports\", \"@type\": \"@id\"}, \"isShownAt\": {\"@id\": \"http://www.europeana.eu/schemas/edm/isShownAt\", \"@type\": \"@id\"}, \"isShownBy\": {\"@id\": \"http://www.europeana.eu/schemas/edm/isShownBy\", \"@type\": \"@id\"}, \"preview\": {\"@id\": \"http://www.europeana.eu/schemas/edm/preview\", \"@type\": \"@id\"}, \"provider\": {\"@id\": \"http://www.europeana.eu/schemas/edm/provider\", \"@type\": \"@id\"}, \"rights\": {\"@id\": \"http://www.europeana.eu/schemas/edm/rights\", \"@type\": \"@id\"} } }";
+				final Object contextJson = JSONObject.fromObject(contextJSON) ;
+
+				final com.github.jsonldjava.core.JsonLdOptions options = new com.github.jsonldjava.core.JsonLdOptions();
+				options.format = "application/jsonld";
+
+				Object compact = JsonLdProcessor.compact(new ByteArrayInputStream(XMLTools.writeModelJsonLD(model).getBytes("UTF-8")), contextJson, options);
+				
+				System.out.println(JSONUtils.valueToString(compact));
+				document.details = JSONUtils.valueToString(compact);
+				*/
+	            long endTransform1 = System.currentTimeMillis();
+			} catch (EEXCESSDataTransformationException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+
+		}
+    	
+    	partnerdataLogger.getActLogEntry().end();
+        partnerdataLogger.save();
+/*
+		DocumentBadgeList returnList = new DocumentBadgeList();
+		returnList.documentBadges = new LinkedList<DocumentBadge>();
+		DocumentBadge e =  new DocumentBadge("id", "uri", "provider");
+		returnList.documentBadges.add(e );
+		DocumentBadge e2 =  new DocumentBadge("id1", "uri1", "provider1");
+		returnList.documentBadges.add(e2 );
+		return returnList ;
+		*/
+        PartnerdataTracer.dumpFile(this.getClass(), partnerConfiguration, documents, "partner-recommender-results-details", PartnerdataTracer.FILETYPE.XML, partnerdataLogger);
+
+        return documents;
 	}
 
     /** 

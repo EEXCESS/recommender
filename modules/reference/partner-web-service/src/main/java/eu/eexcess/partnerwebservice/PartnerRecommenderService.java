@@ -32,6 +32,7 @@ import javax.ws.rs.core.MediaType;
 import org.w3c.dom.Document;
 
 import eu.eexcess.dataformats.result.DocumentBadge;
+import eu.eexcess.dataformats.result.DocumentBadgeList;
 import eu.eexcess.dataformats.result.Result;
 import eu.eexcess.dataformats.result.ResultList;
 import eu.eexcess.dataformats.userprofile.ContextKeyword;
@@ -84,7 +85,7 @@ public class PartnerRecommenderService {
 	@Path("/getDetails")
 	@Consumes({MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})
 	@Produces({MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})
-	public List<DocumentBadge> getDetails(List<DocumentBadge> documents)
+	public DocumentBadgeList getDetails(DocumentBadgeList documents)
 			throws IOException {
 		return partnerRecommender.getDetails(documents);
 	}

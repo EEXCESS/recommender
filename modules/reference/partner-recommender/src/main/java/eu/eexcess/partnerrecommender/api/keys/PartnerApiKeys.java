@@ -3,7 +3,6 @@ package eu.eexcess.partnerrecommender.api.keys;
 import java.util.ArrayList;
 
 import eu.eexcess.config.PartnerConfiguration;
-import eu.eexcess.dataformats.PartnerBadge;
 
 public class PartnerApiKeys {
 	

@@ -19,6 +19,7 @@ package eu.eexcess.kimportal.recommender;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 
+import eu.eexcess.dataformats.result.DocumentBadge;
 import eu.eexcess.dataformats.userprofile.ContextKeyword;
 import eu.eexcess.dataformats.userprofile.SecureUserProfile;
 import eu.eexcess.partnerrecommender.api.QueryGeneratorApi;
@@ -40,4 +41,13 @@ public class KIMPortalQueryGenerator implements QueryGeneratorApi {
         return  "("+builder.toString()+")";
     }
 
+	@Override
+	public String toDetailQuery(DocumentBadge document) {
+		if (document.uri.contains("#"))
+			return document.uri.substring(document.uri.lastIndexOf("#")+1);
+		return null;
+	}
+
+    
+    
 }

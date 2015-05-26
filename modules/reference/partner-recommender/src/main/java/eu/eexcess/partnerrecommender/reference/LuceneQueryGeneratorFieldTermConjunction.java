@@ -3,6 +3,7 @@ package eu.eexcess.partnerrecommender.reference;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import eu.eexcess.dataformats.result.DocumentBadge;
 import eu.eexcess.dataformats.userprofile.ContextKeyword;
 import eu.eexcess.dataformats.userprofile.ExpansionType;
 import eu.eexcess.dataformats.userprofile.SecureUserProfile;
@@ -62,6 +63,12 @@ public class LuceneQueryGeneratorFieldTermConjunction implements
 			
 		return result.toString();
 	}
+
+	@Override
+	public String toDetailQuery(DocumentBadge document) {
+		return document.id;
+	}
+
 
 
 }

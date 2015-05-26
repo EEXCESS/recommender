@@ -16,12 +16,14 @@ limitations under the License.
  */
 package eu.eexcess.partnerrecommender.api;
 
+import eu.eexcess.dataformats.result.DocumentBadge;
 import eu.eexcess.dataformats.userprofile.SecureUserProfile;
 
 /**
  * 
  * 
  * @author rkern@know-center.at
+ * @author thomas.orgel@joanneum.at
  */
 public interface QueryGeneratorApi {
     /** 
@@ -30,4 +32,11 @@ public interface QueryGeneratorApi {
      * @return the query as string
      */
     public String toQuery(SecureUserProfile userProfile);
+
+    /** 
+     * Transforms a documentbadge into a detail query in textual representation.
+     * @param userProfile 
+     * @return the query as string
+     */
+    public String toDetailQuery(DocumentBadge document);
 }

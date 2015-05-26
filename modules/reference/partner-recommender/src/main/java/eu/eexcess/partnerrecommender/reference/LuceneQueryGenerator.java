@@ -22,6 +22,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 package eu.eexcess.partnerrecommender.reference;
 
+import eu.eexcess.dataformats.result.DocumentBadge;
 import eu.eexcess.dataformats.userprofile.ContextKeyword;
 import eu.eexcess.dataformats.userprofile.ExpansionType;
 import eu.eexcess.dataformats.userprofile.SecureUserProfile;
@@ -71,6 +72,11 @@ public class LuceneQueryGenerator implements QueryGeneratorApi {
 			result.append(")");
 			
 		return result.toString();
+	}
+
+	@Override
+	public String toDetailQuery(DocumentBadge document) {
+		return document.id;
 	}
 
 //    @Override

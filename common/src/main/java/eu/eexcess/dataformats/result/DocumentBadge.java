@@ -31,7 +31,7 @@ public class DocumentBadge implements Serializable {
 	public String uri;
 	@XmlElement(name = "provider")
 	public String provider;
-	
+
 	@XmlElement(name = "detail")
 	public String details = null;
 	
