@@ -212,11 +212,24 @@ public enum PartnerConfigurationCache {
 	 * @return
 	 */
 	public QueryGeneratorApi getQueryGenerator(String queryGen) {
+		logger.log(Level.INFO,"Query Gen requested:"+ queryGen);
 		if(queryGen==null)
 			return this.defaultQueryGen;
 		QueryGeneratorApi returnGen = queryGeneratorMapping.get(queryGen);
-		if(returnGen==null)
+		if(returnGen==null){
+			try {
+				QueryGeneratorApi queryGenerator =(QueryGeneratorApi) Class.forName(
+						queryGen).newInstance();
+				this.defaultQueryGen = queryGenerator;
+				queryGeneratorMapping.put(partnerConfiguration.queryGeneratorClass,queryGenerator);
+				return queryGenerator;
+			} catch (InstantiationException | IllegalAccessException
+					| ClassNotFoundException e1) {
+				logger.log(Level.SEVERE, "Cannot load query generation class: "+queryGen,
+						e1);
+			}
 			return this.defaultQueryGen;
+		}
 		else
 			return returnGen;
 	}
