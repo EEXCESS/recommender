@@ -55,14 +55,14 @@
 					          <xsl:element name="edm:provider">
 						            <xsl:element name="edm:Agent">
 							              <xsl:attribute name="rdf:about">https://kgapi.bl.ch/</xsl:attribute>
-							              <xsl:element name="foaf:name">KIM.Portal</xsl:element>
+							              <xsl:element name="foaf:name">KIMPortal</xsl:element>
 						            </xsl:element>
 					          </xsl:element>
 
 					          <xsl:element name="edm:dataProvider">
 						            <xsl:element name="edm:Agent">
 							              <xsl:attribute name="rdf:about">https://kgapi.bl.ch/</xsl:attribute>
-							              <xsl:element name="foaf:name">KIM.Portal</xsl:element>
+							              <xsl:element name="foaf:name">KIMPortal</xsl:element>
 						            </xsl:element>
 					          </xsl:element>
 
