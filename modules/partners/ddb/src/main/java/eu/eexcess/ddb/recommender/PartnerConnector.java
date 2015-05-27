@@ -308,6 +308,10 @@ public class PartnerConnector extends PartnerConnectorBase implements PartnerCon
 	        
 	        String httpXMLResult = callDDBAPI(key, searchRequest, "application/xml"); // print results
 	       
+	        // HOFFIX TODO_REMOVE
+	        httpXMLResult = httpXMLResult.replaceAll("<ns4:", "<ns4");
+	        httpXMLResult = httpXMLResult.replaceAll("</ns4:", "</ns4");
+	        
 	        return XMLTools.convertStringToDocument(httpXMLResult);
 		}
 		catch (Exception e) {

@@ -4,18 +4,22 @@
                 xmlns:dc="http://purl.org/dc/elements/1.1/"
                 xmlns:edm="http://www.europeana.eu/schemas/edm/"
                 xmlns:foaf="http://xmlns.com/foaf/0.1/"
-                xmlns:eexcess="http://eexcess.eu/schema/"
                 xmlns:ore="http://www.openarchives.org/ore/terms/"
+                xmlns:eexcess="http://eexcess.eu/schema/"
                 xmlns:dyn="http://exslt.org/dynamic"
                 xmlns:dcterms="http://purl.org/dc/terms/"
+                xmlns:ns2="http://www.deutsche-digitale-bibliothek.de/institution"
                 xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#"
                 xmlns:mpeg7="urn:mpeg:mpeg7:schema:2004"
+                xmlns:ns4="http://www.deutsche-digitale-bibliothek.de/item"
+                xmlns:ns3="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
                 xmlns:xsd="http://www.w3.org/2001/XMLSchema#"
                 xmlns:owl="http://www.w3.org/2002/07/owl#"
                 xmlns:wgs84="http://www.w3.org/2003/01/geo/wgs84-pos/"
                 xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
                 xmlns:skos="http://www.w3.org/2004/02/skos/core#"
                 xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                exclude-result-prefixes="ns2 ns3 ns4"
                 extension-element-prefixes="dyn"
                 version="2.0"
                 xml:base="http://example.org/">
@@ -37,7 +41,7 @@
 			      </xsl:element>
 
 
-			      <xsl:for-each select="/o/results/e/docs/e">
+			      <xsl:for-each select=".">
 			      		<xsl:variable name="mainURI">
 			      			   <xsl:call-template name="Main.URI"/>
 			      		</xsl:variable>
@@ -158,40 +162,50 @@
 
 	  <xsl:template name="Main.Language"/>
 	  <xsl:template name="Main.Title">
-      <apply-templates xmlns="http://www.w3.org/1999/XSL/Transform" mode="m4" select="label"/>
+      <apply-templates xmlns="http://www.w3.org/1999/XSL/Transform"
+                       mode="m2"
+                       select="/cortex/view/ns4item/ns4title"/>
    </xsl:template>
 	  <xsl:template name="Main.Description"/>
 	  <xsl:template name="Main.Date"/>
 	  <xsl:template name="Main.Identifier">
-      <apply-templates xmlns="http://www.w3.org/1999/XSL/Transform" mode="m3" select="id"/>
+      <apply-templates xmlns="http://www.w3.org/1999/XSL/Transform"
+                       mode="m3"
+                       select="/cortex/properties/item-id"/>
    </xsl:template>
 	  <xsl:template name="Main.isShownAt">
-      <apply-templates xmlns="http://www.w3.org/1999/XSL/Transform" mode="m0" select="id"/>
+      <apply-templates xmlns="http://www.w3.org/1999/XSL/Transform"
+                       mode="m0"
+                       select="/cortex/properties/item-id"/>
    </xsl:template>
 	  <xsl:template name="Main.collectionName"/>
 	  <xsl:template name="Main.previewImage">
       <apply-templates xmlns="http://www.w3.org/1999/XSL/Transform"
-                       mode="m1"
+                       mode="m4"
                        select="thumbnail"/>
    </xsl:template>
 	  <xsl:template name="Main.Subject"/>
 	  <xsl:template name="Main.URI">
-      <apply-templates xmlns="http://www.w3.org/1999/XSL/Transform" mode="m5" select="id"/>
+      <apply-templates xmlns="http://www.w3.org/1999/XSL/Transform"
+                       mode="m5"
+                       select="/cortex/properties/item-id"/>
    </xsl:template>
 	  <xsl:template name="Main.concept"/>
 	  <xsl:template name="Main.Country"/>
 	  <xsl:template name="Main.License"/>
 	  <xsl:template name="Main.Latitude">
       <apply-templates xmlns="http://www.w3.org/1999/XSL/Transform"
-                       mode="m2"
+                       mode="m6"
                        select="latitude"/>
    </xsl:template>
 	  <xsl:template name="Main.Longitude">
       <apply-templates xmlns="http://www.w3.org/1999/XSL/Transform"
-                       mode="m6"
+                       mode="m1"
                        select="longitude"/>
    </xsl:template>
-   <template xmlns="http://www.w3.org/1999/XSL/Transform" match="id" mode="m0">
+   <template xmlns="http://www.w3.org/1999/XSL/Transform"
+             match="/cortex/properties/item-id"
+             mode="m0">
       <element name="uri">
          <call-template name="StringToString"/>
       </element>
@@ -200,36 +214,42 @@
       <xsl:value-of select="."/>
    </xsl:template>
    <template xmlns="http://www.w3.org/1999/XSL/Transform"
-             match="thumbnail"
+             match="longitude"
              mode="m1">
-      <element name="previewImage">
-         <call-template name="StringToString"/>
-      </element>
-   </template>
-   <template xmlns="http://www.w3.org/1999/XSL/Transform" match="latitude" mode="m2">
-      <element name="wgs84:lat">
-         <call-template name="StringToString"/>
-      </element>
-   </template>
-   <template xmlns="http://www.w3.org/1999/XSL/Transform" match="id" mode="m3">
-      <element name="dc:identifier">
-         <call-template name="StringToString"/>
-      </element>
-   </template>
-   <template xmlns="http://www.w3.org/1999/XSL/Transform" match="label" mode="m4">
-      <element name="dc:title">
-         <call-template name="StringToString"/>
-      </element>
-   </template>
-   <template xmlns="http://www.w3.org/1999/XSL/Transform" match="id" mode="m5">
-      <element name="uri">
+      <element name="wgs84:long">
          <call-template name="StringToString"/>
       </element>
    </template>
    <template xmlns="http://www.w3.org/1999/XSL/Transform"
-             match="longitude"
-             mode="m6">
-      <element name="wgs84:long">
+             match="/cortex/view/ns4item/ns4title"
+             mode="m2">
+      <element name="dc:title">
+         <call-template name="StringToString"/>
+      </element>
+   </template>
+   <template xmlns="http://www.w3.org/1999/XSL/Transform"
+             match="/cortex/properties/item-id"
+             mode="m3">
+      <element name="dc:identifier">
+         <call-template name="StringToString"/>
+      </element>
+   </template>
+   <template xmlns="http://www.w3.org/1999/XSL/Transform"
+             match="thumbnail"
+             mode="m4">
+      <element name="previewImage">
+         <call-template name="StringToString"/>
+      </element>
+   </template>
+   <template xmlns="http://www.w3.org/1999/XSL/Transform"
+             match="/cortex/properties/item-id"
+             mode="m5">
+      <element name="uri">
+         <call-template name="StringToString"/>
+      </element>
+   </template>
+   <template xmlns="http://www.w3.org/1999/XSL/Transform" match="latitude" mode="m6">
+      <element name="wgs84:lat">
          <call-template name="StringToString"/>
       </element>
    </template>
