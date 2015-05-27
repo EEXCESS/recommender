@@ -26,9 +26,12 @@ import java.io.IOException;
 import java.util.LinkedList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+
 import org.json.XML;
 import org.w3c.dom.Document;
+
 import eu.eexcess.config.PartnerConfiguration;
+import eu.eexcess.dataformats.PartnerBadge;
 import eu.eexcess.dataformats.result.DocumentBadge;
 import eu.eexcess.dataformats.result.DocumentBadgeList;
 import eu.eexcess.dataformats.result.Result;
@@ -84,7 +87,15 @@ public class PartnerRecommender implements PartnerRecommenderApi {
         	partnerdataLogger.getActLogEntry().start();
         	long startCallPartnerApi = System.currentTimeMillis();
         	// use native untransformed result primarily
-        	ResultList nativeResult = partnerConnector.queryPartnerNative(partnerConfiguration, userProfile, partnerdataLogger);
+        	PartnerConfiguration currentPartnerConfiguration = partnerConfiguration;
+        	if(userProfile.partnerList!=null)
+        		if(userProfile.partnerList.size()>0)
+        			for (PartnerBadge pC: userProfile.partnerList) {
+						if(pC.systemId.equals(partnerConfiguration.systemId)){
+							currentPartnerConfiguration.queryGeneratorClass=pC.queryGeneratorClass;
+						}	
+					}
+        	ResultList nativeResult = partnerConnector.queryPartnerNative(currentPartnerConfiguration, userProfile, partnerdataLogger);
         	if (nativeResult != null) {
         		  long endCallPartnerApi = System.currentTimeMillis();
         		  nativeResult.setResultStats(new ResultStats(PartnerConfigurationCache.CONFIG.getQueryGenerator(null).toQuery(userProfile),endCallPartnerApi-startCallPartnerApi,0,0,0,nativeResult.totalResults));
