@@ -163,50 +163,50 @@
 	  <xsl:template name="Main.Language"/>
 	  <xsl:template name="Main.Title">
       <apply-templates xmlns="http://www.w3.org/1999/XSL/Transform"
-                       mode="m2"
+                       mode="m5"
                        select="/cortex/view/ns4item/ns4title"/>
    </xsl:template>
 	  <xsl:template name="Main.Description"/>
 	  <xsl:template name="Main.Date"/>
 	  <xsl:template name="Main.Identifier">
       <apply-templates xmlns="http://www.w3.org/1999/XSL/Transform"
-                       mode="m3"
+                       mode="m2"
                        select="/cortex/properties/item-id"/>
    </xsl:template>
 	  <xsl:template name="Main.isShownAt">
       <apply-templates xmlns="http://www.w3.org/1999/XSL/Transform"
-                       mode="m0"
-                       select="/cortex/properties/item-id"/>
+                       mode="m4"
+                       select="/cortex/edm/ns3RDF/oreAggregation/edmisShownAt/@ns3resource"/>
    </xsl:template>
 	  <xsl:template name="Main.collectionName"/>
 	  <xsl:template name="Main.previewImage">
       <apply-templates xmlns="http://www.w3.org/1999/XSL/Transform"
-                       mode="m4"
+                       mode="m0"
                        select="thumbnail"/>
    </xsl:template>
 	  <xsl:template name="Main.Subject"/>
 	  <xsl:template name="Main.URI">
       <apply-templates xmlns="http://www.w3.org/1999/XSL/Transform"
-                       mode="m5"
-                       select="/cortex/properties/item-id"/>
+                       mode="m3"
+                       select="/cortex/edm/ns3RDF/oreAggregation/edmisShownAt/@ns3resource"/>
    </xsl:template>
 	  <xsl:template name="Main.concept"/>
 	  <xsl:template name="Main.Country"/>
 	  <xsl:template name="Main.License"/>
 	  <xsl:template name="Main.Latitude">
       <apply-templates xmlns="http://www.w3.org/1999/XSL/Transform"
-                       mode="m6"
-                       select="latitude"/>
+                       mode="m1"
+                       select="/cortex/view/ns4item/ns4latitude"/>
    </xsl:template>
 	  <xsl:template name="Main.Longitude">
       <apply-templates xmlns="http://www.w3.org/1999/XSL/Transform"
-                       mode="m1"
-                       select="longitude"/>
+                       mode="m6"
+                       select="/cortex/view/ns4item/ns4longitude"/>
    </xsl:template>
    <template xmlns="http://www.w3.org/1999/XSL/Transform"
-             match="/cortex/properties/item-id"
+             match="thumbnail"
              mode="m0">
-      <element name="uri">
+      <element name="previewImage">
          <call-template name="StringToString"/>
       </element>
    </template>
@@ -214,42 +214,44 @@
       <xsl:value-of select="."/>
    </xsl:template>
    <template xmlns="http://www.w3.org/1999/XSL/Transform"
-             match="longitude"
+             match="/cortex/view/ns4item/ns4latitude"
              mode="m1">
-      <element name="wgs84:long">
-         <call-template name="StringToString"/>
-      </element>
-   </template>
-   <template xmlns="http://www.w3.org/1999/XSL/Transform"
-             match="/cortex/view/ns4item/ns4title"
-             mode="m2">
-      <element name="dc:title">
+      <element name="wgs84:lat">
          <call-template name="StringToString"/>
       </element>
    </template>
    <template xmlns="http://www.w3.org/1999/XSL/Transform"
              match="/cortex/properties/item-id"
-             mode="m3">
+             mode="m2">
       <element name="dc:identifier">
          <call-template name="StringToString"/>
       </element>
    </template>
    <template xmlns="http://www.w3.org/1999/XSL/Transform"
-             match="thumbnail"
-             mode="m4">
-      <element name="previewImage">
-         <call-template name="StringToString"/>
-      </element>
-   </template>
-   <template xmlns="http://www.w3.org/1999/XSL/Transform"
-             match="/cortex/properties/item-id"
-             mode="m5">
+             match="/cortex/edm/ns3RDF/oreAggregation/edmisShownAt/@ns3resource"
+             mode="m3">
       <element name="uri">
          <call-template name="StringToString"/>
       </element>
    </template>
-   <template xmlns="http://www.w3.org/1999/XSL/Transform" match="latitude" mode="m6">
-      <element name="wgs84:lat">
+   <template xmlns="http://www.w3.org/1999/XSL/Transform"
+             match="/cortex/edm/ns3RDF/oreAggregation/edmisShownAt/@ns3resource"
+             mode="m4">
+      <element name="uri">
+         <call-template name="StringToString"/>
+      </element>
+   </template>
+   <template xmlns="http://www.w3.org/1999/XSL/Transform"
+             match="/cortex/view/ns4item/ns4title"
+             mode="m5">
+      <element name="dc:title">
+         <call-template name="StringToString"/>
+      </element>
+   </template>
+   <template xmlns="http://www.w3.org/1999/XSL/Transform"
+             match="/cortex/view/ns4item/ns4longitude"
+             mode="m6">
+      <element name="wgs84:long">
          <call-template name="StringToString"/>
       </element>
    </template>

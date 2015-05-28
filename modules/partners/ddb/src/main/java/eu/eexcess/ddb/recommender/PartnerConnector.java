@@ -312,6 +312,17 @@ public class PartnerConnector extends PartnerConnectorBase implements PartnerCon
 	        httpXMLResult = httpXMLResult.replaceAll("<ns4:", "<ns4");
 	        httpXMLResult = httpXMLResult.replaceAll("</ns4:", "</ns4");
 	        
+	        httpXMLResult = httpXMLResult.replaceAll("<ns3:", "<ns3");
+	        httpXMLResult = httpXMLResult.replaceAll("</ns3:", "</ns3");
+
+	        httpXMLResult = httpXMLResult.replaceAll(" ns3:", " ns3");
+	        
+	        httpXMLResult = httpXMLResult.replaceAll("<edm:", "<edm");
+	        httpXMLResult = httpXMLResult.replaceAll("</edm:", "</edm");
+
+	        httpXMLResult = httpXMLResult.replaceAll("<ore:", "<ore");
+	        httpXMLResult = httpXMLResult.replaceAll("</ore:", "</ore");
+
 	        return XMLTools.convertStringToDocument(httpXMLResult);
 		}
 		catch (Exception e) {
