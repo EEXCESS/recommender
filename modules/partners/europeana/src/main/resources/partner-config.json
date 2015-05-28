@@ -9,7 +9,7 @@
   "apiKey": "",
   "mappingListTransformationFile":"mapperResultList.xsl",
   "mappingObjectTransformationFile":"mapperObject.xsl",
-  "partnerDataRequestsTrace":"true",
+  "partnerDataRequestsTrace":"false",
   "enableEnriching":"false",
   "makeCleanupBeforeTransformation":"false",
   "partnerConnectorEndpoint": "http://127.0.0.1/eexcess-partner-europeana-1.0-SNAPSHOT/partner/",
