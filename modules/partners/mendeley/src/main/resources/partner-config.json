@@ -4,7 +4,7 @@
   "partnerConnectorClass": "eu.eexcess.mendeley.recommender.PartnerConnector",
   "transformerClass": "eu.eexcess.mendeley.datalayer.MendeleyTransformer",
   "searchEndpoint": "https://api.mendeley.com/search/catalog?limit=20&query=${query}",
-  "detailEndpoint": "https://api.mendeley.com/documents/${detailQuery}",
+  "detailEndpoint": "https://api.mendeley.com/catalog/${detailQuery}",
    "isTransformedNative": "false",
   "userName": "",
   "password": "",

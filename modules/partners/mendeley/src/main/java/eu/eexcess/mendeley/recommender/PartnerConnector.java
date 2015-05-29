@@ -233,12 +233,11 @@ public class PartnerConnector extends PartnerConnectorBase implements PartnerCon
 	        String httpJSONResult = builder.get(String.class);
 	        */
 			String httpJSONResult ="";
-			MendeleyDocs doc = null;
 			try {
 				client.addFilter(new LoggingFilter(log));
-				doc = client.resource(searchRequest)
+				httpJSONResult = client.resource(searchRequest)
 						.header("Authorization", "Bearer " + accessTokenResponse.getAccessToken()).accept(APPLICATION_MENDELEY_TYPE)
-						.get(MendeleyDocs.class);
+						.get(String.class);
 			} catch (UniformInterfaceException e) {
 				String resultString = e.getResponse().getEntity(String.class);
 				
