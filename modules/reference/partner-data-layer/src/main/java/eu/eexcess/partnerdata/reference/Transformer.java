@@ -148,6 +148,7 @@ public class Transformer implements ITransformer{
 			reader=null;
 			PartnerdataTracer.debugTrace(this.partnerConfig, "Transformation:" + out.toString());
 			transformationResultList = XMLTools.convertStringToDocument(out.toString());
+			
     		InputStream resourceAsStream = this.getClass().getResourceAsStream("/"+ this.resultObjectTransformationFilename);
 			InputStreamReader isReader = new InputStreamReader(resourceAsStream);
 			reader = new BufferedReader(isReader);
@@ -155,7 +156,6 @@ public class Transformer implements ITransformer{
 			while ((line = reader.readLine()) != null) {
 			    out.append(line);
 			}
-			
 			transformationResultObject = XMLTools.convertStringToDocument(out.toString());
 			reader.close();
 			isReader.close();
@@ -191,26 +191,6 @@ public class Transformer implements ITransformer{
 			
 		input = preProcessTransform( input, logger);  
 
-/*		
-		XPathFactory xpathFactory = XPathFactory.newInstance();
-		// XPath to find empty text nodes.
-		XPathExpression xpathExp;
-		try {
-			xpathExp = xpathFactory.newXPath().compile("//text()[normalize-space(.) = '']");
-			NodeList emptyTextNodes = (NodeList) xpathExp.evaluate(input, XPathConstants.NODESET);
-	
-			// Remove each empty text node from document.
-			for (int i = 0; i < emptyTextNodes.getLength(); i++) {
-			    Node emptyTextNode = emptyTextNodes.item(i);
-			    emptyTextNode.getParentNode().removeChild(emptyTextNode);
-			}
-		} catch (XPathExpressionException e1) {
-			// TODO Auto-generated catch block
-			e1.printStackTrace();
-		}  
-		
-		PartnerdataTracer.dumpFile(this.getClass(), partnerConfig, input, "before-transform-after-cleanup"); 
-		*/
 		DOMSource source = new DOMSource( input );
 		DOMResult domResultCleaned = new DOMResult();
 		DOMResult domResult = new DOMResult();
@@ -235,13 +215,33 @@ public class Transformer implements ITransformer{
 		}
 	}
 
+	protected Document transformInternalDetail(Document input, javax.xml.transform.Transformer transformer, PartnerdataLogger logger) throws EEXCESSDataTransformationException {
+		PartnerdataTracer.debugTrace(this.partnerConfig, "before transform-detail:\n" + XMLTools.getStringFromDocument(input));
+		
+		PartnerdataTracer.dumpFile(this.getClass(), partnerConfig, input, "before-transform-detail", logger); 
+			
+		//input = preProcessTransform( input, logger);  
+
+		DOMSource source = new DOMSource( input );
+		DOMResult domResult = new DOMResult();
+		try {
+			transformer.transform(source, domResult);
+			Document result = (Document)domResult.getNode();
+			result = this.postTransformationResults(input, result);
+			PartnerdataTracer.debugTrace(this.partnerConfig, "after transform-detail:\n" + XMLTools.getStringFromDocument(result));
+			PartnerdataTracer.dumpFile(this.getClass(), partnerConfig, result, "done-transform-detail", logger); 
+			return result;
+		} catch (TransformerException e) {
+			throw new EEXCESSDataTransformationException(e);
+		}
+	}
 	
 	public Document transform(Document input, PartnerdataLogger logger) throws EEXCESSDataTransformationException {
 		return transformInternal(input, transformerResultList, logger);
 	}
 
 	public Document transformDetail(Document input, PartnerdataLogger logger)  throws EEXCESSDataTransformationException{
-		return transformInternal(input, transformerResultObject, logger);
+		return transformInternalDetail(input, transformerResultObject, logger);
 	}
 
 	public Document preProcessTransform(Document input, PartnerdataLogger logger)  throws EEXCESSDataTransformationException{

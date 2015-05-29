@@ -39,6 +39,8 @@ import org.w3c.dom.Document;
 import com.sun.jersey.api.client.Client;
 import com.sun.jersey.api.client.ClientResponse;
 import com.sun.jersey.api.client.UniformInterfaceException;
+import com.sun.jersey.api.client.WebResource;
+import com.sun.jersey.api.client.WebResource.Builder;
 import com.sun.jersey.api.client.config.ClientConfig;
 import com.sun.jersey.api.client.config.DefaultClientConfig;
 import com.sun.jersey.api.client.filter.LoggingFilter;
@@ -50,12 +52,14 @@ import eu.eexcess.dataformats.result.DocumentBadgeList;
 import eu.eexcess.dataformats.result.ResultList;
 import eu.eexcess.dataformats.userprofile.SecureUserProfile;
 import eu.eexcess.mendeley.recommender.dataformat.MendeleyAuthors;
+import eu.eexcess.mendeley.recommender.dataformat.MendeleyDocDetails;
 import eu.eexcess.mendeley.recommender.dataformat.MendeleyDocs;
 import eu.eexcess.mendeley.recommender.dataformat.MendeleyResponse;
 import eu.eexcess.partnerdata.api.EEXCESSDataTransformationException;
 import eu.eexcess.partnerdata.reference.PartnerdataLogger;
 import eu.eexcess.partnerrecommender.api.PartnerConfigurationCache;
 import eu.eexcess.partnerrecommender.api.PartnerConnectorApi;
+import eu.eexcess.partnerrecommender.api.QueryGeneratorApi;
 import eu.eexcess.partnerrecommender.reference.PartnerConnectorBase;
 import eu.eexcess.utils.URLParamEncoder;
 
@@ -205,7 +209,60 @@ public class PartnerConnector extends PartnerConnectorBase implements PartnerCon
 			PartnerConfiguration partnerConfiguration,
 			DocumentBadge document, PartnerdataLogger logger)
 			throws IOException {
-		// TODO Auto-generated method stub
-		return null;
+		// Configure
+		try {	
+	        Client client = new Client(PartnerConfigurationCache.CONFIG.getClientDefault());
+	
+	        QueryGeneratorApi queryGenerator = PartnerConfigurationCache.CONFIG.getQueryGenerator(partnerConfiguration.queryGeneratorClass);
+			
+	        String detailQuery = queryGenerator.toDetailQuery(document);
+	        
+	        Map<String, String> valuesMap = new HashMap<String, String>();
+	        valuesMap.put("detailQuery", detailQuery);
+
+	        String searchRequest = StrSubstitutor.replace(partnerConfiguration.detailEndpoint, valuesMap);
+			AccessTokenResponse accessTokenResponse = getAccessToken(client, partnerConfiguration);
+
+/*
+	        WebResource service = client.resource(searchRequest);
+	       
+	        Builder builder = service.accept(MediaType.APPLICATION_JSON);
+
+	        client.destroy();
+	        
+	        String httpJSONResult = builder.get(String.class);
+	        */
+			String httpJSONResult ="";
+			MendeleyDocs doc = null;
+			try {
+				client.addFilter(new LoggingFilter(log));
+				doc = client.resource(searchRequest)
+						.header("Authorization", "Bearer " + accessTokenResponse.getAccessToken()).accept(APPLICATION_MENDELEY_TYPE)
+						.get(MendeleyDocs.class);
+			} catch (UniformInterfaceException e) {
+				String resultString = e.getResponse().getEntity(String.class);
+				
+				ClientResponse header = client.resource(searchRequest).header("Authorization", "Bearer " + accessTokenResponse.getAccessToken()).head();
+							
+				log.log(Level.WARNING,"Server returned equal or above 300 \nResponse as String:\n"+resultString+"\n Header: "+header+
+						"\n Request: "+searchRequest+
+						"\n AccessTokenResponse: "+accessTokenResponse.toString(),e);
+
+			}
+
+    		Document newResponse = null;
+			try {
+				newResponse = this.transformJSON2XML(httpJSONResult);
+			} catch (EEXCESSDataTransformationException e) {
+				// TODO logger
+				
+				log.log(Level.INFO,"Error Transforming Json to xml",e );
+				
+			}
+	        return newResponse;
+		}
+		catch (Exception e) {
+				throw new IOException("Cannot query partner REST API!", e);
+		}
 	}
 }

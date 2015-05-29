@@ -67,7 +67,7 @@ public class PartnerConnector extends PartnerConnectorBase implements PartnerCon
 	private final Logger log = Logger.getLogger(PartnerConnector.class.getName());
     private QueryGeneratorApi queryGenerator;
     
-    private boolean makeDetailRequests = false;
+    private boolean makeDetailRequests = true;
     
     public PartnerConnector(){
     
@@ -212,8 +212,40 @@ public class PartnerConnector extends PartnerConnectorBase implements PartnerCon
 			PartnerConfiguration partnerConfiguration,
 			DocumentBadge document, PartnerdataLogger logger)
 			throws IOException {
-		// TODO Auto-generated method stub
-		return null;
+		// Configure
+		try {	
+	        Client client = new Client(PartnerConfigurationCache.CONFIG.getClientDefault());
+	
+	        queryGenerator = PartnerConfigurationCache.CONFIG.getQueryGenerator(partnerConfiguration.queryGeneratorClass);
+			
+	        String detailQuery = getQueryGenerator().toDetailQuery(document);
+	        
+	        Map<String, String> valuesMap = new HashMap<String, String>();
+	        valuesMap.put("detailQuery", detailQuery);
+	        valuesMap.put("apiKey", partnerConfiguration.apiKey);		// add API key
+
+	        String searchRequest = StrSubstitutor.replace(partnerConfiguration.detailEndpoint, valuesMap);
+	        
+	        WebResource service = client.resource(searchRequest);
+	       
+	        Builder builder = service.accept(MediaType.APPLICATION_JSON);
+
+	        client.destroy();
+	        String httpJSONResult = builder.get(String.class);
+    		Document newResponse = null;
+			try {
+				newResponse = this.transformJSON2XML(httpJSONResult);
+			} catch (EEXCESSDataTransformationException e) {
+				// TODO logger
+				
+				log.log(Level.INFO,"Error Transforming Json to xml",e );
+				
+			}
+	        return newResponse;
+		}
+		catch (Exception e) {
+				throw new IOException("Cannot query partner REST API!", e);
+		}
 	}
 
 
