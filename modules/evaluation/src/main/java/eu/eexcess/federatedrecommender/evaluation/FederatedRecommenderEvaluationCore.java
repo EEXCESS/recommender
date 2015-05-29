@@ -117,7 +117,11 @@ public class FederatedRecommenderEvaluationCore   {
 				userProfileEvaluation = userProfile;
 				break;
 			}
-	
+		if(userProfileEvaluation==null){
+			userProfileEvaluation = userProfile;
+			
+		}
+		
 		if (userProfile.decomposer != null)
 			switch (userProfile.decomposer) {
 			case "wikipedia":
@@ -270,6 +274,7 @@ public class FederatedRecommenderEvaluationCore   {
 		evalProfil.picker = "FiFoPicker";
 		
 		final SecureUserProfileEvaluation diversityProfile = (SecureUserProfileEvaluation) SerializationUtils.clone(evalProfil);
+		
 //		diversityProfile.partnerList=queryPartner;
 		
 		Future<Void> diversityFuture = threadPool.submit(new Callable<Void>() {
