@@ -40,7 +40,7 @@ public class OrQueryGeneratorFieldTermConjunctionTest {
 			userProfile.contextKeywords.add(keyword7);
 			String result =gen.toQuery(userProfile );
 			System.out.println(result);
-			assertTrue(result.equals("\"k1\" OR \"k2\" OR \"k3\" OR \"k4\" OR \"k5\" OR \"k6\" OR \"k7\""));
+			assertTrue(result.equals("k1 OR k2 OR k3 OR k4 OR k5 OR k6 OR k7"));
 		}
 
 		@Test
@@ -66,7 +66,7 @@ public class OrQueryGeneratorFieldTermConjunctionTest {
 			userProfile.contextKeywords.add(keyword7);
 			String result =gen.toQuery(userProfile );
 			System.out.println(result);
-			assertTrue(result.equals("\"k1 AND k5\" OR \" k2 AND k5 AND k6 \" OR \"k3\" OR \"k4\" OR \"k5\" OR \"k6\" OR \"k7\""));
+			assertTrue(result.equals("k1 AND k5 OR  k2 AND k5 AND k6  OR k3 OR k4 OR k5 OR k6 OR k7"));
 		}
 }
 

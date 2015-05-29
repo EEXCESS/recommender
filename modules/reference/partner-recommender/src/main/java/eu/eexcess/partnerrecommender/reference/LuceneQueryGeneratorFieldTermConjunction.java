@@ -37,25 +37,32 @@ public class LuceneQueryGeneratorFieldTermConjunction implements
 					expansion=true;
 					if(result.length()>0){
 						if(key.expansion==ExpansionType.PSEUDORELEVANCEWP)
-							result.append(" OR (\""+keyword+"\"");
+//							result.append(" OR (\""+keyword+"\"");
+							result.append(" OR ("+keyword+"");
 						else
-							result.append(" AND (\""+keyword+"\"");
+							result.append(" AND ("+keyword+"");
+//						result.append(" AND (\""+keyword+"\"");
 					}
 					else
-						result.append("(\""+keyword+"\"");
+//						result.append("(\""+keyword+"\"");
+						result.append("("+keyword+"");
 				}else{
-					result.append(" OR \""+keyword+"\"");
+//						result.append(" OR \""+keyword+"\"");
+						result.append(" OR "+keyword+"");
 				}
 			} else{
 				if(expansion){
-					result.append(") OR \""+keyword+"\"");
+					result.append(") OR "+keyword+"");
+					//result.append(") OR \""+keyword+"\"");
 					expansion=false;
 				}	
 				else
 					if(result.length()>0)
-						result.append(" OR \""+keyword+"\"");
+						result.append(" OR "+keyword+"");
+//						result.append(" OR \""+keyword+"\"");
 					else
-						result.append("\""+keyword+"\"");
+						result.append(""+keyword+"");
+//						result.append("\""+keyword+"\"");
 			}
 		}
 		if(expansion)

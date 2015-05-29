@@ -47,10 +47,9 @@ public class OrQueryGeneratorFieldTermConjunction implements QueryGeneratorApi{
    		 keyword=matcher2.replaceAll(" AND ");
         		
             	if (builder.length() > 0) { builder.append(" OR "); }
-	            builder.append('\"');
-	            
-				builder.append(keyword);
-	            builder.append('\"');
+	    //        builder.append('\"');
+	    		builder.append(keyword);
+	      //      builder.append('\"');
         }
 		return builder.toString();
 	}

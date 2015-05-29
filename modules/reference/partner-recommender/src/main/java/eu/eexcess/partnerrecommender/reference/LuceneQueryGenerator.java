@@ -41,31 +41,39 @@ public class LuceneQueryGenerator implements QueryGeneratorApi {
 		boolean expansion= false;
 		for (ContextKeyword key : userProfile.contextKeywords) {
 			
+			String keyword = key.text;
 			if(key.expansion!=null && (key.expansion ==ExpansionType.PSEUDORELEVANCEWP||key.expansion ==ExpansionType.SERENDIPITY))
 			{
 				if(!expansion){
 					expansion=true;
 					if(result.length()>0){
 						if(key.expansion==ExpansionType.PSEUDORELEVANCEWP)
-							result.append(" OR (\""+key.text+"\"");
+//							result.append(" OR (\""+keyword+"\"");
+							result.append(" OR ("+keyword+"");
 						else
-							result.append(" AND (\""+key.text+"\"");
+							result.append(" AND ("+keyword+"");
+//						result.append(" AND (\""+keyword+"\"");
 					}
 					else
-						result.append("(\""+key.text+"\"");
+//						result.append("(\""+keyword+"\"");
+						result.append("("+keyword+"");
 				}else{
-					result.append(" OR \""+key.text+"\"");
+//						result.append(" OR \""+keyword+"\"");
+						result.append(" OR "+keyword+"");
 				}
 			} else{
 				if(expansion){
-					result.append(") OR \""+key.text+"\"");
+					result.append(") OR "+keyword+"");
+					//result.append(") OR \""+keyword+"\"");
 					expansion=false;
 				}	
 				else
 					if(result.length()>0)
-						result.append(" OR \""+key.text+"\"");
+						result.append(" OR "+keyword+"");
+//						result.append(" OR \""+keyword+"\"");
 					else
-						result.append("\""+key.text+"\"");
+						result.append(""+keyword+"");
+//						result.append("\""+keyword+"\"");
 			}
 		}
 		if(expansion)

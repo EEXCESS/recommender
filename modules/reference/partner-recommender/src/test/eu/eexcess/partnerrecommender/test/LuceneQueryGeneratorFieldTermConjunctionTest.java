@@ -38,7 +38,8 @@ public class LuceneQueryGeneratorFieldTermConjunctionTest {
 		userProfile.contextKeywords.add(keyword7);
 		String result =gen.toQuery(userProfile );
 		System.out.println(result);
-		assertTrue(result.equals("\"k1\" OR \"k2\" OR \"k3\" OR \"k4\" OR (\"k5\" OR \"k6\" OR \"k7\")"));
+		assertTrue(result.equals("k1 OR k2 OR k3 OR k4 OR (k5 OR k6 OR k7)"));
+		//assertTrue(result.equals("k1 OR k2 OR k3 OR k4 OR (k5 OR k6 OR k7)"));
 	}
 
 	
@@ -54,7 +55,8 @@ public class LuceneQueryGeneratorFieldTermConjunctionTest {
 		userProfile.contextKeywords.add(keyword2);
 		String result =gen.toQuery(userProfile );
 		System.out.println(result);
-		assertTrue(result.equals("\"k1\" OR (\"k2\")"));
+		assertTrue(result.equals("k1 OR (k2)"));
+//		assertTrue(result.equals("k1 OR (k2)"));
 	}
 	
 	@Test
@@ -83,7 +85,8 @@ public class LuceneQueryGeneratorFieldTermConjunctionTest {
 		userProfile.contextKeywords.add(keyword7);
 		String result =gen.toQuery(userProfile );
 		System.out.println(result);
-		assertTrue(result.equals("\"k1\" OR (\"k2\" OR \"k3\") OR \"k4\" OR (\"k5\" OR \"k6\" OR \"k7\")"));
+		assertTrue(result.equals("k1 OR (k2 OR k3) OR k4 OR (k5 OR k6 OR k7)"));
+//		assertTrue(result.equals("k1 OR (k2 OR k3) OR k4 OR (k5 OR k6 OR k7)"));
 	}
 
 	@Test
@@ -112,7 +115,8 @@ public class LuceneQueryGeneratorFieldTermConjunctionTest {
 		userProfile.contextKeywords.add(keyword7);
 		String result =gen.toQuery(userProfile );
 		System.out.println(result);
-		assertTrue(result.equals("\"k1\" OR (\"k2\") OR \"k3\" OR \"k4\" OR (\"k5\" OR \"k6\" OR \"k7\")"));
+//		assertTrue(result.equals("k1 OR (k2) OR k3 OR k4 OR (k5 OR k6 OR k7)"));
+		assertTrue(result.equals("k1 OR (k2) OR k3 OR k4 OR (k5 OR k6 OR k7)"));
 	}
 
 	@Test
@@ -142,7 +146,7 @@ public class LuceneQueryGeneratorFieldTermConjunctionTest {
 		userProfile.contextKeywords.add(keyword7);
 		String result =gen.toQuery(userProfile );
 		System.out.println(result);
-		assertTrue(result.equals("(\"k1\" OR \"k2\" OR \"k3\") OR \"k4\" OR (\"k5\" OR \"k6\" OR \"k7\")"));
+		assertTrue(result.equals("(k1 OR k2 OR k3) OR k4 OR (k5 OR k6 OR k7)"));
 	}
 	@Test
 	public void multibleSerendipityStartTest() {
@@ -171,7 +175,7 @@ public class LuceneQueryGeneratorFieldTermConjunctionTest {
 		userProfile.contextKeywords.add(keyword7);
 		String result =gen.toQuery(userProfile );
 		System.out.println(result);
-		assertTrue(result.equals("(\"k1\" OR \"k2\" OR \"k3\") OR \"k4\" AND (\"k5\" OR \"k6\" OR \"k7\")"));
+		assertTrue(result.equals("(k1 OR k2 OR k3) OR k4 AND (k5 OR k6 OR k7)"));
 	}
 	
 	@Test
@@ -198,6 +202,6 @@ public class LuceneQueryGeneratorFieldTermConjunctionTest {
 		userProfile.contextKeywords.add(keyword7);
 		String result =gen.toQuery(userProfile );
 		System.out.println(result);
-		assertTrue(result.equals("\"k1 AND K5\" OR \" k2 AND K5 AND K6 \" OR \"k3\" OR \"k4\" OR (\"k5\" OR \"k6\" OR \"k7\")"));
+		assertTrue(result.equals("k1 AND K5 OR  k2 AND K5 AND K6  OR k3 OR k4 OR (k5 OR k6 OR k7)"));
 	}
 }

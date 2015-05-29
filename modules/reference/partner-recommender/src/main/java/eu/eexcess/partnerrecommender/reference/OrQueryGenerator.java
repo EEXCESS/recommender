@@ -39,9 +39,9 @@ public class OrQueryGenerator implements QueryGeneratorApi{
         
         for (ContextKeyword context : userProfile.contextKeywords) {
             	if (builder.length() > 0) { builder.append(" OR "); }
-	            builder.append('\"');
+//	            builder.append('\"');
 	            builder.append(context.text);
-	            builder.append('\"');
+//            builder.append('\"');
         }
 		return builder.toString();
 	}

@@ -27,6 +27,7 @@ import java.util.LinkedList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import org.apache.commons.lang.SerializationUtils;
 import org.json.XML;
 import org.w3c.dom.Document;
 
@@ -87,18 +88,20 @@ public class PartnerRecommender implements PartnerRecommenderApi {
         	partnerdataLogger.getActLogEntry().start();
         	long startCallPartnerApi = System.currentTimeMillis();
         	// use native untransformed result primarily
-        	PartnerConfiguration currentPartnerConfiguration = partnerConfiguration;
+        	PartnerConfiguration currentPartnerConfiguration = (PartnerConfiguration) SerializationUtils.clone(partnerConfiguration);
         	if(userProfile.partnerList!=null)
         		if(userProfile.partnerList.size()>0)
         			for (PartnerBadge pC: userProfile.partnerList) {
 						if(pC.systemId.equals(partnerConfiguration.systemId)){
+							log.log(Level.INFO,"Query Generator PartnerRecommender 1: "+pC.systemId + " " +pC.queryGeneratorClass);
 							currentPartnerConfiguration.queryGeneratorClass=pC.queryGeneratorClass;
 						}	
 					}
+        	
         	ResultList nativeResult = partnerConnector.queryPartnerNative(currentPartnerConfiguration, userProfile, partnerdataLogger);
         	if (nativeResult != null) {
         		  long endCallPartnerApi = System.currentTimeMillis();
-        		  nativeResult.setResultStats(new ResultStats(PartnerConfigurationCache.CONFIG.getQueryGenerator(null).toQuery(userProfile),endCallPartnerApi-startCallPartnerApi,0,0,0,nativeResult.totalResults));
+        		  nativeResult.setResultStats(new ResultStats(PartnerConfigurationCache.CONFIG.getQueryGenerator(currentPartnerConfiguration.queryGeneratorClass).toQuery(userProfile),endCallPartnerApi-startCallPartnerApi,0,0,0,nativeResult.totalResults));
                 
         		return nativeResult;
         	}
@@ -108,8 +111,8 @@ public class PartnerRecommender implements PartnerRecommenderApi {
         	 */
         
         	partnerdataLogger.getActLogEntry().queryPartnerAPIStart();
-        	
-            Document searchResultsNative = partnerConnector.queryPartner(partnerConfiguration, userProfile, partnerdataLogger);
+        	log.log(Level.INFO,"Query Generator PartnerRecommender 2: "+currentPartnerConfiguration.queryGeneratorClass);
+            Document searchResultsNative = partnerConnector.queryPartner(currentPartnerConfiguration, userProfile, partnerdataLogger);
             partnerdataLogger.getActLogEntry().queryPartnerAPIEnd();
             long endCallPartnerApi = System.currentTimeMillis();
         	/*
@@ -146,7 +149,7 @@ public class PartnerRecommender implements PartnerRecommenderApi {
             long endTransform2 = System.currentTimeMillis();
             log.log(Level.INFO,"Call Parnter Api:"+(endCallPartnerApi-startCallPartnerApi)+"ms; First Transformation:"+(endTransform1-startTransform1)+"ms; Enrichment:"+(endEnrich-startEnrich)+"ms; Second Transformation:"+(endTransform2-startTransform2)+"ms");
             //TODO: refactor the next line!
-            recommendations.setResultStats(new ResultStats(PartnerConfigurationCache.CONFIG.getQueryGenerator(null).toQuery(userProfile),endCallPartnerApi-startCallPartnerApi,endTransform1-startTransform1,endTransform2-startTransform2,endEnrich-startEnrich,recommendations.totalResults));
+            recommendations.setResultStats(new ResultStats(PartnerConfigurationCache.CONFIG.getQueryGenerator(currentPartnerConfiguration.queryGeneratorClass).toQuery(userProfile),endCallPartnerApi-startCallPartnerApi,endTransform1-startTransform1,endTransform2-startTransform2,endEnrich-startEnrich,recommendations.totalResults));
             PartnerdataTracer.dumpFile(this.getClass(), this.partnerConfiguration, recommendations, "partner-recommender-results", PartnerdataTracer.FILETYPE.XML, partnerdataLogger);
             return recommendations;
             
