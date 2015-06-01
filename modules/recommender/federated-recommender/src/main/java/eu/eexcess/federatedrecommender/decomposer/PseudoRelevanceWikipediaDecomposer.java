@@ -79,6 +79,7 @@ public class PseudoRelevanceWikipediaDecomposer implements SecureUserProfileDeco
 		
 		TermSet<TypedTerm> terms = new TermSet<TypedTerm>(new TypedTerm.AddingWeightTermMerger());
 		StringBuilder builder = new StringBuilder();
+	
 		for (ContextKeyword keyword : inputSecureUserProfile.contextKeywords) {
 			if (builder.length() > 0) { builder.append(" "); }
 			builder.append(keyword.text);

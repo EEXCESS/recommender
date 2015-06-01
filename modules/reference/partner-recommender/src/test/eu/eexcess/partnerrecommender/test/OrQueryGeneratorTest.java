@@ -20,7 +20,7 @@ public class OrQueryGeneratorTest {
 		public void multibleExpansionsTest() {
 			
 			SecureUserProfile userProfile = new SecureUserProfile();
-			ContextKeyword keyword1 = new ContextKeyword("k1");
+			ContextKeyword keyword1 = new ContextKeyword("k1 k3");
 			userProfile.contextKeywords.add(keyword1);
 			ContextKeyword keyword2 = new ContextKeyword("k2");
 			userProfile.contextKeywords.add(keyword2);
@@ -39,7 +39,7 @@ public class OrQueryGeneratorTest {
 			userProfile.contextKeywords.add(keyword7);
 			String result =gen.toQuery(userProfile );
 			System.out.println(result);
-			assertTrue(result.equals("\"k1\" \"k2\" \"k3\" \"k4\" OR \"k5\" OR \"k6\" OR \"k7\""));
+			assertTrue(result.equals("k1 k2 k3 k4 OR k5 OR k6 OR k7"));
 		}
 
 }

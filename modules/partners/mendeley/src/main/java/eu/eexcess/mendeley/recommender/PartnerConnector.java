@@ -126,6 +126,7 @@ public class PartnerConnector extends PartnerConnectorBase implements PartnerCon
 
 	protected MendeleyResponse fetchSearchResults(Client client, SecureUserProfile userProfile, AccessTokenResponse accessTokenResponse,
 			PartnerConfiguration partnerConfiguration) throws InstantiationException, IllegalAccessException, ClassNotFoundException {
+		log.log(Level.INFO,"Query Generator fetch Partner: "+partnerConfiguration.queryGeneratorClass);
 		String query = PartnerConfigurationCache.CONFIG.getQueryGenerator(partnerConfiguration.queryGeneratorClass).toQuery(userProfile);
 		Map<String, String> valuesMap = new HashMap<String, String>();
 		valuesMap.put("query", URLParamEncoder.encode(query));       
