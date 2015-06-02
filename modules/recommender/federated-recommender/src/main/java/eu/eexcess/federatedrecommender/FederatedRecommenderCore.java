@@ -567,10 +567,6 @@ public class FederatedRecommenderCore {
 		if (this.getPartnerRegister().getPartners().contains(badge)) {
 			logger.log(Level.INFO, "Partner: " + badge.getSystemId()
 					+ " allready registered!");
-			synchronized (partnerRegister) {
-				writeStatsToDB();
-			}
-
 			return "Allready Registered";
 		}
 
