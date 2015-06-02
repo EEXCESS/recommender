@@ -26,6 +26,7 @@ import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlElementWrapper;
 import javax.xml.bind.annotation.XmlRootElement;
 
+
 //import cc.mallet.types.Instance;
 import eu.eexcess.dataformats.PartnerBadge;
 
@@ -58,7 +59,8 @@ public class SecureUserProfile implements Serializable {
     public String gender;
     @XmlElement(name="address")
     public Address address;
-    
+    @XmlElement(name="timeRange")
+    public TimeRange timeRange;
     
     
     @XmlElementWrapper(name="languages")
@@ -94,23 +96,21 @@ public class SecureUserProfile implements Serializable {
     @XmlElement(name="contextNamedEntities")
     public ContextNamedEntity contextNamedEntities;
 
-
-
-
-
 	@Override
 	public String toString() {
 		return "SecureUserProfile [partnerList=" + partnerList
 				+ ", protectedPartnerList=" + protectedPartnerList
-				+ ", firstName=" + firstName + ", lastName=" + lastName
-				+ ", birthDate=" + birthDate + ", gender=" + gender
-				+ ", address=" + address + ", languages=" + languages
-				+ ", userLocations=" + userLocations + ", userCredentials="
-				+ userCredentials + ", history=" + history + ", interestList="
-				+ interestList + ", contextKeywords=" + contextKeywords
-				+ ", contextNamedEntities=" + contextNamedEntities + "]";
+				+ ", queryID=" + queryID + ", firstName=" + firstName
+				+ ", lastName=" + lastName + ", birthDate=" + birthDate
+				+ ", numResults=" + numResults + ", gender=" + gender
+				+ ", address=" + address + ", timeRange=" + timeRange
+				+ ", languages=" + languages + ", userLocations="
+				+ userLocations + ", userCredentials=" + userCredentials
+				+ ", history=" + history + ", interestList=" + interestList
+				+ ", contextKeywords=" + contextKeywords + ", context="
+				+ context + ", contextNamedEntities=" + contextNamedEntities
+				+ "]";
 	}
-
 
 	@Override
 	public int hashCode() {
@@ -119,6 +119,7 @@ public class SecureUserProfile implements Serializable {
 		result = prime * result + ((address == null) ? 0 : address.hashCode());
 		result = prime * result
 				+ ((birthDate == null) ? 0 : birthDate.hashCode());
+		result = prime * result + ((context == null) ? 0 : context.hashCode());
 		result = prime * result
 				+ ((contextKeywords == null) ? 0 : contextKeywords.hashCode());
 		result = prime
@@ -136,18 +137,22 @@ public class SecureUserProfile implements Serializable {
 		result = prime * result
 				+ ((lastName == null) ? 0 : lastName.hashCode());
 		result = prime * result
+				+ ((numResults == null) ? 0 : numResults.hashCode());
+		result = prime * result
 				+ ((partnerList == null) ? 0 : partnerList.hashCode());
 		result = prime
 				* result
 				+ ((protectedPartnerList == null) ? 0 : protectedPartnerList
 						.hashCode());
+		result = prime * result + ((queryID == null) ? 0 : queryID.hashCode());
+		result = prime * result
+				+ ((timeRange == null) ? 0 : timeRange.hashCode());
 		result = prime * result
 				+ ((userCredentials == null) ? 0 : userCredentials.hashCode());
 		result = prime * result
 				+ ((userLocations == null) ? 0 : userLocations.hashCode());
 		return result;
 	}
-
 
 	@Override
 	public boolean equals(Object obj) {
@@ -167,6 +172,11 @@ public class SecureUserProfile implements Serializable {
 			if (other.birthDate != null)
 				return false;
 		} else if (!birthDate.equals(other.birthDate))
+			return false;
+		if (context == null) {
+			if (other.context != null)
+				return false;
+		} else if (!context.equals(other.context))
 			return false;
 		if (contextKeywords == null) {
 			if (other.contextKeywords != null)
@@ -208,6 +218,11 @@ public class SecureUserProfile implements Serializable {
 				return false;
 		} else if (!lastName.equals(other.lastName))
 			return false;
+		if (numResults == null) {
+			if (other.numResults != null)
+				return false;
+		} else if (!numResults.equals(other.numResults))
+			return false;
 		if (partnerList == null) {
 			if (other.partnerList != null)
 				return false;
@@ -217,6 +232,16 @@ public class SecureUserProfile implements Serializable {
 			if (other.protectedPartnerList != null)
 				return false;
 		} else if (!protectedPartnerList.equals(other.protectedPartnerList))
+			return false;
+		if (queryID == null) {
+			if (other.queryID != null)
+				return false;
+		} else if (!queryID.equals(other.queryID))
+			return false;
+		if (timeRange == null) {
+			if (other.timeRange != null)
+				return false;
+		} else if (!timeRange.equals(other.timeRange))
 			return false;
 		if (userCredentials == null) {
 			if (other.userCredentials != null)
@@ -230,7 +255,6 @@ public class SecureUserProfile implements Serializable {
 			return false;
 		return true;
 	}
+
     
-    
- 
 }
