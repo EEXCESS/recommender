@@ -36,7 +36,7 @@ public class DummyTransformer extends Transformer implements ITransformer{
 	
 	public ResultList toResultList(Document input){
 		ResultList ret =  new ResultList();
-		ret.resultsRDF = XMLTools.getStringFromDocument(input);
+		//ret.resultsRDF = XMLTools.getStringFromDocument(input);
 		return ret;
 	}
 

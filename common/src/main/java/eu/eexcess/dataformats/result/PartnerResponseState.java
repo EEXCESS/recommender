@@ -13,25 +13,25 @@ public class PartnerResponseState implements Serializable {
 	private static final long serialVersionUID = -5684391973830630216L;
 
 	@XmlElement(name = "systemID")
-	String systemID;
+	private String systemID;
 	@XmlElement(name = "success")
-	Boolean success;
+	private Boolean success;
 	@XmlElement(name = "errorMessage")
-	String errorMessage;
+	private String errorMessage;
 	@Override
 	public String toString() {
-		return "PartnerResponseState [systemID=" + systemID + ", success="
-				+ success + ", errorMessage=" + errorMessage + "]";
+		return "PartnerResponseState [systemID=" + getSystemID() + ", success="
+				+ getSuccess() + ", errorMessage=" + getErrorMessage() + "]";
 	}
 	@Override
 	public int hashCode() {
 		final int prime = 31;
 		int result = 1;
 		result = prime * result
-				+ ((errorMessage == null) ? 0 : errorMessage.hashCode());
-		result = prime * result + ((success == null) ? 0 : success.hashCode());
+				+ ((getErrorMessage() == null) ? 0 : getErrorMessage().hashCode());
+		result = prime * result + ((getSuccess() == null) ? 0 : getSuccess().hashCode());
 		result = prime * result
-				+ ((systemID == null) ? 0 : systemID.hashCode());
+				+ ((getSystemID() == null) ? 0 : getSystemID().hashCode());
 		return result;
 	}
 	@Override
@@ -43,22 +43,40 @@ public class PartnerResponseState implements Serializable {
 		if (getClass() != obj.getClass())
 			return false;
 		PartnerResponseState other = (PartnerResponseState) obj;
-		if (errorMessage == null) {
-			if (other.errorMessage != null)
+		if (getErrorMessage() == null) {
+			if (other.getErrorMessage() != null)
 				return false;
-		} else if (!errorMessage.equals(other.errorMessage))
+		} else if (!getErrorMessage().equals(other.getErrorMessage()))
 			return false;
-		if (success == null) {
-			if (other.success != null)
+		if (getSuccess() == null) {
+			if (other.getSuccess() != null)
 				return false;
-		} else if (!success.equals(other.success))
+		} else if (!getSuccess().equals(other.getSuccess()))
 			return false;
-		if (systemID == null) {
-			if (other.systemID != null)
+		if (getSystemID() == null) {
+			if (other.getSystemID() != null)
 				return false;
-		} else if (!systemID.equals(other.systemID))
+		} else if (!getSystemID().equals(other.getSystemID()))
 			return false;
 		return true;
+	}
+	public String getErrorMessage() {
+		return errorMessage;
+	}
+	public void setErrorMessage(String errorMessage) {
+		this.errorMessage = errorMessage;
+	}
+	public Boolean getSuccess() {
+		return success;
+	}
+	public void setSuccess(Boolean success) {
+		this.success = success;
+	}
+	public String getSystemID() {
+		return systemID;
+	}
+	public void setSystemID(String systemID) {
+		this.systemID = systemID;
 	}
 	
 	
