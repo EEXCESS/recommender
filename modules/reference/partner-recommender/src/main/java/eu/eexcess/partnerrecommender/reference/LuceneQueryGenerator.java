@@ -22,6 +22,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 package eu.eexcess.partnerrecommender.reference;
 
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 import eu.eexcess.dataformats.result.DocumentBadge;
 import eu.eexcess.dataformats.userprofile.ContextKeyword;
 import eu.eexcess.dataformats.userprofile.ExpansionType;
@@ -29,19 +32,26 @@ import eu.eexcess.dataformats.userprofile.SecureUserProfile;
 import eu.eexcess.partnerrecommender.api.QueryGeneratorApi;
 
 /**
- * Query generator to create a Lucene search query out of a user profile.
- * 
- * @author rkern@know-center.at
+ * Similar to the Lucene query generator but also checks context keywords for terms and transforms them into conjunction query terms.
+ * Keyword "New York" ends up as "New OR York" in the query.
+ * @author hziak@know-center.at
  */
 public class LuceneQueryGenerator implements QueryGeneratorApi {
+
+
+	private static final String REGEXP = "(?<=\\w)\\s(?=\\w)";
 
 	@Override
 	public String toQuery(SecureUserProfile userProfile) {
 		StringBuilder result = new StringBuilder();
 		boolean expansion= false;
+		Pattern replace = Pattern.compile(REGEXP);
+		 
 		for (ContextKeyword key : userProfile.contextKeywords) {
-			
 			String keyword = key.text;
+			 Matcher matcher2 = replace.matcher(keyword);
+			keyword=matcher2.replaceAll(" OR ");
+			
 			if(key.expansion!=null && (key.expansion ==ExpansionType.PSEUDORELEVANCEWP||key.expansion ==ExpansionType.SERENDIPITY))
 			{
 				if(!expansion){
@@ -87,50 +97,6 @@ public class LuceneQueryGenerator implements QueryGeneratorApi {
 		return document.id;
 	}
 
-//    @Override
-//    public String toQuery(SecureUserProfile userProfile) {
-//        StringBuilder builder = new StringBuilder();
-//        boolean expanded=false;
-//        for (ContextKeyword context : userProfile.contextKeywords) {
-//        	if(context.expansion==null || !context.expansion){
-//	        	if (builder.length() > 0) { builder.append(' '); }
-//	            builder.append('\"');
-//	            builder.append(context.text);
-//	            builder.append('\"');
-//        	}else{
-//        		expanded=true;
-//        	}
-//        }
-//        if(expanded){
-//        builder.append(" OR (");
-//        Boolean first=true;
-//        for (ContextKeyword context : userProfile.contextKeywords) {
-//        	if(context.expansion!=null && context.expansion){
-//        		
-//        		if(first)
-//        			builder.append("\"");
-//        		else
-//        			builder.append("\" OR ");	
-//	            builder.append(context.text);
-//	            builder.append("\"");
-//	            first=false;
-//        	}
-//        }
-//        
-//        builder.append(')');
-//        }
-////        boolean isFirst = false;
-////        for (String interest : userProfile.interestList) {
-////            if (builder.length() > 0) { builder.append(' '); }
-////            if (isFirst) { isFirst = false; }
-////            else {builder.append(" OR "); }
-////            builder.append('\"');
-////            builder.append(interest);
-////            builder.append("\"^0.2");
-////        }
-//        return builder.toString();
-//    }
-    
-    
+
 
 }

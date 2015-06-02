@@ -22,6 +22,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 package eu.eexcess.partnerrecommender.reference;
 
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 import eu.eexcess.dataformats.result.DocumentBadge;
 import eu.eexcess.dataformats.userprofile.ContextKeyword;
 import eu.eexcess.dataformats.userprofile.SecureUserProfile;
@@ -33,15 +36,21 @@ import eu.eexcess.partnerrecommender.api.QueryGeneratorApi;
  */
 public class OrQueryGenerator implements QueryGeneratorApi{
 
+	private static final String REGEXP = "(?<=\\w)\\s(?=\\w)";
 	@Override
 	public String toQuery(SecureUserProfile userProfile) {
 		StringBuilder builder = new StringBuilder();
-        
+		Pattern replace = Pattern.compile(REGEXP);
+	
         for (ContextKeyword context : userProfile.contextKeywords) {
+        	String keyword = context.text;
+   		 Matcher matcher2 = replace.matcher(keyword);
+   		 keyword=matcher2.replaceAll(" OR ");
+        		
             	if (builder.length() > 0) { builder.append(" OR "); }
-//	            builder.append('\"');
-	            builder.append(context.text);
-//            builder.append('\"');
+	    //        builder.append('\"');
+	    		builder.append(keyword);
+	      //      builder.append('\"');
         }
 		return builder.toString();
 	}
@@ -50,5 +59,6 @@ public class OrQueryGenerator implements QueryGeneratorApi{
 	public String toDetailQuery(DocumentBadge document) {
 		return document.id;
 	}
+
 
 }

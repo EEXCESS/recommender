@@ -37,7 +37,7 @@ public class LuceneQueryGeneratorTest {
 		userProfile.contextKeywords.add(keyword7);
 		String result =gen.toQuery(userProfile );
 		System.out.println(result);
-		assertTrue(result.equals("k1 k3 OR k2 OR k3 OR k4 OR (k5 OR k6 OR k7)"));
+		assertTrue(result.equals("k1 OR k3 OR k2 OR k3 OR k4 OR (k5 OR k6 OR k7)"));
 	}
 
 	
