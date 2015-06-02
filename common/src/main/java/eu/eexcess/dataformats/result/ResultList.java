@@ -17,7 +17,9 @@ limitations under the License.
 package eu.eexcess.dataformats.result;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.LinkedList;
+import java.util.List;
 
 import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlElement;
@@ -31,45 +33,49 @@ import eu.eexcess.dataformats.result.ResultStats;
  * @author plopez@know-center.at
  */
 @XmlRootElement(name = "eexcess-results")
-
 public class ResultList implements Serializable {
-	
+
 	private static final long serialVersionUID = 1L;
 
 	@XmlAttribute
-    public String provider;
-    
-	private ResultStats resultStats;
-	
-    @XmlAttribute
-    public int totalResults;
+	public String provider;
 
-    @XmlElement(name="result")
-    public LinkedList<Result> results = new LinkedList<Result>();
-    
-    @XmlElement(name="resultsRDF")
-    public Object resultsRDF = null;
-    
-    @XmlElement(name="queryID")
-    public String queryID;
-    
-    @Override
+	private ResultStats resultStats;
+
+	@XmlAttribute
+	public int totalResults;
+
+	@XmlElement(name = "result")
+	public LinkedList<Result> results = new LinkedList<Result>();
+
+	@XmlElement(name ="partnerResponseState")
+	public List<PartnerResponseState> partnerResponseState = new ArrayList<PartnerResponseState>();
+
+	@XmlElement(name = "queryID")
+	public String queryID;
+
+	@Override
 	public String toString() {
-		return "ResultList [provider=" + provider + ", totalResults="
-				+ totalResults + ", results=" + results + ", resultsRDF="
-				+ resultsRDF + ", queryID=" + queryID + "]";
+		return "ResultList [provider=" + provider + ", resultStats="
+				+ resultStats + ", totalResults=" + totalResults + ", results="
+				+ results + ", partnerResponseState=" + partnerResponseState
+				+ ", queryID=" + queryID + "]";
 	}
 
 	@Override
 	public int hashCode() {
 		final int prime = 31;
 		int result = 1;
+		result = prime
+				* result
+				+ ((partnerResponseState == null) ? 0 : partnerResponseState
+						.hashCode());
 		result = prime * result
 				+ ((provider == null) ? 0 : provider.hashCode());
 		result = prime * result + ((queryID == null) ? 0 : queryID.hashCode());
-		result = prime * result + ((results == null) ? 0 : results.hashCode());
 		result = prime * result
-				+ ((resultsRDF == null) ? 0 : resultsRDF.hashCode());
+				+ ((resultStats == null) ? 0 : resultStats.hashCode());
+		result = prime * result + ((results == null) ? 0 : results.hashCode());
 		result = prime * result + totalResults;
 		return result;
 	}
@@ -83,6 +89,11 @@ public class ResultList implements Serializable {
 		if (getClass() != obj.getClass())
 			return false;
 		ResultList other = (ResultList) obj;
+		if (partnerResponseState == null) {
+			if (other.partnerResponseState != null)
+				return false;
+		} else if (!partnerResponseState.equals(other.partnerResponseState))
+			return false;
 		if (provider == null) {
 			if (other.provider != null)
 				return false;
@@ -93,21 +104,21 @@ public class ResultList implements Serializable {
 				return false;
 		} else if (!queryID.equals(other.queryID))
 			return false;
+		if (resultStats == null) {
+			if (other.resultStats != null)
+				return false;
+		} else if (!resultStats.equals(other.resultStats))
+			return false;
 		if (results == null) {
 			if (other.results != null)
 				return false;
 		} else if (!results.equals(other.results))
 			return false;
-		if (resultsRDF == null) {
-			if (other.resultsRDF != null)
-				return false;
-		} else if (!resultsRDF.equals(other.resultsRDF))
-			return false;
 		if (totalResults != other.totalResults)
 			return false;
 		return true;
 	}
-    
+
 	@XmlElement(name = "resultStats")
 	public ResultStats getResultStats() {
 		return resultStats;
@@ -117,5 +128,4 @@ public class ResultList implements Serializable {
 		this.resultStats = resultStats;
 	}
 
-    
 }
