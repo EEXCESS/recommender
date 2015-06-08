@@ -150,6 +150,47 @@ public class MendeleyPartnerRecommenderTest {
 
 	
 
+	@Test
+	public void singleQueryAdaLovelaceLordByron() {
+		ArrayList<String> keywords = new ArrayList<String>();
+		keywords.add("Ada Lovelace");
+		keywords.add("Lord Byron");
+        ResultList resultList = PartnerRecommenderTestHelper.getRecommendations(DEPLOYMENT_CONTEXT,	
+        		port, 
+        		PartnerRecommenderTestHelper.createParamsForPartnerRecommender(20,keywords ));
+	    
+        assertNotNull(resultList);
+        assertTrue(resultList.results.size() > 0 );
+        assertEquals(20, resultList.results.size());
+
+	}
+
+	@Test
+	public void singleQueryAdaLovelaceLordByronWithDetails() {
+		ArrayList<String> keywords = new ArrayList<String>();
+		keywords.add("Ada Lovelace");
+		keywords.add("Lord Byron");
+        ResultList resultList = PartnerRecommenderTestHelper.getRecommendations(DEPLOYMENT_CONTEXT,	
+        		port, 
+        		PartnerRecommenderTestHelper.createParamsForPartnerRecommender(20,keywords ));
+	    
+        assertNotNull(resultList);
+        assertTrue(resultList.results.size() > 0 );
+        assertEquals(20, resultList.results.size());
+        for (int i = 0; i < resultList.results.size(); i++) {
+            ArrayList<String> ids = new ArrayList<String>();
+    		ArrayList<String> uris = new ArrayList<String>();
+            ids.add(resultList.results.get(i).documentBadge.id);
+            uris.add(resultList.results.get(i).documentBadge.uri);
+            DocumentBadgeList documentDetails = PartnerRecommenderTestHelper.getDetails(DEPLOYMENT_CONTEXT,	
+            		port, 
+            		PartnerRecommenderTestHelper.createParamsForPartnerRecommenderDetailCall(ids, uris, DATAPROVIDER));
+    	    
+            assertNotNull(documentDetails);
+            assertTrue(documentDetails.documentBadges.size() > 0 );
+            assertEquals(1, documentDetails.documentBadges.size());
+		}
+	}
 	
 
 }
