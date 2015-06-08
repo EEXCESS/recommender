@@ -54,6 +54,7 @@ import eu.eexcess.dataformats.RecommenderStats;
 import eu.eexcess.dataformats.result.DocumentBadge;
 import eu.eexcess.dataformats.result.DocumentBadgeList;
 import eu.eexcess.dataformats.result.DocumentBadgePredicate;
+import eu.eexcess.dataformats.result.PartnerResponseState;
 import eu.eexcess.dataformats.result.ResultList;
 import eu.eexcess.dataformats.result.ResultStats;
 import eu.eexcess.dataformats.userprofile.SecureUserProfile;
@@ -206,15 +207,21 @@ public class FederatedRecommenderCore {
 		for (Entry<PartnerBadge, Future<ResultList>> entry : futures.entrySet()) {
 			long startT = System.currentTimeMillis();
 			try {
+				
 				entry.getKey().shortTimeStats.requestCount++;
 				ResultList rL = entry.getValue().get(timeout,
 						TimeUnit.MILLISECONDS);
+				PartnerResponseState responseState = new PartnerResponseState();
+				
+				responseState.setSuccess(true);
+				responseState.setSystemID(entry.getKey().systemId);
+				rL.partnerResponseState.add(responseState );
+				
 				entry.getValue().cancel(true);
 				partnersFederatedResults.getResults().put(entry.getKey(), rL);
 				entry.getKey().addLastQueries(rL.getResultStats());
 
 				timeout -= System.currentTimeMillis() - startT;
-
 				timeout = timeout - (System.currentTimeMillis() - startT);
 
 			} catch (TimeoutException e) {
@@ -223,18 +230,31 @@ public class FederatedRecommenderCore {
 				entry.getValue().cancel(true);
 				
 				timeout -= System.currentTimeMillis() - startT;
-				logger.log(Level.WARNING,
-						"Waited too long for partner system '" + entry.getKey()
-								+ "' to respond " + timeout, e);
+				String msg = "Waited too long for partner system '" + entry.getKey()
+						+ "' to respond " + timeout;
+				ResultList rL = new ResultList();
+				PartnerResponseState responseState = new PartnerResponseState();
+				responseState.setErrorMessage(msg);
+				responseState.setSuccess(false);
+				responseState.setSystemID(entry.getKey().systemId);
+				rL.partnerResponseState.add(responseState );
+				partnersFederatedResults.getResults().put(entry.getKey(), rL);
+				logger.log(Level.WARNING, msg, e);
 			} catch (Exception e) {
 				if (entry.getKey() != null) {
 					entry.getKey().shortTimeStats.failedRequestCount++;
 					entry.getValue().cancel(true);
 					timeout -= System.currentTimeMillis() - startT;
 				}
-				logger.log(Level.SEVERE,
-						"Failed to retrieve results from a parter system '"
-								+ entry.getKey() + "'" + (timeout) + "ms ", e);
+				String msg = "Failed to retrieve results from a parter system '"
+						+ entry.getKey() + "'" + (timeout) + "ms ";
+				PartnerResponseState responseState = new PartnerResponseState();
+				responseState.setErrorMessage(msg);
+				responseState.setSuccess(false);
+				responseState.setSystemID(entry.getKey().systemId);
+				ResultList rL = new ResultList();
+				rL.partnerResponseState.add(responseState );
+				logger.log(Level.SEVERE, msg, e);
 			}
 			entry.setValue(null);
 
@@ -567,10 +587,6 @@ public class FederatedRecommenderCore {
 		if (this.getPartnerRegister().getPartners().contains(badge)) {
 			logger.log(Level.INFO, "Partner: " + badge.getSystemId()
 					+ " allready registered!");
-			synchronized (partnerRegister) {
-				writeStatsToDB();
-			}
-
 			return "Allready Registered";
 		}
 
@@ -638,6 +654,10 @@ public class FederatedRecommenderCore {
 		}
 		long start = System.currentTimeMillis();
 		PartnersFederatedRecommendations pFR = getPartnersRecommendations(userProfile);
+		List<PartnerResponseState> partnerResponseState = new ArrayList<PartnerResponseState>();
+		for(PartnerBadge badge : pFR.getResults().keySet()){
+			partnerResponseState.addAll(pFR.getResults().get(badge).partnerResponseState);
+		}
 		long end = System.currentTimeMillis();
 		long timeToGetPartners = end - start;
 		start = System.currentTimeMillis();
@@ -656,6 +676,7 @@ public class FederatedRecommenderCore {
 				+ "ms");
 		resultList.totalResults = resultList.results.size();
 		resultList.provider = "federated";
+		resultList.partnerResponseState = partnerResponseState;
 		return resultList;
 	}
 	

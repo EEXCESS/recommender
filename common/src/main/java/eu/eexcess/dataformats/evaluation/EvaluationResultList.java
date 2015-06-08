@@ -42,7 +42,7 @@ public class EvaluationResultList extends ResultList implements Serializable{
 		public EvaluationResultList(ResultList parent) {
 			this.provider = parent.provider;
 			this.results = parent.results;
-			this.resultsRDF= parent.resultsRDF;
+			this.partnerResponseState = parent.partnerResponseState;
 			this.totalResults= parent.totalResults;
 		}
 	  	@XmlAttribute
