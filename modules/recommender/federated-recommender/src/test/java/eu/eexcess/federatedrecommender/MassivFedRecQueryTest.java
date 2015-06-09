@@ -29,7 +29,9 @@ import eu.eexcess.dataformats.userprofile.SecureUserProfile;
 
 public class MassivFedRecQueryTest {
 //	private static final String searchRequest = "http://eexcess-dev.joanneum.at/eexcess-federated-recommender-web-service-1.0-SNAPSHOT/recommender/recommend";
-	private static final String searchRequest = "http://localhost/eexcess-federated-recommender-web-service-1.0-SNAPSHOT/recommender/recommend";
+	//private static final String searchRequest = "http://localhost/eexcess-federated-recommender-web-service-1.0-SNAPSHOT/recommender/recommend";
+	private static final String searchRequest = "http://eexcess-demo.know-center.tugraz.at/eexcess-federated-recommender-web-service-1.0-SNAPSHOT/recommender/recommend";
+	
 	private final ExecutorService threadPool;
 	public  MassivFedRecQueryTest() {
 		threadPool= Executors.newFixedThreadPool(30);
@@ -40,7 +42,7 @@ public class MassivFedRecQueryTest {
 		final MassivFedRecQueryTest test = new MassivFedRecQueryTest();
 		List<String> queryList = test.getQueryList();
 		HashMap<String,Future<String>> futures = new HashMap<String,Future<String>>();
-		for (int i = 0; i < 30; i++) {
+		for (int i = 0; i < 2; i++) {
 			for (final String string : queryList) {
 
 				Future<String> future = threadPool.submit(new Callable<String>() {
@@ -56,7 +58,7 @@ public class MassivFedRecQueryTest {
 
 				futures.put(string + i, future);
 				try {
-					Thread.sleep(500);
+					Thread.sleep(1500);
 				} catch (InterruptedException e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();

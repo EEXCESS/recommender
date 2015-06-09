@@ -2,7 +2,6 @@ package eu.eexcess.partnerrecommender.api;
 
 import java.io.File;
 import java.net.URL;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.logging.Level;
@@ -73,7 +72,7 @@ public enum PartnerConfigurationCache {
 			String eexcessPartnerKeyFile =System.getenv("EEXCESS_PARTNER_KEY_FILE");
 			logger.log(Level.INFO,"Reading Api Keys from:" + eexcessPartnerKeyFile);
 			if(eexcessPartnerKeyFile==null)
-			logger.log(Level.INFO,"Environment variable \"EEXCESS_PARTNER_KEY_FILE\" has to be set");
+			logger.log(Level.INFO,"Environment variable \"EEXCESS_PARTNER_KEY_FILE\" for "+partnerConfiguration.systemId+" has to be set");
 			PartnerApiKeys partnerKeys = mapper.readValue(new File(eexcessPartnerKeyFile), PartnerApiKeys.class);
 		
 			/*
@@ -121,7 +120,7 @@ public enum PartnerConfigurationCache {
 			}
 
 		} catch (Exception e) {
-			logger.log(Level.SEVERE, "Cannot initialize partner recommender", e);
+			logger.log(Level.WARNING, "Cannot initialize enrichment service for "+partnerConfiguration.systemId+" recommender", e);
 
 		}
 		try {
@@ -131,7 +130,7 @@ public enum PartnerConfigurationCache {
 			queryGeneratorMapping.put(partnerConfiguration.queryGeneratorClass,queryGen);
 		} catch (InstantiationException | IllegalAccessException
 				| ClassNotFoundException e1) {
-			logger.log(Level.SEVERE, "Cannot initialize partner recommender",
+			logger.log(Level.SEVERE, "Cannot initialize query generator for "+partnerConfiguration.systemId+" recommender",
 					e1);
 		}
 	}
@@ -212,11 +211,8 @@ public enum PartnerConfigurationCache {
 	 * @return
 	 */
 	public QueryGeneratorApi getQueryGenerator(String queryGen) {
-		logger.log(Level.INFO,"Query Generator requested:"+ queryGen);
 		if(queryGen==null){
-			logger.log(Level.INFO,"Query Generator Returned: "+this.defaultQueryGen.getClass().getName());
 			return this.defaultQueryGen;
-			
 		}
 		QueryGeneratorApi returnGen = queryGeneratorMapping.get(queryGen);
 		if(returnGen==null){
@@ -224,14 +220,12 @@ public enum PartnerConfigurationCache {
 				QueryGeneratorApi queryGenerator =(QueryGeneratorApi) Class.forName(
 						queryGen).newInstance();
 				queryGeneratorMapping.put(queryGen,queryGenerator);
-				logger.log(Level.INFO,"Query Generator Returned: "+queryGenerator.getClass().getName());
 				return queryGenerator;
 			} catch (InstantiationException | IllegalAccessException
 					| ClassNotFoundException e1) {
-				logger.log(Level.SEVERE, "Cannot load query generation class: "+queryGen,
+				logger.log(Level.SEVERE, "Cannot load query generation class: "+queryGen + " for partner "+partnerConfiguration.systemId,
 						e1);
 			}
-			logger.log(Level.INFO,"Query Generator Returned: "+ this.defaultQueryGen.getClass().getName());
 			return this.defaultQueryGen;
 		}
 		else
