@@ -41,6 +41,7 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
 import com.hp.hpl.jena.ontology.OntModel;
+import com.hp.hpl.jena.ontology.impl.OntModelImpl;
 import com.hp.hpl.jena.query.Query;
 import com.hp.hpl.jena.query.QueryExecution;
 import com.hp.hpl.jena.query.QueryExecutionFactory;
@@ -178,6 +179,7 @@ public class Transformer implements ITransformer{
 			}
 		}
    		model = ModelFactory.createOntologyModel();
+   		
 		sparqlQueryForToResultListString = createSPARQLqueryForToResultList();
 
 		sparqlQueryForToResultList = QueryFactory.create(sparqlQueryForToResultListString);	
@@ -253,23 +255,24 @@ public class Transformer implements ITransformer{
 	public ResultList toResultList(Document nativeResults, Document input, PartnerdataLogger logger) {
 		ResultList returnList =  new ResultList();
     	
-   		model.removeAll();
+//   		model.removeAll();
+  		OntModel tmpModel =new OntModelImpl(model.getSpecification(),model);
    		String inputString = XMLTools.getStringFromDocument(input);
    		//System.out.println(inputString);
    		StringReader stream = new StringReader(inputString);
-   		model.read(stream,null);
-
+   		tmpModel.read(stream,null);
+   		
 
 		if (this.partnerConfig.partnerDataRequestsTrace){// for debugging:
 			PartnerdataTracer.debugTrace(this.partnerConfig, "createSPARQLqueryForToResultList:\n"+ sparqlQueryForToResultListString);
 			Query queryDebug = QueryFactory.create(sparqlQueryForToResultListString);	
-			QueryExecution qeDebug = QueryExecutionFactory.create(queryDebug, model);
+			QueryExecution qeDebug = QueryExecutionFactory.create(queryDebug, tmpModel);
 			ResultSet queryResultsDebug =  qeDebug.execSelect();
 			log.info("createSPARQLqueryForToResultList Result:\n" + ResultSetFormatter.asText(queryResultsDebug));
 			qeDebug.close();
 			
 		}
-		QueryExecution qe = QueryExecutionFactory.create(sparqlQueryForToResultList, model);
+		QueryExecution qe = QueryExecutionFactory.create(sparqlQueryForToResultList, tmpModel);
 
 		ResultSet queryResults =  qe.execSelect();
 		

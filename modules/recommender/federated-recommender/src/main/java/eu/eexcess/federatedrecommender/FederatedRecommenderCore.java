@@ -213,8 +213,8 @@ public class FederatedRecommenderCore {
 						TimeUnit.MILLISECONDS);
 				PartnerResponseState responseState = new PartnerResponseState();
 				
-				responseState.setSuccess(true);
-				responseState.setSystemID(entry.getKey().systemId);
+				responseState.success=true;
+				responseState.systemID=entry.getKey().systemId;
 				rL.partnerResponseState.add(responseState );
 				
 				entry.getValue().cancel(true);
@@ -230,13 +230,13 @@ public class FederatedRecommenderCore {
 				entry.getValue().cancel(true);
 				
 				timeout -= System.currentTimeMillis() - startT;
-				String msg = "Waited too long for partner system '" + entry.getKey()
-						+ "' to respond " + timeout;
+				String msg = "Waited too long for partner system '" + entry.getKey().systemId
+						+ "' to respond " + (federatedRecConfiguration.partnersTimeout-timeout) +" ms ";
 				ResultList rL = new ResultList();
 				PartnerResponseState responseState = new PartnerResponseState();
-				responseState.setErrorMessage(msg);
-				responseState.setSuccess(false);
-				responseState.setSystemID(entry.getKey().systemId);
+				responseState.errorMessage=msg;
+				responseState.success=false;
+				responseState.systemID=entry.getKey().systemId;
 				rL.partnerResponseState.add(responseState );
 				partnersFederatedResults.getResults().put(entry.getKey(), rL);
 				logger.log(Level.WARNING, msg, e);
@@ -247,11 +247,11 @@ public class FederatedRecommenderCore {
 					timeout -= System.currentTimeMillis() - startT;
 				}
 				String msg = "Failed to retrieve results from a parter system '"
-						+ entry.getKey() + "'" + (timeout) + "ms ";
+						+ entry.getKey().systemId;
 				PartnerResponseState responseState = new PartnerResponseState();
-				responseState.setErrorMessage(msg);
-				responseState.setSuccess(false);
-				responseState.setSystemID(entry.getKey().systemId);
+				responseState.errorMessage =msg;
+				responseState.success=false;
+				responseState.systemID=entry.getKey().systemId;
 				ResultList rL = new ResultList();
 				rL.partnerResponseState.add(responseState );
 				logger.log(Level.SEVERE, msg, e);

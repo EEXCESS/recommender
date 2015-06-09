@@ -85,7 +85,7 @@ public class PartnerRecommender implements PartnerRecommenderApi {
     public ResultList recommend(SecureUserProfile userProfile) throws IOException {
         try {
             PartnerdataLogger partnerdataLogger = new PartnerdataLogger(partnerConfiguration);
-        	partnerdataLogger.getActLogEntry().start();
+//        	partnerdataLogger.getActLogEntry().start();
         	long startCallPartnerApi = System.currentTimeMillis();
         	// use native untransformed result primarily
         	PartnerConfiguration currentPartnerConfiguration = (PartnerConfiguration) SerializationUtils.clone(partnerConfiguration);
@@ -93,7 +93,6 @@ public class PartnerRecommender implements PartnerRecommenderApi {
         		if(userProfile.partnerList.size()>0)
         			for (PartnerBadge pC: userProfile.partnerList) {
 						if(pC.systemId.equals(partnerConfiguration.systemId)){
-							log.log(Level.INFO,"Query Generator PartnerRecommender 1: "+pC.systemId + " " +pC.queryGeneratorClass);
 							currentPartnerConfiguration.queryGeneratorClass=pC.queryGeneratorClass;
 						}	
 					}
@@ -110,16 +109,15 @@ public class PartnerRecommender implements PartnerRecommenderApi {
         	 *  Call remote API from partner
         	 */
         
-        	partnerdataLogger.getActLogEntry().queryPartnerAPIStart();
-        	log.log(Level.INFO,"Query Generator PartnerRecommender 2: "+currentPartnerConfiguration.queryGeneratorClass);
-            Document searchResultsNative = partnerConnector.queryPartner(currentPartnerConfiguration, userProfile, partnerdataLogger);
-            partnerdataLogger.getActLogEntry().queryPartnerAPIEnd();
+//        	partnerdataLogger.getActLogEntry().queryPartnerAPIStart();
+        	Document searchResultsNative = partnerConnector.queryPartner(currentPartnerConfiguration, userProfile, partnerdataLogger);
+//            partnerdataLogger.getActLogEntry().queryPartnerAPIEnd();
             long endCallPartnerApi = System.currentTimeMillis();
         	/*
         	 *  Transform Document in partner format to EEXCESS RDF format
         	 */
             long startTransform1 = System.currentTimeMillis();
-            partnerdataLogger.addQuery(userProfile);
+//            partnerdataLogger.addQuery(userProfile);
             // TODO rrubien: begin impl of PartnerRecommender
             Document searchResultsEexcess = transformer.transform(searchResultsNative, partnerdataLogger);
             long endTransform1 = System.currentTimeMillis();
@@ -127,12 +125,12 @@ public class PartnerRecommender implements PartnerRecommenderApi {
         	 *  Enrich results
         	 */
             long startEnrich = System.currentTimeMillis();
-        	partnerdataLogger.getActLogEntry().enrichStart();
+//        	partnerdataLogger.getActLogEntry().enrichStart();
         	Document enrichedResultsExcess = null;
         	boolean queryHasResults= transformer.hasEEXCESSRDFResponseResults(searchResultsEexcess);
             if (queryHasResults)
             	enrichedResultsExcess = enricher.enrichResultList(searchResultsEexcess, partnerdataLogger);
-        	partnerdataLogger.getActLogEntry().enrichEnd();
+//        	partnerdataLogger.getActLogEntry().enrichEnd();
             long endEnrich = System.currentTimeMillis();
         	/*
         	 *  Pack into ResultList simple format
@@ -143,14 +141,14 @@ public class PartnerRecommender implements PartnerRecommenderApi {
             	recommendations = transformer.toResultList(searchResultsNative, enrichedResultsExcess, partnerdataLogger);
             else 
             	recommendations.results = new LinkedList<Result>();
-            partnerdataLogger.addResults(recommendations);
-        	partnerdataLogger.getActLogEntry().end();
-            partnerdataLogger.save();
+//            partnerdataLogger.addResults(recommendations);
+//        	partnerdataLogger.getActLogEntry().end();
+//            partnerdataLogger.save();
             long endTransform2 = System.currentTimeMillis();
             log.log(Level.INFO,"Call Parnter Api:"+(endCallPartnerApi-startCallPartnerApi)+"ms; First Transformation:"+(endTransform1-startTransform1)+"ms; Enrichment:"+(endEnrich-startEnrich)+"ms; Second Transformation:"+(endTransform2-startTransform2)+"ms");
             //TODO: refactor the next line!
             recommendations.setResultStats(new ResultStats(PartnerConfigurationCache.CONFIG.getQueryGenerator(currentPartnerConfiguration.queryGeneratorClass).toQuery(userProfile),endCallPartnerApi-startCallPartnerApi,endTransform1-startTransform1,endTransform2-startTransform2,endEnrich-startEnrich,recommendations.totalResults));
-            PartnerdataTracer.dumpFile(this.getClass(), this.partnerConfiguration, recommendations, "partner-recommender-results", PartnerdataTracer.FILETYPE.XML, partnerdataLogger);
+//            PartnerdataTracer.dumpFile(this.getClass(), this.partnerConfiguration, recommendations, "partner-recommender-results", PartnerdataTracer.FILETYPE.XML, partnerdataLogger);
             return recommendations;
             
             // TODO rrubien: end impl of PartnerRecommender
