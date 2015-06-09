@@ -131,7 +131,7 @@ public class OccurrenceProbabilityPickerTest {
 		}
 		
 		for (Result iterable_element : evalList.results) {
-			System.out.println(iterable_element.title +" "+ iterable_element.description);
+			System.out.println(iterable_element.title +" "+ iterable_element.description +" "+iterable_element.resultGroup);
 		}
 		assertEquals(true, evalList.results.size()==10 );
 		assertEquals(true, evalList.results.get(2).description ==null);
