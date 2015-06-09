@@ -136,15 +136,27 @@ public class OccurrenceProbabilityPicker extends PartnersFederatedRecommendation
 				if(resultToAdd==null)
 					break;
 				byte[] signNewResult= getFuzzyHashSignature(resultToAdd);
-				boolean found=false;
+				Result found=null;
 				for (Result selectedResult : results) {
 					if(Arrays.equals(signNewResult, getFuzzyHashSignature(selectedResult))){
-						found=true;
+						found=selectedResult;
 						break;
 					}
 				}
-				if (!found) 
+//				if (!found) 
+//					results.add(resultToAdd);
+				if (found==null) {
 					results.add(resultToAdd);
+				}
+				else{
+					if(found.resultGroup!=null)
+					found.resultGroup.add(resultToAdd);
+					else{
+						found.resultGroup = new LinkedList<Result>();
+						found.resultGroup.add(resultToAdd);
+					}
+						
+				}
 //				else {
 //					numResults++; // leaving one out -> increasing num results
 //				}

@@ -129,7 +129,7 @@ public class FiFoPickerTest {
 		}
 		
 		for (Result iterable_element : evalList.results) {
-			System.out.println(iterable_element.title +" "+ iterable_element.description);
+			System.out.println(iterable_element.title +" "+ iterable_element.description+" "+iterable_element.resultGroup);
 		}
 		assertEquals(true, evalList.results.size()==10 );
 		assertEquals(true, evalList.results.get(0).title.equals("RL1T1") );

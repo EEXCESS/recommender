@@ -24,6 +24,7 @@ package eu.eexcess.federatedrecommender.picker;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -79,16 +80,26 @@ public class FiFoPicker extends PartnersFederatedRecommendationsPicker {
 						break;
 
 					byte[] signNewResult = getFuzzyHashSignature(resultToAdd);
-					boolean found = false;
+					Result found = null;
 					for (Result selectedResult : result.results) {
 						if (Arrays.equals(signNewResult,
 								getFuzzyHashSignature(selectedResult))) {
-							found = true;
+							found = selectedResult;
 							break;
 						}
 					}
-					if (!found) {
+					
+					if (found==null) {
 						result.results.add(resultToAdd);
+					}
+					else{
+						if(found.resultGroup!=null)
+						found.resultGroup.add(resultToAdd);
+						else{
+							found.resultGroup = new LinkedList<Result>();
+							found.resultGroup.add(resultToAdd);
+						}
+							
 					}
 					resultList.getResults().get(partnerBadge).results.remove(0);
 				}
