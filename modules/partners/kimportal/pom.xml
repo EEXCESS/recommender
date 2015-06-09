@@ -49,11 +49,7 @@ limitations under the License.
         	<type>jar</type>
         	<scope>compile</scope>
     	</dependency>
-    	<dependency>
-	        <groupId>xom</groupId>
-        	<artifactId>xom</artifactId>
-        	<version>1.1</version>
-    	</dependency>
+
         <dependency>
 			<groupId>eu.eexcess</groupId>
 			<artifactId>eexcess-common</artifactId>
