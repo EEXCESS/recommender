@@ -20,7 +20,15 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 
+import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
@@ -192,5 +200,25 @@ public class MendeleyPartnerRecommenderTest {
 		}
 	}
 	
-
+	@Test
+	public void singleQueryMonaLisaThreaded() throws InterruptedException, ExecutionException {
+		final int threadCount = 3;
+	    final MendeleyPartnerRecommenderTest domainObject = new MendeleyPartnerRecommenderTest();
+	    Callable<Long> task = new Callable<Long>() {
+	        @Override
+	        public Long call() {
+	        	domainObject.singleQueryMonaLisa();
+	            return new Long(0);
+	        }
+	    };
+	    List<Callable<Long>> tasks = Collections.nCopies(threadCount, task);
+	    ExecutorService executorService = Executors.newFixedThreadPool(threadCount);
+	    List<Future<Long>> futures = executorService.invokeAll(tasks);
+	    List<Long> resultList = new ArrayList<Long>(futures.size());
+	    // Check for exceptions
+	    for (Future<Long> future : futures) {
+	        // Throws an exception if an exception was thrown by the task.
+	        resultList.add(future.get());
+	    }
+	}
 }

@@ -71,7 +71,7 @@ public class Transformer implements ITransformer{
 	
 	protected javax.xml.transform.Transformer transformerResultList;
 	protected javax.xml.transform.Transformer transformerResultObject;
-	protected OntModel model;
+//	protected OntModel model;
 	
 	protected Document transformationResultList;
 	protected Document transformationResultObject;
@@ -178,7 +178,7 @@ public class Transformer implements ITransformer{
 				e.printStackTrace();
 			}
 		}
-   		model = ModelFactory.createOntologyModel();
+   		//model = ModelFactory.createOntologyModel();
    		
 		sparqlQueryForToResultListString = createSPARQLqueryForToResultList();
 
@@ -255,24 +255,26 @@ public class Transformer implements ITransformer{
 	public ResultList toResultList(Document nativeResults, Document input, PartnerdataLogger logger) {
 		ResultList returnList =  new ResultList();
     	
-		model.removeAll();
-  		OntModel tmpModel =new OntModelImpl(model.getSpecification(),model);
+
+		//model.removeAll();
+  		//OntModel tmpModel =new OntModelImpl(model.getSpecification(),model);
+		OntModel model = ModelFactory.createOntologyModel();
    		String inputString = XMLTools.getStringFromDocument(input);
    		//System.out.println(inputString);
    		StringReader stream = new StringReader(inputString);
-   		tmpModel.read(stream,null);
+   		model.read(stream,null);
    		
 
 		if (this.partnerConfig.partnerDataRequestsTrace){// for debugging:
 			PartnerdataTracer.debugTrace(this.partnerConfig, "createSPARQLqueryForToResultList:\n"+ sparqlQueryForToResultListString);
 			Query queryDebug = QueryFactory.create(sparqlQueryForToResultListString);	
-			QueryExecution qeDebug = QueryExecutionFactory.create(queryDebug, tmpModel);
+			QueryExecution qeDebug = QueryExecutionFactory.create(queryDebug, model);
 			ResultSet queryResultsDebug =  qeDebug.execSelect();
 			log.info("createSPARQLqueryForToResultList Result:\n" + ResultSetFormatter.asText(queryResultsDebug));
 			qeDebug.close();
 			
 		}
-		QueryExecution qe = QueryExecutionFactory.create(sparqlQueryForToResultList, tmpModel);
+		QueryExecution qe = QueryExecutionFactory.create(sparqlQueryForToResultList, model);
 
 		ResultSet queryResults =  qe.execSelect();
 		
@@ -394,7 +396,7 @@ public class Transformer implements ITransformer{
 		return returnList ;
 	}
 
-
+/*
 	private Object extractRDFForOneObject(Result result, String inputString) {
 
 		String queryString = getRDFPrefixes() + 
@@ -404,15 +406,18 @@ public class Transformer implements ITransformer{
 				+ "{?x ?y <" + result.documentBadge.uri + "> }" + 
 				" }" ;
 
+		model.removeAll();
+  		OntModel tmpModel =new OntModelImpl(model.getSpecification(),model);
+
 		com.hp.hpl.jena.query.Query query = QueryFactory.create(queryString);
 
-		QueryExecution qe = QueryExecutionFactory.create(query, model);
+		QueryExecution qe = QueryExecutionFactory.create(query, tmpModel);
 
 		if (this.partnerConfig.partnerDataRequestsTrace) {// for debugging:
 			PartnerdataTracer.debugTrace(this.partnerConfig, queryString);
 			Query queryDebug = QueryFactory.create(queryString);
 			QueryExecution qeDebug = QueryExecutionFactory.create(queryDebug,
-					model);
+					tmpModel);
 			Model queryResultsDebug = qeDebug.execDescribe();
 			PartnerdataTracer.debugTrace(this.partnerConfig, XMLTools.writeModel(queryResultsDebug));
 			
@@ -423,7 +428,7 @@ public class Transformer implements ITransformer{
 		qe.close();
 		return XMLTools.writeModel(newRawModel);
 	}
-
+*/
 	protected Result postProcessResult(Document orgPartnerResult, Result result, QuerySolution querySol) {
 		return result;
 	}
