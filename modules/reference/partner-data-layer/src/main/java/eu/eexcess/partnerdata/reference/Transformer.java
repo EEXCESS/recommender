@@ -255,7 +255,7 @@ public class Transformer implements ITransformer{
 	public ResultList toResultList(Document nativeResults, Document input, PartnerdataLogger logger) {
 		ResultList returnList =  new ResultList();
     	
-//   		model.removeAll();
+		model.removeAll();
   		OntModel tmpModel =new OntModelImpl(model.getSpecification(),model);
    		String inputString = XMLTools.getStringFromDocument(input);
    		//System.out.println(inputString);
