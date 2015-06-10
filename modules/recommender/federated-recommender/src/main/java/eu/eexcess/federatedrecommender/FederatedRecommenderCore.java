@@ -149,7 +149,7 @@ public class FederatedRecommenderCore {
 
 		long start = System.currentTimeMillis();
 		Map<PartnerBadge, Future<ResultList>> futures = new HashMap<PartnerBadge, Future<ResultList>>();
-		for (final PartnerBadge partner : partnerRegister.getPartners()) {
+		for (final PartnerBadge partner : getPartnerRegister().getPartners()) {
 			if (checkUserSelectedPartners(secureUserProfile, partner)) {
 				final Client tmpClient = partnerRegister.getClient(partner);
 
