@@ -63,14 +63,14 @@
 					          <xsl:element name="edm:provider">
 						            <xsl:element name="edm:Agent">
 							              <xsl:attribute name="rdf:about">http://api.mendeley.com/</xsl:attribute>
-							              <xsl:element name="foaf:name">mendeley</xsl:element>
+							              <xsl:element name="foaf:name">Mendeley</xsl:element>
 						            </xsl:element>
 					          </xsl:element>
 
 					          <xsl:element name="edm:dataProvider">
 						            <xsl:element name="edm:Agent">
 							              <xsl:attribute name="rdf:about">http://api.mendeley.com/</xsl:attribute>
-							              <xsl:element name="foaf:name">mendeley</xsl:element>
+							              <xsl:element name="foaf:name">Mendeley</xsl:element>
 						            </xsl:element>
 					          </xsl:element>
 
@@ -162,18 +162,18 @@
                        select="description"/>
    </xsl:template>
 	  <xsl:template name="Main.Date">
-      <apply-templates xmlns="http://www.w3.org/1999/XSL/Transform" mode="m7" select="year"/>
+      <apply-templates xmlns="http://www.w3.org/1999/XSL/Transform" mode="m1" select="year"/>
    </xsl:template>
 	  <xsl:template name="Main.Identifier">
-      <apply-templates xmlns="http://www.w3.org/1999/XSL/Transform" mode="m0" select="id"/>
+      <apply-templates xmlns="http://www.w3.org/1999/XSL/Transform" mode="m2" select="id"/>
    </xsl:template>
 	  <xsl:template name="Main.Creator">
       <apply-templates xmlns="http://www.w3.org/1999/XSL/Transform"
-                       mode="m1"
+                       mode="m3"
                        select="authorsString"/>
    </xsl:template>
 	  <xsl:template name="Main.isShownAt">
-      <apply-templates xmlns="http://www.w3.org/1999/XSL/Transform" mode="m3" select="link"/>
+      <apply-templates xmlns="http://www.w3.org/1999/XSL/Transform" mode="m0" select="link"/>
    </xsl:template>
 	  <xsl:template name="Main.collectionName">
       <apply-templates xmlns="http://www.w3.org/1999/XSL/Transform"
@@ -181,31 +181,31 @@
                        select="publicationOutlet"/>
    </xsl:template>
 	  <xsl:template name="Main.URI">
-      <apply-templates xmlns="http://www.w3.org/1999/XSL/Transform" mode="m2" select="link"/>
+      <apply-templates xmlns="http://www.w3.org/1999/XSL/Transform" mode="m7" select="link"/>
    </xsl:template>
 
-   <template xmlns="http://www.w3.org/1999/XSL/Transform" match="id" mode="m0">
-      <element name="dc:identifier">
+   <template xmlns="http://www.w3.org/1999/XSL/Transform" match="link" mode="m0">
+      <element name="uri">
          <call-template name="StringToString"/>
       </element>
    </template>
    <xsl:template name="StringToString">
       <xsl:value-of select="."/>
    </xsl:template>
+   <template xmlns="http://www.w3.org/1999/XSL/Transform" match="year" mode="m1">
+      <element name="dcterms:date">
+         <call-template name="StringToString"/>
+      </element>
+   </template>
+   <template xmlns="http://www.w3.org/1999/XSL/Transform" match="id" mode="m2">
+      <element name="dc:identifier">
+         <call-template name="StringToString"/>
+      </element>
+   </template>
    <template xmlns="http://www.w3.org/1999/XSL/Transform"
              match="authorsString"
-             mode="m1">
+             mode="m3">
       <element name="dc:creator">
-         <call-template name="StringToString"/>
-      </element>
-   </template>
-   <template xmlns="http://www.w3.org/1999/XSL/Transform" match="link" mode="m2">
-      <element name="uri">
-         <call-template name="StringToString"/>
-      </element>
-   </template>
-   <template xmlns="http://www.w3.org/1999/XSL/Transform" match="link" mode="m3">
-      <element name="uri">
          <call-template name="StringToString"/>
       </element>
    </template>
@@ -228,8 +228,8 @@
          <call-template name="StringToString"/>
       </element>
    </template>
-   <template xmlns="http://www.w3.org/1999/XSL/Transform" match="year" mode="m7">
-      <element name="dcterms:date">
+   <template xmlns="http://www.w3.org/1999/XSL/Transform" match="link" mode="m7">
+      <element name="uri">
          <call-template name="StringToString"/>
       </element>
    </template>
