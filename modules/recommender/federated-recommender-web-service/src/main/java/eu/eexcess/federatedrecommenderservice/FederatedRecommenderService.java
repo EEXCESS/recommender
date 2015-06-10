@@ -287,11 +287,14 @@ public class FederatedRecommenderService {
 	@Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
 	public SecureUserProfile testSUP() {
 		SecureUserProfile secureUserProfile = new SecureUserProfile();
+		secureUserProfile.queryID="QueryID01234567";
 		secureUserProfile.firstName = "Max";
 		secureUserProfile.lastName = "Musterman";
 		secureUserProfile.birthDate = new Date();
 		secureUserProfile.gender = "male";
-
+		secureUserProfile.timeRange = new TimeRange();
+		secureUserProfile.timeRange.setStart("1980");
+		secureUserProfile.timeRange.setEnd("2000");
 		List<History> history = new ArrayList<History>();
 		history.add(new History(new Date(), "history title", 4, 4,
 				"http://1234.com"));
