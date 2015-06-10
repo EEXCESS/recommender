@@ -1,6 +1,6 @@
 {
   "systemId": "Deutsche Digitale Bibliothek",
-  "queryGeneratorClass": "eu.eexcess.partnerrecommender.reference.OrQueryGenerator",
+  "queryGeneratorClass": "eu.eexcess.partnerrecommender.reference.OrQueryGeneratorFieldTermConjunction",
   "partnerConnectorClass": "eu.eexcess.ddb.recommender.PartnerConnector",
   "isTransformedNative": "false",
   "transformerClass": "eu.eexcess.ddb.datalayer.DDBTransformer",

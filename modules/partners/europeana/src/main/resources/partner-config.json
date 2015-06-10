@@ -1,6 +1,6 @@
 {
   "systemId": "Europeana",
-  "queryGeneratorClass": "eu.eexcess.partnerrecommender.reference.OrQueryGenerator",
+  "queryGeneratorClass": "eu.eexcess.partnerrecommender.reference.OrQueryGeneratorFieldTermConjunction",
   "partnerConnectorClass": "eu.eexcess.europeana.recommender.PartnerConnector",
   "transformerClass": "eu.eexcess.europeana.datalayer.EuropeanaTransformer",
   "searchEndpoint": "http://www.europeana.eu/api/v2/search.json?wskey=${apiKey}&query=${query}&rows=${numResults}",
