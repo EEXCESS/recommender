@@ -166,6 +166,22 @@ public class KIMPortalPartnerRecommenderTest {
 	}
 
 	@Test
+	public void detailCallForEnrichmentSingleObject() {
+        ArrayList<String> ids = new ArrayList<String>();
+		ArrayList<String> uris = new ArrayList<String>();
+        ids.add("Mz 000068");
+        uris.add("http://www.kim.bl.openinteractive.ch/sammlungen#aa0b5559-6e86-46db-9785-0329ab800956");
+        DocumentBadgeList documentDetails = PartnerRecommenderTestHelper.getDetails(DEPLOYMENT_CONTEXT,	
+        		port, 
+        		PartnerRecommenderTestHelper.createParamsForPartnerRecommenderDetailCall(ids, uris, DATAPROVIDER));
+	    
+        assertNotNull(documentDetails);
+        assertTrue(documentDetails.documentBadges.size() > 0 );
+        assertEquals(1, documentDetails.documentBadges.size());
+
+	}
+
+	@Test
 	public void singleQueryBierglasZiegelhofKalenderbildWithDetails() {
 		ArrayList<String> keywords = new ArrayList<String>();
 		keywords.add("bierglas");

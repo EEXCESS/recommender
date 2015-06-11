@@ -64,8 +64,16 @@ public class XMLTools {
 		return ret;
 	}
 	
+	public static String writeModelNQuads(Model model) {
+		String syntax = "NQUADS"; 
+		StringWriter out = new StringWriter();
+		model.write(out, syntax);
+		String ret = out.toString();
+		return ret;
+	}
+
 	public static String writeModelJsonLD(Model model) {
-		String syntax = "RDF/JSON"; 
+		String syntax = "JSONLD"; 
 		StringWriter out = new StringWriter();
 		model.write(out, syntax);
 		String ret = out.toString();
