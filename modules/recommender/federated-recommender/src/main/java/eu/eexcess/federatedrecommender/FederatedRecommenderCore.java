@@ -29,6 +29,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -149,7 +150,8 @@ public class FederatedRecommenderCore {
 
 		long start = System.currentTimeMillis();
 		Map<PartnerBadge, Future<ResultList>> futures = new HashMap<PartnerBadge, Future<ResultList>>();
-		for (final PartnerBadge partner : partnerRegister.getPartners()) {
+		List<PartnerBadge> partners = new LinkedList<PartnerBadge>(getPartnerRegister().getPartners());
+		for (final PartnerBadge partner : partners) {
 			if (checkUserSelectedPartners(secureUserProfile, partner)) {
 				final Client tmpClient = partnerRegister.getClient(partner);
 
