@@ -108,6 +108,7 @@ public class PartnerRecommenderTestHelper {
 		}
 		return null;
 	}
+	
 	@SuppressWarnings({"resource", "deprecation"})
 	static public ResultList getRecommendations(String deploymentContext, int port,StringEntity params) {
 		
@@ -133,8 +134,8 @@ public class PartnerRecommenderTestHelper {
 		return resultList;
 	}
 
-	static public DocumentBadgeList getDetails(String deploymentContext, int port,StringEntity params) {
-		
+	@SuppressWarnings({"resource", "deprecation"})
+	static protected DocumentBadgeList getDetails(String deploymentContext, int port,StringEntity params, String contentType) {
 		HttpClient httpClient = new DefaultHttpClient();
 		DocumentBadgeList decoumentBadges = null;
 	    try {
@@ -157,4 +158,11 @@ public class PartnerRecommenderTestHelper {
 		return decoumentBadges;
 	}
 
+	static public DocumentBadgeList getDetails(String deploymentContext, int port,StringEntity params) {
+		return PartnerRecommenderTestHelper.getDetails(deploymentContext, port, params, "application/xml");
+	}
+	static public DocumentBadgeList getDetailsJSON(String deploymentContext, int port,StringEntity params) {
+		return PartnerRecommenderTestHelper.getDetails(deploymentContext, port, params, "application/json");
+	}
 }
+

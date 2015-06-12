@@ -298,26 +298,53 @@ public class PartnerRecommender implements PartnerRecommenderApi {
 			JSONObject rdf = new JSONObject(json);
 			if (rdf.has("rdfRDF")) {
 				JSONObject rdfRDF = (JSONObject)rdf.get("rdfRDF");
-				if (rdfRDF.has("eexcessProxy")) {
-					JSONArray eexcessProxyArray = (JSONArray)rdfRDF.get("eexcessProxy");
-					for (int i = 0; i < eexcessProxyArray.length(); i++) {
-						JSONObject eexcessProxyItem = (JSONObject) eexcessProxyArray.get(i);
-						String rdfaboutKey = "rdfabout";
-						if (eexcessProxyItem.has(rdfaboutKey)) {
-							String rdfabout = eexcessProxyItem.getString(rdfaboutKey);
-							if (rdfabout.endsWith("/enrichedProxy/")) {
-								eexcessProxyItem.remove(rdfaboutKey);
-								eexcessProxyItem.remove("oreproxyFor");
-								eexcessProxyItem.remove("oreproxyIn");
-								ret.put("eexcessProxyEnriched", eexcessProxyItem);
-							}
-							if (rdfabout.endsWith("/proxy/")) {
-								eexcessProxyItem.remove(rdfaboutKey);
-								eexcessProxyItem.remove("oreproxyFor");
-								eexcessProxyItem.remove("oreproxyIn");
-								ret.put("eexcessProxy", eexcessProxyItem);
-							}
-						}			
+				String eexcessProxyKey="eexcessProxy";
+				if (rdfRDF.has(eexcessProxyKey)) {
+					if (rdfRDF.get(eexcessProxyKey) instanceof JSONArray ) {
+						JSONArray eexcessProxyArray = (JSONArray)rdfRDF.get("eexcessProxy");
+						for (int i = 0; i < eexcessProxyArray.length(); i++) {
+							JSONObject eexcessProxyItem = (JSONObject) eexcessProxyArray.get(i);
+							String rdfaboutKey = "rdfabout";
+							if (eexcessProxyItem.has(rdfaboutKey)) {
+								String rdfabout = eexcessProxyItem.getString(rdfaboutKey);
+								if (rdfabout.endsWith("/enrichedProxy/")) {
+									eexcessProxyItem.remove(rdfaboutKey);
+									eexcessProxyItem.remove("oreproxyFor");
+									eexcessProxyItem.remove("oreproxyIn");
+									ret.put("eexcessProxyEnriched", eexcessProxyItem);
+								}
+								if (rdfabout.endsWith("/proxy/")) {
+									eexcessProxyItem.remove(rdfaboutKey);
+									eexcessProxyItem.remove("oreproxyFor");
+									eexcessProxyItem.remove("oreproxyIn");
+									ret.put("eexcessProxy", eexcessProxyItem);
+								}
+							}			
+						}
+					} else {
+						if (rdfRDF.get(eexcessProxyKey) instanceof JSONObject) {
+							JSONObject eexcessProxyItem = (JSONObject)rdfRDF.get("eexcessProxy");
+//							for (int i = 0; i < eexcessProxyArray.length(); i++) {
+//								JSONObject eexcessProxyItem = (JSONObject) eexcessProxyArray.get(i);
+								String rdfaboutKey = "rdfabout";
+								if (eexcessProxyItem.has(rdfaboutKey)) {
+									String rdfabout = eexcessProxyItem.getString(rdfaboutKey);
+									if (rdfabout.endsWith("/enrichedProxy/")) {
+										eexcessProxyItem.remove(rdfaboutKey);
+										eexcessProxyItem.remove("oreproxyFor");
+										eexcessProxyItem.remove("oreproxyIn");
+										ret.put("eexcessProxyEnriched", eexcessProxyItem);
+									}
+									if (rdfabout.endsWith("/proxy/")) {
+										eexcessProxyItem.remove(rdfaboutKey);
+										eexcessProxyItem.remove("oreproxyFor");
+										eexcessProxyItem.remove("oreproxyIn");
+										ret.put("eexcessProxy", eexcessProxyItem);
+									}
+								}			
+//							}
+						}
+						
 					}
 				}
 			}
