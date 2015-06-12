@@ -165,7 +165,7 @@ public class PartnerRecommender implements PartnerRecommenderApi {
             log.log(Level.INFO,"Call Parnter Api:"+(endCallPartnerApi-startCallPartnerApi)+"ms; First Transformation:"+(endTransform1-startTransform1)+"ms; Second Transformation:"+(endTransform2-startTransform2)+"ms");
             //TODO: refactor the next line!
             recommendations.setResultStats(new ResultStats(PartnerConfigurationCache.CONFIG.getQueryGenerator(currentPartnerConfiguration.queryGeneratorClass).toQuery(userProfile),endCallPartnerApi-startCallPartnerApi,endTransform1-startTransform1,endTransform2-startTransform2,0,recommendations.totalResults));
-//            PartnerdataTracer.dumpFile(this.getClass(), this.partnerConfiguration, recommendations, "partner-recommender-results", PartnerdataTracer.FILETYPE.XML, partnerdataLogger);
+            PartnerdataTracer.dumpFile(this.getClass(), this.partnerConfiguration, recommendations, "partner-recommender-results", PartnerdataTracer.FILETYPE.XML, partnerdataLogger);
             return recommendations;
             
             // TODO rrubien: end impl of PartnerRecommender

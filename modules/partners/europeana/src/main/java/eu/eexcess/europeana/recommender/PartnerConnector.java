@@ -65,7 +65,7 @@ public class PartnerConnector extends PartnerConnectorBase implements PartnerCon
 	private final Logger log = Logger.getLogger(PartnerConnector.class.getName());
     private QueryGeneratorApi queryGenerator;
     
-    private boolean makeDetailRequests = true;
+    private boolean makeDetailRequests = false;
     
     public PartnerConnector(){
     
