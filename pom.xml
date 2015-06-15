@@ -1,100 +1,100 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
-  <modelVersion>4.0.0</modelVersion>
-  <groupId>eu.eexcess</groupId>
-  <artifactId>eexcess-parent</artifactId>
-  <version>1.0-SNAPSHOT</version>
-  <packaging>pom</packaging>
-  <name>EEXCESS - Parent</name>
-  <description>Parent for all EEXCESS related projects.
+	<modelVersion>4.0.0</modelVersion>
+	<groupId>eu.eexcess</groupId>
+	<artifactId>eexcess-parent</artifactId>
+	<version>1.0-SNAPSHOT</version>
+	<packaging>pom</packaging>
+	<name>EEXCESS - Parent</name>
+	<description>Parent for all EEXCESS related projects.
   </description>
-  <properties>
-    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-  </properties>
-  <modules>
-    <module>common/</module>
-    <module>modules/reference/partner-data-layer/</module>
-    <module>modules/reference/partner-recommender/</module>
-    <module>modules/reference/partner-web-service/</module>
-    <module>modules/partners/wissenmedia/</module>
-    <module>modules/partners/wikipedialocal/</module>
-    <module>modules/partners/europeana/</module>
-    <module>modules/partners/kimportal/</module>
-    <module>modules/partners/zbw/</module>
-    <module>modules/partners/mendeley/</module>
-    <module>modules/partners/ddb/</module>
-    <module>modules/partners/opensearch/</module>
-    <module>modules/recommender/federated-recommender/</module>
-    <module>modules/recommender/federated-recommender-web-service/</module>
-    <module>modules/evaluation/</module> 
-    <module>experimental/misc/</module>
-  </modules>
-  <developers>
-    <developer>
-      <id>plopez</id>
-      <name>Pablo Lopez</name>
-      <organization>Know-Center</organization>
-      <email>plopez@know-center.at</email>
-    </developer>
-    <developer>
-      <id>rkern</id>
-      <name>Roman Kern</name>
-      <organization>Know-Center</organization>
-      <email>rkern@know-center.at</email>
-    </developer>
-    <developer>
-      <id>oro</id>
-      <name>Thomas Orgel</name>
-      <organization>Joanneum Research</organization>
-      <email>thomas.orgel@joanneum.at</email>
-    </developer>
-  </developers>
-  <dependencies>
-    <dependency>
-      <groupId>junit</groupId>
-      <artifactId>junit</artifactId>
-      <version>4.11</version>
-    </dependency>
-  </dependencies>
-  <repositories>
-  	<repository>
-					<id>kc_external</id>
-					<releases>
-						<enabled>true</enabled>
-					</releases>
-					<snapshots>
-						<enabled>true</enabled>
-						<updatePolicy>always</updatePolicy>
-					</snapshots>
-					<url>http://nexus.know-center.tugraz.at/content/repositories/public/</url>
-				</repository>
-  </repositories>
-  <distributionManagement>
-    <repository>
-      <id>eexcess</id>
-      <name>EEXCESS Repository</name>
-      <url>http://nexus.know-center.tugraz.at/content/repositories/eexcess</url>
-    </repository>
-  </distributionManagement>
-  <build>
-    <plugins>
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-dependency-plugin</artifactId>
-        <version>2.2</version>
-      </plugin>
-      <plugin>
-        <groupId>org.mortbay.jetty</groupId>
-        <artifactId>maven-jetty-plugin</artifactId>
-      </plugin>
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-compiler-plugin</artifactId>
-        <configuration>
-          <source>1.8</source>
-          <target>1.8</target>
-        </configuration>
-      </plugin>
-    </plugins>
-  </build>
+	<properties>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+	</properties>
+	<modules>
+		<module>common/</module>
+		<module>modules/reference/partner-data-layer/</module>
+		<module>modules/reference/partner-recommender/</module>
+		<module>modules/reference/partner-web-service/</module>
+		<module>modules/partners/wissenmedia/</module>
+		<module>modules/partners/wikipedialocal/</module>
+		<module>modules/partners/europeana/</module>
+		<module>modules/partners/kimportal/</module>
+		<module>modules/partners/zbw/</module>
+		<module>modules/partners/mendeley/</module>
+		<module>modules/partners/ddb/</module>
+		<module>modules/partners/opensearch/</module>
+		<module>modules/recommender/federated-recommender/</module>
+		<module>modules/recommender/federated-recommender-web-service/</module>
+		<module>modules/evaluation/</module>
+		<module>experimental/misc/</module>
+	</modules>
+	<developers>
+		<developer>
+			<id>plopez</id>
+			<name>Pablo Lopez</name>
+			<organization>Know-Center</organization>
+			<email>plopez@know-center.at</email>
+		</developer>
+		<developer>
+			<id>rkern</id>
+			<name>Roman Kern</name>
+			<organization>Know-Center</organization>
+			<email>rkern@know-center.at</email>
+		</developer>
+		<developer>
+			<id>oro</id>
+			<name>Thomas Orgel</name>
+			<organization>Joanneum Research</organization>
+			<email>thomas.orgel@joanneum.at</email>
+		</developer>
+	</developers>
+	<dependencies>
+		<dependency>
+			<groupId>junit</groupId>
+			<artifactId>junit</artifactId>
+			<version>4.11</version>
+		</dependency>
+	</dependencies>
+	<repositories>
+		<repository>
+			<id>kc_external</id>
+			<releases>
+				<enabled>true</enabled>
+			</releases>
+			<snapshots>
+				<enabled>true</enabled>
+				<updatePolicy>always</updatePolicy>
+			</snapshots>
+			<url>http://nexus.know-center.tugraz.at/content/repositories/public/</url>
+		</repository>
+	</repositories>
+	<distributionManagement>
+		<repository>
+			<id>eexcess</id>
+			<name>EEXCESS Repository</name>
+			<url>http://nexus.know-center.tugraz.at/content/repositories/eexcess</url>
+		</repository>
+	</distributionManagement>
+	<build>
+		<plugins>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-dependency-plugin</artifactId>
+				<version>2.2</version>
+			</plugin>
+			<plugin>
+				<groupId>org.mortbay.jetty</groupId>
+				<artifactId>maven-jetty-plugin</artifactId>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-compiler-plugin</artifactId>
+				<configuration>
+					<source>1.8</source>
+					<target>1.8</target>
+				</configuration>
+			</plugin>
+		</plugins>
+	</build>
 </project>
