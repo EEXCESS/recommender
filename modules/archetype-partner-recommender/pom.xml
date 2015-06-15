@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+
+  <groupId>eu.eexcess</groupId>
+  <artifactId>eexcess-partner-recommender-archetype</artifactId>
+  <version>1.0-SNAPSHOT</version>
+  <packaging>maven-archetype</packaging>
+
+  <name>eexcess-partner-recommender-archetype</name>
+
+  <build>
+    <extensions>
+      <extension>
+        <groupId>org.apache.maven.archetype</groupId>
+        <artifactId>archetype-packaging</artifactId>
+        <version>2.3</version>
+      </extension>
+    </extensions>
+
+    <pluginManagement>
+      <plugins>
+        <plugin>
+          <artifactId>maven-archetype-plugin</artifactId>
+          <version>2.3</version>
+        </plugin>
+      </plugins>
+    </pluginManagement>
+  </build>
+
+  <description>EEXCESS Partnerrecommender Maven archetype.</description>
+
+  <developers>
+    <developer>
+      <id>rkern</id>
+      <name>Roman Kern</name>
+      <email>rkern@know-center.at</email>
+      <organization>Know-Center</organization>
+    </developer>
+    <developer>
+      <id>oro</id>
+      <name>Thomas Orgel</name>
+      <email>thomas.orgel@joanneum.at</email>
+      <organization>Joanneum Research</organization>
+    </developer>
+    <developer>
+      <id>hziak</id>
+      <name>Hermann Ziak</name>
+      <email>hziak@know-center.at</email>
+      <organization>Know-Center</organization>
+    </developer>
+  </developers>
+
+  <distributionManagement>
+    <repository>
+      <id>eexcess</id>
+      <name>EEXCESS Repository</name>
+      <url>http://nexus.know-center.tugraz.at/content/repositories/eexcess</url>
+    </repository>
+  </distributionManagement>
+</project>
