@@ -26,7 +26,7 @@ limitations under the License.
     
     <name>EEXCESS - ${PartnerName}</name>
     <description>${artifactId} implementation.</description>
-	<properties><eexcessVersion>1.0-SNAPSHOT</eexcessVersion></properties>
+	<properties><eexcess.version>1.0-SNAPSHOT</eexcess.version></properties>
 
     <dependencies>
     	<dependency>
@@ -55,7 +55,7 @@ limitations under the License.
         <dependency>
 			<groupId>eu.eexcess</groupId>
 			<artifactId>eexcess-common</artifactId>
-			<version>${eexcessVersion}</version>
+			<version>${eexcess.version}</version>
 			<exclusions>
 				<exclusion>
 					<groupId>commons-lang</groupId>
@@ -70,17 +70,17 @@ limitations under the License.
         <dependency>
 		  <groupId>eu.eexcess</groupId>
 		  <artifactId>eexcess-reference-partner-recommender</artifactId>
-			<version>${eexcessVersion}</version>
+			<version>${eexcess.version}</version>
 		</dependency>
         <dependency>
 		  <groupId>eu.eexcess</groupId>
 		  <artifactId>eexcess-reference-partner-data-layer</artifactId>
-			<version>${eexcessVersion}</version>
+			<version>${eexcess.version}</version>
 		</dependency>
         <dependency>
 		  <groupId>eu.eexcess</groupId>
 		  <artifactId>eexcess-reference-partner-web-service</artifactId>
-			<version>${eexcessVersion}</version>
+			<version>${eexcess.version}</version>
 		</dependency>
 	</dependencies>
 	<build>
