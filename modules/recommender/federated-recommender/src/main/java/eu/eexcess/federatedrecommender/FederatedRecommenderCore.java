@@ -453,6 +453,10 @@ public class FederatedRecommenderCore {
 	 */
 	public SecureUserProfile sourceSelection(
 			SecureUserProfileEvaluation userProfile,String className) {
+		//getPartnerRegister()
+		//if(userProfile.partnerList==null)
+
+		//Class.forName(pickerName).newInstance();
 		// TODO add connection to langModelSourceSelection and alter
 		// userProfile.partnerList to select sources
 		return userProfile;
