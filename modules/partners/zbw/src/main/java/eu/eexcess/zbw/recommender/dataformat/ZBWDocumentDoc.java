@@ -71,6 +71,9 @@ public class ZBWDocumentDoc {
 	@XmlElement(name="subject")
 	public List<String> subject;
 
+	@XmlElement(name="language")
+	public List<String> language;
+
 	@XmlElement(name="type_genre")
 	public List<String> type_genre;
 	

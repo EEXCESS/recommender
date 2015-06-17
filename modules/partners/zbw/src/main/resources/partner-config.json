@@ -2,7 +2,7 @@
   "systemId": "ZBW",
   "partnerConnectorClass": "eu.eexcess.zbw.recommender.PartnerConnector",
   "queryGeneratorClass": "eu.eexcess.partnerrecommender.reference.OrQueryGeneratorFieldTermConjunction",
-  "searchEndpoint": "https://api.econbiz.de/v1/search?q=${query}&xml=true&size=${size}",
+  "searchEndpoint": "https://api.econbiz.de/v1/search?q=${query}&xml=on&size=${size}&profile=eexcess",
   "detailEndpoint": "https://api.econbiz.de/v1/record/${detailQuery}?xml=true",
   "partnerConnectorEndpoint": "http://127.0.0.1/eexcess-partner-zbw-1.0-SNAPSHOT/partner/",
   "transformerClass": "eu.eexcess.zbw.datalayer.ZBWTransformer",

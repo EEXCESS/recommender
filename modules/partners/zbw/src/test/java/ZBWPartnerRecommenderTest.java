@@ -75,7 +75,7 @@ public class ZBWPartnerRecommenderTest {
 	    
         assertNotNull(resultList);
         assertTrue(resultList.results.size() > 0 );
-        assertEquals(4, resultList.results.size());
+        assertEquals(7, resultList.results.size());
 
 	}
 	
@@ -89,7 +89,7 @@ public class ZBWPartnerRecommenderTest {
 	    
         assertNotNull(resultList);
         assertTrue(resultList.results.size() > 0 );
-        assertEquals(4, resultList.results.size());
+        assertEquals(7, resultList.results.size());
         for (int i = 0; i < resultList.results.size(); i++) {
             ArrayList<String> ids = new ArrayList<String>();
     		ArrayList<String> uris = new ArrayList<String>();
