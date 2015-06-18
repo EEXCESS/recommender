@@ -220,7 +220,9 @@ public class PartnerRecommender implements PartnerRecommenderApi {
 				document.detailsJSONLDCompacted = transformJSONLDToResponseDetailJSONLDCompact(document.detailsJSONLD);
 				document.detailXMLJSON = transformRDFXMLToResponseDetail(rdfXML);
 				*/
-				document.details = transformRDFXMLToResponseDetail(rdfXML); 
+				document.details = transformRDFXMLToResponseDetail(rdfXML);
+		        PartnerdataTracer.dumpFile(this.getClass(), this.partnerConfiguration, document.details, "partner-recommender-results-details-"+i, PartnerdataTracer.FILETYPE.JSON, partnerdataLogger);
+
 						
 				/*
 				String contextJSON = "{\"@context\": {\"aggregatedCHO\": {\"@id\": \"http://www.europeana.eu/schemas/edm/aggregatedCHO\", \"@type\": \"@id\"}, \"collectionName\": \"http://www.europeana.eu/schemas/edm/collectionName\", \"dataProvider\": {\"@id\": \"http://www.europeana.eu/schemas/edm/dataProvider\", \"@type\": \"@id\"}, \"imports\": {\"@id\": \"http://www.w3.org/2002/07/owl#imports\", \"@type\": \"@id\"}, \"isShownAt\": {\"@id\": \"http://www.europeana.eu/schemas/edm/isShownAt\", \"@type\": \"@id\"}, \"isShownBy\": {\"@id\": \"http://www.europeana.eu/schemas/edm/isShownBy\", \"@type\": \"@id\"}, \"preview\": {\"@id\": \"http://www.europeana.eu/schemas/edm/preview\", \"@type\": \"@id\"}, \"provider\": {\"@id\": \"http://www.europeana.eu/schemas/edm/provider\", \"@type\": \"@id\"}, \"rights\": {\"@id\": \"http://www.europeana.eu/schemas/edm/rights\", \"@type\": \"@id\"} } }";
@@ -352,7 +354,6 @@ public class PartnerRecommender implements PartnerRecommenderApi {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		
 		return ret.toString();
 	}
 

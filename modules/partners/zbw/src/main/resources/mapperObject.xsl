@@ -154,86 +154,82 @@
 
 
 	  <xsl:template name="Main.Title">
-      <apply-templates xmlns="http://www.w3.org/1999/XSL/Transform" mode="m3" select="title"/>
+      <apply-templates xmlns="http://www.w3.org/1999/XSL/Transform" mode="m0" select="title"/>
    </xsl:template>
 	  <xsl:template name="Main.Description">
       <apply-templates xmlns="http://www.w3.org/1999/XSL/Transform"
-                       mode="m5"
+                       mode="m7"
                        select="abstract"/>
    </xsl:template>
 	  <xsl:template name="Main.Date">
-      <apply-templates xmlns="http://www.w3.org/1999/XSL/Transform" mode="m0" select="date"/>
+      <apply-templates xmlns="http://www.w3.org/1999/XSL/Transform" mode="m3" select="date"/>
    </xsl:template>
 	  <xsl:template name="Main.Identifier">
-      <apply-templates xmlns="http://www.w3.org/1999/XSL/Transform" mode="m2" select="id"/>
+      <apply-templates xmlns="http://www.w3.org/1999/XSL/Transform" mode="m6" select="id"/>
    </xsl:template>
 	  <xsl:template name="Main.Subject">
-      <apply-templates xmlns="http://www.w3.org/1999/XSL/Transform" mode="m8" select="subject"/>
+      <apply-templates xmlns="http://www.w3.org/1999/XSL/Transform" mode="m4" select="subject"/>
    </xsl:template>
 	  <xsl:template name="Main.URI">
-      <apply-templates xmlns="http://www.w3.org/1999/XSL/Transform" mode="m1" select="id"/>
+      <apply-templates xmlns="http://www.w3.org/1999/XSL/Transform" mode="m8" select="id"/>
    </xsl:template>
 	  <xsl:template name="Main.isShownAt"/>
 	  <xsl:template name="Main.previewImage"/>
 	  <xsl:template name="Main.Latitude">
-      <apply-templates xmlns="http://www.w3.org/1999/XSL/Transform" mode="m4" select="lat"/>
+      <apply-templates xmlns="http://www.w3.org/1999/XSL/Transform" mode="m2" select="lat"/>
    </xsl:template>
 	  <xsl:template name="Main.Longitude">
-      <apply-templates xmlns="http://www.w3.org/1999/XSL/Transform" mode="m6" select="lng"/>
+      <apply-templates xmlns="http://www.w3.org/1999/XSL/Transform" mode="m5" select="lng"/>
    </xsl:template>
 	  <xsl:template name="Main.Creator">
-      <apply-templates xmlns="http://www.w3.org/1999/XSL/Transform"
-                       mode="m7"
-                       select="creatorString"/>
+      <apply-templates xmlns="http://www.w3.org/1999/XSL/Transform" mode="m1" select="creator"/>
    </xsl:template>
 
-   <template xmlns="http://www.w3.org/1999/XSL/Transform" match="date" mode="m0">
-      <element name="dcterms:date">
+   <template xmlns="http://www.w3.org/1999/XSL/Transform" match="title" mode="m0">
+      <element name="dc:title">
          <call-template name="StringToString"/>
       </element>
    </template>
    <xsl:template name="StringToString">
       <xsl:value-of select="."/>
    </xsl:template>
-   <template xmlns="http://www.w3.org/1999/XSL/Transform" match="id" mode="m1">
-      <element name="uri">
-         <call-template name="StringToString"/>
-      </element>
-   </template>
-   <template xmlns="http://www.w3.org/1999/XSL/Transform" match="id" mode="m2">
-      <element name="dc:identifier">
-         <call-template name="StringToString"/>
-      </element>
-   </template>
-   <template xmlns="http://www.w3.org/1999/XSL/Transform" match="title" mode="m3">
-      <element name="dc:title">
-         <call-template name="StringToString"/>
-      </element>
-   </template>
-   <template xmlns="http://www.w3.org/1999/XSL/Transform" match="lat" mode="m4">
-      <element name="wgs84:lat">
-         <call-template name="StringToString"/>
-      </element>
-   </template>
-   <template xmlns="http://www.w3.org/1999/XSL/Transform" match="abstract" mode="m5">
-      <element name="dc:description">
-         <call-template name="StringToString"/>
-      </element>
-   </template>
-   <template xmlns="http://www.w3.org/1999/XSL/Transform" match="lng" mode="m6">
-      <element name="wgs84:long">
-         <call-template name="StringToString"/>
-      </element>
-   </template>
-   <template xmlns="http://www.w3.org/1999/XSL/Transform"
-             match="creatorString"
-             mode="m7">
+   <template xmlns="http://www.w3.org/1999/XSL/Transform" match="creator" mode="m1">
       <element name="dc:creator">
          <call-template name="StringToString"/>
       </element>
    </template>
-   <template xmlns="http://www.w3.org/1999/XSL/Transform" match="subject" mode="m8">
+   <template xmlns="http://www.w3.org/1999/XSL/Transform" match="lat" mode="m2">
+      <element name="wgs84:lat">
+         <call-template name="StringToString"/>
+      </element>
+   </template>
+   <template xmlns="http://www.w3.org/1999/XSL/Transform" match="date" mode="m3">
+      <element name="dcterms:date">
+         <call-template name="StringToString"/>
+      </element>
+   </template>
+   <template xmlns="http://www.w3.org/1999/XSL/Transform" match="subject" mode="m4">
       <element name="dc:subject">
+         <call-template name="StringToString"/>
+      </element>
+   </template>
+   <template xmlns="http://www.w3.org/1999/XSL/Transform" match="lng" mode="m5">
+      <element name="wgs84:long">
+         <call-template name="StringToString"/>
+      </element>
+   </template>
+   <template xmlns="http://www.w3.org/1999/XSL/Transform" match="id" mode="m6">
+      <element name="dc:identifier">
+         <call-template name="StringToString"/>
+      </element>
+   </template>
+   <template xmlns="http://www.w3.org/1999/XSL/Transform" match="abstract" mode="m7">
+      <element name="dc:description">
+         <call-template name="StringToString"/>
+      </element>
+   </template>
+   <template xmlns="http://www.w3.org/1999/XSL/Transform" match="id" mode="m8">
+      <element name="uri">
          <call-template name="StringToString"/>
       </element>
    </template>
