@@ -300,7 +300,9 @@ public class FederatedRecommenderCore {
 	public ResultList generateFederatedRecommendation(SecureUserProfile secureUserProfile) throws FileNotFoundException {
 		// ResultList result = new ResultList();
 		ResultList resultList = null;
-
+		//this.sourceSelection(secureUserProfile, this.federatedRecConfiguration.); 
+		//FederatedRecommenderConfiguration.java
+		//TODO: add sourceselect here!
 		// SecureUserProfileDecomposer sUPDecomposer = null;
 		// sUPDecomposer = new
 		// SecureUserProfileDecomposer(federatedRecConfiguration,dbPediaSolrIndex);
@@ -428,8 +430,8 @@ public class FederatedRecommenderCore {
 			PartnerSelector sourceSelector = (PartnerSelector) Class.forName(sourceSelectorClassName).newInstance();
 			return sourceSelector.sourceSelect(userProfile, getPartnerRegister().getPartners());
 		} catch (InstantiationException | IllegalAccessException | ClassNotFoundException e) {
-			logger.severe("failed to instanciate source selector [" + sourceSelectorClassName
-							+ "] by name: ignoring source selection");
+			logger.log(Level.SEVERE,"failed to instanciate source selector [" + sourceSelectorClassName
+							+ "] by name: ignoring source selection", e);
 		}
 		return userProfile;
 	}
