@@ -142,6 +142,8 @@
 					          <xsl:call-template name="Main.License"/>	
 					          <xsl:call-template name="Main.Latitude"/>	
 					          <xsl:call-template name="Main.Longitude"/>	
+					          <xsl:call-template name="Main.Creator"/>
+
 				        </xsl:element>
 					
 
@@ -158,43 +160,43 @@
 
 	  <xsl:template name="Main.Language">
       <apply-templates xmlns="http://www.w3.org/1999/XSL/Transform"
-                       mode="m4"
+                       mode="m9"
                        select="europeanaAggregation/edmLanguage/def/e"/>
    </xsl:template>
 	  <xsl:template name="Main.Title">
-      <apply-templates xmlns="http://www.w3.org/1999/XSL/Transform" mode="m10" select="title"/>
+      <apply-templates xmlns="http://www.w3.org/1999/XSL/Transform" mode="m11" select="title"/>
    </xsl:template>
 	  <xsl:template name="Main.Description"/>
 	  <xsl:template name="Main.Date">
-      <apply-templates xmlns="http://www.w3.org/1999/XSL/Transform" mode="m2" select="year"/>
+      <apply-templates xmlns="http://www.w3.org/1999/XSL/Transform" mode="m10" select="year"/>
    </xsl:template>
 	  <xsl:template name="Main.Identifier">
       <apply-templates xmlns="http://www.w3.org/1999/XSL/Transform" mode="m1" select="about"/>
    </xsl:template>
 	  <xsl:template name="Main.isShownAt">
       <apply-templates xmlns="http://www.w3.org/1999/XSL/Transform"
-                       mode="m3"
+                       mode="m4"
                        select="aggregations/e/edmIsShownAt"/>
    </xsl:template>
 	  <xsl:template name="Main.collectionName">
       <apply-templates xmlns="http://www.w3.org/1999/XSL/Transform"
-                       mode="m12"
+                       mode="m3"
                        select="europeanaCollectionName"/>
    </xsl:template>
 	  <xsl:template name="Main.previewImage">
       <apply-templates xmlns="http://www.w3.org/1999/XSL/Transform"
-                       mode="m5"
+                       mode="m2"
                        select="edmPreview"/>
    </xsl:template>
 	  <xsl:template name="Main.Subject"/>
 	  <xsl:template name="Main.URI">
       <apply-templates xmlns="http://www.w3.org/1999/XSL/Transform"
-                       mode="m7"
+                       mode="m5"
                        select="aggregations/e/edmIsShownAt"/>
    </xsl:template>
 	  <xsl:template name="Main.concept">
       <apply-templates xmlns="http://www.w3.org/1999/XSL/Transform"
-                       mode="m8"
+                       mode="m13"
                        select="concepts/e/prefLabel/en/e"/>
    </xsl:template>
 	  <xsl:template name="Main.Country">
@@ -203,22 +205,27 @@
                        select="edmCountry/def/e"/>
    </xsl:template>
 	  <xsl:template name="Main.License">
-      <apply-templates xmlns="http://www.w3.org/1999/XSL/Transform" mode="m11" select="rights"/>
+      <apply-templates xmlns="http://www.w3.org/1999/XSL/Transform" mode="m12" select="rights"/>
    </xsl:template>
 	  <xsl:template name="Main.Latitude">
       <apply-templates xmlns="http://www.w3.org/1999/XSL/Transform"
-                       mode="m9"
+                       mode="m8"
                        select="places/e/latitude"/>
    </xsl:template>
 	  <xsl:template name="Main.Longitude">
       <apply-templates xmlns="http://www.w3.org/1999/XSL/Transform"
-                       mode="m0"
+                       mode="m7"
                        select="places/e/longitude"/>
    </xsl:template>
+        <xsl:template name="Main.Creator">
+      <apply-templates xmlns="http://www.w3.org/1999/XSL/Transform"
+                       mode="m0"
+                       select="proxies/e/dcCreator/def/e"/>
+   </xsl:template>
    <template xmlns="http://www.w3.org/1999/XSL/Transform"
-             match="places/e/longitude"
+             match="proxies/e/dcCreator/def/e"
              mode="m0">
-      <element name="wgs84:long">
+      <element name="dc:creator">
          <call-template name="StringToString"/>
       </element>
    </template>
@@ -230,29 +237,31 @@
          <call-template name="StringToString"/>
       </element>
    </template>
-   <template xmlns="http://www.w3.org/1999/XSL/Transform" match="year" mode="m2">
-      <element name="dcterms:date">
+   <template xmlns="http://www.w3.org/1999/XSL/Transform"
+             match="edmPreview"
+             mode="m2">
+      <element name="previewImage">
+         <call-template name="StringToString"/>
+      </element>
+   </template>
+   <template xmlns="http://www.w3.org/1999/XSL/Transform"
+             match="europeanaCollectionName"
+             mode="m3">
+      <element name="edm:collectionName">
          <call-template name="StringToString"/>
       </element>
    </template>
    <template xmlns="http://www.w3.org/1999/XSL/Transform"
              match="aggregations/e/edmIsShownAt"
-             mode="m3">
+             mode="m4">
       <element name="uri">
          <call-template name="StringToString"/>
       </element>
    </template>
    <template xmlns="http://www.w3.org/1999/XSL/Transform"
-             match="europeanaAggregation/edmLanguage/def/e"
-             mode="m4">
-      <element name="edm:language">
-         <call-template name="StringToString"/>
-      </element>
-   </template>
-   <template xmlns="http://www.w3.org/1999/XSL/Transform"
-             match="edmPreview"
+             match="aggregations/e/edmIsShownAt"
              mode="m5">
-      <element name="previewImage">
+      <element name="uri">
          <call-template name="StringToString"/>
       </element>
    </template>
@@ -264,40 +273,45 @@
       </element>
    </template>
    <template xmlns="http://www.w3.org/1999/XSL/Transform"
-             match="aggregations/e/edmIsShownAt"
+             match="places/e/longitude"
              mode="m7">
-      <element name="uri">
-         <call-template name="StringToString"/>
-      </element>
-   </template>
-   <template xmlns="http://www.w3.org/1999/XSL/Transform"
-             match="concepts/e/prefLabel/en/e"
-             mode="m8">
-      <element name="edm:concept">
+      <element name="wgs84:long">
          <call-template name="StringToString"/>
       </element>
    </template>
    <template xmlns="http://www.w3.org/1999/XSL/Transform"
              match="places/e/latitude"
-             mode="m9">
+             mode="m8">
       <element name="wgs84:lat">
          <call-template name="StringToString"/>
       </element>
    </template>
-   <template xmlns="http://www.w3.org/1999/XSL/Transform" match="title" mode="m10">
+   <template xmlns="http://www.w3.org/1999/XSL/Transform"
+             match="europeanaAggregation/edmLanguage/def/e"
+             mode="m9">
+      <element name="edm:language">
+         <call-template name="StringToString"/>
+      </element>
+   </template>
+   <template xmlns="http://www.w3.org/1999/XSL/Transform" match="year" mode="m10">
+      <element name="dcterms:date">
+         <call-template name="StringToString"/>
+      </element>
+   </template>
+   <template xmlns="http://www.w3.org/1999/XSL/Transform" match="title" mode="m11">
       <element name="dc:title">
          <call-template name="StringToString"/>
       </element>
    </template>
-   <template xmlns="http://www.w3.org/1999/XSL/Transform" match="rights" mode="m11">
+   <template xmlns="http://www.w3.org/1999/XSL/Transform" match="rights" mode="m12">
       <element name="edm:rights">
          <call-template name="StringToString"/>
       </element>
    </template>
    <template xmlns="http://www.w3.org/1999/XSL/Transform"
-             match="europeanaCollectionName"
-             mode="m12">
-      <element name="edm:collectionName">
+             match="concepts/e/prefLabel/en/e"
+             mode="m13">
+      <element name="edm:concept">
          <call-template name="StringToString"/>
       </element>
    </template>
