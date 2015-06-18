@@ -101,7 +101,7 @@ public class FederatedRecommenderEvaluationCore   {
 			switch (userProfile.sourceSelect) {
 			case "langModel":
 				userProfileEvaluation = (SecureUserProfileEvaluation) fRCore
-						.sourceSelection(userProfile,"Model");
+						.sourceSelection(userProfile,"Model");//TODO: shoudl not be "model"
 				break;
 			case "wordnet":
 				userProfileEvaluation = (SecureUserProfileEvaluation) fRCore
