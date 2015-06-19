@@ -75,6 +75,37 @@ public class MendeleyPartnerRecommenderTest {
 
 	}
 
+	@Test
+	public void detailCallSingleItemWithOneAuthor() {
+        ArrayList<String> ids = new ArrayList<String>();
+		ArrayList<String> uris = new ArrayList<String>();
+        ids.add("0d530ec8-8f31-304c-b340-1056277df01b");
+        uris.add("http://www.mendeley.com/research/public-concern-work-website");
+        DocumentBadgeList documentDetails = PartnerRecommenderTestHelper.getDetails(DEPLOYMENT_CONTEXT,	
+        		port, 
+        		PartnerRecommenderTestHelper.createParamsForPartnerRecommenderDetailCall(ids, uris, DATAPROVIDER));
+	    
+        assertNotNull(documentDetails);
+        assertTrue(documentDetails.documentBadges.size() > 0 );
+        assertEquals(1, documentDetails.documentBadges.size());
+
+	}
+
+	@Test
+	public void detailCallSingleItemWithmoreAuthors() {
+        ArrayList<String> ids = new ArrayList<String>();
+		ArrayList<String> uris = new ArrayList<String>();
+        ids.add("9b71cb2e-78ff-3ae0-b1dc-af0db029b508");
+        uris.add("http://www.mendeley.com/research/work-256");
+        DocumentBadgeList documentDetails = PartnerRecommenderTestHelper.getDetails(DEPLOYMENT_CONTEXT,	
+        		port, 
+        		PartnerRecommenderTestHelper.createParamsForPartnerRecommenderDetailCall(ids, uris, DATAPROVIDER));
+	    
+        assertNotNull(documentDetails);
+        assertTrue(documentDetails.documentBadges.size() > 0 );
+        assertEquals(1, documentDetails.documentBadges.size());
+
+	}
 
 	@Test
 	public void singleQueryWork() {

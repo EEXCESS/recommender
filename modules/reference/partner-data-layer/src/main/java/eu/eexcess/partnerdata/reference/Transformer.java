@@ -220,7 +220,7 @@ public class Transformer implements ITransformer{
 		
 		PartnerdataTracer.dumpFile(this.getClass(), partnerConfig, input, "before-transform-detail", logger); 
 			
-		//input = preProcessTransform( input, logger);  
+		input = preProcessTransformDetail( input, logger);  
 
 		DOMSource source = new DOMSource( input );
 		DOMResult domResult = new DOMResult();
@@ -248,6 +248,9 @@ public class Transformer implements ITransformer{
 		return input;
 	}
     
+	public Document preProcessTransformDetail(Document input, PartnerdataLogger logger)  throws EEXCESSDataTransformationException{
+		return input;
+	}
 	
 	@Override
 	public ResultList toResultList(Document nativeResults, Document input, PartnerdataLogger logger) {
