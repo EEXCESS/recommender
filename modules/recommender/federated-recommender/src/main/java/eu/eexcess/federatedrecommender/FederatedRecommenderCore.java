@@ -27,6 +27,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -57,7 +58,6 @@ import eu.eexcess.dataformats.result.DocumentBadgePredicate;
 import eu.eexcess.dataformats.result.PartnerResponseState;
 import eu.eexcess.dataformats.result.ResultList;
 import eu.eexcess.dataformats.result.ResultStats;
-import eu.eexcess.dataformats.userprofile.Language;
 import eu.eexcess.dataformats.userprofile.SecureUserProfile;
 import eu.eexcess.dataformats.userprofile.SecureUserProfileEvaluation;
 import eu.eexcess.federatedrecommender.dataformats.PartnersFederatedRecommendations;
@@ -300,9 +300,11 @@ public class FederatedRecommenderCore {
 	public ResultList generateFederatedRecommendation(SecureUserProfile secureUserProfile) throws FileNotFoundException {
 		// ResultList result = new ResultList();
 		ResultList resultList = null;
-		//this.sourceSelection(secureUserProfile, this.federatedRecConfiguration.); 
-		//FederatedRecommenderConfiguration.java
-		//TODO: add sourceselect here!
+
+		ArrayList<String> sourceSelectors = new ArrayList<>();
+		Collections.addAll(sourceSelectors, federatedRecConfiguration.sourceSelectors);
+		secureUserProfile = sourceSelection(secureUserProfile, sourceSelectors);
+		
 		// SecureUserProfileDecomposer sUPDecomposer = null;
 		// sUPDecomposer = new
 		// SecureUserProfileDecomposer(federatedRecConfiguration,dbPediaSolrIndex);
@@ -416,24 +418,40 @@ public class FederatedRecommenderCore {
 	}
 
 	/**
-	 * Selects partners according to the given sourceSelectorClassName
+	 * Performs partner source selection according to the given classes and
+	 * their order. Multiple identical selectors are allowed but instantiated
+	 * only once.
 	 * 
 	 * @param userProfile
-	 *            that beneath others keeps language information
+	 * 
 	 * @param sourceSelectorClassName
-	 *            class name of source selector
+	 *            class names of source selectors to be applied in same order
 	 * @return same userProfile but with changed partner list
 	 */
-	public SecureUserProfile sourceSelection(SecureUserProfileEvaluation userProfile, String sourceSelectorClassName) {
+	public SecureUserProfile sourceSelection(SecureUserProfile userProfile, ArrayList<String> selectorsClassNames) {
 
-		try {
-			PartnerSelector sourceSelector = (PartnerSelector) Class.forName(sourceSelectorClassName).newInstance();
-			return sourceSelector.sourceSelect(userProfile, getPartnerRegister().getPartners());
-		} catch (InstantiationException | IllegalAccessException | ClassNotFoundException e) {
-			logger.log(Level.SEVERE,"failed to instanciate source selector [" + sourceSelectorClassName
-							+ "] by name: ignoring source selection", e);
+		if (selectorsClassNames == null || selectorsClassNames.size() <= 0) {
+			return userProfile;
 		}
-		return userProfile;
+
+		SecureUserProfile lastEvaluatedProfile = userProfile;
+		HashMap<String, PartnerSelector> instances = new HashMap<>();
+
+		for (String sourceSelectorClassName : selectorsClassNames) {
+			try {
+				PartnerSelector sourceSelector = instances.get(sourceSelectorClassName);
+				if (null == sourceSelector) {
+					sourceSelector = (PartnerSelector) Class.forName(sourceSelectorClassName).newInstance();
+					instances.put(sourceSelectorClassName, sourceSelector);
+				}
+				lastEvaluatedProfile = sourceSelector.sourceSelect(lastEvaluatedProfile, getPartnerRegister()
+								.getPartners());
+			} catch (InstantiationException | IllegalAccessException | ClassNotFoundException e) {
+				logger.log(Level.SEVERE, "failed to instanciate source selector [" + sourceSelectorClassName
+								+ "] by name: ignoring source selection", e);
+			}
+		}
+		return lastEvaluatedProfile;
 	}
 
 	/**

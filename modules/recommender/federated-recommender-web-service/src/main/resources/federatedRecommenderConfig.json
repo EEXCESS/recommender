@@ -7,8 +7,6 @@
 "partnersTimeout":7000,
 "numRecommenderThreads":30,
 "statsLogDatabase":"/var/lib/tomcat6/webapps/eexcess-federated-recommender-web-service-1.0-SNAPSHOT/FederatedRecommenderStats.db",
-"defaultPickerName":"eu.eexcess.federatedrecommender.picker.OccurrenceProbabilityPicker"
+"defaultPickerName":"eu.eexcess.federatedrecommender.picker.OccurrenceProbabilityPicker",
+"sourceSelectors" : ["eu.eexcess.federatedrecommender.sourceselection.LanguageSourceSelector"]
 }
-
-
-

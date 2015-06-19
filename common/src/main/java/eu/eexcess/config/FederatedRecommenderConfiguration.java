@@ -38,5 +38,6 @@ public class FederatedRecommenderConfiguration {
 	public int numRecommenderThreads;
 	public String statsLogDatabase;
 	public String defaultPickerName;
+	public String[] sourceSelectors;
 
 }
