@@ -25,6 +25,8 @@ package eu.eexcess.federatedrecommender.evaluation;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
@@ -38,6 +40,7 @@ import org.apache.commons.lang.SerializationUtils;
 import org.jgraph.graph.DefaultEdge;
 import org.jgrapht.graph.SimpleWeightedGraph;
 
+import cc.mallet.grmm.inference.Utils;
 import eu.eexcess.config.FederatedRecommenderConfiguration;
 import eu.eexcess.dataformats.PartnerBadge;
 import eu.eexcess.dataformats.PartnerBadgeList;
@@ -97,19 +100,21 @@ public class FederatedRecommenderEvaluationCore   {
 	public EvaluationResultList getEvaluationResults(
 			SecureUserProfileEvaluation userProfile) {
 		SecureUserProfileEvaluation userProfileEvaluation = null;
+		String[] sourceSelectionModel = {"Model"};//TODO: should not be "model"
 		if (userProfile.sourceSelect != null)
+			
 			switch (userProfile.sourceSelect) {
 			case "langModel":
 				userProfileEvaluation = (SecureUserProfileEvaluation) fRCore
-						.sourceSelection(userProfile,"Model");//TODO: shoudl not be "model"
+						.sourceSelection(userProfile,new ArrayList<String>(Arrays.asList(sourceSelectionModel)));
 				break;
 			case "wordnet":
 				userProfileEvaluation = (SecureUserProfileEvaluation) fRCore
-						.sourceSelection(userProfile,"Model");
+						.sourceSelection(userProfile,new ArrayList<String>(Arrays.asList(sourceSelectionModel)));
 				break;
 			case "wikipedia":
 				userProfileEvaluation = (SecureUserProfileEvaluation) fRCore
-						.sourceSelection(userProfile,"Model");
+						.sourceSelection(userProfile, new ArrayList<String>(Arrays.asList(sourceSelectionModel)));
 				break;
 			default:
 				logger.log(Level.WARNING,

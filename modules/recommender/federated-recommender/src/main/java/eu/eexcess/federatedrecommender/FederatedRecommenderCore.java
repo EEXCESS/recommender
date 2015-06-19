@@ -300,11 +300,11 @@ public class FederatedRecommenderCore {
 	public ResultList generateFederatedRecommendation(SecureUserProfile secureUserProfile) throws FileNotFoundException {
 		// ResultList result = new ResultList();
 		ResultList resultList = null;
-
-		ArrayList<String> sourceSelectors = new ArrayList<>();
-		Collections.addAll(sourceSelectors, federatedRecConfiguration.sourceSelectors);
-		secureUserProfile = sourceSelection(secureUserProfile, sourceSelectors);
-		
+		if(federatedRecConfiguration.sourceSelectors!=null){
+			ArrayList<String> sourceSelectors = new ArrayList<String>();
+			Collections.addAll(sourceSelectors, federatedRecConfiguration.sourceSelectors);
+			secureUserProfile = sourceSelection(secureUserProfile, sourceSelectors);
+		}
 		// SecureUserProfileDecomposer sUPDecomposer = null;
 		// sUPDecomposer = new
 		// SecureUserProfileDecomposer(federatedRecConfiguration,dbPediaSolrIndex);
