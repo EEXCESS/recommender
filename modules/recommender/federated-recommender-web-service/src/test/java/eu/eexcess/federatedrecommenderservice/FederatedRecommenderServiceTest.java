@@ -1,7 +1,5 @@
 package eu.eexcess.federatedrecommenderservice;
-import static org.junit.Assert.*;
-
-import java.io.IOException;
+import static org.junit.Assert.assertFalse;
 
 import org.junit.Test;
 

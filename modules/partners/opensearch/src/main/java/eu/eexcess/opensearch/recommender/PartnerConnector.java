@@ -37,7 +37,6 @@ import com.sun.jersey.api.client.WebResource;
 
 import eu.eexcess.config.PartnerConfiguration;
 import eu.eexcess.dataformats.result.DocumentBadge;
-import eu.eexcess.dataformats.result.DocumentBadgeList;
 import eu.eexcess.dataformats.result.ResultList;
 import eu.eexcess.dataformats.userprofile.SecureUserProfile;
 import eu.eexcess.opensearch.opensearchDescriptionDocument.OpensearchDescription;

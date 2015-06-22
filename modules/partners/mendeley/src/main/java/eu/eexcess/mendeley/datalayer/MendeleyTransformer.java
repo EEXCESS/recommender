@@ -34,7 +34,6 @@ import eu.eexcess.partnerdata.api.ITransformer;
 import eu.eexcess.partnerdata.reference.PartnerdataLogger;
 import eu.eexcess.partnerdata.reference.PartnerdataTracer;
 import eu.eexcess.partnerdata.reference.Transformer;
-import eu.eexcess.partnerdata.reference.XMLTools;
 
 public class MendeleyTransformer extends Transformer implements ITransformer{
 	

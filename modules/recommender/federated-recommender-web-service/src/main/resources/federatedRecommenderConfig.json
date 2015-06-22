@@ -8,5 +8,5 @@
 "numRecommenderThreads":30,
 "statsLogDatabase":"/var/lib/tomcat6/webapps/eexcess-federated-recommender-web-service-1.0-SNAPSHOT/FederatedRecommenderStats.db",
 "defaultPickerName":"eu.eexcess.federatedrecommender.picker.OccurrenceProbabilityPicker",
-"sourceSelectors" : ["eu.eexcess.federatedrecommender.sourceselection.LanguageSourceSelector"]
+"sourceSelectors" : ["eu.eexcess.federatedrecommender.sourceselection.LanguageSourceSelector", "eu.eexcess.federatedrecommender.sourceselection.LanguageGuessingSourceSelector"]
 }

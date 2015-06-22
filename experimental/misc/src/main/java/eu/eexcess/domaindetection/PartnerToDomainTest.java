@@ -76,52 +76,55 @@ public class PartnerToDomainTest {
      */
     
 	public PartnerToDomainTest() {
-        String europeana = null, mendeley = null, zbw = null, kimCollect = null, wissensserver = null;
+		String zbw = null;
+//        String europeana = null, mendeley = null, kimCollect = null, wissensserver = null;
             
         
 //        europeana = "http://localhost:38080/eexcess-partner-europeana-1.0-SNAPSHOT/partner/recommend/";
         
-        europeana = "http://eexcess-dev.joanneum.at/eexcess-partner-europeana-1.0-SNAPSHOT/partner/recommend/";
-        mendeley = "http://eexcess-dev.joanneum.at/eexcess-partner-mendeley-1.0-SNAPSHOT/partner/recommend/";
+//        europeana = "http://eexcess-dev.joanneum.at/eexcess-partner-europeana-1.0-SNAPSHOT/partner/recommend/";
+//        mendeley = "http://eexcess-dev.joanneum.at/eexcess-partner-mendeley-1.0-SNAPSHOT/partner/recommend/";
         zbw = "http://eexcess-dev.joanneum.at/eexcess-partner-zbw-1.0-SNAPSHOT/partner/recommend/";
-        kimCollect = "http://eexcess-dev.joanneum.at/eexcess-partner-kim-collect-1.0-SNAPSHOT/partner/recommend/";
-        wissensserver = "http://eexcess-dev.joanneum.at/eexcess-partner-wissenmedia-1.0-SNAPSHOT/partner/recommend/";
+		// kimCollect =
+		// "http://eexcess-dev.joanneum.at/eexcess-partner-kim-collect-1.0-SNAPSHOT/partner/recommend/";
+		// wissensserver =
+		// "http://eexcess-dev.joanneum.at/eexcess-partner-wissenmedia-1.0-SNAPSHOT/partner/recommend/";
      
-        if (false) { 
-            PartnerBadge badge = new PartnerBadge();
-            badge = new PartnerBadge();
-            badge.setSystemId("Europeana");
-            badge.setPartnerConnectorEndpoint(europeana);
-            badge.setTags(new ArrayList<String>() {/**
-				 * 
-				 */
-				private static final long serialVersionUID = 1L;
-
-			{
-                add("Europe");
-                add("Culture");
-            }});
-            partnerRegister.addPartner(badge);
-        }
+//        if (false) { 
+//            PartnerBadge badge = new PartnerBadge();
+//            badge = new PartnerBadge();
+//            badge.setSystemId("Europeana");
+//            badge.setPartnerConnectorEndpoint(europeana);
+//            badge.setTags(new ArrayList<String>() {/**
+//				 * 
+//				 */
+//				private static final long serialVersionUID = 1L;
+//
+//			{
+//                add("Europe");
+//                add("Culture");
+//            }});
+//            partnerRegister.addPartner(badge);
+//        }
         
-        if (false) {
-			PartnerBadge badge2 = new PartnerBadge();
-			badge2 = new PartnerBadge();
-			badge2.setSystemId("Mendeley");
-			badge2.setPartnerConnectorEndpoint(mendeley);
-			badge2.setTags(new ArrayList<String>() {
-				/**
-				 * 
-				 */
-				private static final long serialVersionUID = 1L;
-
-				{
-					add("Science");
-					add("Journals");
-				}
-			});
-			partnerRegister.addPartner(badge2);
-		}
+//        if (false) {
+//			PartnerBadge badge2 = new PartnerBadge();
+//			badge2 = new PartnerBadge();
+//			badge2.setSystemId("Mendeley");
+//			badge2.setPartnerConnectorEndpoint(mendeley);
+//			badge2.setTags(new ArrayList<String>() {
+//				/**
+//				 * 
+//				 */
+//				private static final long serialVersionUID = 1L;
+//
+//				{
+//					add("Science");
+//					add("Journals");
+//				}
+//			});
+//			partnerRegister.addPartner(badge2);
+//		}
 		PartnerBadge badge3 = new PartnerBadge();
         badge3.setSystemId("ZBW");
         badge3.setPartnerConnectorEndpoint(zbw);
@@ -136,41 +139,41 @@ public class PartnerToDomainTest {
         }});
         partnerRegister.addPartner(badge3);
                
-        if (false) {
-			PartnerBadge badge4 = new PartnerBadge();
-			badge4.setSystemId("KIMCollect");
-			badge4.setPartnerConnectorEndpoint(kimCollect);
-			badge4.setTags(new ArrayList<String>() {
-				/**
-				 * 
-				 */
-				private static final long serialVersionUID = 1L;
-
-				{
-					add("Swiss");
-					add("Culture");
-				}
-			});
-			partnerRegister.addPartner(badge4);
-		}
+//        if (false) {
+//			PartnerBadge badge4 = new PartnerBadge();
+//			badge4.setSystemId("KIMCollect");
+//			badge4.setPartnerConnectorEndpoint(kimCollect);
+//			badge4.setTags(new ArrayList<String>() {
+//				/**
+//				 * 
+//				 */
+//				private static final long serialVersionUID = 1L;
+//
+//				{
+//					add("Swiss");
+//					add("Culture");
+//				}
+//			});
+//			partnerRegister.addPartner(badge4);
+//		}
         
-		if (false) {
-			PartnerBadge badge5 = new PartnerBadge();
-			badge5.setSystemId("Wissenmedia");
-			badge5.setPartnerConnectorEndpoint(wissensserver);
-			badge5.setTags(new ArrayList<String>() {
-				/**
-				 * 
-				 */
-				private static final long serialVersionUID = 1L;
-
-				{
-					add("Articles");
-					add("Culture");
-				}
-			});
-			partnerRegister.addPartner(badge5);
-		}
+//		if (false) {
+//			PartnerBadge badge5 = new PartnerBadge();
+//			badge5.setSystemId("Wissenmedia");
+//			badge5.setPartnerConnectorEndpoint(wissensserver);
+//			badge5.setTags(new ArrayList<String>() {
+//				/**
+//				 * 
+//				 */
+//				private static final long serialVersionUID = 1L;
+//
+//				{
+//					add("Articles");
+//					add("Culture");
+//				}
+//			});
+//			partnerRegister.addPartner(badge5);
+//		}
     }
     
     private ResultList getPartnerResult(PartnerBadge partner, SecureUserProfile secureUserProfile) {

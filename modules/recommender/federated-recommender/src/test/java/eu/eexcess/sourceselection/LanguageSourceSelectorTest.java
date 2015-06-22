@@ -28,6 +28,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import org.apache.commons.lang.StringUtils;
 import org.junit.Test;
 
 import eu.eexcess.dataformats.PartnerBadge;
@@ -36,10 +37,10 @@ import eu.eexcess.dataformats.userprofile.SecureUserProfile;
 import eu.eexcess.federatedrecommender.interfaces.PartnerSelector;
 import eu.eexcess.federatedrecommender.sourceselection.LanguageSourceSelector;
 
-public class LanguageSourceSelectionTest {
+public class LanguageSourceSelectorTest {
 
 	@Test
-	public void languageSourceSelectionTest_sourceSelect_expectOneSelection() {
+	public void languageSourceSelector_sourceSelect_expectOneSelection() {
 		PartnerSelector selector = new LanguageSourceSelector();
 
 		SecureUserProfile userProfile = new SecureUserProfile();
@@ -48,6 +49,7 @@ public class LanguageSourceSelectionTest {
 		List<PartnerBadge> partners = new ArrayList<>();
 		PartnerBadge pb = new PartnerBadge();
 		pb.setLanguageContent(Arrays.asList(new String[] { "de", "en", "fr" }));
+		pb.systemId = StringUtils.join(pb.getLanguageContent().toArray());
 		partners.add(pb);
 
 		SecureUserProfile refinedUserProfile = selector.sourceSelect(userProfile, partners);
@@ -58,7 +60,7 @@ public class LanguageSourceSelectionTest {
 	}
 
 	@Test
-	public void languageSourceSelectionTest_sourceSelect_expectOneOfTwoSelections() {
+	public void languageSourceSelector_sourceSelect_expectOneOfTwoSelections() {
 		PartnerSelector selector = new LanguageSourceSelector();
 
 		SecureUserProfile userProfile = new SecureUserProfile();
@@ -67,10 +69,12 @@ public class LanguageSourceSelectionTest {
 		List<PartnerBadge> partners = new ArrayList<>();
 		PartnerBadge pb = new PartnerBadge();
 		pb.setLanguageContent(Arrays.asList(new String[] { "de", "en", "fr" }));
+		pb.systemId = StringUtils.join(pb.getLanguageContent().toArray());		
 		partners.add(pb);
 
 		PartnerBadge pb2 = new PartnerBadge();
 		pb2.setLanguageContent(Arrays.asList(new String[] { "ak", "am", "ar" }));
+		pb2.systemId = StringUtils.join(pb2.getLanguageContent().toArray());
 		partners.add(pb2);
 
 		assertEquals(2, partners.size());
@@ -80,33 +84,33 @@ public class LanguageSourceSelectionTest {
 		assertSame(userProfile, refinedUserProfile);
 		assertTrue(userProfile.partnerList.contains(pb));
 	}
-	
+
 	@Test
-	public void languageSourceSelectionTest_sourceSelect_withPreselectedSources_expectSkippedSelection() {
+	public void languageSourceSelector_sourceSelect_withPreselectedSources_expectSkippedSelection() {
 		PartnerSelector selector = new LanguageSourceSelector();
 
 		SecureUserProfile userProfile = new SecureUserProfile();
 		userProfile.languages = Arrays.asList(new Language[] { new Language("de", 1.0) });
-		
 
 		List<PartnerBadge> partners = new ArrayList<>();
 		PartnerBadge pb = new PartnerBadge();
 		pb.setLanguageContent(Arrays.asList(new String[] { "de", "en", "fr" }));
-		
+		pb.systemId = StringUtils.join(pb.getLanguageContent().toArray());
+
 		userProfile.partnerList.add(pb);
-		assertEquals(1, userProfile.partnerList.size()); 
+		assertEquals(1, userProfile.partnerList.size());
 
 		PartnerBadge pb2 = new PartnerBadge();
 		pb2.setLanguageContent(Arrays.asList(new String[] { "de", "am", "ar" }));
+		pb2.systemId = StringUtils.join(pb2.getLanguageContent().toArray());
 		partners.add(pb2);
 
 		assertEquals(1, partners.size());
-		
+
 		SecureUserProfile refinedUserProfile = selector.sourceSelect(userProfile, partners);
 
 		assertEquals(1, userProfile.partnerList.size());
 		assertSame(userProfile, refinedUserProfile);
 		assertTrue(userProfile.partnerList.contains(pb));
 	}
-
 }

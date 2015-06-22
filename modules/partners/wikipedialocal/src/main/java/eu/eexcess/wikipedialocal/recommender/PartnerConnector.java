@@ -40,7 +40,6 @@ import org.w3c.dom.Document;
 
 import eu.eexcess.config.PartnerConfiguration;
 import eu.eexcess.dataformats.result.DocumentBadge;
-import eu.eexcess.dataformats.result.DocumentBadgeList;
 import eu.eexcess.dataformats.result.Result;
 import eu.eexcess.dataformats.result.ResultList;
 import eu.eexcess.dataformats.userprofile.SecureUserProfile;

@@ -22,9 +22,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 package eu.eexcess.partnerrecommender.reference;
 
-import java.io.FileInputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -44,7 +42,6 @@ import com.github.jsonldjava.core.JsonLdError;
 import com.github.jsonldjava.core.JsonLdOptions;
 import com.github.jsonldjava.core.JsonLdProcessor;
 import com.github.jsonldjava.utils.JsonUtils;
-import com.hp.hpl.jena.ontology.OntModel;
 
 import eu.eexcess.config.PartnerConfiguration;
 import eu.eexcess.dataformats.PartnerBadge;
@@ -166,7 +163,7 @@ public class PartnerRecommender implements PartnerRecommenderApi {
             log.log(Level.INFO,"Call Parnter Api:"+(endCallPartnerApi-startCallPartnerApi)+"ms; First Transformation:"+(endTransform1-startTransform1)+"ms; Second Transformation:"+(endTransform2-startTransform2)+"ms");
             //TODO: refactor the next line!
             recommendations.setResultStats(new ResultStats(PartnerConfigurationCache.CONFIG.getQueryGenerator(currentPartnerConfiguration.queryGeneratorClass).toQuery(userProfile),endCallPartnerApi-startCallPartnerApi,endTransform1-startTransform1,endTransform2-startTransform2,0,recommendations.totalResults));
-            PartnerdataTracer.dumpFile(this.getClass(), this.partnerConfiguration, recommendations, "partner-recommender-results", PartnerdataTracer.FILETYPE.XML, partnerdataLogger);
+            PartnerdataTracer.dumpFile(this.getClass(), PartnerRecommender.partnerConfiguration, recommendations, "partner-recommender-results", PartnerdataTracer.FILETYPE.XML, partnerdataLogger);
             return recommendations;
             
             // TODO rrubien: end impl of PartnerRecommender
@@ -197,14 +194,14 @@ public class PartnerRecommender implements PartnerRecommenderApi {
 				//partnerdataLogger.addQuery(userProfile);
 				Document detailResultEexcess = transformer.transformDetail(detailResultNative, partnerdataLogger);
 				
-	            long startEnrich = System.currentTimeMillis();
+//	            long startEnrich = System.currentTimeMillis();
 //	        	partnerdataLogger.getActLogEntry().enrichStart();
 	        	Document enrichedDetailResultEexcess = null;
 //	        	boolean queryHasResults= transformer.hasEEXCESSRDFResponseResults(searchResultsEexcess);
 //	            if (queryHasResults)
 	            	enrichedDetailResultEexcess = enricher.enrichResultList(detailResultEexcess, partnerdataLogger);
 //	        	partnerdataLogger.getActLogEntry().enrichEnd();
-	            long endEnrich = System.currentTimeMillis();
+//	            long endEnrich = System.currentTimeMillis();
 
 				String rdfXML = XMLTools.getStringFromDocument(enrichedDetailResultEexcess);
 
@@ -222,7 +219,7 @@ public class PartnerRecommender implements PartnerRecommenderApi {
 				document.detailXMLJSON = transformRDFXMLToResponseDetail(rdfXML);
 				*/
 				document.details = transformRDFXMLToResponseDetail(rdfXML);
-		        PartnerdataTracer.dumpFile(this.getClass(), this.partnerConfiguration, document.details, "partner-recommender-results-details-"+i, PartnerdataTracer.FILETYPE.JSON, partnerdataLogger);
+		        PartnerdataTracer.dumpFile(this.getClass(), PartnerRecommender.partnerConfiguration, document.details, "partner-recommender-results-details-"+i, PartnerdataTracer.FILETYPE.JSON, partnerdataLogger);
 
 						
 				/*
@@ -389,13 +386,13 @@ public class PartnerRecommender implements PartnerRecommenderApi {
 		try {
 			System.out.println(XML.toJSONObject(rdfXML).toString());
 			// Open a valid json(-ld) input file
-			InputStream inputStream = new FileInputStream("d:\\input.json");
+//			InputStream inputStream = new FileInputStream("d:\\input.json");
 			// Read the file into an Object (The type of this object will be a List, Map, String, Boolean,
 			// Number or null depending on the root object in the file).
-			Object jsonObject = JsonUtils.fromInputStream(inputStream);
+//			Object jsonObject = JsonUtils.fromInputStream(inputStream);
 
 			// Create a context JSON map containing prefixes and definitions
-			Map context = new HashMap();
+//			Map context = new HashMap();
 			// Customise context...
 			// Create an instance of JsonLdOptions with the standard JSON-LD options
 			JsonLdOptions options = new JsonLdOptions();

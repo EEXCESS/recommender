@@ -1,22 +1,14 @@
 package eu.eexcess.evaluation.queryexpansion;
 
 import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
-import java.util.LinkedList;
 import java.util.List;
 
 import org.codehaus.jackson.map.ObjectMapper;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-import com.google.gson.stream.JsonReader;
-
-import eu.eexcess.dataformats.evaluation.EvaluationResultList;
 import eu.eexcess.dataformats.evaluation.EvaluationResultLists;
 
 public class QueryExpansionEvaluationResultsAnalysis {
