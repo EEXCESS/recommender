@@ -20,7 +20,10 @@
 
 package eu.eexcess.federatedrecommender.sourceselection;
 
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import eu.eexcess.dataformats.PartnerBadge;
 import eu.eexcess.dataformats.userprofile.ContextKeyword;
@@ -29,6 +32,8 @@ import eu.eexcess.federatedrecommender.interfaces.PartnerSelector;
 import eu.eexcess.utils.LanguageGuesser;
 
 public class LanguageGuessingSourceSelector implements PartnerSelector {
+
+	private Map<PartnerBadge, List<String>> selectedPartners = new HashMap<>();
 
 	/**
 	 * Selects partners according to language matches. Languages may be
@@ -50,6 +55,19 @@ public class LanguageGuessingSourceSelector implements PartnerSelector {
 				collectPartnersOnLanguageMatch(userLanguage, partners, userProfile.partnerList);
 			}
 		}
+
+		if (selectedPartners.size() > 0) {
+			System.out.println("context-keywords-based source selection:");
+			for (Map.Entry<PartnerBadge, List<String>> entry : selectedPartners.entrySet()) {
+				StringBuilder info = new StringBuilder();
+				info.append("partner [" + entry.getKey().systemId + "] matching language:");
+				for (String language : entry.getValue()) {
+					info.append(" [" + language + "]");
+				}
+				System.out.println(info);
+			}
+		}
+
 		return userProfile;
 	}
 
@@ -81,6 +99,11 @@ public class LanguageGuessingSourceSelector implements PartnerSelector {
 				if (partnerLanguage.compareTo(language) == 0) {
 					if (false == partnerConnectorList.contains(partner)) {
 						partnerConnectorList.add(partner);
+
+						if (!selectedPartners.containsKey(partner)) {
+							selectedPartners.put(partner, new ArrayList<String>());
+						}
+						selectedPartners.get(partner).add(language);
 					}
 				}
 			}
