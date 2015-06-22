@@ -31,7 +31,6 @@ import java.util.List;
 import org.junit.Test;
 
 import eu.eexcess.dataformats.PartnerBadge;
-import eu.eexcess.dataformats.userprofile.ContextKeyword;
 import eu.eexcess.dataformats.userprofile.Language;
 import eu.eexcess.dataformats.userprofile.SecureUserProfile;
 import eu.eexcess.federatedrecommender.interfaces.PartnerSelector;
