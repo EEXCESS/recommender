@@ -26,6 +26,7 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.Map;
 import java.util.logging.Level;
@@ -346,19 +347,43 @@ public class PartnerRecommender implements PartnerRecommenderApi {
 			if (rdfabout.endsWith("/enrichedProxy/")) {
 				eexcessProxyItem.remove(rdfaboutKey);
 				eexcessProxyItem.remove("oreproxyFor");
+				eexcessProxyItem.remove("xmlnseexcess");
 				eexcessProxyItem.remove(oreProxyInKey);
+				eexcessProxyItem = simplify(eexcessProxyItem);
 				ret.put("eexcessProxyEnriched", eexcessProxyItem);
 			}
 			if (rdfabout.endsWith("/proxy/")) {
 				eexcessProxyItem.remove(rdfaboutKey);
 				eexcessProxyItem.remove("oreproxyFor");
+				eexcessProxyItem.remove("xmlnseexcess");
 				eexcessProxyItem.remove(oreProxyInKey);
+				eexcessProxyItem = simplify(eexcessProxyItem);
 				ret.put("eexcessProxy", eexcessProxyItem);
 			}
 		}
 	}
 
 	
+	private JSONObject simplify(JSONObject eexcessProxyItem) {
+		Iterator<?> keys = eexcessProxyItem.keys();
+
+		while( keys.hasNext() ) {
+		    String key = (String)keys.next();
+		    try {
+				if ( eexcessProxyItem.get(key) instanceof JSONObject ) {
+					JSONObject myChild = (JSONObject) eexcessProxyItem.get(key);
+					String content = myChild.getString("content");
+//					eexcessProxyItem.remove(key);
+					eexcessProxyItem.put(key, content);
+				}
+			} catch (JSONException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}		
+		return eexcessProxyItem;
+	}
+
 	private String transformRDFXMLToResponseDetailJSONLD(String rdfXML) {
 		try {
 			System.out.println(XML.toJSONObject(rdfXML).toString());
