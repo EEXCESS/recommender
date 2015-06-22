@@ -27,8 +27,6 @@ package eu.eexcess.diversityasurement.iaselect;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
-import org.apache.commons.lang.StringUtils;
-
 /**
  * Implementation of IA-Select described in [Agrawal, R., Gollapudi, S.,
  * Halverson, A., & Ieong, S. (2009). Diversifying search results. In
@@ -101,10 +99,10 @@ public class IASelect {
 		return S;
 	}
 
-	private String sToString(Set<Document> S) {
-		return new StringBuilder().append("S:{").append(StringUtils.join(S.toArray(new Document[0]), ", ")).append("}")
-						.toString();
-	}
+//	private String sToString(Set<Document> S) {
+//		return new StringBuilder().append("S:{").append(StringUtils.join(S.toArray(new Document[0]), ", ")).append("}")
+//						.toString();
+//	}
 
 	private void clearMaxMarginalUtility() {
 		maxMarginalUtility = -1;

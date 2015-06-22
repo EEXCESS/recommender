@@ -1,8 +1,5 @@
 package eu.eexcess.federatedrecommender;
 
-import static org.junit.Assert.*;
-
-import java.util.ArrayList;
 import java.util.List;
 
 import org.junit.Test;
@@ -11,7 +8,6 @@ import eu.eexcess.config.FederatedRecommenderConfiguration;
 import eu.eexcess.dataformats.PartnerBadge;
 import eu.eexcess.dataformats.result.DocumentBadge;
 import eu.eexcess.dataformats.result.DocumentBadgeList;
-import eu.eexcess.federatedrecommender.registration.PartnerRegister;
 import eu.eexcess.federatedrecommender.utils.FederatedRecommenderException;
 
 public class FederatedRecommenderDocDetailsTest {

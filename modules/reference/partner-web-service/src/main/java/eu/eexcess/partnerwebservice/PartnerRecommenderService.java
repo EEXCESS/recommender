@@ -18,7 +18,6 @@ package eu.eexcess.partnerwebservice;
 
 import java.io.IOException;
 import java.util.Date;
-import java.util.List;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;

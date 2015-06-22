@@ -27,6 +27,13 @@ import java.util.logging.LogRecord;
 import java.util.logging.Logger;
 import java.util.logging.SimpleFormatter;
 
+/**
+ * A logger printing to System.out instead of System.err. to make errors more
+ * noisy but normal logging quieter.
+ * 
+ * @author Raoul Rubien
+ *
+ */
 public class PianoLogger {
 
 	private static class PianoHandler extends Handler {

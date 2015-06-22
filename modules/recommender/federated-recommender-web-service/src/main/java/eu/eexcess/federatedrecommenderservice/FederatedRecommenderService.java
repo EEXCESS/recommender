@@ -16,29 +16,6 @@ limitations under the License.
  */
 package eu.eexcess.federatedrecommenderservice;
 
-import com.sun.jersey.spi.resource.Singleton;
-
-import eu.eexcess.config.FederatedRecommenderConfiguration;
-import eu.eexcess.dataformats.PartnerBadge;
-import eu.eexcess.dataformats.PartnerBadgeList;
-import eu.eexcess.dataformats.RecommenderStats;
-import eu.eexcess.dataformats.result.DocumentBadge;
-import eu.eexcess.dataformats.result.DocumentBadgeList;
-import eu.eexcess.dataformats.result.ResultList;
-import eu.eexcess.dataformats.userprofile.*;
-import eu.eexcess.federatedrecommender.FederatedRecommenderCore;
-import eu.eexcess.federatedrecommender.utils.FederatedRecommenderException;
-
-import org.codehaus.jackson.JsonParseException;
-import org.codehaus.jackson.JsonParser;
-import org.codehaus.jackson.map.JsonMappingException;
-import org.codehaus.jackson.map.ObjectMapper;
-
-import javax.annotation.PostConstruct;
-import javax.ws.rs.*;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
-
 import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
@@ -49,6 +26,44 @@ import java.util.Date;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+
+import javax.annotation.PostConstruct;
+import javax.ws.rs.Consumes;
+import javax.ws.rs.GET;
+import javax.ws.rs.POST;
+import javax.ws.rs.Path;
+import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
+
+import org.codehaus.jackson.JsonParseException;
+import org.codehaus.jackson.JsonParser;
+import org.codehaus.jackson.map.JsonMappingException;
+import org.codehaus.jackson.map.ObjectMapper;
+
+import com.sun.jersey.spi.resource.Singleton;
+
+import eu.eexcess.config.FederatedRecommenderConfiguration;
+import eu.eexcess.dataformats.PartnerBadge;
+import eu.eexcess.dataformats.PartnerBadgeList;
+import eu.eexcess.dataformats.RecommenderStats;
+import eu.eexcess.dataformats.result.DocumentBadgeList;
+import eu.eexcess.dataformats.result.ResultList;
+import eu.eexcess.dataformats.userprofile.Address;
+import eu.eexcess.dataformats.userprofile.Context;
+import eu.eexcess.dataformats.userprofile.ContextKeyword;
+import eu.eexcess.dataformats.userprofile.ContextNamedEntitiesElement;
+import eu.eexcess.dataformats.userprofile.ContextNamedEntity;
+import eu.eexcess.dataformats.userprofile.History;
+import eu.eexcess.dataformats.userprofile.Interest;
+import eu.eexcess.dataformats.userprofile.Language;
+import eu.eexcess.dataformats.userprofile.SecureUserProfile;
+import eu.eexcess.dataformats.userprofile.TimeRange;
+import eu.eexcess.dataformats.userprofile.UserCredentials;
+import eu.eexcess.dataformats.userprofile.UserLocation;
+import eu.eexcess.federatedrecommender.FederatedRecommenderCore;
+import eu.eexcess.federatedrecommender.utils.FederatedRecommenderException;
 
 /**
  * Reference implementation of a partner recommender web service.

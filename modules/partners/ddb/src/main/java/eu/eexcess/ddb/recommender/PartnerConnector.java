@@ -31,8 +31,6 @@ import java.util.logging.Logger;
 import org.apache.commons.lang.text.StrSubstitutor;
 import org.w3c.dom.Document;
 
-import com.sun.jersey.api.client.Client;
-
 import eu.eexcess.config.PartnerConfiguration;
 import eu.eexcess.dataformats.result.DocumentBadge;
 import eu.eexcess.dataformats.result.ResultList;

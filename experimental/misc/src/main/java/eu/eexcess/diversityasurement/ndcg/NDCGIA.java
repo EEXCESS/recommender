@@ -23,7 +23,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 package eu.eexcess.diversityasurement.ndcg;
 
 import java.util.ArrayList;
-import java.util.List;
 
 /**
  * NDCG-IA Intend aware implementation for ndcg
