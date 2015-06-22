@@ -58,8 +58,8 @@ public class Database {
 
 	public <T extends DatabasePreparedQuery> Database(String dBName,
 			T[] preparedStatementsDefinitions) {
-		logger.log(Level.INFO,"Trying to open DB:" +this.dBName);
-		this.dBName = dBName;
+		logger.log(Level.INFO,"Trying to open DB:" +Database.dBName);
+		Database.dBName = dBName;
 		try {
 			Class.forName(JDBC_DRIVER);
 		} catch (ClassNotFoundException e) {
@@ -67,10 +67,10 @@ public class Database {
 		}
 		try {
 			this.con = DriverManager
-					.getConnection("jdbc:sqlite:" + this.dBName);
+					.getConnection("jdbc:sqlite:" + Database.dBName);
 		} catch (SQLException e) {
 			logger.log(Level.SEVERE, "Could not connect to Database: "
-					+ this.dBName, e);
+					+ Database.dBName, e);
 		}
 		if (con != null) {
 			try {
