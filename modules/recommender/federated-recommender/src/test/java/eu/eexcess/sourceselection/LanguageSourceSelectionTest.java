@@ -31,6 +31,7 @@ import java.util.List;
 import org.junit.Test;
 
 import eu.eexcess.dataformats.PartnerBadge;
+import eu.eexcess.dataformats.userprofile.ContextKeyword;
 import eu.eexcess.dataformats.userprofile.Language;
 import eu.eexcess.dataformats.userprofile.SecureUserProfile;
 import eu.eexcess.federatedrecommender.interfaces.PartnerSelector;
@@ -39,7 +40,7 @@ import eu.eexcess.federatedrecommender.sourceselection.LanguageSourceSelector;
 public class LanguageSourceSelectionTest {
 
 	@Test
-	public void languageSourceSelectionTest_sourceSelect_expectOneSelection() {
+	public void languageSourceSelector_sourceSelect_expectOneSelection() {
 		PartnerSelector selector = new LanguageSourceSelector();
 
 		SecureUserProfile userProfile = new SecureUserProfile();
@@ -58,7 +59,7 @@ public class LanguageSourceSelectionTest {
 	}
 
 	@Test
-	public void languageSourceSelectionTest_sourceSelect_expectOneOfTwoSelections() {
+	public void languageSourceSelector_sourceSelect_expectOneOfTwoSelections() {
 		PartnerSelector selector = new LanguageSourceSelector();
 
 		SecureUserProfile userProfile = new SecureUserProfile();
@@ -80,28 +81,27 @@ public class LanguageSourceSelectionTest {
 		assertSame(userProfile, refinedUserProfile);
 		assertTrue(userProfile.partnerList.contains(pb));
 	}
-	
+
 	@Test
-	public void languageSourceSelectionTest_sourceSelect_withPreselectedSources_expectSkippedSelection() {
+	public void languageSourceSelector_sourceSelect_withPreselectedSources_expectSkippedSelection() {
 		PartnerSelector selector = new LanguageSourceSelector();
 
 		SecureUserProfile userProfile = new SecureUserProfile();
 		userProfile.languages = Arrays.asList(new Language[] { new Language("de", 1.0) });
-		
 
 		List<PartnerBadge> partners = new ArrayList<>();
 		PartnerBadge pb = new PartnerBadge();
 		pb.setLanguageContent(Arrays.asList(new String[] { "de", "en", "fr" }));
-		
+
 		userProfile.partnerList.add(pb);
-		assertEquals(1, userProfile.partnerList.size()); 
+		assertEquals(1, userProfile.partnerList.size());
 
 		PartnerBadge pb2 = new PartnerBadge();
 		pb2.setLanguageContent(Arrays.asList(new String[] { "de", "am", "ar" }));
 		partners.add(pb2);
 
 		assertEquals(1, partners.size());
-		
+
 		SecureUserProfile refinedUserProfile = selector.sourceSelect(userProfile, partners);
 
 		assertEquals(1, userProfile.partnerList.size());
@@ -109,4 +109,61 @@ public class LanguageSourceSelectionTest {
 		assertTrue(userProfile.partnerList.contains(pb));
 	}
 
+	@Test
+	public void languageSourceSelector_sourceSelect_withNoPreselectedLanguages_expectDELanguageToBeGuessed() {
+
+		PartnerBadge germanPartner = new PartnerBadge();
+		germanPartner.setLanguageContent(Arrays.asList(new String[] { "de" }));
+
+		PartnerBadge frenchPartner = new PartnerBadge();
+		frenchPartner.setLanguageContent(Arrays.asList(new String[] { "fr" }));
+
+		PartnerBadge englishPartner = new PartnerBadge();
+		englishPartner.setLanguageContent(Arrays.asList(new String[] { "en" }));
+
+		List<PartnerBadge> partners = new ArrayList<>();
+		partners.add(germanPartner);
+		partners.add(frenchPartner);
+		partners.add(englishPartner);
+
+		SecureUserProfile userProfile = new SecureUserProfile();
+		userProfile.contextKeywords.addAll(Arrays.asList(new ContextKeyword[] { new ContextKeyword("das"),
+						new ContextKeyword("ist"), new ContextKeyword("ein"), new ContextKeyword("auto") }));
+
+		PartnerSelector selector = new LanguageSourceSelector();
+		SecureUserProfile refinedUserProfile = selector.sourceSelect(userProfile, partners);
+
+		assertEquals(1, userProfile.partnerList.size());
+		assertSame(userProfile, refinedUserProfile);
+		assertTrue(userProfile.partnerList.contains(germanPartner));
+	}
+
+	@Test
+	public void languageSourceSelector_sourceSelect_withNoPreselectedLanguages_expectENLanguageToBeGuessed() {
+
+		PartnerBadge germanPartner = new PartnerBadge();
+		germanPartner.setLanguageContent(Arrays.asList(new String[] { "de" }));
+
+		PartnerBadge frenchPartner = new PartnerBadge();
+		frenchPartner.setLanguageContent(Arrays.asList(new String[] { "fr" }));
+
+		PartnerBadge englishPartner = new PartnerBadge();
+		englishPartner.setLanguageContent(Arrays.asList(new String[] { "en" }));
+
+		List<PartnerBadge> partners = new ArrayList<>();
+		partners.add(germanPartner);
+		partners.add(frenchPartner);
+		partners.add(englishPartner);
+
+		SecureUserProfile userProfile = new SecureUserProfile();
+		userProfile.contextKeywords.addAll(Arrays.asList(new ContextKeyword[] { new ContextKeyword("this"),
+						new ContextKeyword("is"), new ContextKeyword("a"), new ContextKeyword("car") }));
+
+		PartnerSelector selector = new LanguageSourceSelector();
+		SecureUserProfile refinedUserProfile = selector.sourceSelect(userProfile, partners);
+
+		assertEquals(1, userProfile.partnerList.size());
+		assertSame(userProfile, refinedUserProfile);
+		assertTrue(userProfile.partnerList.contains(germanPartner));
+	}
 }
