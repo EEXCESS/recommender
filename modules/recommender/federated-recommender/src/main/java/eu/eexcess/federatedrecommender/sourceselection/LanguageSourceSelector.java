@@ -40,7 +40,7 @@ import eu.eexcess.federatedrecommender.interfaces.PartnerSelector;
  */
 public class LanguageSourceSelector implements PartnerSelector {
 
-	private Logger logger = Logger.getLogger(LanguageSourceSelector.class.getCanonicalName());
+	private Logger logger = Logger.getLogger(LanguageSourceSelector.class);
 	private Map<PartnerBadge, List<String>> selectedPartners = new HashMap<>();
 
 	/**
@@ -64,14 +64,14 @@ public class LanguageSourceSelector implements PartnerSelector {
 		}
 
 		if (selectedPartners.size() > 0) {
-			System.out.println("language-based source selection:");
+			logger.info("language-based source selection:");
 			for (Map.Entry<PartnerBadge, List<String>> entry : selectedPartners.entrySet()) {
 				StringBuilder info = new StringBuilder();
 				info.append("partner [" + entry.getKey().systemId + "] matching language(s):");
 				for (String language : entry.getValue()) {
 					info.append(" [" + language + "]");
 				}
-				System.out.println(info);
+				logger.info(info);
 			}
 		}
 

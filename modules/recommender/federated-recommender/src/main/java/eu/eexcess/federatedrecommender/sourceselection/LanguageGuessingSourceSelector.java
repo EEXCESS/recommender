@@ -25,6 +25,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.log4j.Logger;
+
 import eu.eexcess.dataformats.PartnerBadge;
 import eu.eexcess.dataformats.userprofile.ContextKeyword;
 import eu.eexcess.dataformats.userprofile.SecureUserProfile;
@@ -33,6 +35,7 @@ import eu.eexcess.utils.LanguageGuesser;
 
 public class LanguageGuessingSourceSelector implements PartnerSelector {
 
+	private Logger logger = Logger.getLogger(LanguageGuessingSourceSelector.class);
 	private Map<PartnerBadge, List<String>> selectedPartners = new HashMap<>();
 
 	/**
@@ -57,14 +60,14 @@ public class LanguageGuessingSourceSelector implements PartnerSelector {
 		}
 
 		if (selectedPartners.size() > 0) {
-			System.out.println("context-keywords-based source selection:");
+			logger.info("context-keywords-based source selection:");
 			for (Map.Entry<PartnerBadge, List<String>> entry : selectedPartners.entrySet()) {
 				StringBuilder info = new StringBuilder();
 				info.append("partner [" + entry.getKey().systemId + "] matching language:");
 				for (String language : entry.getValue()) {
 					info.append(" [" + language + "]");
 				}
-				System.out.println(info);
+				logger.info(info);
 			}
 		}
 
