@@ -26,11 +26,9 @@ package eu.eexcess.federatedrecommender.sourceselection;
 import java.util.List;
 
 import eu.eexcess.dataformats.PartnerBadge;
-import eu.eexcess.dataformats.userprofile.ContextKeyword;
 import eu.eexcess.dataformats.userprofile.Language;
 import eu.eexcess.dataformats.userprofile.SecureUserProfile;
 import eu.eexcess.federatedrecommender.interfaces.PartnerSelector;
-import eu.eexcess.utils.LanguageGuesser;
 
 /**
  * @author Raoul Rubien
@@ -38,15 +36,14 @@ import eu.eexcess.utils.LanguageGuesser;
 public class LanguageSourceSelector implements PartnerSelector {
 
 	/**
-	 * Selects partners according to language matches. Languages may be
-	 * specified in the user profile. If no language is specified, it will be
-	 * guessed from the context keywords.
+	 * Selects partners according to language matches.
 	 * 
 	 * @return the same userProfile with eventually added sources if
 	 *         (userProfile.partnerList.size() <= 0)
 	 */
 	@Override
 	public SecureUserProfile sourceSelect(SecureUserProfile userProfile, List<PartnerBadge> partners) {
+		// don't touch if already selected
 		if (userProfile.partnerList.size() <= 0) {
 			// query language(s) are specified in user profile
 			if (userProfile.languages.size() > 0) {
@@ -56,24 +53,8 @@ public class LanguageSourceSelector implements PartnerSelector {
 					collectPartnersOnLanguageMatch(userLanguage, partners, userProfile.partnerList);
 				}
 			}
-			// no query language(s) are specified; try to guess
-			else {
-				String textFragment = joinContextKeywords(userProfile.contextKeywords);
-				String userLanguage = LanguageGuesser.getInstance().guessLanguage(textFragment);
-				collectPartnersOnLanguageMatch(userLanguage, partners, userProfile.partnerList);
-			}
 		}
 		return userProfile;
-	}
-
-	private String joinContextKeywords(List<ContextKeyword> contextKeywords) {
-		StringBuilder builder = new StringBuilder();
-
-		for (ContextKeyword keyword : contextKeywords) {
-			builder.append(keyword.text + " ");
-		}
-
-		return builder.toString().trim();
 	}
 
 	/**

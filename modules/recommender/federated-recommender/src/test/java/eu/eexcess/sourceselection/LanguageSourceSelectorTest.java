@@ -37,7 +37,7 @@ import eu.eexcess.dataformats.userprofile.SecureUserProfile;
 import eu.eexcess.federatedrecommender.interfaces.PartnerSelector;
 import eu.eexcess.federatedrecommender.sourceselection.LanguageSourceSelector;
 
-public class LanguageSourceSelectionTest {
+public class LanguageSourceSelectorTest {
 
 	@Test
 	public void languageSourceSelector_sourceSelect_expectOneSelection() {
@@ -107,63 +107,5 @@ public class LanguageSourceSelectionTest {
 		assertEquals(1, userProfile.partnerList.size());
 		assertSame(userProfile, refinedUserProfile);
 		assertTrue(userProfile.partnerList.contains(pb));
-	}
-
-	@Test
-	public void languageSourceSelector_sourceSelect_withNoPreselectedLanguages_expectDELanguageToBeGuessed() {
-
-		PartnerBadge germanPartner = new PartnerBadge();
-		germanPartner.setLanguageContent(Arrays.asList(new String[] { "de" }));
-
-		PartnerBadge frenchPartner = new PartnerBadge();
-		frenchPartner.setLanguageContent(Arrays.asList(new String[] { "fr" }));
-
-		PartnerBadge englishPartner = new PartnerBadge();
-		englishPartner.setLanguageContent(Arrays.asList(new String[] { "en" }));
-
-		List<PartnerBadge> partners = new ArrayList<>();
-		partners.add(germanPartner);
-		partners.add(frenchPartner);
-		partners.add(englishPartner);
-
-		SecureUserProfile userProfile = new SecureUserProfile();
-		userProfile.contextKeywords.addAll(Arrays.asList(new ContextKeyword[] { new ContextKeyword("das"),
-						new ContextKeyword("ist"), new ContextKeyword("ein"), new ContextKeyword("auto") }));
-
-		PartnerSelector selector = new LanguageSourceSelector();
-		SecureUserProfile refinedUserProfile = selector.sourceSelect(userProfile, partners);
-
-		assertEquals(1, userProfile.partnerList.size());
-		assertSame(userProfile, refinedUserProfile);
-		assertTrue(userProfile.partnerList.contains(germanPartner));
-	}
-
-	@Test
-	public void languageSourceSelector_sourceSelect_withNoPreselectedLanguages_expectENLanguageToBeGuessed() {
-
-		PartnerBadge germanPartner = new PartnerBadge();
-		germanPartner.setLanguageContent(Arrays.asList(new String[] { "de" }));
-
-		PartnerBadge frenchPartner = new PartnerBadge();
-		frenchPartner.setLanguageContent(Arrays.asList(new String[] { "fr" }));
-
-		PartnerBadge englishPartner = new PartnerBadge();
-		englishPartner.setLanguageContent(Arrays.asList(new String[] { "en" }));
-
-		List<PartnerBadge> partners = new ArrayList<>();
-		partners.add(germanPartner);
-		partners.add(frenchPartner);
-		partners.add(englishPartner);
-
-		SecureUserProfile userProfile = new SecureUserProfile();
-		userProfile.contextKeywords.addAll(Arrays.asList(new ContextKeyword[] { new ContextKeyword("this"),
-						new ContextKeyword("is"), new ContextKeyword("a"), new ContextKeyword("car") }));
-
-		PartnerSelector selector = new LanguageSourceSelector();
-		SecureUserProfile refinedUserProfile = selector.sourceSelect(userProfile, partners);
-
-		assertEquals(1, userProfile.partnerList.size());
-		assertSame(userProfile, refinedUserProfile);
-		assertTrue(userProfile.partnerList.contains(germanPartner));
 	}
 }
