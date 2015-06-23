@@ -320,7 +320,6 @@ public class PartnerConnector extends PartnerConnectorBase implements PartnerCon
 
 	        httpXMLResult = httpXMLResult.replaceAll("<ore:", "<ore");
 	        httpXMLResult = httpXMLResult.replaceAll("</ore:", "</ore");
-
 	        return XMLTools.convertStringToDocument(httpXMLResult);
 		}
 		catch (Exception e) {

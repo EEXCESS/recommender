@@ -23,7 +23,12 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 package eu.eexcess.federatedrecommender.sourceselection;
 
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+
+import org.apache.log4j.Logger;
 
 import eu.eexcess.dataformats.PartnerBadge;
 import eu.eexcess.dataformats.userprofile.Language;
@@ -34,6 +39,9 @@ import eu.eexcess.federatedrecommender.interfaces.PartnerSelector;
  * @author Raoul Rubien
  */
 public class LanguageSourceSelector implements PartnerSelector {
+
+	private Logger logger = Logger.getLogger(LanguageSourceSelector.class);
+	private Map<PartnerBadge, List<String>> selectedPartners = new HashMap<>();
 
 	/**
 	 * Selects partners according to language matches.
@@ -54,6 +62,19 @@ public class LanguageSourceSelector implements PartnerSelector {
 				}
 			}
 		}
+
+		if (selectedPartners.size() > 0) {
+			logger.info("language-based source selection:");
+			for (Map.Entry<PartnerBadge, List<String>> entry : selectedPartners.entrySet()) {
+				StringBuilder info = new StringBuilder();
+				info.append("partner [" + entry.getKey().systemId + "] matching language(s):");
+				for (String language : entry.getValue()) {
+					info.append(" [" + language + "]");
+				}
+				logger.info(info);
+			}
+		}
+
 		return userProfile;
 	}
 
@@ -76,6 +97,10 @@ public class LanguageSourceSelector implements PartnerSelector {
 					if (false == partnerConnectorList.contains(partner)) {
 						partnerConnectorList.add(partner);
 					}
+					if (!selectedPartners.containsKey(partner)) {
+						selectedPartners.put(partner, new ArrayList<String>());
+					}
+					selectedPartners.get(partner).add(language);
 				}
 			}
 		}

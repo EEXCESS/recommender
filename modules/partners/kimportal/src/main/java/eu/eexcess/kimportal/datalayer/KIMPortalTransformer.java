@@ -39,8 +39,10 @@ public class KIMPortalTransformer extends Transformer{
 	@Override
 	protected Result postProcessResult(Document orgPartnerResult, Result result, QuerySolution querySol) {
 //		result.uri = "http://www.kim.bl.openinteractive.ch/sammlungen#"+ result.uri;
-		if (result.previewImage != null && !result.previewImage.isEmpty())
+		if (result.previewImage != null && !result.previewImage.isEmpty()) {
 			result.previewImage = result.previewImage.replace("kgapi.bl.ch/edm/", "kgapi.bl.ch/");
+			result.mediaType ="IMAGE";
+		}
 		return result;
 	}
 	

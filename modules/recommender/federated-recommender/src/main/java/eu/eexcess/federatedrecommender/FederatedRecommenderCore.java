@@ -84,6 +84,11 @@ public class FederatedRecommenderCore {
 	private ExecutorService threadPool;
 	private RecommenderStats recommenderStats;
 
+	/**
+	 * references to re-usable state-less source selection instances
+	 */
+	HashMap<String, PartnerSelector> statelessSourceSelectionInstances = new HashMap<>();
+	
 	private FederatedRecommenderCore(FederatedRecommenderConfiguration federatedRecConfiguration) {
 		threadPool = Executors.newFixedThreadPool(federatedRecConfiguration.numRecommenderThreads);
 		this.federatedRecConfiguration = federatedRecConfiguration;
@@ -435,14 +440,13 @@ public class FederatedRecommenderCore {
 		}
 
 		SecureUserProfile lastEvaluatedProfile = userProfile;
-		HashMap<String, PartnerSelector> instances = new HashMap<>();
 
 		for (String sourceSelectorClassName : selectorsClassNames) {
 			try {
-				PartnerSelector sourceSelector = instances.get(sourceSelectorClassName);
+				PartnerSelector sourceSelector = statelessSourceSelectionInstances.get(sourceSelectorClassName);
 				if (null == sourceSelector) {
 					sourceSelector = (PartnerSelector) Class.forName(sourceSelectorClassName).newInstance();
-					instances.put(sourceSelectorClassName, sourceSelector);
+					statelessSourceSelectionInstances.put(sourceSelectorClassName, sourceSelector);
 				}
 				lastEvaluatedProfile = sourceSelector.sourceSelect(lastEvaluatedProfile, getPartnerRegister()
 								.getPartners());

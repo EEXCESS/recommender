@@ -23,6 +23,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 package eu.eexcess.partnerrecommender.reference;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -370,9 +371,22 @@ public class PartnerRecommender implements PartnerRecommenderApi {
 		    try {
 				if ( eexcessProxyItem.get(key) instanceof JSONObject ) {
 					JSONObject myChild = (JSONObject) eexcessProxyItem.get(key);
-					String content = myChild.getString("content");
-//					eexcessProxyItem.remove(key);
-					eexcessProxyItem.put(key, content);
+					if (myChild.has("content")) {
+						String content = myChild.getString("content");
+	//					eexcessProxyItem.remove(key);
+						eexcessProxyItem.put(key, content);
+					}
+					Iterator<?> keysChild = myChild.keys();
+
+					ArrayList<String> keysToRemove = new ArrayList<String>(); 
+					while( keysChild.hasNext() ) {
+					    String keyChild = (String)keysChild.next();
+					    if (keyChild.toLowerCase().startsWith("xmlns"))
+					    	keysToRemove.add(keyChild);
+					}
+					for (String removeKey : keysToRemove) {
+				    	myChild.remove(removeKey);
+					}
 				}
 			} catch (JSONException e) {
 				// TODO Auto-generated catch block

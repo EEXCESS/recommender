@@ -28,6 +28,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import org.apache.commons.lang.StringUtils;
 import org.junit.Test;
 
 import eu.eexcess.dataformats.PartnerBadge;
@@ -44,14 +45,17 @@ public class LanguageGuessingSourceSelectorTest {
 		PartnerBadge germanPartner = new PartnerBadge();
 		germanPartner.setSystemId("german");
 		germanPartner.setLanguageContent(Arrays.asList(new String[] { "de" }));
+		germanPartner.systemId = StringUtils.join(germanPartner.getLanguageContent().toArray());
 
 		PartnerBadge frenchPartner = new PartnerBadge();
 		frenchPartner.setSystemId("frenchPartner");
 		frenchPartner.setLanguageContent(Arrays.asList(new String[] { "fr" }));
-
+		frenchPartner.systemId = StringUtils.join(frenchPartner.getLanguageContent().toArray());
+		
 		PartnerBadge englishPartner = new PartnerBadge();
 		englishPartner.setSystemId("englishPartner");
 		englishPartner.setLanguageContent(Arrays.asList(new String[] { "en" }));
+		englishPartner.systemId = StringUtils.join(englishPartner.getLanguageContent().toArray());
 
 		List<PartnerBadge> partners = new ArrayList<>();
 		partners.add(germanPartner);
@@ -67,7 +71,9 @@ public class LanguageGuessingSourceSelectorTest {
 
 		assertEquals(1, userProfile.partnerList.size());
 		assertSame(userProfile, refinedUserProfile);
-		assertTrue(userProfile.partnerList.contains(germanPartner));
+		assertTrue(userProfile.partnerList.get(0) == germanPartner);
+		assertTrue(userProfile.partnerList.get(0) != englishPartner);
+		assertTrue(userProfile.partnerList.get(0) != frenchPartner);
 	}
 
 	@Test
@@ -76,14 +82,17 @@ public class LanguageGuessingSourceSelectorTest {
 		PartnerBadge germanPartner = new PartnerBadge();
 		germanPartner.setSystemId("german");
 		germanPartner.setLanguageContent(Arrays.asList(new String[] { "de" }));
+			germanPartner.systemId = StringUtils.join(germanPartner.getLanguageContent().toArray());
 
 		PartnerBadge frenchPartner = new PartnerBadge();
 		frenchPartner.setSystemId("frenchPartner");
 		frenchPartner.setLanguageContent(Arrays.asList(new String[] { "fr" }));
+			frenchPartner.systemId = StringUtils.join(frenchPartner.getLanguageContent().toArray());
 
 		PartnerBadge englishPartner = new PartnerBadge();
 		englishPartner.setSystemId("englishPartner");
 		englishPartner.setLanguageContent(Arrays.asList(new String[] { "en" }));
+			englishPartner.systemId = StringUtils.join(englishPartner.getLanguageContent().toArray());
 
 		List<PartnerBadge> partners = new ArrayList<>();
 		partners.add(germanPartner);
@@ -99,7 +108,11 @@ public class LanguageGuessingSourceSelectorTest {
 
 		assertEquals(1, userProfile.partnerList.size());
 		assertSame(userProfile, refinedUserProfile);
-		assertTrue(userProfile.partnerList.contains(englishPartner));
+
+		assertTrue(userProfile.partnerList.get(0) != germanPartner);
+		assertTrue(userProfile.partnerList.get(0) == englishPartner);
+		assertTrue(userProfile.partnerList.get(0) != frenchPartner);
+
 	}
 
 }
