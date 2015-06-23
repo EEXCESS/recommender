@@ -7,7 +7,7 @@
 "partnersTimeout":7000,
 "numRecommenderThreads":30,
 "defaultPickerName":"eu.eexcess.federatedrecommender.picker.OccurrenceProbabilityPicker",
-"sourceSelectors" : ["eu.eexcess.federatedrecommender.sourceselection.LanguageSourceSelector"]
+"sourceSelectors" : []
 }
 
 
