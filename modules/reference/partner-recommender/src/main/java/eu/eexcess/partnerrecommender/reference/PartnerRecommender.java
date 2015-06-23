@@ -373,7 +373,6 @@ public class PartnerRecommender implements PartnerRecommenderApi {
 					JSONObject myChild = (JSONObject) eexcessProxyItem.get(key);
 					if (myChild.has("content")) {
 						String content = myChild.getString("content");
-	//					eexcessProxyItem.remove(key);
 						eexcessProxyItem.put(key, content);
 					}
 					Iterator<?> keysChild = myChild.keys();
@@ -387,6 +386,30 @@ public class PartnerRecommender implements PartnerRecommenderApi {
 					for (String removeKey : keysToRemove) {
 				    	myChild.remove(removeKey);
 					}
+				}
+				if ( eexcessProxyItem.get(key) instanceof JSONArray ) {
+					JSONArray myNewChilds = new JSONArray();
+					JSONArray myChilds = (JSONArray) eexcessProxyItem.get(key);
+					for (int i = 0; i < myChilds.length(); i++) {
+						JSONObject myChild = (JSONObject) myChilds.get(i);
+						if (myChild.has("content")) {
+							String content = myChild.getString("content");
+							myNewChilds.put(content);
+						}
+						Iterator<?> keysChild = myChild.keys();
+
+						ArrayList<String> keysToRemove = new ArrayList<String>(); 
+						while( keysChild.hasNext() ) {
+						    String keyChild = (String)keysChild.next();
+						    if (keyChild.toLowerCase().startsWith("xmlns"))
+						    	keysToRemove.add(keyChild);
+						}
+						for (String removeKey : keysToRemove) {
+					    	myChild.remove(removeKey);
+						}
+						
+					}
+					eexcessProxyItem.put(key, myNewChilds);
 				}
 			} catch (JSONException e) {
 				// TODO Auto-generated catch block
