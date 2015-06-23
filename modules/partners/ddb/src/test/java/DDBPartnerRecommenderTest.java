@@ -82,6 +82,23 @@ public class DDBPartnerRecommenderTest {
 	}
 	
 	@Test
+	public void detailCallrdfRDFProblem() {
+        ArrayList<String> ids = new ArrayList<String>();
+		ArrayList<String> uris = new ArrayList<String>();
+        ids.add("EHTG6PFMAXH6MU35PP6S44ODZ56DLT2F");
+        uris.add("https://www.deutsche-digitale-bibliothek.de/item/EHTG6PFMAXH6MU35PP6S44ODZ56DLT2F");
+        ids.add("FQOUN2TQHRXHXG2LKASNZ3VD432AFUIJ");
+        uris.add("https://www.deutsche-digitale-bibliothek.de/item/FQOUN2TQHRXHXG2LKASNZ3VD432AFUIJ");
+        DocumentBadgeList documentDetails = PartnerRecommenderTestHelper.getDetails(DEPLOYMENT_CONTEXT,	
+        		port, 
+        		PartnerRecommenderTestHelper.createParamsForPartnerRecommenderDetailCall(ids, uris, DATAPROVIDER));
+	    
+        assertNotNull(documentDetails);
+        assertTrue(documentDetails.documentBadges.size() > 0 );
+        assertEquals(2, documentDetails.documentBadges.size());
+
+	}
+	@Test
 	public void singleGoetheWithDetails() {
 		ArrayList<String> keywords = new ArrayList<String>();
 		keywords.add("goethe");
