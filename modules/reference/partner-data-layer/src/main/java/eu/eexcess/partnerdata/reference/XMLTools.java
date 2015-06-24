@@ -57,6 +57,10 @@ public class XMLTools {
 	
 	
 	public static String writeModel(Model model) {
+		model.setNsPrefix("wgs84", "http://www.w3.org/2003/01/geo/wgs84-pos/");
+		model.setNsPrefix("dbpedia", "http://dbpedia.org/ontology/");
+		model.setNsPrefix("freebase", "http://www.freebase.com/");
+		model.setNsPrefix("Schema", "http://schema.org/");
 		String syntax = "RDF/XML-ABBREV"; 
 		StringWriter out = new StringWriter();
 		model.write(out, syntax);

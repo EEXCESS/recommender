@@ -28,6 +28,7 @@ import eu.eexcess.config.PartnerConfiguration;
 import eu.eexcess.partnerdata.reference.PartnerdataLogger;
 import eu.eexcess.partnerdata.reference.PartnerdataTracer;
 import eu.eexcess.partnerdata.reference.PartnerdataTracer.FILETYPE;
+import eu.eexcess.partnerdata.reference.enrichment.EnrichmentResult.EnrichmentSource;
 
 
 public class GeoNames extends EnrichmentServiceBase {
@@ -55,7 +56,7 @@ public class GeoNames extends EnrichmentServiceBase {
 			if (searchResult.getToponyms().size()>0)
 			{
 				Toponym topo=searchResult.getToponyms().get(0);
-				EnrichmentResult result = new EnrichmentResult();
+				EnrichmentResult result = new EnrichmentResult(EnrichmentSource.GEONAMES);
 				String word = "";
 				if (topo.getName() != null && !topo.getName().isEmpty())
 					word += topo.getName();
@@ -69,6 +70,8 @@ public class GeoNames extends EnrichmentServiceBase {
 				}
 				result.setWord(word);
 				result.setUri("http://www.geonames.org/" + topo.getGeoNameId());
+				result.setLatitude(topo.getLatitude());
+				result.setLongitude(topo.getLongitude());
 				resultSet.add(result);
 				
 				/*

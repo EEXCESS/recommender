@@ -22,14 +22,13 @@ import java.util.Set;
 
 import eu.eexcess.config.PartnerConfiguration;
 import eu.eexcess.partnerdata.reference.PartnerdataLogger;
+import eu.eexcess.partnerdata.reference.enrichment.EnrichmentResult.EnrichmentSource;
 
 public class EnrichmentServicesProxy {
 	
 	protected PartnerConfiguration partnerConfig;
 	protected WordFilter wordFilter;
 	
-	private boolean useFreebase = false;
-
 	public EnrichmentServicesProxy(PartnerConfiguration config)
 	{
 		this.partnerConfig = config;
@@ -42,17 +41,23 @@ public class EnrichmentServicesProxy {
 		Set<EnrichmentResult> enrichmentResults = new HashSet<EnrichmentResult>();
 		
 		
-		FreeBase freebase = new FreeBase(this.partnerConfig);
 		GeoNames geonames = new GeoNames(this.partnerConfig);
 		DbpediaSpotlight dbpediaSpotlight = new DbpediaSpotlight(partnerConfig);
 		Set<DbpediaSpotlightResult> dbpediaSpotlightResults = dbpediaSpotlight.searchDbpediaSpotlight(text, logger);
 		for (Iterator<DbpediaSpotlightResult> iterator = dbpediaSpotlightResults.iterator(); iterator.hasNext();) {
 			DbpediaSpotlightResult dbpediaSpotlightResult = (DbpediaSpotlightResult) iterator.next();
-			EnrichmentResult enrichmentResult = new EnrichmentResult();
+			EnrichmentResult enrichmentResult = new EnrichmentResult(EnrichmentSource.DBPEDIA);
 			enrichmentResult.setWord(dbpediaSpotlightResult.getName());
 			enrichmentResult.setUri(dbpediaSpotlightResult.getURI());
-			if (dbpediaSpotlightResult.types != null && !dbpediaSpotlightResult.types.isEmpty() )
-				enrichmentResult.setType(dbpediaSpotlightResult.types.get(0));
+			if (dbpediaSpotlightResult.types != null && !dbpediaSpotlightResult.types.isEmpty() ) {
+				enrichmentResult.setTypes(dbpediaSpotlightResult.getAllConcepts());
+				enrichmentResult.setType(enrichmentResult.getTypes().get(0));
+				if (enrichmentResult.isTypeGeographicResource())
+				{
+					Set<EnrichmentResult> responseGeonames = geonames.getLocationHierarchy(enrichmentResult.getWord(), logger);
+					enrichmentResults.addAll(responseGeonames);
+				}
+			}
 			enrichmentResults.add(enrichmentResult);
 		}
 		
