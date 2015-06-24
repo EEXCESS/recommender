@@ -415,6 +415,7 @@ public class PartnerRecommender implements PartnerRecommenderApi {
 							for (String removeKey : keysToRemove) {
 						    	myChild.remove(removeKey);
 							}
+							myNewChilds.put(myChild);
 						}
 						
 					}
