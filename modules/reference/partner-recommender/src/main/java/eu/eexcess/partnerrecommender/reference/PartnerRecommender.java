@@ -111,10 +111,11 @@ public class PartnerRecommender implements PartnerRecommenderApi {
 					}
         	
         	ResultList nativeResult = partnerConnector.queryPartnerNative(currentPartnerConfiguration, userProfile, partnerdataLogger);
-        	if (nativeResult != null) {
+        	String finalFormulatedQuery = PartnerConfigurationCache.CONFIG.getQueryGenerator(currentPartnerConfiguration.queryGeneratorClass).toQuery(userProfile);
+			if (nativeResult != null) {
         		  long endCallPartnerApi = System.currentTimeMillis();
-        		  nativeResult.setResultStats(new ResultStats(PartnerConfigurationCache.CONFIG.getQueryGenerator(currentPartnerConfiguration.queryGeneratorClass).toQuery(userProfile),endCallPartnerApi-startCallPartnerApi,0,0,0,nativeResult.totalResults));
-                
+        		  nativeResult.setResultStats(new ResultStats(finalFormulatedQuery,endCallPartnerApi-startCallPartnerApi,0,0,0,nativeResult.totalResults));
+                addQueryToResultDocuments(nativeResult, finalFormulatedQuery);
         		return nativeResult;
         	}
             
@@ -163,7 +164,8 @@ public class PartnerRecommender implements PartnerRecommenderApi {
             long endTransform2 = System.currentTimeMillis();
             log.log(Level.INFO,"Call Parnter Api:"+(endCallPartnerApi-startCallPartnerApi)+"ms; First Transformation:"+(endTransform1-startTransform1)+"ms; Second Transformation:"+(endTransform2-startTransform2)+"ms");
             //TODO: refactor the next line!
-            recommendations.setResultStats(new ResultStats(PartnerConfigurationCache.CONFIG.getQueryGenerator(currentPartnerConfiguration.queryGeneratorClass).toQuery(userProfile),endCallPartnerApi-startCallPartnerApi,endTransform1-startTransform1,endTransform2-startTransform2,0,recommendations.totalResults));
+            recommendations.setResultStats(new ResultStats(finalFormulatedQuery,endCallPartnerApi-startCallPartnerApi,endTransform1-startTransform1,endTransform2-startTransform2,0,recommendations.totalResults));
+            addQueryToResultDocuments(recommendations, finalFormulatedQuery);
             PartnerdataTracer.dumpFile(this.getClass(), PartnerRecommender.partnerConfiguration, recommendations, "partner-recommender-results", PartnerdataTracer.FILETYPE.XML, partnerdataLogger);
             return recommendations;
             
@@ -172,6 +174,17 @@ public class PartnerRecommender implements PartnerRecommenderApi {
             throw new IOException("Partner system is not working correctly ", e);
         }
     }
+    /**
+     *  Adds the generating query to each document in the resultlist
+     * @param resultList
+     * @param finalFormulatedQuery
+     */
+	private void addQueryToResultDocuments(ResultList resultList,
+			String finalFormulatedQuery) {
+		for (Result resultDocument : resultList.results) {
+			resultDocument.generatingQuery=finalFormulatedQuery;
+		}
+	}
     /**
      * Fetch the details of the documents.
      * @returns list of DocumentBadges including the details
