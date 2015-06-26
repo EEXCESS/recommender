@@ -18,6 +18,7 @@ package eu.eexcess.kimportal.datalayer;
 
 import javax.xml.xpath.XPath;
 import javax.xml.xpath.XPathConstants;
+import javax.xml.xpath.XPathExpressionException;
 import javax.xml.xpath.XPathFactory;
 
 import org.w3c.dom.Document;
@@ -46,8 +47,25 @@ public class KIMPortalTransformer extends Transformer{
 		return result;
 	}
 	
-	
+	protected Document postTransformationResultsDetail(Document orgPartnerResults, Document transformedResults) {
+		XPath xPath = XPathFactory.newInstance().newXPath();
+		NodeList nodes;
+			try {
+				nodes = (NodeList) xPath.compile("//Country") .evaluate(transformedResults.getDocumentElement(), XPathConstants.NODESET);
+				if (nodes.getLength() > 0 )
+					nodes.item(0).setNodeValue("Hi mom!");
+				
+			} catch (XPathExpressionException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 
+			
+		return transformedResults;
+	}
+
+	
+	
 	@Override
 	public Document preProcessTransform(Document input, PartnerdataLogger logger)
 			throws EEXCESSDataTransformationException {
@@ -71,9 +89,6 @@ public class KIMPortalTransformer extends Transformer{
 								if (field.getAttributes().getNamedItem("name").getNodeValue().equalsIgnoreCase("uuid"))
 								{
 									Element eexcessURI = input.createElement("eexcessURI");
-									
-									
-									
 									if (field.getNodeType() == Node.ELEMENT_NODE) {
 										NodeList fieldChilds = field.getChildNodes();
 										if(fieldChilds != null && fieldChilds.getLength() > 0) {
@@ -84,10 +99,41 @@ public class KIMPortalTransformer extends Transformer{
 											}
 										}
 									}
-									
-									
-									
-									
+								}
+							}
+						}
+					}
+				
+					if (field.getNodeName().equalsIgnoreCase("arr"))
+					{
+						if (field.hasAttributes() ){
+							if (field.getAttributes().getNamedItem("name") != null)
+							{
+								if (field.getAttributes().getNamedItem("name").getNodeValue().equalsIgnoreCase("ort_s_herstellung"))
+								{
+									Element eexcessOrt = input.createElement("ort_s_herstellung_EEXCESS");
+									if (field.getNodeType() == Node.ELEMENT_NODE) {
+										NodeList fieldChilds = field.getChildNodes();
+										if(fieldChilds != null && fieldChilds.getLength() > 0) {
+											for(int k = 0 ; k < fieldChilds.getLength();k++) {
+												
+											
+												if (fieldChilds.item(k).getNodeType() == Node.ELEMENT_NODE) {
+													NodeList fieldChildsChilds = fieldChilds.item(k).getChildNodes();
+													if(fieldChildsChilds != null && fieldChildsChilds.getLength() > 0) {
+														for(int k2 = 0 ; k2 < fieldChildsChilds.getLength();k2++) {
+															Node fieldChildsChild = fieldChildsChilds.item(k2);
+															String newOrt = fieldChildsChild.getNodeValue();
+															if (newOrt.contains(">>"))
+																newOrt = newOrt.substring(0,newOrt.indexOf(">>"));
+															eexcessOrt.appendChild(input.createTextNode(newOrt));
+															field.getParentNode().appendChild(eexcessOrt);
+														}
+													}
+												}
+											}
+										}
+									}
 								}
 							}
 						}
@@ -101,7 +147,11 @@ public class KIMPortalTransformer extends Transformer{
 		return input;
 	}
 
-
+	@Override
+	public Document preProcessTransformDetail(Document input, PartnerdataLogger logger)
+			throws EEXCESSDataTransformationException {
+		return preProcessTransform(input, logger);
+	}
 
 	@Override
 	protected ResultList postProcessResults(Document orgPartnerResult, ResultList resultList) {

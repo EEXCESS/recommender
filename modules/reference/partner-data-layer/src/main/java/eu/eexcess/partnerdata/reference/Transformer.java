@@ -227,7 +227,7 @@ public class Transformer implements ITransformer{
 		try {
 			transformer.transform(source, domResult);
 			Document result = (Document)domResult.getNode();
-			result = this.postTransformationResults(input, result);
+			result = this.postTransformationResultsDetail(input, result);
 			PartnerdataTracer.debugTrace(this.partnerConfig, "after transform-detail:\n" + XMLTools.getStringFromDocument(result));
 			PartnerdataTracer.dumpFile(this.getClass(), partnerConfig, result, "done-transform-detail", logger); 
 			return result;
@@ -348,12 +348,7 @@ public class Transformer implements ITransformer{
 				if (!edmPreview.toString().equalsIgnoreCase(xmlBase))
 					result.previewImage = edmPreview.toString();
 			}
-//			Literal oreCollectionName = querySol.getLiteral("oreCollectionName");
-//			if (oreCollectionName != null) {
-//				result.collectionName = oreCollectionName.toString();
-//			}
-			//result.rdf = extractRDFForOneObject(result, inputString);
-			// fillup empty values in the facets
+			// fillup empty values 
 			if (result.language == null ||
 				result.language.isEmpty() ||
 				result.language.trim().isEmpty() )
@@ -392,7 +387,6 @@ public class Transformer implements ITransformer{
 		}
 	
 		returnList.results = resultsList;
-//		returnList.resultsRDF = inputString;
 		returnList = postProcessResults(nativeResults, returnList);
 		return returnList ;
 	}
@@ -438,6 +432,10 @@ public class Transformer implements ITransformer{
 		return transformedResults;
 	}
 	
+	protected Document postTransformationResultsDetail(Document orgPartnerResults, Document transformedResults) {
+		return transformedResults;
+	}
+
 	protected ResultList postProcessResults(Document orgPartnerResult, ResultList resultList) {
 		return resultList;
 	}

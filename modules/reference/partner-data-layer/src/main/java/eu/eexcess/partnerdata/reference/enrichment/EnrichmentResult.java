@@ -16,15 +16,30 @@ limitations under the License.
  */
 package eu.eexcess.partnerdata.reference.enrichment;
 
-public class EnrichmentResult {
+import java.util.ArrayList;
 
-	protected String enrichmentSource;
+public class EnrichmentResult {
+	public enum EnrichmentSource {
+	    GEONAMES, DBPEDIA 
+	}
+	
+	protected EnrichmentSource enrichmentSource;
+	
+	public EnrichmentResult(EnrichmentSource source) 
+	{
+		this.enrichmentSource = source;
+	}
+	
+	private EnrichmentResult()
+	{
+		
+	}
 	
 	public String getEnrichmentSource() {
-		return enrichmentSource;
+		return enrichmentSource.toString();
 	}
 
-	public void setEnrichmentSource(String enrichmentSource) {
+	public void setEnrichmentSource(EnrichmentSource enrichmentSource) {
 		this.enrichmentSource = enrichmentSource;
 	}
 
@@ -35,9 +50,44 @@ public class EnrichmentResult {
 	protected String uri;
 	
 	protected String type;
+	
+	protected double longitude;
+	protected double latitude;
+	
+	public double getLongitude() {
+		return longitude;
+	}
+
+	public void setLongitude(double longitude) {
+		this.longitude = longitude;
+	}
+
+	public double getLatitude() {
+		return latitude;
+	}
+
+	public void setLatitude(double latitude) {
+		this.latitude = latitude;
+	}
+
+	protected ArrayList<String> types = new ArrayList<String>();
 
 	public String getType() {
 		return type;
+	}
+
+	public ArrayList<String> getTypes() {
+		return types;
+	}
+
+	public void setTypes(ArrayList<String> types) {
+		this.types = types;
+	}
+
+	public void addType(String type) {
+		if (this.types == null)
+			this.types = new ArrayList<String>();
+		this.types.add(type);
 	}
 
 	public void setType(String type) {
@@ -68,5 +118,39 @@ public class EnrichmentResult {
 		this.uri = uri;
 	}
 	
+	private boolean containsInList(String search, String[] list)
+	{
+		search = search.toLowerCase();
+		for(String s : list)
+		    if(s.toLowerCase().contains(search)) return true;
+		return false;		
+	}
+	
+	String[] geoConcepts = new String[] {
+			"http://dbpedia.org/ontology/City", 
+			"http://dbpedia.org/ontology/Settlement", 
+			"http://dbpedia.org/ontology/PopulatedPlace", 
+			"http://dbpedia.org/ontology/Place", 
+			"http://www.freebase.com/location/location", 
+			"http://www.freebase.com/location", 
+			"http://www.freebase.com/people/place_of_interment", 
+			"http://www.freebase.com/people", 
+			"http://www.freebase.com/location/statistical_region", 
+			"http://www.freebase.com/location/dated_location",
+			"http://www.freebase.com/location/de_city", 
+			"http://www.freebase.com/location/de_urban_district", 
+			"http://www.freebase.com/location/citytown", 
+			"http://schema.org/Place", 
+			"http://schema.org/City"
+	};
+	
+	public boolean isTypeGeographicResource()
+	{
+		for (int i = 0; i < getTypes().size(); i++) {
+			if (this.containsInList(getTypes().get(i), this.geoConcepts))
+				return true;
+		}
+		return false;
+	}
 	
 }

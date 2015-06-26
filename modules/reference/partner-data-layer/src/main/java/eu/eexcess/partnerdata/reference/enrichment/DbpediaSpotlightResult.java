@@ -25,6 +25,7 @@ public class DbpediaSpotlightResult {
 	private static final String CONCEPT_SCHEMA = "Schema:";
 	protected String uri;
 	protected String name;
+	
 	protected ArrayList<String> types;
 	
 	public ArrayList<String> getTypes() {
@@ -77,6 +78,16 @@ public class DbpediaSpotlightResult {
 		}
 		return false;
 	}
+	
+	
+	public ArrayList<String> getAllConcepts()
+	{
+		ArrayList<String> ret = new ArrayList<String>();
+		ret.addAll(getDBpediaConcept());
+		ret.addAll(getFreebaseConcept());
+		ret.addAll(getSchemaConcept());
+		return ret;
+	}
 
 	public ArrayList<String> getDBpediaConcept()
 	{
@@ -103,7 +114,7 @@ public class DbpediaSpotlightResult {
 				String type = this.types.get(i);
 				if (type.startsWith(CONCEPT_FREEBASE))
 				{
-					ret.add(type.replace(CONCEPT_FREEBASE, ""));
+					ret.add(type.replace(CONCEPT_FREEBASE, "http://www.freebase.com"));
 				}
 			}
 		}
@@ -119,7 +130,7 @@ public class DbpediaSpotlightResult {
 				String type = this.types.get(i);
 				if (type.startsWith(CONCEPT_SCHEMA))
 				{
-					ret.add(type.replace(CONCEPT_SCHEMA, ""));
+					ret.add(type.replace(CONCEPT_SCHEMA, "http://schema.org/"));
 				}
 			}
 		}

@@ -22,7 +22,6 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URLEncoder;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.Set;
 
 import org.apache.http.HttpResponse;
@@ -34,8 +33,6 @@ import org.apache.http.impl.client.HttpClientBuilder;
 
 import eu.eexcess.config.PartnerConfiguration;
 import eu.eexcess.partnerdata.reference.PartnerdataLogger;
-import eu.eexcess.partnerdata.reference.PartnerdataTracer;
-import eu.eexcess.partnerdata.reference.PartnerdataTracer.FILETYPE;
 
 
 public class DbpediaSpotlight extends EnrichmentServiceBase{
@@ -94,7 +91,7 @@ public class DbpediaSpotlight extends EnrichmentServiceBase{
 		return false;
 
 	}
-
+/*
 	@Deprecated
 	public Set<DbpediaSpotlightResult> selectEntitiesDbpediaSpotlight(Set<String> words, PartnerdataLogger logger)
 	{
@@ -159,7 +156,7 @@ public class DbpediaSpotlight extends EnrichmentServiceBase{
 		}
 		
 	}
-	
+	*/
 
 	public Set<DbpediaSpotlightResult> searchDbpediaSpotlight(String text, PartnerdataLogger logger)
 	{
@@ -177,7 +174,7 @@ public class DbpediaSpotlight extends EnrichmentServiceBase{
 			request.setHeader("Accept", "text/xml");
 
 			HttpResponse response = client.execute(request);
-	        PartnerdataTracer.dumpFile(DbpediaSpotlight.class, this.partnerConfig, response.getEntity().toString(), "dbpedia-response", FILETYPE.XML, logger);
+//	        PartnerdataTracer.dumpFile(DbpediaSpotlight.class, this.partnerConfig, response.getEntity().getContent(), "dbpedia-response", FILETYPE.XML, logger);
 
 			entities.addAll(XmlParser.getEntitiesDbpediaSpotlightAnnotateXML(this.partnerConfig, response.getEntity().getContent(), logger));
 			return entities;

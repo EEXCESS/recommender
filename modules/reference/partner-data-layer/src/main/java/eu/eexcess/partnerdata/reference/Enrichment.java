@@ -112,7 +112,7 @@ public class Enrichment implements IEnrichment{
 			if (proxyTitle != null) {
 				result.title = proxyTitle.toString();
 				enriching(modelEnriched, enrichedEEXCESSProxyItem, proxyTitle, 
-						"http://purl.org/dc/elements/1.1/subject", logger);
+						 logger);
 						
 			}
 
@@ -120,7 +120,7 @@ public class Enrichment implements IEnrichment{
 			if (proxyDescription != null) {
 				result.description = proxyDescription.toString();
 				enriching(modelEnriched, enrichedEEXCESSProxyItem, proxyDescription, 
-						"http://purl.org/dc/elements/1.1/subject", logger);
+						logger);
 
 			}
 			/*
@@ -161,7 +161,8 @@ public class Enrichment implements IEnrichment{
 
 	protected void enriching(OntModel modelEnriched,
 			Resource enrichedEEXCESSProxyItem, Literal proxyTitle,
-			String propertyEnriched, PartnerdataLogger logger) {
+			PartnerdataLogger logger) {
+		
 		Set<EnrichmentResult> enriched = services.enrich(proxyTitle.toString(), logger);
 		for (Iterator<EnrichmentResult> iterator = enriched.iterator(); iterator.hasNext();) {
 			EnrichmentResult enrichmentResult = (EnrichmentResult) iterator.next();
@@ -169,6 +170,27 @@ public class Enrichment implements IEnrichment{
 					enrichmentResult.getWord() != null && 
 					!enrichmentResult.getWord().trim().isEmpty())
 			{
+				if (enrichmentResult.getLatitude() != 0 && enrichmentResult.getLongitude() != 0)
+				{
+					Resource enrichedResourceType = modelEnriched.getResource(enrichmentResult.getUri());
+					modelEnriched.add(
+							modelEnriched.createStatement(enrichedEEXCESSProxyItem,
+									modelEnriched.getProperty("http://www.w3.org/2003/01/geo/wgs84-pos/Point"),
+									enrichedResourceType
+						));
+					Literal literalLat = modelEnriched.createLiteral(""+enrichmentResult.getLatitude());
+					modelEnriched.add(
+							modelEnriched.createStatement(enrichedResourceType,
+									modelEnriched.getProperty("http://www.w3.org/2003/01/geo/wgs84-pos/lat"),
+									literalLat
+						));
+					Literal literalLong = modelEnriched.createLiteral(""+enrichmentResult.getLongitude());
+					modelEnriched.add(
+							modelEnriched.createStatement(enrichedResourceType,
+									modelEnriched.getProperty("http://www.w3.org/2003/01/geo/wgs84-pos/long"),
+									literalLong
+						));
+				}
 				if ( enrichmentResult.getUri() == null || 
 						enrichmentResult.getUri().trim().isEmpty()) {
 					Literal literal = null;
@@ -179,7 +201,7 @@ public class Enrichment implements IEnrichment{
 
 					modelEnriched.add(
 							modelEnriched.createStatement(enrichedEEXCESSProxyItem,
-									modelEnriched.getProperty(propertyEnriched),
+									modelEnriched.getProperty("http://purl.org/dc/elements/1.1/subject"),
 									literal
 						));
 				} else {
@@ -192,20 +214,27 @@ public class Enrichment implements IEnrichment{
 
 					modelEnriched.add(
 							modelEnriched.createStatement(enrichedEEXCESSProxyItem,
-									modelEnriched.getProperty(propertyEnriched),
-									enrichedResourceType)); //addProperty(RDFS.label, literal)
+									modelEnriched.getProperty("http://purl.org/dc/elements/1.1/subject"),
+									enrichedResourceType)); 
 					modelEnriched.add(
 							modelEnriched.createStatement(enrichedResourceType,
 									RDFS.label,
-									literal)); //addProperty(RDFS.label, literal)
+									literal)); 
+//					
+//					if (enrichmentResult.getType() != null && !enrichmentResult.getType().isEmpty()) {
+//						modelEnriched.add(
+//								modelEnriched.createStatement(enrichedResourceType,
+//										RDF.type,
+//										modelEnriched.getResource(enrichmentResult.getType()))); 
+//					}
 					
 					if (enrichmentResult.getType() != null && !enrichmentResult.getType().isEmpty()) {
 						modelEnriched.add(
 								modelEnriched.createStatement(enrichedResourceType,
 										RDF.type,
-										modelEnriched.getResource(enrichmentResult.getType()))); //addProperty(RDFS.label, literal)
-//						enrichedResourceType.addProperty(RDF.type, enrichmentResult.getType())));
+										modelEnriched.getResource(enrichmentResult.getType()))); 
 					}
+
 
 				}
 

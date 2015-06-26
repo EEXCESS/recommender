@@ -166,6 +166,22 @@ public class KIMPortalPartnerRecommenderTest {
 	}
 
 	@Test
+	public void detailCallWithCountry() {
+        ArrayList<String> ids = new ArrayList<String>();
+		ArrayList<String> uris = new ArrayList<String>();
+        ids.add("E1.6889");
+        uris.add("http://www.kim.bl.openinteractive.ch/sammlungen#7c627767-4511-144e-8c29-c8a475aca2ac");
+        DocumentBadgeList documentDetails = PartnerRecommenderTestHelper.getDetails(DEPLOYMENT_CONTEXT,	
+        		port, 
+        		PartnerRecommenderTestHelper.createParamsForPartnerRecommenderDetailCall(ids, uris, DATAPROVIDER));
+	    
+        assertNotNull(documentDetails);
+        assertTrue(documentDetails.documentBadges.size() > 0 );
+        assertEquals(1, documentDetails.documentBadges.size());
+
+	}
+
+	@Test
 	public void detailCallForEnrichmentSingleObject() {
         ArrayList<String> ids = new ArrayList<String>();
 		ArrayList<String> uris = new ArrayList<String>();
