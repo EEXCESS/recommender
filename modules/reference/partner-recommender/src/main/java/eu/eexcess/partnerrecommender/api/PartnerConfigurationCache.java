@@ -66,15 +66,7 @@ public enum PartnerConfigurationCache {
 
 		ObjectMapper mapper = new ObjectMapper();
 		try {
-			/*
-			 * Read global partner key file
-			 */
-			String eexcessPartnerKeyFile =System.getenv("EEXCESS_PARTNER_KEY_FILE");
-			logger.log(Level.INFO,"Reading Api Keys from:" + eexcessPartnerKeyFile);
-			if(eexcessPartnerKeyFile==null)
-			logger.log(Level.INFO,"Environment variable \"EEXCESS_PARTNER_KEY_FILE\" for "+partnerConfiguration.systemId+" has to be set");
-			PartnerApiKeys partnerKeys = mapper.readValue(new File(eexcessPartnerKeyFile), PartnerApiKeys.class);
-		
+			
 			/*
 			 * Read partner configuration file
 			 */
@@ -83,6 +75,19 @@ public enum PartnerConfigurationCache {
 			mapper.configure(JsonParser.Feature.ALLOW_COMMENTS, true);
 			partnerConfiguration = mapper.readValue(
 					new File(resource.getFile()), PartnerConfiguration.class);
+			/*
+			 * Read global partner key file
+			 */
+			String eexcessPartnerKeyFile =System.getenv("EEXCESS_PARTNER_KEY_FILE");
+			logger.log(Level.INFO,"Reading Api Keys from: " + eexcessPartnerKeyFile);
+			PartnerApiKeys partnerKeys = null;
+			if(eexcessPartnerKeyFile==null){
+			logger.log(Level.INFO,"Environment variable \"EEXCESS_PARTNER_KEY_FILE\" for "+partnerConfiguration.systemId+" has to be set");
+			}else{
+				partnerKeys= mapper.readValue(new File(eexcessPartnerKeyFile), PartnerApiKeys.class);
+			}
+		
+			if(partnerKeys!=null)
 			for (PartnerConfiguration badge : partnerKeys.getPartners()) {
 					if(partnerConfiguration.systemId.equals(badge.systemId)){
 						if(badge.apiKey!=null){
