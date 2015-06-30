@@ -49,6 +49,8 @@ public class LanguageGuessingSourceSelector implements PartnerSelector {
 	@Override
 	public SecureUserProfile sourceSelect(SecureUserProfile userProfile, List<PartnerBadge> partners) {
 
+		selectedPartners.clear();
+
 		// don't touch if already selected
 		if (userProfile.partnerList.size() <= 0) {
 			// no query language(s) are specified; try to guess
@@ -56,7 +58,15 @@ public class LanguageGuessingSourceSelector implements PartnerSelector {
 				String textFragment = joinContextKeywords(userProfile.contextKeywords);
 				String userLanguage = LanguageGuesser.getInstance().guessLanguage(textFragment);
 				collectPartnersOnLanguageMatch(userLanguage, partners, userProfile.partnerList);
+			} else {
+				logger.info("refusing to guess languages due to [" + userProfile.languages.size()
+								+ "] already specified languages");
+				return userProfile;
 			}
+		} else {
+			logger.info("refusing to select partners due to [" + userProfile.partnerList.size()
+							+ "] prevoiously selected partners");
+			return userProfile;
 		}
 
 		if (selectedPartners.size() > 0) {
@@ -69,6 +79,8 @@ public class LanguageGuessingSourceSelector implements PartnerSelector {
 				}
 				logger.info(info);
 			}
+		} else {
+			logger.info("unsuccessfull partner selection");
 		}
 
 		return userProfile;
@@ -97,6 +109,10 @@ public class LanguageGuessingSourceSelector implements PartnerSelector {
 	 */
 	private void collectPartnersOnLanguageMatch(String language, List<PartnerBadge> partners,
 					List<PartnerBadge> partnerConnectorList) {
+
+		if (null == language) {
+			return;
+		}
 		for (PartnerBadge partner : partners) {
 			for (String partnerLanguage : partner.getLanguageContent()) {
 				if (partnerLanguage.compareTo(language) == 0) {

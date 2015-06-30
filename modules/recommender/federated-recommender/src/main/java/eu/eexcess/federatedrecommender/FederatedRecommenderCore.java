@@ -88,7 +88,7 @@ public class FederatedRecommenderCore {
 	 * references to re-usable state-less source selection instances
 	 */
 	HashMap<String, PartnerSelector> statelessSourceSelectionInstances = new HashMap<>();
-	
+
 	private FederatedRecommenderCore(FederatedRecommenderConfiguration federatedRecConfiguration) {
 		threadPool = Executors.newFixedThreadPool(federatedRecConfiguration.numRecommenderThreads);
 		this.federatedRecConfiguration = federatedRecConfiguration;
@@ -305,7 +305,7 @@ public class FederatedRecommenderCore {
 	public ResultList generateFederatedRecommendation(SecureUserProfile secureUserProfile) throws FileNotFoundException {
 		// ResultList result = new ResultList();
 		ResultList resultList = null;
-		if(federatedRecConfiguration.sourceSelectors!=null){
+		if (federatedRecConfiguration.sourceSelectors != null) {
 			ArrayList<String> sourceSelectors = new ArrayList<String>();
 			Collections.addAll(sourceSelectors, federatedRecConfiguration.sourceSelectors);
 			secureUserProfile = sourceSelection(secureUserProfile, sourceSelectors);
@@ -446,6 +446,8 @@ public class FederatedRecommenderCore {
 				PartnerSelector sourceSelector = statelessSourceSelectionInstances.get(sourceSelectorClassName);
 				if (null == sourceSelector) {
 					sourceSelector = (PartnerSelector) Class.forName(sourceSelectorClassName).newInstance();
+					logger.info("instanciating new source selection [" + sourceSelector.getClass().getSimpleName()
+									+ "]");
 					statelessSourceSelectionInstances.put(sourceSelectorClassName, sourceSelector);
 				}
 				lastEvaluatedProfile = sourceSelector.sourceSelect(lastEvaluatedProfile, getPartnerRegister()
