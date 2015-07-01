@@ -10,12 +10,10 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.stream.JsonReader;
 
-import edu.stanford.nlp.tagger.maxent.MaxentTagger;
 import eu.eexcess.dataformats.userprofile.Interest;
 import eu.eexcess.federatedrecommender.evaluation.csv.EvaluationQueryList;
 import eu.eexcess.federatedrecommender.evaluation.evaluation.EvaluationQuery;
 
-import org.apache.tika.exception.TikaException;
 import org.apache.tika.language.LanguageIdentifier;
 public class SchloettQuerySelection {
 	final static String directoryPath = "/home/hziak/Datasets/EExcess/schloett-datacollection-785deb288e36/";

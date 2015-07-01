@@ -1,7 +1,5 @@
 package eu.eexcess.federatedrecommender.evaluation.blockranking;
 
-import static org.junit.Assert.*;
-
 import org.junit.Test;
 
 import eu.eexcess.dataformats.userprofile.ContextKeyword;

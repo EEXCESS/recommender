@@ -50,7 +50,7 @@ import eu.eexcess.dataformats.userprofile.SecureUserProfileEvaluation;
 import eu.eexcess.federatedrecommender.evaluation.evaluation.EvaluationQuery;
 
 public class CSVResultCreation {
-	public final static String directoryPath = "/media/hziak/494c2958-e0d7-4ac1-8337-2c3240b5b5b2/home/hziak/Datasets/EExcess/schloett-datacollection-785deb288e36/";
+	public final static String directoryPath = "/home/hziak/Datasets/EEXCESS/evaluationBlockRanking/";
 
 	private final WebResource wRBlock;
 
@@ -90,7 +90,7 @@ public class CSVResultCreation {
 			SecureUserProfileEvaluation secureUserProfileEvaluation = convertEvalQueryToSecUserProfile(query);
 			String blockResultString = getQueryResultCSV(getwRBlock(),
 					secureUserProfileEvaluation);
-			String defaultResultString = null; // Todo: Get default string from
+			String defaultResultString = ""; // Todo: Get default string from
 												// get queyr resultCSV
 			// defaultResultString = getQueryResultCSV(getwRDefault(),
 			// secureUserProfileEvaluation);
@@ -134,6 +134,7 @@ public class CSVResultCreation {
 		return queries;
 	}
 
+	@SuppressWarnings("unused")
 	private void writeQueriesToQueryCSVFile(EvaluationQueryList queries) {
 		FileWriter ofqw = null;
 		try {
@@ -195,6 +196,7 @@ public class CSVResultCreation {
 		return profile;
 	}
 
+	@SuppressWarnings("deprecation")
 	private static String getQueryResultCSV(WebResource wresource,
 			SecureUserProfileEvaluation secureUserProfileEvaluation) {
 		StringBuilder builder = new StringBuilder();

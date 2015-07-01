@@ -24,6 +24,7 @@ import java.util.logging.Logger;
 
 import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.analysis.en.EnglishAnalyzer;
+import org.apache.lucene.index.DirectoryReader;
 import org.apache.lucene.index.IndexReader;
 import org.apache.lucene.index.IndexableField;
 import org.apache.lucene.queryparser.classic.MultiFieldQueryParser;
@@ -55,12 +56,14 @@ import eu.eexcess.partnerrecommender.reference.PartnerConnectorBase;
  */
 public class PartnerConnector extends PartnerConnectorBase implements PartnerConnectorApi {
 
+	@SuppressWarnings("unused")
 	private static final Logger logger = Logger.getLogger(PartnerConnector.class.getName());
 
 
 	private static final String[] FIELD_CONTENTS = {"sectionText","sectionTitle","title"};
 
 	
+	@SuppressWarnings("unused")
 	private PartnerConfiguration partnerConfig = null;
 
 
@@ -80,7 +83,7 @@ public class PartnerConnector extends PartnerConnectorBase implements PartnerCon
 		Analyzer analyzer = new EnglishAnalyzer();
 		File directoryPath = new File(PartnerConfigurationCache.CONFIG.getPartnerConfiguration().searchEndpoint);
 		Directory directory = FSDirectory.open(directoryPath );
-		IndexReader indexReader = IndexReader.open(directory );
+		IndexReader indexReader = DirectoryReader.open(directory );
 		IndexSearcher indexSearcher = new IndexSearcher(indexReader);
 		QueryParser queryParser = new MultiFieldQueryParser(FIELD_CONTENTS,analyzer);
 		queryParser.setDefaultOperator(Operator.AND);

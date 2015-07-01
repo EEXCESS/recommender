@@ -135,7 +135,7 @@ private static final String searchRequest = "http://eexcess-demo.know-center.tug
 	public void singleOnceSingleThreadedQuery() {
 		final MassivFedRecQueryTest test = new MassivFedRecQueryTest();
 		List<String> queryList = test.getQueryList();
-		HashMap<String,Future<String>> futures = new HashMap<String,Future<String>>();
+//		HashMap<String,Future<String>> futures = new HashMap<String,Future<String>>();
 			for (final String string : queryList) {
 				
 						long start = System.currentTimeMillis();

@@ -197,6 +197,7 @@ public class EvaluationManager {
 	 * write query file when cache is warmed and all queries that returned zero
 	 * results for one of the partners are removed
 	 */
+	@SuppressWarnings("unused")
 	private void writeNewQueryFile() {
 		String jsonString = gson.toJson(evalQueries);
 

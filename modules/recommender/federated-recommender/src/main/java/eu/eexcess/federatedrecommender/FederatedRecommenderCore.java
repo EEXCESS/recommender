@@ -87,8 +87,8 @@ public class FederatedRecommenderCore {
 	/**
 	 * references to re-usable state-less source selection instances
 	 */
-	HashMap<String, PartnerSelector> statelessSourceSelectionInstances = new HashMap<>();
-	
+	private HashMap<String, Object> statelessClassInstances = new HashMap<>();
+
 	private FederatedRecommenderCore(FederatedRecommenderConfiguration federatedRecConfiguration) {
 		threadPool = Executors.newFixedThreadPool(federatedRecConfiguration.numRecommenderThreads);
 		this.federatedRecConfiguration = federatedRecConfiguration;
@@ -407,6 +407,7 @@ public class FederatedRecommenderCore {
 	 * @param userProfile
 	 * @return
 	 */
+	@SuppressWarnings("unchecked")
 	public SecureUserProfile addQueryExpansionTerms(SecureUserProfileEvaluation userProfile, String qEClass) {
 		SecureUserProfileDecomposer<SecureUserProfile, SecureUserProfile> sUPDecomposer = null;
 		try {
@@ -443,10 +444,10 @@ public class FederatedRecommenderCore {
 
 		for (String sourceSelectorClassName : selectorsClassNames) {
 			try {
-				PartnerSelector sourceSelector = statelessSourceSelectionInstances.get(sourceSelectorClassName);
+				PartnerSelector sourceSelector = (PartnerSelector) statelessClassInstances.get(sourceSelectorClassName);
 				if (null == sourceSelector) {
 					sourceSelector = (PartnerSelector) Class.forName(sourceSelectorClassName).newInstance();
-					statelessSourceSelectionInstances.put(sourceSelectorClassName, sourceSelector);
+					statelessClassInstances.put(sourceSelectorClassName, sourceSelector);
 				}
 				lastEvaluatedProfile = sourceSelector.sourceSelect(lastEvaluatedProfile, getPartnerRegister()
 								.getPartners());
@@ -616,7 +617,12 @@ public class FederatedRecommenderCore {
 		ResultList resultList;
 		PartnersFederatedRecommendationsPicker pFRPicker = null;
 		try {
-			pFRPicker = (PartnersFederatedRecommendationsPicker) Class.forName(pickerName).newInstance();
+			Object newInstance = statelessClassInstances.get(pickerName);
+			if(newInstance==null) {
+				newInstance = Class.forName(pickerName).newInstance();
+				statelessClassInstances.put(pickerName,newInstance);
+			}
+			pFRPicker = (PartnersFederatedRecommendationsPicker) newInstance;
 		} catch (InstantiationException | IllegalAccessException | ClassNotFoundException e) {
 			logger.log(Level.SEVERE, "Could not get Picker from Class: " + pickerName, e);
 			throw new FederatedRecommenderException("Could not get Picker from Class: " + pickerName, e);

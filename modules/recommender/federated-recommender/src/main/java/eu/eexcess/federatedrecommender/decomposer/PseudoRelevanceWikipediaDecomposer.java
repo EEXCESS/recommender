@@ -61,7 +61,7 @@ public class PseudoRelevanceWikipediaDecomposer implements SecureUserProfileDeco
 	/**
 	 * number of terms to be expanded in {@link #decompose(SecureUserProfile)}
 	 */
-	private int numTermsToExpand = 5;
+	private int numTermsToExpand = 10;
 
 	/**
 	 * 

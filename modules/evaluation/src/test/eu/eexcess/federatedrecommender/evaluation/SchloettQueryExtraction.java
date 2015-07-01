@@ -32,6 +32,7 @@ public class SchloettQueryExtraction {
 		
 	}
 
+	@SuppressWarnings("deprecation")
 	public static void main(String[] args) throws JsonGenerationException {
 		SchloettQueryExtraction extraction = new SchloettQueryExtraction();
 		File folder = new File(
@@ -77,6 +78,7 @@ public class SchloettQueryExtraction {
 	
 	}
 
+	@SuppressWarnings({ "unchecked", "rawtypes" })
 	private static List<SchloettQueryFormat> parseQueryiesFile(
 			List<File> files, SchloettQueryExtraction extraction) throws JsonSyntaxException, IOException {
 		FileReader freader;

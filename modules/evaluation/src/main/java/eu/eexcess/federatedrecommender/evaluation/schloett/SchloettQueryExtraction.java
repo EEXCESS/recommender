@@ -115,17 +115,20 @@ public class SchloettQueryExtraction {
 			"zusatzinformationen", "zur", "zune", "zuerst", "wort", "um",
 			"trainer", "suchanfragen", "sehen", "neueste", "letzten",
 			"klicken", "ipod", "iphone", "ipad", "installieren",
-			"impressumwebseite", "italiano" };
+			"impressumwebseite", "italiano",
+			"wikibooks","svenska","suomi","srpskohrvatski","srpski","nynorsk","melayu","x6","x4","x2","x18","svenska","suomi","subjects","share","ru","s","svenska","russisch","portugiesisch","polnisch","letzten","italienisch","klicken","impressumwebsei","russisch","portugiesisch","polnisch","italienisch","suchanfragen","magyar","languages","italiano","indonesia","hrvatski","galego","euskara","esperanto","encyclopedia","eesti","deutsch","dansk","commons","bosanski",
+			"twitter","term","publisher","websites",};
 	static List<String> blackList;
 
 	public SchloettQueryExtraction() {
 		blackList = Arrays.asList(blackListTerms);
 	}
 
+	@SuppressWarnings("deprecation")
 	public static void main(String[] args) throws JsonGenerationException {
 		SchloettQueryExtraction extraction = new SchloettQueryExtraction();
 		File folder = new File(
-				"/home/hziak/Datasets/EExcess/schloett-datacollection-785deb288e36/");
+				"/home/hziak/Datasets/EEXCESS/schloett-datacollection-785deb288e36/");
 		File[] listOfFiles = folder.listFiles();
 		List<File> files = getQueryFile(listOfFiles);
 
@@ -168,7 +171,7 @@ public class SchloettQueryExtraction {
 		ObjectMapper mapper = new ObjectMapper();
 
 		try {
-			File file = new File(folder.getCanonicalFile() + "/queriesEn.json");
+			File file = new File(folder.getCanonicalFile() + "/queriesEn-final.json");
 			mapper.defaultPrettyPrintingWriter().writeValue(file, evalQueries);
 			System.out.println("Writing to file:" + file.getAbsolutePath());
 		} catch (IOException e) {
@@ -313,7 +316,7 @@ public class SchloettQueryExtraction {
 
 											try {
 												IndexWriterConfig config = new IndexWriterConfig(
-														Version.LUCENE_4_10_0,
+														Version.LATEST,
 														analyzer);
 												writer = new IndexWriter(dir,
 														config);
@@ -445,6 +448,7 @@ public class SchloettQueryExtraction {
 			return query;
 		}
 
+		@SuppressWarnings("unused")
 		public SchloettQueryFormat getHistory() {
 			return history;
 		}
