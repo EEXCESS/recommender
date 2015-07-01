@@ -305,7 +305,7 @@ public class FederatedRecommenderCore {
 	public ResultList generateFederatedRecommendation(SecureUserProfile secureUserProfile) throws FileNotFoundException {
 		// ResultList result = new ResultList();
 		ResultList resultList = null;
-		if(federatedRecConfiguration.sourceSelectors!=null){
+		if (federatedRecConfiguration.sourceSelectors != null) {
 			ArrayList<String> sourceSelectors = new ArrayList<String>();
 			Collections.addAll(sourceSelectors, federatedRecConfiguration.sourceSelectors);
 			secureUserProfile = sourceSelection(secureUserProfile, sourceSelectors);
@@ -447,6 +447,8 @@ public class FederatedRecommenderCore {
 				PartnerSelector sourceSelector = (PartnerSelector) statelessClassInstances.get(sourceSelectorClassName);
 				if (null == sourceSelector) {
 					sourceSelector = (PartnerSelector) Class.forName(sourceSelectorClassName).newInstance();
+					logger.info("instanciating new source selection [" + sourceSelector.getClass().getSimpleName()
+									+ "]");
 					statelessClassInstances.put(sourceSelectorClassName, sourceSelector);
 				}
 				lastEvaluatedProfile = sourceSelector.sourceSelect(lastEvaluatedProfile, getPartnerRegister()

@@ -51,6 +51,7 @@ public class LanguageSourceSelector implements PartnerSelector {
 	 */
 	@Override
 	public SecureUserProfile sourceSelect(SecureUserProfile userProfile, List<PartnerBadge> partners) {
+		selectedPartners.clear();
 		// don't touch if already selected
 		if (userProfile.partnerList.size() <= 0) {
 			// query language(s) are specified in user profile
@@ -60,7 +61,14 @@ public class LanguageSourceSelector implements PartnerSelector {
 					String userLanguage = userLangDetails.iso2;
 					collectPartnersOnLanguageMatch(userLanguage, partners, userProfile.partnerList);
 				}
+			} else {
+				logger.info("refusing to select partners due to no specified languages");
+				return userProfile;
 			}
+		} else {
+			logger.info("refusing to select partners due to [" + userProfile.partnerList.size()
+							+ "] prevoiously selected partners");
+			return userProfile;
 		}
 
 		if (selectedPartners.size() > 0) {
@@ -73,6 +81,8 @@ public class LanguageSourceSelector implements PartnerSelector {
 				}
 				logger.info(info);
 			}
+		} else {
+			logger.info("unsuccessfull partner selection");
 		}
 
 		return userProfile;
@@ -91,6 +101,9 @@ public class LanguageSourceSelector implements PartnerSelector {
 	 */
 	private void collectPartnersOnLanguageMatch(String language, List<PartnerBadge> partners,
 					List<PartnerBadge> partnerConnectorList) {
+		if (null == language) {
+			return;
+		}
 		for (PartnerBadge partner : partners) {
 			for (String partnerLanguage : partner.getLanguageContent()) {
 				if (partnerLanguage.compareTo(language) == 0) {
