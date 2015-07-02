@@ -42,6 +42,7 @@ import java.util.logging.Logger;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
+import eu.eexcess.dataformats.evaluation.EvaluationResultList;
 import eu.eexcess.dataformats.evaluation.EvaluationResultLists;
 import eu.eexcess.dataformats.userprofile.ContextKeyword;
 import eu.eexcess.dataformats.userprofile.SecureUserProfile;
@@ -169,13 +170,13 @@ public class EvaluationManager {
 	public void addResultToQueryCache(SecureUserProfileEvaluation query,
 			EvaluationResultLists evaluationResultLists) {
 		boolean resultSaved = true;
-//		for (EvaluationResultList result : evaluationResultLists.results) {
-//			if (result.totalResults == 0) {
-//				resultSaved = false;
-//
-//				break;
-//			}
-//		}
+		for (EvaluationResultList result : evaluationResultLists.results) {
+			if (result.totalResults == 0) {
+				resultSaved = false;
+
+				break;
+			}
+		}
 		if (resultSaved)
 			queryCache.put(query, evaluationResultLists);
 		else {
