@@ -205,7 +205,7 @@ public class KIMPortalPartnerRecommenderTest {
         uris.add("http://www.kim.bl.openinteractive.ch/sammlungen#aa0b5559-6e86-46db-9785-0329ab800956");
         DocumentBadgeList documentDetails = PartnerRecommenderTestHelper.getDetailsJSON(DEPLOYMENT_CONTEXT,	
         		port, 
-        		PartnerRecommenderTestHelper.createParamsForPartnerRecommenderDetailCall(ids, uris, DATAPROVIDER));
+        		PartnerRecommenderTestHelper.createParamsForPartnerRecommenderDetailCallJSON(ids, uris, DATAPROVIDER));
 	    
         assertNotNull(documentDetails);
         assertTrue(documentDetails.documentBadges.size() > 0 );

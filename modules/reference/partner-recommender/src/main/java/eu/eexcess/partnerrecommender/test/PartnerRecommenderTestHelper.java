@@ -79,6 +79,37 @@ public class PartnerRecommenderTestHelper {
 		return params;
 	}
 
+	static public StringEntity createParamsForPartnerRecommenderDetailCallJSON(ArrayList<String> ids, ArrayList<String> uris, String provider)
+	{
+		/*
+		 {
+        "documentBadge":[
+        {
+            "id":"E1.6882",
+            "uri":"http://www.kim.bl.openinteractive.ch/sammlungen#f19e71ca-4dc6-48b8-858c-60a1710066f0",
+            "provider":"KIM.Portal"
+        },
+        {
+            "id":"E1.6880",
+            "uri":"http://www.kim.bl.openinteractive.ch/sammlungen#f04ae6c5-45fd-ff40-333c-f3b50dffbe3d",
+            "provider":"KIM.Portal"
+        }
+        ]
+	}
+
+		 */
+		StringEntity params = null;
+		String documentBadges = "{\"documentBadge\":[";
+		if (ids.size() != uris.size()) return null;
+		for (int i = 0; i < ids.size(); i++) {
+			if( i !=0 ) documentBadges += ",";
+			documentBadges +="{\"id\":\""+ids.get(i)+"\",\"uri\":\""+uris.get(i)+"\",\"provider\":\""+provider+"\"}";
+		}
+		documentBadges +="]}";
+		params = new StringEntity(documentBadges,"UTF-8");
+		return params;
+	}
+
 	static public ResultList parseResponse(String responseString) throws JAXBException {
 		JAXBContext jc = JAXBContext.newInstance(ResultList.class);
 
@@ -141,7 +172,8 @@ public class PartnerRecommenderTestHelper {
 	    try {
 
 			HttpPost request = new HttpPost("http://localhost:" +port + "/"+deploymentContext+"/partner/getDetails/");
-	        request.addHeader("content-type", "application/xml");
+	        request.addHeader("content-type", contentType);
+	        request.addHeader("accept", contentType);
 	        request.setEntity(params);
 	        HttpResponse response = httpClient.execute(request);
             String responseString = EntityUtils.toString(response.getEntity());
