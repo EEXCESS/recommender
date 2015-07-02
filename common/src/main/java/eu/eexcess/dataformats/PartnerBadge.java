@@ -18,7 +18,6 @@ package eu.eexcess.dataformats;
 
 import eu.eexcess.dataformats.result.ResultStats;
 
-import org.apache.commons.math3.stat.descriptive.moment.StandardDeviation;
 import org.codehaus.jackson.annotate.JsonIgnoreProperties;
 
 import javax.xml.bind.annotation.*;
@@ -196,7 +195,7 @@ public class PartnerBadge implements Serializable{
 //			setLongTimeResponseTime(respTime);
 		double[] values = new double[getLastResponseTimes().toArray().length];
 
-		StandardDeviation standartDeviation = new StandardDeviation();
+//		StandardDeviation standartDeviation = new StandardDeviation();
 		Object[] respTimes = getLastResponseTimes().toArray();
 		int count = 0;
 		for (Object long1 : respTimes) {

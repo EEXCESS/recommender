@@ -56,7 +56,7 @@ public class QuerySuggestionEffectivenessEvaluation {
 		WikipediaPreprocessedIndex wikipediaPreprocessedIndex = new WikipediaPreprocessedIndex(wikipediaIndexDir, locale);
 		
 		wikipediaPreprocessedIndex.forEachParsedArticle(new PreprocessedArticleCallback() {
-			@SuppressWarnings("unchecked")
+			@SuppressWarnings({ "unchecked", "unused" })
 			@Override
 			public void onArticle(String title, AnnotatedPlainText annotatedText, AnnotatedDocument annotatedDocument) {
 				Set<Itemset> itemsets = new HashSet<>();

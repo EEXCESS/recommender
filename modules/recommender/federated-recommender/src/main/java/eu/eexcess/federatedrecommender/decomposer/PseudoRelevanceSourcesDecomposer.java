@@ -106,8 +106,8 @@ public class PseudoRelevanceSourcesDecomposer implements
 		
 		Directory directory = new RAMDirectory();
 
-		Analyzer analyzer = new StopAnalyzer(Version.LUCENE_48);
-		IndexWriterConfig config = new IndexWriterConfig(Version.LUCENE_48,
+		Analyzer analyzer = new StopAnalyzer();
+		IndexWriterConfig config = new IndexWriterConfig(Version.LATEST,
 				analyzer);
 		IndexWriter writer = null;
 

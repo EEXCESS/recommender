@@ -37,6 +37,7 @@ public class FederatedRecommenderDocDetailsTest {
 		DocumentBadgeList documents = getDocs(fRC.getPartnerRegister().getPartners());
 		
 		DocumentBadgeList results =fRC.getDocumentDetails(documents );
+		System.out.println(results);
 	    
 	}
 

@@ -57,6 +57,8 @@ public class Result implements Serializable {
 	
 	@XmlElement(name = "licence")
 	public String licence;
+	@XmlElement(name = "generatingQuery")
+	public String generatingQuery;
 
 	@Override
 	public String toString() {

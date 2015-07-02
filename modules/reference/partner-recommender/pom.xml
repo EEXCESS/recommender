@@ -34,21 +34,13 @@
 	<description>Reference implementation to transform a EEXCESS secure user profile into Lucene search query.
     </description>
 	<dependencies>
-		<dependency>
-			<groupId>eu.eexcess</groupId>
-			<artifactId>eexcess-common</artifactId>
-			<version>${parent.version}</version>
-		</dependency>
+	
 		<dependency>
 			<groupId>eu.eexcess</groupId>
 			<artifactId>eexcess-reference-partner-data-layer</artifactId>
 			<version>${parent.version}</version>
 		</dependency>
-		<dependency>
-			<groupId>javax.mail</groupId>
-			<artifactId>mail</artifactId>
-			<version>1.4</version>
-		</dependency>
+	
 		<dependency>
 	<groupId>dom4j</groupId>
 	<artifactId>dom4j</artifactId>

@@ -140,7 +140,7 @@ public class PartnerRecommenderTestHelper {
 		return null;
 	}
 	
-	@SuppressWarnings({"resource", "deprecation"})
+	@SuppressWarnings({"resource"})
 	static public ResultList getRecommendations(String deploymentContext, int port,StringEntity params) {
 		
 		HttpClient httpClient = new DefaultHttpClient();
@@ -165,7 +165,7 @@ public class PartnerRecommenderTestHelper {
 		return resultList;
 	}
 
-	@SuppressWarnings({"resource", "deprecation"})
+	@SuppressWarnings({"resource"})
 	static protected DocumentBadgeList getDetails(String deploymentContext, int port,StringEntity params, String contentType) {
 		HttpClient httpClient = new DefaultHttpClient();
 		DocumentBadgeList decoumentBadges = null;
