@@ -87,7 +87,7 @@ public class FederatedRecommenderCore {
 	/**
 	 * references to re-usable state-less source selection instances
 	 */
-	private HashMap<String, Object> statelessClassInstances = new HashMap<>();
+	private Map<String, Object> statelessClassInstances = new HashMap<>();
 
 	private FederatedRecommenderCore(FederatedRecommenderConfiguration federatedRecConfiguration) {
 		threadPool = Executors.newFixedThreadPool(federatedRecConfiguration.numRecommenderThreads);
@@ -284,8 +284,7 @@ public class FederatedRecommenderCore {
 				else
 					for (PartnerBadge uBadge : secureUserProfile.protectedPartnerList) {
 						if (uBadge.partnerKey != null)
-							if (!uBadge.partnerKey.isEmpty())
-								if (partner.partnerKey.equals(uBadge.partnerKey)
+							if (!uBadge.partnerKey.isEmpty() && partner.partnerKey.equals(uBadge.partnerKey)
 												&& uBadge.getSystemId().equals(partner.getSystemId()))
 									return true;
 					}
@@ -303,16 +302,12 @@ public class FederatedRecommenderCore {
 	 * @return
 	 */
 	public ResultList generateFederatedRecommendation(SecureUserProfile secureUserProfile) throws FileNotFoundException {
-		// ResultList result = new ResultList();
 		ResultList resultList = null;
 		if (federatedRecConfiguration.sourceSelectors != null) {
 			ArrayList<String> sourceSelectors = new ArrayList<String>();
 			Collections.addAll(sourceSelectors, federatedRecConfiguration.sourceSelectors);
 			secureUserProfile = sourceSelection(secureUserProfile, sourceSelectors);
 		}
-		// SecureUserProfileDecomposer sUPDecomposer = null;
-		// sUPDecomposer = new
-		// SecureUserProfileDecomposer(federatedRecConfiguration,dbPediaSolrIndex);
 		try {
 			resultList = getAndAggregateResults(secureUserProfile, this.federatedRecConfiguration.defaultPickerName);
 		} catch (FederatedRecommenderException e) {
@@ -419,7 +414,7 @@ public class FederatedRecommenderCore {
 			logger.log(Level.WARNING, "Could not initalize query expansion algorithm", e);
 		}
 		if (sUPDecomposer == null)
-			return (SecureUserProfile) userProfile;
+			return userProfile;
 		return sUPDecomposer.decompose(userProfile);
 	}
 
@@ -434,9 +429,9 @@ public class FederatedRecommenderCore {
 	 *            class names of source selectors to be applied in same order
 	 * @return same userProfile but with changed partner list
 	 */
-	public SecureUserProfile sourceSelection(SecureUserProfile userProfile, ArrayList<String> selectorsClassNames) {
+	public SecureUserProfile sourceSelection(SecureUserProfile userProfile, List<String> selectorsClassNames) {
 
-		if (selectorsClassNames == null || selectorsClassNames.size() <= 0) {
+		if (selectorsClassNames == null || selectorsClassNames.isEmpty()) {
 			return userProfile;
 		}
 
@@ -514,18 +509,11 @@ public class FederatedRecommenderCore {
 						logger.log(Level.INFO, "Could not write into StatsDatabase: " + e.getMessage());
 					} finally {
 						db.commit();
-						// try {
-						// db.close();
-						// } catch (SQLException e) {
-						// logger.log(Level.WARNING, "Could not close Database",
-						// e);
-						// }
 					}
 				} else
 					logger.log(Level.INFO, "Could write into request statistics database");
 				PreparedStatement updateQ = db.getPreparedUpdateStatement(DatabaseQueryStats.QUERYLOG);
 				if (updateQ != null) {
-					// ('ID','SYSTEM_ID','QUERY','CALLTIME','FIRSTTRANSFORMATIONTIME','SECONDTRANSFORMATIONTIME','ENRICHMENTTIME','RESULTCOUNT')
 					for (ResultStats queryStats : partner.getLastQueries()) {
 						try {
 							updateQ.clearBatch();
@@ -570,8 +558,7 @@ public class FederatedRecommenderCore {
 		}
 
 		if (badge.partnerKey != null)
-			if (!badge.partnerKey.isEmpty())
-				if (badge.partnerKey.length() < 20)
+			if (!badge.partnerKey.isEmpty() && badge.partnerKey.length() < 20)
 					return "Partner Key is too short (<20)";
 
 		Database db = new Database(this.federatedRecConfiguration.statsLogDatabase, DatabaseQueryStats.values());
