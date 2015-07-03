@@ -10,6 +10,7 @@
   </description>
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+		 <sonar.language>java</sonar.language>
 	</properties>
 	<modules>
 		<module>common/</module>
@@ -87,6 +88,11 @@
 				<groupId>org.mortbay.jetty</groupId>
 				<artifactId>maven-jetty-plugin</artifactId>
 			</plugin>
+	  <plugin>
+       	<groupId>org.codehaus.sonar</groupId>
+	<artifactId>sonar-maven-plugin</artifactId>
+	<version>4.5.1</version>
+      </plugin>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-compiler-plugin</artifactId>

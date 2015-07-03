@@ -296,7 +296,7 @@ public class FederatedRecommenderCore {
     public ResultList generateFederatedRecommendation(SecureUserProfile secureUserProfile) throws FileNotFoundException {
         ResultList resultList = null;
         if (federatedRecConfiguration.sourceSelectors != null) {
-            ArrayList<String> sourceSelectors = new ArrayList<String>();
+            List<String> sourceSelectors = new ArrayList<String>();
             Collections.addAll(sourceSelectors, federatedRecConfiguration.sourceSelectors);
             secureUserProfile = sourceSelection(secureUserProfile, sourceSelectors);
         }
@@ -323,9 +323,7 @@ public class FederatedRecommenderCore {
             Future<DocumentBadgeList> future = threadPool.submit(new Callable<DocumentBadgeList>() {
                 @Override
                 public DocumentBadgeList call() throws Exception {
-
-                    DocumentBadgeList resultList = getDocsResult(partner, tmpClient, currentDocs);
-                    return resultList;
+                    return getDocsResult(partner, tmpClient, currentDocs);
                 }
 
                 /**
