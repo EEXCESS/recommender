@@ -16,7 +16,6 @@ limitations under the License.
  */
 package eu.eexcess.dataformats;
 
-
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.LinkedList;
@@ -64,12 +63,8 @@ public class PartnerBadge implements Serializable {
 	private String favIconURI;
 	@XmlElement(name = "partnerConnectorEndpoint")
 	private String partnerConnectorEndpoint;
-	@XmlElement(name = "wordnetPath")
-	private String wordnetPath;
-	@XmlElement(name = "wordnetDomainPath")
-	private String wordnetDomainPath;
 	@XmlElement(name = "domainContent")
-	private List<PartnerDomain> domainContent = new ArrayList<>();
+	private List<PartnerDomain> domainContent = new ArrayList<PartnerDomain>();
 	@XmlElement(name = "languageContent")
 	private List<String> languageContent = new ArrayList<String>();
 
@@ -79,22 +74,6 @@ public class PartnerBadge implements Serializable {
 
 	public void setShortTimeResponseTime(Long shortTimeResponseTime) {
 		this.shortTimeStats.shortTimeResponseTime = shortTimeResponseTime;
-	}
-
-	public String getWordnetPath() {
-		return wordnetPath;
-	}
-
-	public void setWordnetPath(String wordnetPath) {
-		this.wordnetPath = wordnetPath;
-	}
-
-	public String getWordnetDomainPath() {
-		return wordnetDomainPath;
-	}
-
-	public void setWordnetDomainPath(String wordnetDomainPath) {
-		this.wordnetDomainPath = wordnetDomainPath;
 	}
 
 	public List<PartnerDomain> getDomainContent() {

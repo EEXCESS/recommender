@@ -63,7 +63,7 @@ public class LanguageGuessingSourceSelectorTest {
 		userProfile.contextKeywords.addAll(Arrays.asList(new ContextKeyword[] { new ContextKeyword("das"),
 						new ContextKeyword("ist"), new ContextKeyword("ein"), new ContextKeyword("auto") }));
 
-		PartnerSelector selector = new LanguageGuessingSourceSelector();
+		PartnerSelector selector = new LanguageGuessingSourceSelector(null);
 		SecureUserProfile refinedUserProfile = selector.sourceSelect(userProfile, partners);
 
 		assertEquals(1, userProfile.partnerList.size());
@@ -97,7 +97,7 @@ public class LanguageGuessingSourceSelectorTest {
 		userProfile.contextKeywords.addAll(Arrays.asList(new ContextKeyword[] { new ContextKeyword("this"),
 						new ContextKeyword("is"), new ContextKeyword("a"), new ContextKeyword("car") }));
 
-		PartnerSelector selector = new LanguageGuessingSourceSelector();
+		PartnerSelector selector = new LanguageGuessingSourceSelector(null);
 		SecureUserProfile refinedUserProfile = selector.sourceSelect(userProfile, partners);
 
 		assertEquals(1, userProfile.partnerList.size());

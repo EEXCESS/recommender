@@ -30,6 +30,7 @@ import java.util.Map;
 
 import org.apache.log4j.Logger;
 
+import eu.eexcess.config.FederatedRecommenderConfiguration;
 import eu.eexcess.dataformats.PartnerBadge;
 import eu.eexcess.dataformats.userprofile.Language;
 import eu.eexcess.dataformats.userprofile.SecureUserProfile;
@@ -43,6 +44,9 @@ public class LanguageSourceSelector implements PartnerSelector {
 	private Logger logger = Logger.getLogger(LanguageSourceSelector.class);
 	private Map<PartnerBadge, List<String>> selectedPartners = new HashMap<>();
 
+	public LanguageSourceSelector(FederatedRecommenderConfiguration configuration) {
+	}
+	
 	/**
 	 * Selects partners according to language matches.
 	 * 
