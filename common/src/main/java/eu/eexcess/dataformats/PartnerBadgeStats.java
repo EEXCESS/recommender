@@ -17,8 +17,9 @@ limitations under the License.
 package eu.eexcess.dataformats;
 
 import java.io.Serializable;
+import java.util.ArrayDeque;
+import java.util.Deque;
 import java.util.LinkedList;
-import java.util.Stack;
 
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlTransient;
@@ -48,7 +49,7 @@ public class PartnerBadgeStats implements Serializable {
 
 	//Begin response time
 	@XmlTransient
-	public Stack<Long> lastResponseTimes= new Stack<Long>() ;
+	public Deque<Long> lastResponseTimes= new ArrayDeque<Long>() ;
 	@XmlElement(name="shortTimeResponseTimes")
 	public Long shortTimeResponseTime;
 	
