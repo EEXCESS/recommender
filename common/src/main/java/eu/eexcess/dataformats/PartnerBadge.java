@@ -16,119 +16,155 @@ limitations under the License.
  */
 package eu.eexcess.dataformats;
 
-import eu.eexcess.dataformats.result.ResultStats;
-
-import org.apache.commons.math3.stat.descriptive.moment.StandardDeviation;
-import org.codehaus.jackson.annotate.JsonIgnoreProperties;
-
-import javax.xml.bind.annotation.*;
-
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Stack;
 
+import javax.xml.bind.annotation.XmlAccessType;
+import javax.xml.bind.annotation.XmlAccessorType;
+import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlElementWrapper;
+import javax.xml.bind.annotation.XmlRootElement;
+
+import org.codehaus.jackson.annotate.JsonIgnoreProperties;
 import org.codehaus.jackson.map.annotate.JsonSerialize;
+
+import eu.eexcess.dataformats.result.ResultStats;
 
 @XmlRootElement(name = "eexcess-partner-badge")
 @XmlAccessorType(XmlAccessType.FIELD)
 @JsonIgnoreProperties(ignoreUnknown = true)
-@JsonSerialize(include=JsonSerialize.Inclusion.NON_NULL) 
-public class PartnerBadge implements Serializable{
-	
+@JsonSerialize(include = JsonSerialize.Inclusion.NON_NULL)
+public class PartnerBadge implements Serializable {
+
 	private static final long serialVersionUID = -6411801334911587483L;
 
-	
-	@XmlElement(name="systemId")
-    public String systemId;
-	
-	@XmlElement(name="queryGeneratorClass")
-	public String queryGeneratorClass; // = LuceneQueryGenerator.class.getName();   
-    
-	@XmlElement(name="partnerKey") //has to be the same value than in SecureUserProfile
-    public String partnerKey;
-	@XmlElement(name="description")
-    private String description;
-	@XmlElement(name="favIconURI")
-    private String favIconURI;
-	@XmlElement(name="partnerConnectorEndpoint")
-    private String partnerConnectorEndpoint;
-	
-	@XmlElement(name="shortTimeStats", required=false) 
+	@XmlElement(name = "systemId")
+	public String systemId;
+	@XmlElement(name = "queryGeneratorClass")
+	public String queryGeneratorClass; // =LuceneQueryGenerator.class.getName();
+	@XmlElement(name = "partnerKey")
+	// has to be the same value than in SecureUserProfile
+	public String partnerKey;
+	// TODO: Statistics should be moved somewhere else! (Specially the logic for
+	// it)
+	@XmlElement(name = "shortTimeStats", required = false)
 	public PartnerBadgeStats shortTimeStats = new PartnerBadgeStats();
-	//TODO: Statistics should be moved somewere else! (Specially the logic for it)
-
-	@XmlElement(name="longTimeStats", required=false)
-	public PartnerBadgeStats longTimeStats = new PartnerBadgeStats();	
+	@XmlElement(name = "longTimeStats", required = false)
+	public PartnerBadgeStats longTimeStats = new PartnerBadgeStats();
+	@XmlElement(name = "tag")
+	@XmlElementWrapper(name = "tags")
+	private List<String> tags;
+	@XmlElement(name = "description")
+	private String description;
+	@XmlElement(name = "favIconURI")
+	private String favIconURI;
+	@XmlElement(name = "partnerConnectorEndpoint")
+	private String partnerConnectorEndpoint;
+	@XmlElement(name = "wordnetPath")
+	private String wordnetPath;
+	@XmlElement(name = "wordnetDomainPath")
+	private String wordnetDomainPath;
+	@XmlElement(name = "domainContent")
+	private List<PartnerDomain> domainContent = new ArrayList<>();
+	@XmlElement(name = "languageContent")
+	private List<String> languageContent = new ArrayList<String>();
 
 	public Long getShortTimeResponseTime() {
 		return shortTimeStats.shortTimeResponseTime;
 	}
+
 	public void setShortTimeResponseTime(Long shortTimeResponseTime) {
 		this.shortTimeStats.shortTimeResponseTime = shortTimeResponseTime;
 	}
 
-	@XmlElement(name="tag")
-	@XmlElementWrapper(name="tags")
-    private List<String> tags;
+	public String getWordnetPath() {
+		return wordnetPath;
+	}
 
+	public void setWordnetPath(String wordnetPath) {
+		this.wordnetPath = wordnetPath;
+	}
 
-    @XmlElement(name="languageContent")
-    private List<String> languageContent = new ArrayList<String>();
-    public List<String> getLanguageContent() {
-        return languageContent;
-    }
-    public void setLanguageContent(List<String> languages) {
-        this.languageContent = languages;
-    }
-	
+	public String getWordnetDomainPath() {
+		return wordnetDomainPath;
+	}
+
+	public void setWordnetDomainPath(String wordnetDomainPath) {
+		this.wordnetDomainPath = wordnetDomainPath;
+	}
+
+	public List<PartnerDomain> getDomainContent() {
+		return domainContent;
+	}
+
+	public void setDomainContent(List<PartnerDomain> domainContent) {
+		this.domainContent = domainContent;
+	}
+
+	public List<String> getLanguageContent() {
+		return languageContent;
+	}
+
+	public void setLanguageContent(List<String> languages) {
+		this.languageContent = languages;
+	}
+
 	public String getPartnerConnectorEndpoint() {
 		return partnerConnectorEndpoint;
 	}
+
 	public void setPartnerConnectorEndpoint(String endpoint) {
 		this.partnerConnectorEndpoint = endpoint;
 	}
+
 	public String getDescription() {
 		return description;
 	}
+
 	public void setDescription(String description) {
 		this.description = description;
 	}
+
 	public String getSystemId() {
 		return systemId;
 	}
+
 	public void setSystemId(String systemId) {
 		this.systemId = systemId;
 	}
+
 	public List<String> getTags() {
 		return tags;
 	}
+
 	public void setTags(List<String> tags) {
 		this.tags = tags;
 	}
+
 	public Stack<Long> getLastResponseTimes() {
 		return this.shortTimeStats.lastResponseTimes;
 	}
+
 	public void pushLastResponseTimes(Long lastResponseTime) {
-		while(this.shortTimeStats.lastResponseTimes.size()>50)
+		while (this.shortTimeStats.lastResponseTimes.size() > 50)
 			this.shortTimeStats.lastResponseTimes.pop();
 		this.shortTimeStats.lastResponseTimes.push(lastResponseTime);
 	}
+
 	@Override
 	public int hashCode() {
 		final int prime = 31;
 		int result = 1;
-		result = prime * result
-				+ ((description == null) ? 0 : description.hashCode());
-		result = prime * result
-				+ ((partnerConnectorEndpoint == null) ? 0 : partnerConnectorEndpoint.hashCode());
-		result = prime * result
-				+ ((partnerKey == null) ? 0 : partnerKey.hashCode());
-		result = prime * result
-				+ ((systemId == null) ? 0 : systemId.hashCode());
+		result = prime * result + ((description == null) ? 0 : description.hashCode());
+		result = prime * result + ((partnerConnectorEndpoint == null) ? 0 : partnerConnectorEndpoint.hashCode());
+		result = prime * result + ((partnerKey == null) ? 0 : partnerKey.hashCode());
+		result = prime * result + ((systemId == null) ? 0 : systemId.hashCode());
 		return result;
 	}
+
 	@Override
 	public boolean equals(Object obj) {
 		if (this == obj)
@@ -160,19 +196,22 @@ public class PartnerBadge implements Serializable{
 			return false;
 		return true;
 	}
+
 	@Override
 	public String toString() {
-		return "PartnerBadge [systemId=" + systemId + ", partnerKey="
-				+ partnerKey + ", description=" + description + ", endpoint="
-				+ partnerConnectorEndpoint + ", tags=" + tags + ", languageContent=" + languageContent + "]";
+		return "PartnerBadge [systemId=" + systemId + ", partnerKey=" + partnerKey + ", description=" + description
+						+ ", endpoint=" + partnerConnectorEndpoint + ", tags=" + tags + ", languageContent="
+						+ languageContent + "]";
 	}
+
 	public void setShortTimeResponsDeviation() {
 		// TODO Auto-generated method stub
-		
+
 	}
-	
+
 	/**
-	 * updates the partner response times (shortTime and longTime) and short time deviation
+	 * updates the partner response times (shortTime and longTime) and short
+	 * time deviation
 	 * 
 	 * @param partner
 	 * @param respTime
@@ -190,13 +229,13 @@ public class PartnerBadge implements Serializable{
 			if (next != null)
 				setShortTimeResponseTime((getShortTimeResponseTime() + next) / 2);
 		}
-//		if (getLongTimeResponseTime() != null)
-//			setLongTimeResponseTime((getLongTimeResponseTime() + respTime) / 2);
-//		else
-//			setLongTimeResponseTime(respTime);
+		// if (getLongTimeResponseTime() != null)
+		// setLongTimeResponseTime((getLongTimeResponseTime() + respTime) / 2);
+		// else
+		// setLongTimeResponseTime(respTime);
 		double[] values = new double[getLastResponseTimes().toArray().length];
 
-		StandardDeviation standartDeviation = new StandardDeviation();
+		// StandardDeviation standartDeviation = new StandardDeviation();
 		Object[] respTimes = getLastResponseTimes().toArray();
 		int count = 0;
 		for (Object long1 : respTimes) {
@@ -204,19 +243,18 @@ public class PartnerBadge implements Serializable{
 				values[count] = ((Long) long1).doubleValue();
 			count++;
 		}
-//		setShortTimeResponsDeviation(new Double(standartDeviation.evaluate(values)).longValue());
+		// setShortTimeResponsDeviation(new
+		// Double(standartDeviation.evaluate(values)).longValue());
 	}
+
 	public LinkedList<ResultStats> getLastQueries() {
 		return this.shortTimeStats.lastQueries;
 	}
+
 	public void addLastQueries(ResultStats lastQuerie) {
 		this.shortTimeStats.lastQueries.addLast(lastQuerie);
-		if(this.shortTimeStats.lastQueries.size()>50)
+		if (this.shortTimeStats.lastQueries.size() > 50)
 			this.shortTimeStats.lastQueries.removeFirst();
 	}
-	
-	
-	
-	
-	
+
 }

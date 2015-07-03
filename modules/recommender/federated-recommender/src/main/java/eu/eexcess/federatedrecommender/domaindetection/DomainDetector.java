@@ -20,32 +20,35 @@ GNU Affero General Public License for more details.
 You should have received a copy of the GNU Affero General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
-package eu.eexcess.domaindetection;
+package eu.eexcess.federatedrecommender.domaindetection;
+
+import java.util.Collection;
+import java.util.Set;
 
 /**
- * Exception thrown by the domain classifier classes.
+ * Classifier to detect the domains found in a text.
  * 
  * @author rkern@know-center.at
  */
-public class DomainDetectorException extends Exception {
-    /** long serialVersionUID */
-    private static final long serialVersionUID = 3659634393053549617L;
+public abstract class DomainDetector {
+    /**
+     * Detects the domains of a given text.
+     * @param text the text
+     * @return never null
+     * @throws DomainDetectorException
+     */
+    public abstract Set<Domain> detect(String text) throws DomainDetectorException;
 
     /**
-     * Creates a new instance of this class.
-     * @param message
-     * @param cause
+     * Returns a random word, which is ambiguous according to the domain set.
+     * @param wordsToIgnore TODO
+     * @return
+     * @throws DomainDetectorException 
      */
-    public DomainDetectorException(String message, Throwable cause) {
-        super(message, cause);
-    }
+    public abstract String drawRandomAmbiguousWord(Set<String> wordsToIgnore) throws DomainDetectorException;
 
     /**
-     * Creates a new instance of this class.
-     * @param message
+     * @return
      */
-    public DomainDetectorException(String message) {
-        super(message);
-    }
-    
+    public abstract Collection<Domain> getAllDomains();
 }

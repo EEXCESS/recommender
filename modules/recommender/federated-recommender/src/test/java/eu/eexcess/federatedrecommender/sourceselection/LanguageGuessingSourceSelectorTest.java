@@ -18,7 +18,7 @@
  * @author Raoul Rubien
  */
 
-package eu.eexcess.sourceselection;
+package eu.eexcess.federatedrecommender.sourceselection;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertSame;
@@ -43,17 +43,14 @@ public class LanguageGuessingSourceSelectorTest {
 	public void languageSourceSelector_sourceSelect_withNoPreselectedLanguages_expectDELanguageToBeGuessed() {
 
 		PartnerBadge germanPartner = new PartnerBadge();
-		germanPartner.setSystemId("german");
 		germanPartner.setLanguageContent(Arrays.asList(new String[] { "de" }));
 		germanPartner.systemId = StringUtils.join(germanPartner.getLanguageContent().toArray());
 
 		PartnerBadge frenchPartner = new PartnerBadge();
-		frenchPartner.setSystemId("frenchPartner");
 		frenchPartner.setLanguageContent(Arrays.asList(new String[] { "fr" }));
 		frenchPartner.systemId = StringUtils.join(frenchPartner.getLanguageContent().toArray());
 		
 		PartnerBadge englishPartner = new PartnerBadge();
-		englishPartner.setSystemId("englishPartner");
 		englishPartner.setLanguageContent(Arrays.asList(new String[] { "en" }));
 		englishPartner.systemId = StringUtils.join(englishPartner.getLanguageContent().toArray());
 
@@ -80,17 +77,14 @@ public class LanguageGuessingSourceSelectorTest {
 	public void languageSourceSelector_sourceSelect_withNoPreselectedLanguages_expectENLanguageToBeGuessed() {
 
 		PartnerBadge germanPartner = new PartnerBadge();
-		germanPartner.setSystemId("german");
 		germanPartner.setLanguageContent(Arrays.asList(new String[] { "de" }));
 			germanPartner.systemId = StringUtils.join(germanPartner.getLanguageContent().toArray());
 
 		PartnerBadge frenchPartner = new PartnerBadge();
-		frenchPartner.setSystemId("frenchPartner");
 		frenchPartner.setLanguageContent(Arrays.asList(new String[] { "fr" }));
 			frenchPartner.systemId = StringUtils.join(frenchPartner.getLanguageContent().toArray());
 
 		PartnerBadge englishPartner = new PartnerBadge();
-		englishPartner.setSystemId("englishPartner");
 		englishPartner.setLanguageContent(Arrays.asList(new String[] { "en" }));
 			englishPartner.systemId = StringUtils.join(englishPartner.getLanguageContent().toArray());
 

@@ -39,5 +39,7 @@ public class FederatedRecommenderConfiguration {
 	public String statsLogDatabase;
 	public String defaultPickerName;
 	public String[] sourceSelectors;
+	public String wordnetPath;
+	public String wordnetDomainFilePath;
 
 }

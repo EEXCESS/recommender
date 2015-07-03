@@ -18,7 +18,7 @@
  * @author Raoul Rubien
  */
 
-package eu.eexcess.sourceselection;
+package eu.eexcess.federatedrecommender.sourceselection;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertSame;

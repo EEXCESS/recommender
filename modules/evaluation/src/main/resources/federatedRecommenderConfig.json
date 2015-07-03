@@ -7,8 +7,7 @@
 "partnersTimeout":7000,
 "numRecommenderThreads":30,
 "defaultPickerName":"eu.eexcess.federatedrecommender.picker.OccurrenceProbabilityPicker",
-"sourceSelectors" : []
+"sourceSelectors" : ["eu.eexcess.federatedrecommender.sourceselection.LanguageSourceSelector"],
+"wordnetPath" : "/opt/data/wordnet/WordNet-2.0/dict/",
+"wordnetDomainFilePath" : "/opt/data/wordnet-domains/wn-domains-3.2/wn-domains-3.2-20070223"
 }
-
-
-

@@ -110,10 +110,13 @@ public class LanguageSourceSelector implements PartnerSelector {
 					if (false == partnerConnectorList.contains(partner)) {
 						partnerConnectorList.add(partner);
 					}
-					if (!selectedPartners.containsKey(partner)) {
-						selectedPartners.put(partner, new ArrayList<String>());
+					if (false == selectedPartners.containsKey(partner)) {
+						ArrayList<String> newList = new ArrayList<String>();
+						newList.add(language);
+						selectedPartners.put(partner, newList);
+					} else {
+						selectedPartners.get(partner).add(language);
 					}
-					selectedPartners.get(partner).add(language);
 				}
 			}
 		}
