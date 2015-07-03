@@ -19,7 +19,7 @@ hs_err_pid*
 modules/partners/ddb/src/main/resources/partner-config.json
 #odules/partners/europeana/target/
 modules/partners/europeana/src/main/resources/partner-config.json
-#odules/partners/kimcollect/target/
+modules/partners/kimportal/target/
 modules/partners/kimcollect/src/main/resources/partner-config.json
 #modules/partners/mendeley/target/
 modules/partners/mendeley/src/main/resources/partner-config.json
