@@ -8,7 +8,7 @@
 "numRecommenderThreads":30,
 "statsLogDatabase":"/var/lib/tomcat6/webapps/eexcess-federated-recommender-web-service-1.0-SNAPSHOT/FederatedRecommenderStats.db",
 "defaultPickerName":"eu.eexcess.federatedrecommender.picker.OccurrenceProbabilityPicker",
-"sourceSelectors" : ["eu.eexcess.federatedrecommender.sourceselection.WndomainSourceSelector"],
+"sourceSelectors" : ["eu.eexcess.federatedrecommender.sourceselection.LanguageSourceSelector"],
 "wordnetPath" : "/opt/data/wordnet/WordNet-2.0/dict/",
 "wordnetDomainFilePath" : "/opt/data/wordnet-domains/wn-domains-3.2/wn-domains-3.2-20070223"
 }
