@@ -32,19 +32,56 @@ import javax.xml.bind.annotation.XmlElement;
  */
 public class PartnerDomain implements Serializable {
 
-	private static final long serialVersionUID = -3022570752393633726L;
+    private static final long serialVersionUID = -3022570752393633726L;
 
-	@XmlElement(name = "domainName")
-	public String domainName;
+    @XmlElement(name = "domainName")
+    public String domainName;
 
-	@XmlElement(name = "weight")
-	public Double weight;
+    @XmlElement(name = "weight")
+    public Double weight;
 
-	public PartnerDomain(String domainName, double weight) {
-		this.domainName = domainName;
-		this.weight = weight;
-	}
+    public PartnerDomain(String domainName, double weight) {
+        this.domainName = domainName;
+        this.weight = weight;
+    }
 
-	public PartnerDomain() {
-	}
+    public PartnerDomain() {
+    }
+
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + ((domainName == null) ? 0 : domainName.hashCode());
+        result = prime * result + ((weight == null) ? 0 : weight.hashCode());
+        return result;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj)
+            return true;
+        if (obj == null)
+            return false;
+        if (getClass() != obj.getClass())
+            return false;
+        PartnerDomain other = (PartnerDomain) obj;
+        if (domainName == null) {
+            if (other.domainName != null)
+                return false;
+        } else if (!domainName.equals(other.domainName))
+            return false;
+        if (weight == null) {
+            if (other.weight != null)
+                return false;
+        } else if (!weight.equals(other.weight))
+            return false;
+        return true;
+    }
+
+    @Override
+    public String toString() {
+        return "PartnerDomain [domainName=" + domainName + ", weight=" + weight + "]";
+    }
+
 }

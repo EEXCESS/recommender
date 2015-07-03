@@ -41,6 +41,22 @@ public class PartnerBadge implements Serializable {
 
     private static final long serialVersionUID = -6411801334911587483L;
 
+    @XmlElement(name = "description")
+    private String description;
+    @XmlElement(name = "favIconURI")
+    private String favIconURI;
+    @XmlElement(name = "partnerConnectorEndpoint")
+    private String partnerConnectorEndpoint;
+
+    @XmlElement(name = "tag")
+    @XmlElementWrapper(name = "tags")
+    private List<String> tags;
+
+    @XmlElement(name = "domainContent")
+    private List<PartnerDomain> domainContent = new ArrayList<PartnerDomain>();
+    @XmlElement(name = "languageContent")
+    private List<String> languageContent = new ArrayList<String>();
+
     @XmlElement(name = "systemId")
     public String systemId;
 
@@ -50,15 +66,10 @@ public class PartnerBadge implements Serializable {
     @XmlElement(name = "partnerKey")
     // has to be the same value than in SecureUserProfile
     public String partnerKey;
-    @XmlElement(name = "description")
-    private String description;
-    @XmlElement(name = "favIconURI")
-    private String favIconURI;
-    @XmlElement(name = "partnerConnectorEndpoint")
-    private String partnerConnectorEndpoint;
 
     @XmlElement(name = "shortTimeStats", required = false)
     public PartnerBadgeStats shortTimeStats = new PartnerBadgeStats();
+
     // TODO: Statistics should be moved somewere else! (Specially the logic for
     // it)
 
@@ -73,23 +84,13 @@ public class PartnerBadge implements Serializable {
         this.shortTimeStats.shortTimeResponseTime = shortTimeResponseTime;
     }
 
-    @XmlElement(name = "tag")
-    @XmlElementWrapper(name = "tags")
-    private List<String> tags;
+    public List<PartnerDomain> getDomainContent() {
+        return domainContent;
+    }
 
-    @XmlElement(name = "domainContent")
-	private List<PartnerDomain> domainContent = new ArrayList<PartnerDomain>();
-	@XmlElement(name = "languageContent")
-	private List<String> languageContent = new ArrayList<String>();
-
-	public List<PartnerDomain> getDomainContent() {
-		return domainContent;
-	}
-
-	public void setDomainContent(List<PartnerDomain> domainContent) {
-		this.domainContent = domainContent;
-	}
-    
+    public void setDomainContent(List<PartnerDomain> domainContent) {
+        this.domainContent = domainContent;
+    }
 
     public List<String> getLanguageContent() {
         return languageContent;
@@ -141,55 +142,6 @@ public class PartnerBadge implements Serializable {
         this.shortTimeStats.lastResponseTimes.push(lastResponseTime);
     }
 
-    @Override
-    public int hashCode() {
-        final int prime = 31;
-        int result = 1;
-        result = prime * result + ((description == null) ? 0 : description.hashCode());
-        result = prime * result + ((partnerConnectorEndpoint == null) ? 0 : partnerConnectorEndpoint.hashCode());
-        result = prime * result + ((partnerKey == null) ? 0 : partnerKey.hashCode());
-        result = prime * result + ((systemId == null) ? 0 : systemId.hashCode());
-        return result;
-    }
-
-    @Override
-    public boolean equals(Object obj) {
-        if (this == obj)
-            return true;
-        if (obj == null)
-            return false;
-        if (getClass() != obj.getClass())
-            return false;
-        PartnerBadge other = (PartnerBadge) obj;
-        if (description == null) {
-            if (other.description != null)
-                return false;
-        } else if (!description.equals(other.description))
-            return false;
-        if (partnerConnectorEndpoint == null) {
-            if (other.partnerConnectorEndpoint != null)
-                return false;
-        } else if (!partnerConnectorEndpoint.equals(other.partnerConnectorEndpoint))
-            return false;
-        if (partnerKey == null) {
-            if (other.partnerKey != null)
-                return false;
-        } else if (!partnerKey.equals(other.partnerKey))
-            return false;
-        if (systemId == null) {
-            if (other.systemId != null)
-                return false;
-        } else if (!systemId.equals(other.systemId))
-            return false;
-        return true;
-    }
-
-    @Override
-    public String toString() {
-        return "PartnerBadge [systemId=" + systemId + ", partnerKey=" + partnerKey + ", description=" + description + ", endpoint=" + partnerConnectorEndpoint + ", tags=" + tags
-                + ", languageContent=" + languageContent + "]";
-    }
-
     public void setShortTimeResponsDeviation() {
         // TODO Auto-generated method stub
 
@@ -234,6 +186,106 @@ public class PartnerBadge implements Serializable {
         this.shortTimeStats.lastQueries.addLast(lastQuerie);
         if (this.shortTimeStats.lastQueries.size() > 50)
             this.shortTimeStats.lastQueries.removeFirst();
+    }
+
+    public String getFavIconURI() {
+        return favIconURI;
+    }
+
+    public void setFavIconURI(String favIconURI) {
+        this.favIconURI = favIconURI;
+    }
+
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + ((description == null) ? 0 : description.hashCode());
+        result = prime * result + ((domainContent == null) ? 0 : domainContent.hashCode());
+        result = prime * result + ((favIconURI == null) ? 0 : favIconURI.hashCode());
+        result = prime * result + ((languageContent == null) ? 0 : languageContent.hashCode());
+        result = prime * result + ((longTimeStats == null) ? 0 : longTimeStats.hashCode());
+        result = prime * result + ((partnerConnectorEndpoint == null) ? 0 : partnerConnectorEndpoint.hashCode());
+        result = prime * result + ((partnerKey == null) ? 0 : partnerKey.hashCode());
+        result = prime * result + ((queryGeneratorClass == null) ? 0 : queryGeneratorClass.hashCode());
+        result = prime * result + ((shortTimeStats == null) ? 0 : shortTimeStats.hashCode());
+        result = prime * result + ((systemId == null) ? 0 : systemId.hashCode());
+        result = prime * result + ((tags == null) ? 0 : tags.hashCode());
+        return result;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj)
+            return true;
+        if (obj == null)
+            return false;
+        if (getClass() != obj.getClass())
+            return false;
+        PartnerBadge other = (PartnerBadge) obj;
+        if (description == null) {
+            if (other.description != null)
+                return false;
+        } else if (!description.equals(other.description))
+            return false;
+        if (domainContent == null) {
+            if (other.domainContent != null)
+                return false;
+        } else if (!domainContent.equals(other.domainContent))
+            return false;
+        if (favIconURI == null) {
+            if (other.favIconURI != null)
+                return false;
+        } else if (!favIconURI.equals(other.favIconURI))
+            return false;
+        if (languageContent == null) {
+            if (other.languageContent != null)
+                return false;
+        } else if (!languageContent.equals(other.languageContent))
+            return false;
+        if (longTimeStats == null) {
+            if (other.longTimeStats != null)
+                return false;
+        } else if (!longTimeStats.equals(other.longTimeStats))
+            return false;
+        if (partnerConnectorEndpoint == null) {
+            if (other.partnerConnectorEndpoint != null)
+                return false;
+        } else if (!partnerConnectorEndpoint.equals(other.partnerConnectorEndpoint))
+            return false;
+        if (partnerKey == null) {
+            if (other.partnerKey != null)
+                return false;
+        } else if (!partnerKey.equals(other.partnerKey))
+            return false;
+        if (queryGeneratorClass == null) {
+            if (other.queryGeneratorClass != null)
+                return false;
+        } else if (!queryGeneratorClass.equals(other.queryGeneratorClass))
+            return false;
+        if (shortTimeStats == null) {
+            if (other.shortTimeStats != null)
+                return false;
+        } else if (!shortTimeStats.equals(other.shortTimeStats))
+            return false;
+        if (systemId == null) {
+            if (other.systemId != null)
+                return false;
+        } else if (!systemId.equals(other.systemId))
+            return false;
+        if (tags == null) {
+            if (other.tags != null)
+                return false;
+        } else if (!tags.equals(other.tags))
+            return false;
+        return true;
+    }
+
+    @Override
+    public String toString() {
+        return "PartnerBadge [description=" + description + ", favIconURI=" + favIconURI + ", partnerConnectorEndpoint=" + partnerConnectorEndpoint + ", tags=" + tags
+                + ", domainContent=" + domainContent + ", languageContent=" + languageContent + ", systemId=" + systemId + ", queryGeneratorClass=" + queryGeneratorClass
+                + ", partnerKey=" + partnerKey + ", shortTimeStats=" + shortTimeStats + ", longTimeStats=" + longTimeStats + "]";
     }
 
 }

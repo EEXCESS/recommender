@@ -53,6 +53,67 @@ public class PartnerBadgeStats implements Serializable {
     @XmlElement(name = "shortTimeResponseTimes")
     public Long shortTimeResponseTime;
 
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + ((failedRequestCount == null) ? 0 : failedRequestCount.hashCode());
+        result = prime * result + ((failedRequestTimeoutCount == null) ? 0 : failedRequestTimeoutCount.hashCode());
+        result = prime * result + ((lastQueries == null) ? 0 : lastQueries.hashCode());
+        result = prime * result + ((lastResponseTimes == null) ? 0 : lastResponseTimes.hashCode());
+        result = prime * result + ((requestCount == null) ? 0 : requestCount.hashCode());
+        result = prime * result + ((shortTimeResponseTime == null) ? 0 : shortTimeResponseTime.hashCode());
+        return result;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj)
+            return true;
+        if (obj == null)
+            return false;
+        if (getClass() != obj.getClass())
+            return false;
+        PartnerBadgeStats other = (PartnerBadgeStats) obj;
+        if (failedRequestCount == null) {
+            if (other.failedRequestCount != null)
+                return false;
+        } else if (!failedRequestCount.equals(other.failedRequestCount))
+            return false;
+        if (failedRequestTimeoutCount == null) {
+            if (other.failedRequestTimeoutCount != null)
+                return false;
+        } else if (!failedRequestTimeoutCount.equals(other.failedRequestTimeoutCount))
+            return false;
+        if (lastQueries == null) {
+            if (other.lastQueries != null)
+                return false;
+        } else if (!lastQueries.equals(other.lastQueries))
+            return false;
+        if (lastResponseTimes == null) {
+            if (other.lastResponseTimes != null)
+                return false;
+        } else if (!lastResponseTimes.equals(other.lastResponseTimes))
+            return false;
+        if (requestCount == null) {
+            if (other.requestCount != null)
+                return false;
+        } else if (!requestCount.equals(other.requestCount))
+            return false;
+        if (shortTimeResponseTime == null) {
+            if (other.shortTimeResponseTime != null)
+                return false;
+        } else if (!shortTimeResponseTime.equals(other.shortTimeResponseTime))
+            return false;
+        return true;
+    }
+
+    @Override
+    public String toString() {
+        return "PartnerBadgeStats [requestCount=" + requestCount + ", failedRequestCount=" + failedRequestCount + ", failedRequestTimeoutCount=" + failedRequestTimeoutCount
+                + ", lastQueries=" + lastQueries + ", lastResponseTimes=" + lastResponseTimes + ", shortTimeResponseTime=" + shortTimeResponseTime + "]";
+    }
+
     // End response time
 
 }
