@@ -23,6 +23,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 package eu.eexcess.federatedrecommender;
 
 import java.io.FileNotFoundException;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -93,6 +95,7 @@ public class FederatedRecommenderCore {
         threadPool = Executors.newFixedThreadPool(federatedRecConfiguration.numRecommenderThreads);
         this.federatedRecConfiguration = federatedRecConfiguration;
         this.recommenderStats = new RecommenderStats();
+        instanciateSourceSelectors(this.federatedRecConfiguration);
     }
 
     /**
@@ -403,40 +406,59 @@ public class FederatedRecommenderCore {
         return sUPDecomposer.decompose(userProfile);
     }
 
-    /**
-     * Performs partner source selection according to the given classes and
-     * their order. Multiple identical selectors are allowed but instantiated
-     * only once.
-     * 
-     * @param userProfile
-     * 
-     * @param sourceSelectorClassName
-     *            class names of source selectors to be applied in same order
-     * @return same userProfile but with changed partner list
-     */
-    public SecureUserProfile sourceSelection(SecureUserProfile userProfile, List<String> selectorsClassNames) {
+	private void instanciateSourceSelectors(FederatedRecommenderConfiguration recommenderConfig) {
 
-        if (selectorsClassNames == null || selectorsClassNames.isEmpty()) {
-            return userProfile;
-        }
+		ArrayList<String> selectorsClassNames = new ArrayList<String>();
+		Collections.addAll(selectorsClassNames, recommenderConfig.sourceSelectors);
 
-        SecureUserProfile lastEvaluatedProfile = userProfile;
+		for (String sourceSelectorClassName : selectorsClassNames) {
+			try {
+				PartnerSelector sourceSelector = (PartnerSelector) statelessClassInstances.get(sourceSelectorClassName);
+				if (null == sourceSelector) {
+					Constructor<?> ctor = Class.forName(sourceSelectorClassName).getConstructor(
+									FederatedRecommenderConfiguration.class);
 
-        for (String sourceSelectorClassName : selectorsClassNames) {
-            try {
-                PartnerSelector sourceSelector = (PartnerSelector) statelessClassInstances.get(sourceSelectorClassName);
-                if (null == sourceSelector) {
-                    sourceSelector = (PartnerSelector) Class.forName(sourceSelectorClassName).newInstance();
-                    logger.info("instanciating new source selection [" + sourceSelector.getClass().getSimpleName() + "]");
-                    statelessClassInstances.put(sourceSelectorClassName, sourceSelector);
-                }
-                lastEvaluatedProfile = sourceSelector.sourceSelect(lastEvaluatedProfile, getPartnerRegister().getPartners());
-            } catch (InstantiationException | IllegalAccessException | ClassNotFoundException e) {
-                logger.log(Level.SEVERE, "failed to instanciate source selector [" + sourceSelectorClassName + "] by name: ignoring source selection", e);
-            }
-        }
-        return lastEvaluatedProfile;
-    }
+					sourceSelector = (PartnerSelector) ctor.newInstance(recommenderConfig);
+					logger.info("instanciating new source selector [" + sourceSelector.getClass().getSimpleName() + "]");
+					statelessClassInstances.put(sourceSelectorClassName, sourceSelector);
+				}
+			} catch (InstantiationException | IllegalAccessException | ClassNotFoundException | NoSuchMethodException
+							| InvocationTargetException e) {
+				logger.log(Level.SEVERE, "failed to instanciate source selector [" + sourceSelectorClassName + "]");
+			}
+		}
+	}
+
+	/**
+	 * Performs partner source selection according to the given classes and
+	 * their order. Multiple identical selectors are allowed but instantiated
+	 * only once.
+	 * 
+	 * @param userProfile
+	 * 
+	 * @param sourceSelectorClassName
+	 *            class names of source selectors to be applied in same order
+	 * @return same userProfile but with changed partner list
+	 */
+	public SecureUserProfile sourceSelection(SecureUserProfile userProfile, List<String> selectorsClassNames) {
+
+		if (selectorsClassNames == null || selectorsClassNames.isEmpty()) {
+			return userProfile;
+		}
+
+		SecureUserProfile lastEvaluatedProfile = userProfile;
+		for (String sourceSelectorClassName : selectorsClassNames) {
+			PartnerSelector sourceSelector = (PartnerSelector) statelessClassInstances.get(sourceSelectorClassName);
+			if (null == sourceSelector) {
+				logger.info("failed to find requested source selector [" + sourceSelectorClassName
+								+ "]: ignoring source selection");
+			} else {
+				lastEvaluatedProfile = sourceSelector.sourceSelect(lastEvaluatedProfile, getPartnerRegister()
+								.getPartners());
+			}
+		}
+		return lastEvaluatedProfile;
+	}
 
     /**
      * returns the statistics of the federated recommender

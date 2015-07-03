@@ -18,7 +18,7 @@
  * @author Raoul Rubien
  */
 
-package eu.eexcess.sourceselection;
+package eu.eexcess.federatedrecommender.sourceselection;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertSame;
@@ -41,7 +41,7 @@ public class LanguageSourceSelectorTest {
 
 	@Test
 	public void languageSourceSelector_sourceSelect_expectOneSelection() {
-		PartnerSelector selector = new LanguageSourceSelector();
+		PartnerSelector selector = new LanguageSourceSelector(null);
 
 		SecureUserProfile userProfile = new SecureUserProfile();
 		userProfile.languages = Arrays.asList(new Language[] { new Language("de", 1.0), new Language("en", 1.0) });
@@ -61,7 +61,7 @@ public class LanguageSourceSelectorTest {
 
 	@Test
 	public void languageSourceSelector_sourceSelect_expectOneOfTwoSelections() {
-		PartnerSelector selector = new LanguageSourceSelector();
+		PartnerSelector selector = new LanguageSourceSelector(null);
 
 		SecureUserProfile userProfile = new SecureUserProfile();
 		userProfile.languages = Arrays.asList(new Language[] { new Language("de", 1.0) });
@@ -87,7 +87,7 @@ public class LanguageSourceSelectorTest {
 
 	@Test
 	public void languageSourceSelector_sourceSelect_withPreselectedSources_expectSkippedSelection() {
-		PartnerSelector selector = new LanguageSourceSelector();
+		PartnerSelector selector = new LanguageSourceSelector(null);
 
 		SecureUserProfile userProfile = new SecureUserProfile();
 		userProfile.languages = Arrays.asList(new Language[] { new Language("de", 1.0) });

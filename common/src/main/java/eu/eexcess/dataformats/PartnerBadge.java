@@ -77,8 +77,19 @@ public class PartnerBadge implements Serializable {
     @XmlElementWrapper(name = "tags")
     private List<String> tags;
 
-    @XmlElement(name = "languageContent")
-    private List<String> languageContent = new ArrayList<String>();
+    @XmlElement(name = "domainContent")
+	private List<PartnerDomain> domainContent = new ArrayList<PartnerDomain>();
+	@XmlElement(name = "languageContent")
+	private List<String> languageContent = new ArrayList<String>();
+
+	public List<PartnerDomain> getDomainContent() {
+		return domainContent;
+	}
+
+	public void setDomainContent(List<PartnerDomain> domainContent) {
+		this.domainContent = domainContent;
+	}
+    
 
     public List<String> getLanguageContent() {
         return languageContent;

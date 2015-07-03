@@ -20,59 +20,45 @@ GNU Affero General Public License for more details.
 You should have received a copy of the GNU Affero General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
-package eu.eexcess.domaindetection.wordnet;
+package eu.eexcess.federatedrecommender.domaindetection.wordnet;
 
-import java.util.Map;
+import java.io.Serializable;
 
-import net.sf.extjwnl.data.Synset;
-import at.knowcenter.ie.Annotation;
-import eu.eexcess.domaindetection.Domain;
-
-/**
- * 
- * 
- * @author rkern@know-center.at
- */
-public class WordnetDomain extends Domain {
-    private String domainName;
-    private Map<Annotation, Synset> termToSynset;
-
+class DomainAssignment implements Comparable<DomainAssignment>, Serializable {
+	private static final long serialVersionUID = -6947985645523081761L;
+	public final String domain;
+    public final double weight;
+    
     /**
      * Creates a new instance of this class.
-     * @param domainName
-     * @param termToSynset 
+     * @param domain
+     * @param weight
      */
-    WordnetDomain(String domainName, Map<Annotation, Synset> termToSynset) {
-        this.domainName = domainName;
-        this.termToSynset = termToSynset;
-    }
-    
-    /**
-     * Returns the termToSynset.
-     * @return the termToSynset
-     */
-    Map<Annotation, Synset> getTermToSynset() {
-        return termToSynset;
-    }
-    
-    /**
-     * Returns the domainName.
-     * @return the domainName
-     */
-    public String getDomainName() {
-        return domainName;
-    }
-    
-    @Override
-    public String toString() {
-        return domainName;
+    public DomainAssignment(String domain, double weight) {
+        this.domain = domain;
+        this.weight = weight;
     }
 
+    @Override
+    public int compareTo(DomainAssignment o) {
+        int d = 0;
+        if (weight > o.weight) {
+            d = -1;
+        } else {
+            if (weight < o.weight) {
+                d = +1;
+            } else {
+                d = domain.compareTo(o.domain);
+            }
+        }
+        return d;
+    }
+    
     @Override
     public int hashCode() {
         final int prime = 31;
         int result = 1;
-        result = prime * result + ((domainName == null) ? 0 : domainName.hashCode());
+        result = prime * result + ((domain == null) ? 0 : domain.hashCode());
         return result;
     }
 
@@ -81,18 +67,15 @@ public class WordnetDomain extends Domain {
         if (this == obj) return true;
         if (obj == null) return false;
         if (getClass() != obj.getClass()) return false;
-        WordnetDomain other = (WordnetDomain)obj;
-        if (domainName == null) {
-            if (other.domainName != null) return false;
-        } else if (!domainName.equals(other.domainName)) return false;
+        DomainAssignment other = (DomainAssignment)obj;
+        if (domain == null) {
+            if (other.domain != null) return false;
+        } else if (!domain.equals(other.domain)) return false;
         return true;
     }
 
     @Override
-    public String getName() {
-        return domainName;
+    public String toString() {
+        return String.format("%s^%f", domain, weight);
     }
-    
-    
-
 }

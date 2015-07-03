@@ -25,9 +25,9 @@ package eu.eexcess.domaindetection.wikipedia;
 import java.util.Collection;
 import java.util.Set;
 
-import eu.eexcess.domaindetection.Domain;
-import eu.eexcess.domaindetection.DomainDetector;
-import eu.eexcess.domaindetection.DomainDetectorException;
+import eu.eexcess.federatedrecommender.domaindetection.Domain;
+import eu.eexcess.federatedrecommender.domaindetection.DomainDetector;
+import eu.eexcess.federatedrecommender.domaindetection.DomainDetectorException;
 
 /**
  * Domain detector based on the Wikipedia categories.

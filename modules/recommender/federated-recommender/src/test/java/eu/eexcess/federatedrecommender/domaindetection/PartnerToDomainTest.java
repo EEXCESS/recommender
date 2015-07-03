@@ -20,7 +20,7 @@ GNU Affero General Public License for more details.
 You should have received a copy of the GNU Affero General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
-package eu.eexcess.domaindetection;
+package eu.eexcess.federatedrecommender.domaindetection;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -57,7 +57,9 @@ import eu.eexcess.dataformats.result.Result;
 import eu.eexcess.dataformats.result.ResultList;
 import eu.eexcess.dataformats.userprofile.ContextKeyword;
 import eu.eexcess.dataformats.userprofile.SecureUserProfile;
-import eu.eexcess.domaindetection.wordnet.WordnetDomainsDetector;
+import eu.eexcess.federatedrecommender.domaindetection.Domain;
+import eu.eexcess.federatedrecommender.domaindetection.DomainDetector;
+import eu.eexcess.federatedrecommender.domaindetection.wordnet.WordnetDomainsDetector;
 import eu.eexcess.federatedrecommender.registration.PartnerRegister;
 
 
