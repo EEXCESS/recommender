@@ -295,13 +295,14 @@ public class FederatedRecommenderCore {
      */
     public ResultList generateFederatedRecommendation(SecureUserProfile secureUserProfile) throws FileNotFoundException {
         ResultList resultList = null;
+        SecureUserProfile secureUserProfileTmp = secureUserProfile;
         if (federatedRecConfiguration.sourceSelectors != null) {
             List<String> sourceSelectors = new ArrayList<String>();
             Collections.addAll(sourceSelectors, federatedRecConfiguration.sourceSelectors);
-            secureUserProfile = sourceSelection(secureUserProfile, sourceSelectors);
+            secureUserProfileTmp = sourceSelection(secureUserProfileTmp, sourceSelectors);
         }
         try {
-            resultList = getAndAggregateResults(secureUserProfile, this.federatedRecConfiguration.defaultPickerName);
+            resultList = getAndAggregateResults(secureUserProfileTmp, this.federatedRecConfiguration.defaultPickerName);
         } catch (FederatedRecommenderException e) {
             logger.log(Level.SEVERE, "Some error retrieving or aggregation results occured.", e);
         }

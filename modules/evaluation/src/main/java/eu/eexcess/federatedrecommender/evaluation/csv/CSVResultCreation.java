@@ -169,10 +169,12 @@ public class CSVResultCreation {
 
     private SecureUserProfileEvaluation convertEvalQueryToSecUserProfile(EvaluationQuery query) {
         SecureUserProfileEvaluation profile = new SecureUserProfileEvaluation();
-        for (String queryPart : query.query.split(" ")) {
-            if (!queryPart.trim().isEmpty())
-                profile.contextKeywords.add(new ContextKeyword(queryPart, 0.5));
-        }
+        profile.contextKeywords.add(new ContextKeyword(query.query, 0.5));
+        // for (String queryPart : query.query.split(" ")) {
+        // if (!queryPart.trim().isEmpty())
+        // profile.contextKeywords.add(new ContextKeyword(queryPart, 0.5));
+        // }
+        profile.decomposer = "eu.eexcess.partnerrecommender.reference.OrQueryGeneratorFieldTermConjunction";
         profile.queryID = "query" + profile.hashCode();
         profile.interestList.addAll(query.interests);
         PartnerBadge mendeley = new PartnerBadge();
