@@ -19,7 +19,7 @@ GNU Affero General Public License for more details.
 
 You should have received a copy of the GNU Affero General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
-*/
+ */
 package eu.eexcess.partnerrecommender.reference;
 
 import java.util.regex.Matcher;
@@ -32,71 +32,69 @@ import eu.eexcess.dataformats.userprofile.SecureUserProfile;
 import eu.eexcess.partnerrecommender.api.QueryGeneratorApi;
 
 /**
- * Similar to the Lucene query generator but also checks context keywords for terms and transforms them into conjunction query terms.
- * Keyword "New York" ends up as "New OR York" in the query.
+ * Similar to the Lucene query generator but also checks context keywords for
+ * terms and transforms them into conjunction query terms. Keyword "New York"
+ * ends up as "New OR York" in the query.
+ * 
  * @author hziak@know-center.at
  */
 public class LuceneQueryGenerator implements QueryGeneratorApi {
 
+    private static final String REGEXP = "(?<=\\w)\\s(?=\\w)";
 
-	private static final String REGEXP = "(?<=\\w)\\s(?=\\w)";
+    @Override
+    public String toQuery(SecureUserProfile userProfile) {
+        StringBuilder result = new StringBuilder();
+        boolean expansion = false;
+        Pattern replace = Pattern.compile(REGEXP);
 
-	@Override
-	public String toQuery(SecureUserProfile userProfile) {
-		StringBuilder result = new StringBuilder();
-		boolean expansion= false;
-		Pattern replace = Pattern.compile(REGEXP);
-		 
-		for (ContextKeyword key : userProfile.contextKeywords) {
-			String keyword = key.text;
-			 Matcher matcher2 = replace.matcher(keyword);
-			keyword=matcher2.replaceAll(" OR ");
-			
-			if(key.expansion!=null && (key.expansion ==ExpansionType.PSEUDORELEVANCEWP||key.expansion ==ExpansionType.SERENDIPITY))
-			{
-				if(!expansion){
-					expansion=true;
-					if(result.length()>0){
-						if(key.expansion==ExpansionType.PSEUDORELEVANCEWP)
-//							result.append(" OR (\""+keyword+"\"");
-							result.append(" OR ("+keyword+"");
-						else
-							result.append(" AND ("+keyword+"");
-//						result.append(" AND (\""+keyword+"\"");
-					}
-					else
-//						result.append("(\""+keyword+"\"");
-						result.append("("+keyword+"");
-				}else{
-//						result.append(" OR \""+keyword+"\"");
-						result.append(" OR "+keyword+"");
-				}
-			} else{
-				if(expansion){
-					result.append(") OR "+keyword+"");
-					//result.append(") OR \""+keyword+"\"");
-					expansion=false;
-				}	
-				else
-					if(result.length()>0)
-						result.append(" OR "+keyword+"");
-//						result.append(" OR \""+keyword+"\"");
-					else
-						result.append(""+keyword+"");
-//						result.append("\""+keyword+"\"");
-			}
-		}
-		if(expansion)
-			result.append(")");
-			
-		return result.toString();
-	}
+        for (ContextKeyword key : userProfile.contextKeywords) {
+            String keyword = key.text;
+            Matcher matcher2 = replace.matcher(keyword);
+            keyword = matcher2.replaceAll(" OR ");
 
-	@Override
-	public String toDetailQuery(DocumentBadge document) {
-		return document.id;
-	}
+            if (key.expansion != null && (key.expansion == ExpansionType.PSEUDORELEVANCEWP || key.expansion == ExpansionType.SERENDIPITY)) {
+                expansion = addExpansionTerm(result, expansion, key, keyword);
+            } else {
+                expansion = addQueryTerm(result, expansion, keyword);
+            }
+        }
+        if (expansion)
+            result.append(")");
 
+        return result.toString();
+    }
 
+    private boolean addQueryTerm(StringBuilder result, boolean expansion, String keyword) {
+        if (expansion) {
+            result.append(") OR " + keyword + "");
+            expansion = false;
+        } else if (result.length() > 0)
+            result.append(" OR " + keyword + "");
+        else
+            result.append("" + keyword + "");
+        return expansion;
+    }
+
+    private boolean addExpansionTerm(StringBuilder result, boolean expansion, ContextKeyword key, String keyword) {
+        if (!expansion) {
+            expansion = true;
+            if (result.length() > 0) {
+                if (key.expansion == ExpansionType.PSEUDORELEVANCEWP)
+                    result.append(" OR (" + keyword + "");
+                else
+                    result.append(" AND (" + keyword + "");
+            } else
+                result.append("(" + keyword + "");
+        } else {
+            result.append(" OR " + keyword + "");
+        }
+        return expansion;
+    }
+
+    @Override
+    public String toDetailQuery(DocumentBadge document) {
+        return document.id;
+    }
 
 }
