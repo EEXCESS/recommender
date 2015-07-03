@@ -177,7 +177,7 @@ public class BlockPickerTest extends TestCase {
 	public void testTopResultSize() {
 		BlockPicker blockPicker = new BlockPicker();
 		
-		EvaluationResultLists resultLists = new EvaluationResultLists();
+//		EvaluationResultLists resultLists = new EvaluationResultLists();
 		EvaluationResultList resultList1 = new EvaluationResultList(new ResultList());
 		for(int i = 0; i< 200; i++){
 			Result result = new Result();

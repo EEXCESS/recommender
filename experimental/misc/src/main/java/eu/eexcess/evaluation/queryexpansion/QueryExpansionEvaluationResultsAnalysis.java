@@ -9,14 +9,13 @@ import java.util.List;
 
 import org.codehaus.jackson.map.ObjectMapper;
 
-import eu.eexcess.dataformats.evaluation.EvaluationResultLists;
-
 public class QueryExpansionEvaluationResultsAnalysis {
 
 	private static final String directoryPath = "/home/hziak/Datasets/EExcess/EvalUserBackup/";
 	private static final String[] singlePageQueriesArray= {"michelle obama","Autism","glass ceiling","february revolution",
 		"war on terrorism"};
 	
+	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public static void main(String[] args) {
 		 List<String> singlePageQueriesList= Arrays.asList(singlePageQueriesArray);
 		File dir = new File(directoryPath); 
@@ -29,7 +28,7 @@ public class QueryExpansionEvaluationResultsAnalysis {
 				//JsonReader reader = null;
 				//reader = new JsonReader(new FileReader(file));
 				ObjectMapper mapper = new ObjectMapper();
-				EvaluationResultLists list = null;
+//				EvaluationResultLists list = null;
 				HashMap<String,LinkedHashMap> map=  mapper.readValue(file,new HashMap<String,LinkedHashMap>().getClass());
 				
 				//Gson gson = new GsonBuilder().create();
@@ -62,6 +61,7 @@ public class QueryExpansionEvaluationResultsAnalysis {
 
 	}
 
+	@SuppressWarnings("rawtypes")
 	private static void sumQueryMap(List<LinkedHashMap> queryMap) {
 		Integer sumWiki=0;
 		Integer sumSource=0;
@@ -71,13 +71,14 @@ public class QueryExpansionEvaluationResultsAnalysis {
 			for(Object key : value.keySet()){
 				//System.out.println(key.toString());
 				//System.out.println(value.get(key));
-				List<Object> asList = Arrays.asList(value.get(key));
+//				List<Object> asList = Arrays.asList(value.get(key));
 				try{
 				 Object entry = value.get(key);
 				 //System.out.println(entry.getClass());
 				 if(entry instanceof  java.util.ArrayList){
-					 ArrayList<LinkedHashMap> objects = (ArrayList<LinkedHashMap>) entry;
-					 for(LinkedHashMap obj : objects){
+					 @SuppressWarnings({  "unchecked" })
+					ArrayList<LinkedHashMap> objects = (ArrayList<LinkedHashMap>) entry;
+					 for( LinkedHashMap obj : objects){
 					//	 System.out.println(obj.get("provider").toString());
 						 if(obj.get("provider").toString().startsWith("wikipedia")){
 							 String num =((String) obj.get("numSelect")).trim();

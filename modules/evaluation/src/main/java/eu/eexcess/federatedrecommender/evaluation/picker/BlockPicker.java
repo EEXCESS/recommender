@@ -22,7 +22,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 package eu.eexcess.federatedrecommender.evaluation.picker;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.logging.Level;
@@ -66,7 +65,7 @@ public class BlockPicker extends PartnersFederatedRecommendationsPicker {
 			EvaluationResultList list, int numResults, ResultList result,
 			Integer totalResults) {
 
-		ArrayList<Result> results = new ArrayList<Result>();
+//		ArrayList<Result> results = new ArrayList<Result>();
 		
 		for (int i = 0; i < numResults && i < list.results.size()
 				&& result.results.size() < totalResults; i++) {

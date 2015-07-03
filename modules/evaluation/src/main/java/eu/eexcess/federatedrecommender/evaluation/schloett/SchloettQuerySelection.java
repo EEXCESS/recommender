@@ -18,6 +18,7 @@ import eu.eexcess.federatedrecommender.evaluation.evaluation.EvaluationQuery;
 
 public class SchloettQuerySelection {
 
+	@SuppressWarnings("deprecation")
 	public static void main(String[] args) {
 		SchloettQuerySelection sQS = new SchloettQuerySelection();
 		CSVResultCreation csv = new CSVResultCreation();

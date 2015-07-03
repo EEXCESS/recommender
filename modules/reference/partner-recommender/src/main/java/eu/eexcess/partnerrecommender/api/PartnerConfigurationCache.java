@@ -153,7 +153,7 @@ public enum PartnerConfigurationCache {
 	}
 
 	public void unregisterPartnerAtServer() {
-		regThread.stop();
+		regThread.interrupt();
 		PartnerBadge badge = PartnerConfigurationCache.CONFIG.getBadge();
 		DefaultClientConfig jClientconfig = new DefaultClientConfig();
 		jClientconfig.getClasses().add(JacksonJsonProvider.class);

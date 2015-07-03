@@ -19,7 +19,7 @@ GNU Affero General Public License for more details.
 
 You should have received a copy of the GNU Affero General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
-*/
+ */
 package eu.eexcess.federatedrecommender.dataformats;
 
 import java.util.ArrayList;
@@ -30,29 +30,61 @@ import eu.eexcess.federatedrecommender.utils.esuputils.ESUPPair;
 import eu.eexcess.federatedrecommender.utils.esuputils.ESUPSource;
 
 public class ExtendedSecureUserProfile extends SecureUserProfile {
-	private static final long serialVersionUID = -4983458034155356055L;
-	
-	private List<ESUPPair> extendedInterestList = new ArrayList<ESUPPair>();
-	private List<ESUPPair> extendedContextList = new ArrayList<ESUPPair>();
+    private static final long serialVersionUID = -4983458034155356055L;
 
-	public ExtendedSecureUserProfile(SecureUserProfile secureUserProfile) {
-		this.contextKeywords = secureUserProfile.contextKeywords;
-		this.interestList = secureUserProfile.interestList;
-	}
+    private List<ESUPPair> extendedInterestList = new ArrayList<ESUPPair>();
+    private List<ESUPPair> extendedContextList = new ArrayList<ESUPPair>();
 
-	public void addInterestClass(String interest, List<ESUPSource> sourceClasses) {
-		getExtendedInterestList().add(new ESUPPair(interest, sourceClasses));
-	}
+    public ExtendedSecureUserProfile(SecureUserProfile secureUserProfile) {
+        this.contextKeywords = secureUserProfile.contextKeywords;
+        this.interestList = secureUserProfile.interestList;
+    }
 
-	public void addContextClass(String context, List<ESUPSource> sourceClasses) {
-		getExtendedContextList().add(new ESUPPair(context, sourceClasses));
-	}
+    public void addInterestClass(String interest, List<ESUPSource> sourceClasses) {
+        getExtendedInterestList().add(new ESUPPair(interest, sourceClasses));
+    }
 
-	public List<ESUPPair> getExtendedContextList() {
-		return extendedContextList;
-	}
+    public void addContextClass(String context, List<ESUPSource> sourceClasses) {
+        getExtendedContextList().add(new ESUPPair(context, sourceClasses));
+    }
 
-	public List<ESUPPair> getExtendedInterestList() {
-		return extendedInterestList;
-	}
+    public List<ESUPPair> getExtendedContextList() {
+        return extendedContextList;
+    }
+
+    public List<ESUPPair> getExtendedInterestList() {
+        return extendedInterestList;
+    }
+
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = super.hashCode();
+        result = prime * result + ((extendedContextList == null) ? 0 : extendedContextList.hashCode());
+        result = prime * result + ((extendedInterestList == null) ? 0 : extendedInterestList.hashCode());
+        return result;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj)
+            return true;
+        if (!super.equals(obj))
+            return false;
+        if (getClass() != obj.getClass())
+            return false;
+        ExtendedSecureUserProfile other = (ExtendedSecureUserProfile) obj;
+        if (extendedContextList == null) {
+            if (other.extendedContextList != null)
+                return false;
+        } else if (!extendedContextList.equals(other.extendedContextList))
+            return false;
+        if (extendedInterestList == null) {
+            if (other.extendedInterestList != null)
+                return false;
+        } else if (!extendedInterestList.equals(other.extendedInterestList))
+            return false;
+        return true;
+    }
+
 }

@@ -99,7 +99,7 @@ public class FederatedRecommenderService {
 		}else{
 			logger.log(Level.INFO,"Reading Config file from:" + eexcessPartnerKeyFile);	
 			try {
-				resource = new File(eexcessPartnerKeyFile).toURL();
+				resource = new File(eexcessPartnerKeyFile).toURI().toURL();
 			} catch (MalformedURLException e) {
 				logger.log(Level.SEVERE,"Environment Variable was malformated:"+eexcessPartnerKeyFile,e);
 			}
