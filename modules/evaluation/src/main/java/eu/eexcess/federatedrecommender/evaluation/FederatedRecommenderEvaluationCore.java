@@ -410,8 +410,7 @@ public class FederatedRecommenderEvaluationCore {
             none.get();
             wikipedia.get();
         } catch (InterruptedException | ExecutionException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+            logger.log(Level.WARNING, "", e);
         }
         return results;
     }

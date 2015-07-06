@@ -19,7 +19,7 @@ GNU Affero General Public License for more details.
 
 You should have received a copy of the GNU Affero General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
-*/
+ */
 package eu.eexcess.federatedrecommender.evaluation.service;
 
 import java.io.File;
@@ -63,226 +63,202 @@ import eu.eexcess.federatedrecommender.dataformats.D3GraphDocument;
 import eu.eexcess.federatedrecommender.evaluation.FederatedRecommenderEvaluationCore;
 import eu.eexcess.federatedrecommender.utils.FederatedRecommenderException;
 import eu.eexcess.federatedrecommenderservice.FederatedRecommenderService;
+
 @Path("/evaluation")
 @Singleton
-public class FederatedRecommenderEvaluationService extends FederatedRecommenderService{
-	private static final Logger logger = Logger
-			.getLogger(FederatedRecommenderService.class.getName());
-	private FederatedRecommenderEvaluationCore fREC;
-	private final FederatedRecommenderConfiguration federatedRecommenderConfiguration;
+public class FederatedRecommenderEvaluationService extends FederatedRecommenderService {
+    private static final Logger logger = Logger.getLogger(FederatedRecommenderService.class.getName());
+    private FederatedRecommenderEvaluationCore fREC;
+    private final FederatedRecommenderConfiguration federatedRecommenderConfiguration;
 
-	
-	public FederatedRecommenderEvaluationService() throws FederatedRecommenderException{
-		super();
-		ObjectMapper mapper = new ObjectMapper();
-		URL resource = getClass().getResource(
-				"/federatedRecommenderConfig.json");
-		mapper.configure(JsonParser.Feature.ALLOW_COMMENTS, true);
-		try {
-			federatedRecommenderConfiguration = mapper.readValue(new File(
-					resource.getFile()),
-					FederatedRecommenderConfiguration.class);
-		} catch (JsonParseException e) {
-			logger.log(
-					Level.SEVERE,
-					"There was an error parsing the FederationRecommenderConfig File",
-					e);
-			throw new FederatedRecommenderException(
-					"There was an error parsing the FederationRecommenderConfig File in FederatedRecommenderCore Module",
-					e);
-		} catch (JsonMappingException e) {
-			logger.log(
-					Level.SEVERE,
-					"There was an error parsing the FederationRecommenderConfig File",
-					e);
-			throw new FederatedRecommenderException(
-					"There was an error parsing the FederationRecommenderConfig File in FederatedRecommenderCore Module",
-					e);
-		} catch (IOException e) {
-			logger.log(
-					Level.SEVERE,
-					"There was an error reading the FederationRecommenderConfig File",
-					e);
-			throw new FederatedRecommenderException(
-					"There was an error reading the FederationRecommenderConfig File in FederatedRecommenderCore Module",
-					e);
-		}
-		try {
-			fREC = new FederatedRecommenderEvaluationCore(federatedRecommenderConfiguration);
-		} catch (FileNotFoundException e) {
-			logger.log(Level.SEVERE, "FederatedRecommenderEvaluationCore not working", e);
-		}
-	}
-	
-	// Begin Evaluation Services
-	@POST
-	@Path("/testSUPE")
-	@Produces({ MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON })
-	public SecureUserProfileEvaluation testSUPE() {
-		SecureUserProfileEvaluation secureUserProfile = new SecureUserProfileEvaluation();
+    public FederatedRecommenderEvaluationService() throws FederatedRecommenderException {
+        super();
+        ObjectMapper mapper = new ObjectMapper();
+        URL resource = getClass().getResource("/federatedRecommenderConfig.json");
+        mapper.configure(JsonParser.Feature.ALLOW_COMMENTS, true);
+        try {
+            federatedRecommenderConfiguration = mapper.readValue(new File(resource.getFile()), FederatedRecommenderConfiguration.class);
+        } catch (JsonParseException e) {
+            logger.log(Level.SEVERE, "There was an error parsing the FederationRecommenderConfig File", e);
+            throw new FederatedRecommenderException("There was an error parsing the FederationRecommenderConfig File in FederatedRecommenderCore Module", e);
+        } catch (JsonMappingException e) {
+            logger.log(Level.SEVERE, "There was an error parsing the FederationRecommenderConfig File", e);
+            throw new FederatedRecommenderException("There was an error parsing the FederationRecommenderConfig File in FederatedRecommenderCore Module", e);
+        } catch (IOException e) {
+            logger.log(Level.SEVERE, "There was an error reading the FederationRecommenderConfig File", e);
+            throw new FederatedRecommenderException("There was an error reading the FederationRecommenderConfig File in FederatedRecommenderCore Module", e);
+        }
+        try {
+            fREC = new FederatedRecommenderEvaluationCore(federatedRecommenderConfiguration);
+        } catch (FileNotFoundException e) {
+            logger.log(Level.SEVERE, "FederatedRecommenderEvaluationCore not working", e);
+        }
+    }
 
-		secureUserProfile.firstName = "Max";
-		secureUserProfile.lastName = "Musterman";
-		secureUserProfile.birthDate = new Date();
-		secureUserProfile.gender = "male";
+    // Begin Evaluation Services
+    @POST
+    @Path("/testSUPE")
+    @Produces({ MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON })
+    public SecureUserProfileEvaluation testSUPE() {
+        SecureUserProfileEvaluation secureUserProfile = new SecureUserProfileEvaluation();
 
-		List<ContextKeyword> contextList = new ArrayList<ContextKeyword>();
-		contextList.add(new ContextKeyword("graz", 0.5));
-		contextList.add(new ContextKeyword("vienna", 0.5));
-		secureUserProfile.contextKeywords = contextList;
-		PartnerBadge pB = new PartnerBadge();
-		pB.setSystemId("Europeana");
-		secureUserProfile.partnerList.add(pB);
+        secureUserProfile.firstName = "Max";
+        secureUserProfile.lastName = "Musterman";
+        secureUserProfile.birthDate = new Date();
+        secureUserProfile.gender = "male";
 
-		List<PartnerBadge> protectedPartnerList = new ArrayList<PartnerBadge>();
-		PartnerBadge badge = new PartnerBadge();
-		badge.setSystemId("Wissenmedia");
-		badge.partnerKey = "dsajln22sadjkl!";
-		protectedPartnerList.add(badge);
+        List<ContextKeyword> contextList = new ArrayList<ContextKeyword>();
+        contextList.add(new ContextKeyword("graz", 0.5));
+        contextList.add(new ContextKeyword("vienna", 0.5));
+        secureUserProfile.contextKeywords = contextList;
+        PartnerBadge pB = new PartnerBadge();
+        pB.setSystemId("Europeana");
+        secureUserProfile.partnerList.add(pB);
 
-		secureUserProfile.protectedPartnerList = protectedPartnerList;
+        List<PartnerBadge> protectedPartnerList = new ArrayList<PartnerBadge>();
+        PartnerBadge badge = new PartnerBadge();
+        badge.setSystemId("Wissenmedia");
+        badge.partnerKey = "dsajln22sadjkl!";
+        protectedPartnerList.add(badge);
 
-		List<UserCredentials> UserCredentials = new ArrayList<UserCredentials>();
-		eu.eexcess.dataformats.userprofile.UserCredentials cred = new UserCredentials();
-		cred.login = "me@partner.x";
-		cred.securityToken = "sdjalkej21!#";
-		cred.systemId = "Wissenmedia";
-		UserCredentials.add(cred);
-		secureUserProfile.userCredentials = UserCredentials;
-		secureUserProfile.queryExpansionSourcePartner = (ArrayList<PartnerBadge>) secureUserProfile.partnerList;
-		return secureUserProfile;
-	}
+        secureUserProfile.protectedPartnerList = protectedPartnerList;
 
-	@POST
-	@Path("/evaluation")
-	@Consumes({ MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON })
-	@Produces({ MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON })
-	@Deprecated
-	public EvaluationResultLists evaluation(SecureUserProfileEvaluation userProfile)
-			throws IOException {
-		EvaluationResultLists resultList = new EvaluationResultLists();
-		resultList.results.add(fREC.getEvaluationResults(userProfile));
-		return resultList;
-	}
+        List<UserCredentials> UserCredentials = new ArrayList<UserCredentials>();
+        eu.eexcess.dataformats.userprofile.UserCredentials cred = new UserCredentials();
+        cred.login = "me@partner.x";
+        cred.securityToken = "sdjalkej21!#";
+        cred.systemId = "Wissenmedia";
+        UserCredentials.add(cred);
+        secureUserProfile.userCredentials = UserCredentials;
+        secureUserProfile.queryExpansionSourcePartner = (ArrayList<PartnerBadge>) secureUserProfile.partnerList;
+        return secureUserProfile;
+    }
 
+    @POST
+    @Path("/evaluation")
+    @Consumes({ MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON })
+    @Produces({ MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON })
+    @Deprecated
+    public EvaluationResultLists evaluation(SecureUserProfileEvaluation userProfile) throws IOException {
+        EvaluationResultLists resultList = new EvaluationResultLists();
+        resultList.results.add(fREC.getEvaluationResults(userProfile));
+        return resultList;
+    }
 
+    @POST
+    @Path("/blockEvaluation")
+    @Consumes({ MediaType.APPLICATION_XML, MediaType.WILDCARD })
+    @Produces({ MediaType.APPLICATION_XML, MediaType.WILDCARD })
+    public EvaluationResultLists blockEvaluation(SecureUserProfileEvaluation userProfile) {
 
-	@POST
-	@Path("/blockEvaluation")
-	@Consumes( { MediaType.APPLICATION_XML, MediaType.WILDCARD } )
-	@Produces({ MediaType.APPLICATION_XML, MediaType.WILDCARD } )
-	public EvaluationResultLists blockEvaluation(SecureUserProfileEvaluation userProfile) {
-		
-		EvaluationResultLists resultList = fREC.getblockResult( userProfile);
-		resultList.queryID=userProfile.queryID;
-		return resultList;
-	}
-	
-	@GET
-	@Path("/getPartnersFromFedRec")
-	@Produces({ MediaType.APPLICATION_XML, MediaType.WILDCARD })
-	public Response getPartnersFromFedRec(){
-		logger.log(Level.WARNING,"getPartnersFromFedRec");
-		System.out.println("getPartnersFromFedRec");
-		WebResource webResource = new Client().resource("http://localhost/eexcess-federated-recommender-web-service-1.0-SNAPSHOT/recommender/getRegisteredPartners");
-		PartnerBadgeList partnerList=webResource.get(PartnerBadgeList.class);
-		System.out.println(webResource.get(String.class));
-		fREC.setPartners(partnerList);
-		logger.log(Level.WARNING,partnerList.toString());
-		return Response.ok().build();
-	}
-	
-	/**
-	 * takes the already evaluated result and returns if there is a query left
-	 * to evaluate
-	 * 
-	 * @param id
-	 * @param result
-	 * @return
-	 * @throws IOException
-	 */
-	@POST
-	@Path("/evaluationResultUID")
-	@Consumes({ MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON, MediaType.APPLICATION_FORM_URLENCODED })
-	public Response evaluationResultUID(@QueryParam("id") Integer id,
-			EvaluationResultLists result) throws IOException {
-		EvaluationResponse eR = new EvaluationResponse();
+        EvaluationResultLists resultList = fREC.getblockResult(userProfile);
+        resultList.queryID = userProfile.queryID;
+        return resultList;
+    }
 
-		eR.evaluationDone = fREC.logEvaluationResult(id, result);
+    @GET
+    @Path("/getPartnersFromFedRec")
+    @Produces({ MediaType.APPLICATION_XML, MediaType.WILDCARD })
+    public Response getPartnersFromFedRec() {
+        logger.log(Level.WARNING, "getPartnersFromFedRec");
+        System.out.println("getPartnersFromFedRec");
+        WebResource webResource = new Client().resource("http://localhost/eexcess-federated-recommender-web-service-1.0-SNAPSHOT/recommender/getRegisteredPartners");
+        PartnerBadgeList partnerList = webResource.get(PartnerBadgeList.class);
+        System.out.println(webResource.get(String.class));
+        fREC.setPartners(partnerList);
+        logger.log(Level.WARNING, partnerList.toString());
+        return Response.ok().build();
+    }
 
-		logger.log(Level.INFO, "Result from user " + id + " retrieved ");
-		return Response.ok(eR).build();
-	};
+    /**
+     * takes the already evaluated result and returns if there is a query left
+     * to evaluate
+     * 
+     * @param id
+     * @param result
+     * @return
+     * @throws IOException
+     */
+    @POST
+    @Path("/evaluationResultUID")
+    @Consumes({ MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON, MediaType.APPLICATION_FORM_URLENCODED })
+    public Response evaluationResultUID(@QueryParam("id") Integer id, EvaluationResultLists result) throws IOException {
+        EvaluationResponse eR = new EvaluationResponse();
 
-	/**
-	 * 
-	 * returns the results to evaluate
-	 * 
-	 * @param id
-	 * @return
-	 * @throws IOException
-	 */
-	@POST
-	@Path("/expEvaluationWithUID")
-	// @Consumes({ MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON })
-	@Produces({ MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON })
-	public Response expEvaluationWithUID(@QueryParam("id") Integer id)
-			throws IOException {
-		
-		EvaluationResultLists results = fREC.getExpansionEvaluation(id);
+        eR.evaluationDone = fREC.logEvaluationResult(id, result);
 
-		return Response.ok(results).build();
-		// return Response.ok().build();
+        logger.log(Level.INFO, "Result from user " + id + " retrieved ");
+        return Response.ok(eR).build();
+    };
 
-	}
-	
-	/**
-	 * 
-	 * returns the results to evaluate
-	 * 
-	 * @param id
-	 * @return
-	 * @throws IOException
-	 */
-	@POST
-	@Path("/blockEvaluationWithUID")
-	// @Consumes({ MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON })
-	@Produces({ MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON , MediaType.APPLICATION_FORM_URLENCODED })
-	public Response blockEvaluationWithUID(@QueryParam("id") Integer id)
-			throws IOException {
-		
-		EvaluationResultLists results = fREC.getBlockEvaluation(id);
+    /**
+     * 
+     * returns the results to evaluate
+     * 
+     * @param id
+     * @return
+     * @throws IOException
+     */
+    @POST
+    @Path("/expEvaluationWithUID")
+    // @Consumes({ MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON })
+    @Produces({ MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON })
+    public Response expEvaluationWithUID(@QueryParam("id") Integer id) throws IOException {
 
-		return Response.ok(results).build();
-		// return Response.ok().build();
+        EvaluationResultLists results = fREC.getExpansionEvaluation(id);
 
-	}
+        return Response.ok(results).build();
+        // return Response.ok().build();
 
-	/**
-	 * writes out all result to result files and removes the result from the
-	 * query manager
-	 * 
-	 * @return
-	 */
-	@GET
-	@Path("/evaluationWriteOutAllResults")
-	public Response evaluationWriteOutAllResults() {
-		fREC.evaluationWriteEraseResults();
-		return Response.ok().build();
-	}
-	
-	@POST
-	@Path("/viewGraph")
-	@Consumes(value = MediaType.TEXT_XML)
-	@Produces(MediaType.APPLICATION_JSON)
-	public Response viewGraph(SecureUserProfile userProfile) throws IOException {
-		D3GraphDocument d3GraphDocument;
-		try {
-			d3GraphDocument = fREC.getGraph(userProfile);
-		} catch (FederatedRecommenderException e) {
-			return Response.serverError().build();
-		}
-		return Response.ok(d3GraphDocument).build();
-	}
+    }
 
+    /**
+     * 
+     * returns the results to evaluate
+     * 
+     * @param id
+     * @return
+     * @throws IOException
+     */
+    @POST
+    @Path("/blockEvaluationWithUID")
+    // @Consumes({ MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON })
+    @Produces({ MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON, MediaType.APPLICATION_FORM_URLENCODED })
+    public Response blockEvaluationWithUID(@QueryParam("id") Integer id) throws IOException {
+
+        EvaluationResultLists results = fREC.getBlockEvaluation(id);
+
+        return Response.ok(results).build();
+        // return Response.ok().build();
+
+    }
+
+    /**
+     * writes out all result to result files and removes the result from the
+     * query manager
+     * 
+     * @return
+     */
+    @GET
+    @Path("/evaluationWriteOutAllResults")
+    public Response evaluationWriteOutAllResults() {
+        fREC.evaluationWriteEraseResults();
+        return Response.ok().build();
+    }
+
+    @POST
+    @Path("/viewGraph")
+    @Consumes(value = MediaType.TEXT_XML)
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response viewGraph(SecureUserProfile userProfile) throws IOException {
+        D3GraphDocument d3GraphDocument;
+        try {
+            d3GraphDocument = fREC.getGraph(userProfile);
+        } catch (FederatedRecommenderException e) {
+            logger.log(Level.WARNING, "", e);
+            return Response.serverError().build();
+        }
+
+        return Response.ok(d3GraphDocument).build();
+    }
 }

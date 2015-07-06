@@ -27,6 +27,8 @@ import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import javax.ws.rs.core.MediaType;
 
@@ -51,7 +53,7 @@ import eu.eexcess.federatedrecommender.evaluation.evaluation.EvaluationQuery;
 
 public class CSVResultCreation {
     public final static String DIRECTORYPATH = "/home/hziak/Datasets/EEXCESS/evaluationBlockRanking/";
-
+    private static final Logger logger = Logger.getLogger(CSVResultCreation.class.getName());
     private final WebResource wRBlock;
 
     public CSVResultCreation() {
@@ -77,7 +79,8 @@ public class CSVResultCreation {
         try {
             ofrw = new FileWriter(new File(DIRECTORYPATH + "queryresult.csv"));
         } catch (IOException e1) {
-            e1.printStackTrace();
+            logger.log(Level.WARNING, "", e1);
+
         }
 
         for (EvaluationQuery query : queries.getQueries()) {
@@ -94,9 +97,10 @@ public class CSVResultCreation {
             if (finalCSVString != null)
                 try {
                     ofrw.write(finalCSVString);
+                    logger.log(Level.INFO, finalCSVString);
                     System.out.println(finalCSVString);
                 } catch (IOException e) {
-                    e.printStackTrace();
+                    logger.log(Level.WARNING, "", e);
                 }
         }
 
@@ -104,7 +108,7 @@ public class CSVResultCreation {
             ofrw.flush();
             ofrw.close();
         } catch (IOException e) {
-            e.printStackTrace();
+            logger.log(Level.WARNING, "", e);
         }
     }
 
@@ -114,8 +118,7 @@ public class CSVResultCreation {
 
             reader = new JsonReader(new FileReader(DIRECTORYPATH + fileName));
         } catch (FileNotFoundException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+            logger.log(Level.WARNING, "", e);
         }
 
         EvaluationQueryList queries = null;
@@ -131,7 +134,7 @@ public class CSVResultCreation {
         try {
             ofqw = new FileWriter(new File(DIRECTORYPATH + "query.csv"));
         } catch (IOException e1) {
-            e1.printStackTrace();
+            logger.log(Level.WARNING, "", e1);
         }
         for (EvaluationQuery evalQueries : queries.getQueries()) {
 
@@ -139,7 +142,7 @@ public class CSVResultCreation {
             try {
                 ofqw.write(result);
             } catch (IOException e) {
-                e.printStackTrace();
+                logger.log(Level.WARNING, "", e);
             }
 
         }
@@ -147,7 +150,7 @@ public class CSVResultCreation {
             ofqw.flush();
             ofqw.close();
         } catch (IOException e) {
-            e.printStackTrace();
+            logger.log(Level.WARNING, "", e);
         }
     }
 
@@ -209,14 +212,10 @@ public class CSVResultCreation {
             mapper.defaultPrettyPrintingWriter().writeValue(file, resp);
             System.out.println("Writing to file:" + file.getAbsolutePath());
         } catch (IOException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+            logger.log(Level.WARNING, "", e);
         }
-        // JsonWriter writer= new JsonWriter(new
-        // FileWriter(directoryPath+""+secureUserProfileEvaluation.queryID+".json"));
 
         for (EvaluationResultList resultList : resp.results) {
-            // System.out.println("RL "+resultList);
             int counter = 0;
             for (Result result : resultList.results) {
 
@@ -225,22 +224,14 @@ public class CSVResultCreation {
 
                     builder.append(result.title.replaceAll(",|\"|\n|\r", ""));
                     builder.append("\",");
-                    // if (result.description != null)
-                    // if (!result.description.isEmpty()) {
-                    // builder.append(",");
-                    // builder.append("\"");
-                    // builder.append(result.description.replaceAll(
-                    // ",|\"|\n|\r", " "));
-                    // builder.append("\"");
-                    // }
-                    // builder.append(System.lineSeparator());
                 } else if (resp.results.get(0).results.size() - (++counter) < 10)
                     return null;
             }
             builder.append(",");
         }
         String string = builder.toString();
-        System.out.println("returned " + string);
+        logger.log(Level.INFO, "returned " + string);
+
         return string;
     }
 

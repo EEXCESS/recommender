@@ -44,7 +44,8 @@ public class SchloettQuerySelection {
 
                     EvaluationQuery tmpQuery2 = new EvaluationQuery();
                     tmpQuery2.query = tmpQuery.query;
-                    System.out.println(tmpQuery.query);
+                    logger.log(Level.INFO, tmpQuery.query);
+
                     for (Interest interest : tmpQuery.interests) {
 
                         // System.out.println(interest.text +" ");
@@ -67,7 +68,9 @@ public class SchloettQuerySelection {
                     }
 
                     BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
-                    System.out.print("Description:");
+
+                    logger.log(Level.INFO, "Description:");
+
                     String s = null;
                     try {
                         s = br.readLine();
@@ -77,8 +80,7 @@ public class SchloettQuerySelection {
                     if (s != null) {
                         tmpQuery2.description = s;
                     }
-
-                    System.out.print("Write? ");
+                    logger.log(Level.INFO, "Write? :");
 
                     try {
                         s = br.readLine();
@@ -94,16 +96,18 @@ public class SchloettQuerySelection {
 
                 }
             } else
-                System.out.println("couldn not find " + query);
+                logger.log(Level.INFO, "couldn not find " + query);
+
             ObjectMapper mapper = new ObjectMapper();
 
             try {
                 File file = new File(CSVResultCreation.DIRECTORYPATH + "finalSelectedQueries-new.json");
                 mapper.defaultPrettyPrintingWriter().writeValue(file, selectedEvalQueries);
-                System.out.println("Writing to file:" + file.getAbsolutePath());
+                logger.log(Level.INFO, "Writing to file:" + file.getAbsolutePath());
+
             } catch (IOException e) {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
+
+                logger.log(Level.WARNING, "", e);
             }
         }
 
@@ -125,14 +129,14 @@ public class SchloettQuerySelection {
             line = ifBR.readLine();
         } catch (IOException e1) {
             closeBufferedReader(ifBR);
-            logger.log(Level.INFO, "", e1);
+            logger.log(Level.WARNING, "", e1);
         }
         while (line != null)
             try {
                 returnList.add(line);
                 line = ifBR.readLine();
             } catch (IOException e) {
-                logger.log(Level.INFO, "", e);
+                logger.log(Level.WARNING, "", e);
                 closeBufferedReader(ifBR);
             }
         closeBufferedReader(ifBR);
@@ -143,6 +147,7 @@ public class SchloettQuerySelection {
         try {
             reader.close();
         } catch (IOException e) {
+            logger.log(Level.WARNING, "", e);
         }
     }
 
