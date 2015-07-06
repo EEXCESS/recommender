@@ -285,23 +285,24 @@ public class FederatedRecommenderService {
         secureUserProfile.userCredentials = userCredentials;
 
         ContextNamedEntity contextNamedEntitie = new ContextNamedEntity();
-        ContextNamedEntitiesElement location = new ContextNamedEntitiesElement("graz", 0.1, 0.1, "http://dbpedia.url.org");
+        final String dbPediaUrl = "http://dbpedia.url.org";
+        ContextNamedEntitiesElement location = new ContextNamedEntitiesElement("graz", 0.1, 0.1, dbPediaUrl);
         contextNamedEntitie.locations.add(location);
         contextNamedEntitie.locations.add(location);
-        ContextNamedEntitiesElement misc = new ContextNamedEntitiesElement("something", 0.1, 0.1, "http://dbpedia.url.org");
+        ContextNamedEntitiesElement misc = new ContextNamedEntitiesElement("something", 0.1, 0.1, dbPediaUrl);
         contextNamedEntitie.misc.add(misc);
         contextNamedEntitie.misc.add(misc);
-        ContextNamedEntitiesElement org1 = new ContextNamedEntitiesElement("know-center", 0.1, 0.1, "http://dbpedia.url.org");
+        ContextNamedEntitiesElement org1 = new ContextNamedEntitiesElement("know-center", 0.1, 0.1, dbPediaUrl);
         contextNamedEntitie.organizations.add(org1);
-        ContextNamedEntitiesElement org2 = new ContextNamedEntitiesElement("mendeley", 0.1, 0.1, "http://dbpedia.url.org");
+        ContextNamedEntitiesElement org2 = new ContextNamedEntitiesElement("mendeley", 0.1, 0.1, dbPediaUrl);
         contextNamedEntitie.organizations.add(org2);
-        ContextNamedEntitiesElement pers1 = new ContextNamedEntitiesElement("Michael Jackson", 0.1, 0.1, "http://dbpedia.url.org");
+        ContextNamedEntitiesElement pers1 = new ContextNamedEntitiesElement("Michael Jackson", 0.1, 0.1, dbPediaUrl);
         contextNamedEntitie.persons.add(pers1);
-        ContextNamedEntitiesElement pers2 = new ContextNamedEntitiesElement("Bill Clinton", 0.1, 0.1, "http://dbpedia.url.org");
+        ContextNamedEntitiesElement pers2 = new ContextNamedEntitiesElement("Bill Clinton", 0.1, 0.1, dbPediaUrl);
         contextNamedEntitie.persons.add(pers2);
-        ContextNamedEntitiesElement top1 = new ContextNamedEntitiesElement("Trees", 0.1, 0.1, "http://dbpedia.url.org");
+        ContextNamedEntitiesElement top1 = new ContextNamedEntitiesElement("Trees", 0.1, 0.1, dbPediaUrl);
         contextNamedEntitie.topics.add(top1);
-        ContextNamedEntitiesElement top2 = new ContextNamedEntitiesElement("Animal", 0.1, 0.1, "http://dbpedia.url.org");
+        ContextNamedEntitiesElement top2 = new ContextNamedEntitiesElement("Animal", 0.1, 0.1, dbPediaUrl);
         contextNamedEntitie.topics.add(top2);
 
         secureUserProfile.contextNamedEntities = contextNamedEntitie;

@@ -50,22 +50,19 @@ import eu.eexcess.dataformats.userprofile.SecureUserProfileEvaluation;
 import eu.eexcess.federatedrecommender.evaluation.evaluation.EvaluationQuery;
 
 public class CSVResultCreation {
-    public final static String directoryPath = "/home/hziak/Datasets/EEXCESS/evaluationBlockRanking/";
+    public final static String DIRECTORYPATH = "/home/hziak/Datasets/EEXCESS/evaluationBlockRanking/";
 
     private final WebResource wRBlock;
 
-    // private final WebResource wRDefault;
     public CSVResultCreation() {
         ClientConfig clientConfig = new DefaultClientConfig();
         clientConfig.getFeatures().put(JSONConfiguration.FEATURE_POJO_MAPPING, Boolean.TRUE);
         Client client = Client.create(clientConfig);
         wRBlock = client.resource("http://eexcess-demo.know-center.tugraz.at/eexcess-federated-recommender-web-service-evaluation-1.0-SNAPSHOT/evaluation/blockEvaluation");
-        // wRDefault =
-        // client.resource("http://localhost:8099/excess-federated-recommender-web-service-evaluation-1.0-SNAPSHOT/evaluation/evaluation");
 
     }
 
-    public static void main(String args[]) {
+    public static void main(String[] args) {
         CSVResultCreation creation = new CSVResultCreation();
         EvaluationQueryList queries = creation.getEvaluationQueriesFromJson("finalSelectedQueries.json");
 
@@ -78,7 +75,7 @@ public class CSVResultCreation {
     private void createCSVResultsFile(EvaluationQueryList queries) {
         FileWriter ofrw = null;
         try {
-            ofrw = new FileWriter(new File(directoryPath + "queryresult.csv"));
+            ofrw = new FileWriter(new File(DIRECTORYPATH + "queryresult.csv"));
         } catch (IOException e1) {
             e1.printStackTrace();
         }
@@ -115,7 +112,7 @@ public class CSVResultCreation {
         JsonReader reader = null;
         try {
 
-            reader = new JsonReader(new FileReader(directoryPath + fileName));
+            reader = new JsonReader(new FileReader(DIRECTORYPATH + fileName));
         } catch (FileNotFoundException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();
@@ -132,7 +129,7 @@ public class CSVResultCreation {
     private void writeQueriesToQueryCSVFile(EvaluationQueryList queries) {
         FileWriter ofqw = null;
         try {
-            ofqw = new FileWriter(new File(directoryPath + "query.csv"));
+            ofqw = new FileWriter(new File(DIRECTORYPATH + "query.csv"));
         } catch (IOException e1) {
             e1.printStackTrace();
         }
@@ -208,7 +205,7 @@ public class CSVResultCreation {
         ObjectMapper mapper = new ObjectMapper();
 
         try {
-            File file = new File(directoryPath + "results/" + secureUserProfileEvaluation.queryID + ".json");
+            File file = new File(DIRECTORYPATH + "results/" + secureUserProfileEvaluation.queryID + ".json");
             mapper.defaultPrettyPrintingWriter().writeValue(file, resp);
             System.out.println("Writing to file:" + file.getAbsolutePath());
         } catch (IOException e) {
