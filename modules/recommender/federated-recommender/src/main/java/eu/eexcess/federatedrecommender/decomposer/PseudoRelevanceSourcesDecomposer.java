@@ -19,7 +19,7 @@ GNU Affero General Public License for more details.
 
 You should have received a copy of the GNU Affero General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
-*/
+ */
 package eu.eexcess.federatedrecommender.decomposer;
 
 import java.io.IOException;
@@ -67,136 +67,125 @@ import eu.eexcess.federatedrecommender.utils.FederatedRecommenderException;
  *
  */
 
-public class PseudoRelevanceSourcesDecomposer implements
-		SecureUserProfileDecomposer<SecureUserProfile,SecureUserProfileEvaluation> {
-	private static final Logger logger = Logger
-			.getLogger(PseudoRelevanceSourcesDecomposer.class.getName());
+public class PseudoRelevanceSourcesDecomposer implements SecureUserProfileDecomposer<SecureUserProfile, SecureUserProfileEvaluation> {
+    private static final Logger logger = Logger.getLogger(PseudoRelevanceSourcesDecomposer.class.getName());
 
-	
+    /*
+     * gets all results from the partners and puts the filtered top terms in the
+     * secureuserprofile if queryExpansionSourcePartner is not empty than these
+     * partners are used for the expansion
+     * 
+     * @see
+     * eu.eexcess.federatedrecommender.interfaces.SecureUserProfileDecomposer
+     * #decompose(eu.eexcess.dataformats.userprofile.SecureUserProfile)
+     */
+    @Override
+    public SecureUserProfile decompose(SecureUserProfileEvaluation inputSecureUserProfile) {
+        FederatedRecommenderCore fCore = null;
 
-	/*
-	 * gets all results from the partners and puts the filtered top terms in the secureuserprofile
-	 * if queryExpansionSourcePartner is not empty than these partners are used for the expansion
-	 * @see eu.eexcess.federatedrecommender.interfaces.SecureUserProfileDecomposer#decompose(eu.eexcess.dataformats.userprofile.SecureUserProfile)
-	 */
-	@Override
-	public SecureUserProfile decompose(SecureUserProfileEvaluation inputSecureUserProfile) {
-		FederatedRecommenderCore fCore = null;
-		
-		try {
-			fCore = FederatedRecommenderCore.getInstance(null);
-		} catch (FederatedRecommenderException e) {
-			logger.log(
-					Level.SEVERE,
-					"Error getting FederatedRecommenderCore,was perhabs not initialized correctly",
-					e);
-		}
-		Set<String> keywords = new HashSet<String>();
-		for (ContextKeyword cKeyword : inputSecureUserProfile.contextKeywords) {
-			keywords.add(cKeyword.text);
-		}
-		//	tmpSUP.partnerList = inputSecureUserProfile.queryExpansionSourcePartner;
-		List<PartnerBadge> tmpPartnerList = new ArrayList<PartnerBadge>();
-		for(PartnerBadge partnerBadge:inputSecureUserProfile.partnerList){
-			tmpPartnerList.add(partnerBadge);
-		}
-		inputSecureUserProfile.partnerList= inputSecureUserProfile.queryExpansionSourcePartner;
-		PartnersFederatedRecommendations pFR = fCore.getPartnersRecommendations(inputSecureUserProfile);
-		inputSecureUserProfile.partnerList=tmpPartnerList;
-		
-		Directory directory = new RAMDirectory();
+        try {
+            fCore = FederatedRecommenderCore.getInstance(null);
+        } catch (FederatedRecommenderException e) {
+            logger.log(Level.SEVERE, "Error getting FederatedRecommenderCore,was perhabs not initialized correctly", e);
+        }
+        Set<String> keywords = new HashSet<String>();
+        for (ContextKeyword cKeyword : inputSecureUserProfile.contextKeywords) {
+            keywords.add(cKeyword.text);
+        }
 
-		Analyzer analyzer = new StopAnalyzer();
-		IndexWriterConfig config = new IndexWriterConfig(Version.LATEST,
-				analyzer);
-		IndexWriter writer = null;
+        List<PartnerBadge> tmpPartnerList = new ArrayList<PartnerBadge>();
+        for (PartnerBadge partnerBadge : inputSecureUserProfile.partnerList) {
+            tmpPartnerList.add(partnerBadge);
+        }
+        inputSecureUserProfile.partnerList = inputSecureUserProfile.queryExpansionSourcePartner;
+        PartnersFederatedRecommendations pFR = fCore.getPartnersRecommendations(inputSecureUserProfile);
+        inputSecureUserProfile.partnerList = tmpPartnerList;
 
-		try {
-			writer = new IndexWriter(directory, config);
-			for (ResultList resultLists : pFR.getResults().values()) {
-				for (Result result : resultLists.results) {
-					addDoc(writer, result.description);
-					addDoc(writer, result.title);
-				}
-			}
+        Directory directory = new RAMDirectory();
 
-			writer.close();
+        Analyzer analyzer = new StopAnalyzer();
+        IndexWriterConfig config = new IndexWriterConfig(Version.LATEST, analyzer);
+        IndexWriter writer = null;
 
-			IndexReader reader = DirectoryReader.open(directory);
-			TermStats[] tStats = null;
-			try {
-				tStats = HighFreqTerms.getHighFreqTerms(reader, 20, "content",
-						new DocFreqComparator());
-			} catch (Exception e) {
-				logger.log(Level.SEVERE, "Could not open HighFreqTerms", e);
-			} finally {
-				reader.close();
-			}
-			if(tStats!=null){
-			for (TermStats termStats : tStats) {
-				String utf8String = termStats.termtext.utf8ToString();
-				if (utf8String.length() > 4)
-					if(!checkHighFreqTermsQuery(utf8String.toLowerCase(),keywords))
-					if (keywords.add(utf8String.toLowerCase())) {
-							inputSecureUserProfile.contextKeywords
-									.add(new ContextKeyword(utf8String,
-											termStats.docFreq / 100.0,ExpansionType.PSEUDORELEVANCEWP));
-					}
-			}
-			}
-			else logger.log(Level.SEVERE,"TermStats was null!");
-		} catch (IOException e) {
-			logger.log(Level.SEVERE,
-					"There was and error writing/reading the Index", e);
-		}
+        try {
+            writer = new IndexWriter(directory, config);
+            for (ResultList resultLists : pFR.getResults().values()) {
+                for (Result result : resultLists.results) {
+                    addDoc(writer, result.description);
+                    addDoc(writer, result.title);
+                }
+            }
 
-		logger.log(Level.INFO, "Source   Expansion: " + keywords.toString() +" Partners: "+inputSecureUserProfile.queryExpansionSourcePartner);
-		return inputSecureUserProfile;
-	}
-	/**
-	 * checks if the term contains parts of the query
-	 * @param term
-	 * @param keywords
-	 * @return
-	 */
-	private boolean checkHighFreqTermsQuery(String term,
-			Set<String> keywords) {
-		for (String keyword : keywords) {
-			if(keyword.toLowerCase().contains(term.toLowerCase()))
-					return true;
-			if(term.toLowerCase().contains(keyword.toLowerCase()))
-					return true;
-		}
-		return false;
-	}
-	/**
-	 * adds documents to the index
-	 * @param writer
-	 * @param content
-	 * @throws IOException
-	 */
-	private static void addDoc(IndexWriter writer, String content)
-			throws IOException {
-		if (content != null) {
-			FieldType fieldType = new FieldType();
-			fieldType.setStoreTermVectors(true);
-			fieldType.setStoreTermVectorPositions(true);
-			fieldType.setIndexed(true);
-			fieldType.setIndexOptions(IndexOptions.DOCS_AND_FREQS);
-			fieldType.setStored(true);
-			Document doc = new Document();
-			doc.add(new Field("content", content, fieldType));
-			writer.addDocument(doc);
-		}
-	}
-	@Override
-	public void setConfiguration(FederatedRecommenderConfiguration fedRecConfig)
-			throws FederatedRecommenderException {
-		logger.log(Level.INFO,"Nothing todo with FederatedRecommenderConfiguration, not needed.");
-	}
+            writer.close();
 
-	
-	
-	
+            IndexReader reader = DirectoryReader.open(directory);
+            TermStats[] tStats = null;
+            try {
+                tStats = HighFreqTerms.getHighFreqTerms(reader, 20, "content", new DocFreqComparator());
+            } catch (Exception e) {
+                logger.log(Level.SEVERE, "Could not open HighFreqTerms", e);
+            } finally {
+                reader.close();
+            }
+            if (tStats != null) {
+                for (TermStats termStats : tStats) {
+                    String utf8String = termStats.termtext.utf8ToString();
+                    if (utf8String.length() > 4 && !checkHighFreqTermsQuery(utf8String.toLowerCase(), keywords))
+                        if (keywords.add(utf8String.toLowerCase())) {
+                            inputSecureUserProfile.contextKeywords.add(new ContextKeyword(utf8String, termStats.docFreq / 100.0, ExpansionType.PSEUDORELEVANCEWP));
+                        }
+                }
+            } else
+                logger.log(Level.SEVERE, "TermStats was null!");
+        } catch (IOException e) {
+            logger.log(Level.SEVERE, "There was and error writing/reading the Index", e);
+        }
+
+        logger.log(Level.INFO, "Source   Expansion: " + keywords.toString() + " Partners: " + inputSecureUserProfile.queryExpansionSourcePartner);
+        return inputSecureUserProfile;
+    }
+
+    /**
+     * checks if the term contains parts of the query
+     * 
+     * @param term
+     * @param keywords
+     * @return
+     */
+    private boolean checkHighFreqTermsQuery(String term, Set<String> keywords) {
+        for (String keyword : keywords) {
+            if (keyword.toLowerCase().contains(term.toLowerCase()))
+                return true;
+            if (term.toLowerCase().contains(keyword.toLowerCase()))
+                return true;
+        }
+        return false;
+    }
+
+    /**
+     * adds documents to the index
+     * 
+     * @param writer
+     * @param content
+     * @throws IOException
+     */
+    private static void addDoc(IndexWriter writer, String content) throws IOException {
+        if (content != null) {
+            FieldType fieldType = new FieldType();
+            fieldType.setStoreTermVectors(true);
+            fieldType.setStoreTermVectorPositions(true);
+            fieldType.setIndexed(true);
+            fieldType.setIndexOptions(IndexOptions.DOCS_AND_FREQS);
+            fieldType.setStored(true);
+            Document doc = new Document();
+            doc.add(new Field("content", content, fieldType));
+            writer.addDocument(doc);
+        }
+    }
+
+    @Override
+    public void setConfiguration(FederatedRecommenderConfiguration fedRecConfig) throws FederatedRecommenderException {
+        logger.log(Level.INFO, "Nothing todo with FederatedRecommenderConfiguration, not needed.");
+    }
 
 }
