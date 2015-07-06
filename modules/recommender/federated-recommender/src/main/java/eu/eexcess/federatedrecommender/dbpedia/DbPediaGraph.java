@@ -46,7 +46,8 @@ import eu.eexcess.federatedrecommender.utils.FederatedRecommenderException;
  *
  */
 public class DbPediaGraph {
-	private static final Logger logger = Logger.getLogger(DbPediaGraph.class.getName());
+	private static final String DBPEDIAFAILURE = "DBPedia index could not be searched for keyword";
+    private static final Logger logger = Logger.getLogger(DbPediaGraph.class.getName());
 	private DbPediaSolrIndex dbPediaIndex = null; 
     private ExecutorService threadPool;
 	
@@ -73,8 +74,8 @@ public class DbPediaGraph {
                 	try {
         				searchKeyNodes(g, keyword.text, keynodes, visitedNodes, hitsLimit, depthLimit);
         			} catch (FederatedRecommenderException e) {
-        				logger.log(Level.SEVERE,"DBPedia index could not be searched for keyword");
-        				throw new FederatedRecommenderException("DBPedia index could not be searched for keyword", e);
+        				logger.log(Level.SEVERE,DBPEDIAFAILURE);
+        				throw new FederatedRecommenderException(DBPEDIAFAILURE, e);
         			}                        
                      return null;
                 }
@@ -97,8 +98,8 @@ public class DbPediaGraph {
 		try {
 			results = dbPediaIndex.search(hitsLimit, "entity_en:\"" + keyword + "\" AND edge:\"http://xmlns.com/foaf/0.1/name\"");
 		} catch (FederatedRecommenderException e) {
-			logger.log(Level.SEVERE,"DBPedia index could not be searched for keyword");
-			throw new FederatedRecommenderException("DBPedia index could not be searched for keyword", e);
+			logger.log(Level.SEVERE,DBPEDIAFAILURE);
+			throw new FederatedRecommenderException(DBPEDIAFAILURE, e);
 		}
 		synchronized (this) {
 			g.addVertex(keyword);
@@ -108,8 +109,8 @@ public class DbPediaGraph {
 					g.addEdge(keyword, item.parentNode);
 					buildFromKeyword(g, item.parentNode , vistedNodes, hitsLimit, depthLimit);
 				} catch (FederatedRecommenderException e) {
-					logger.log(Level.SEVERE,"DBPedia index could not be searched for keyword");
-					throw new FederatedRecommenderException("DBPedia index could not be searched for keyword", e);
+					logger.log(Level.SEVERE,DBPEDIAFAILURE);
+					throw new FederatedRecommenderException(DBPEDIAFAILURE, e);
 				}
 			}
 			keynodes.add(keyword);
@@ -133,30 +134,35 @@ public class DbPediaGraph {
 			try {
 				results = dbPediaIndex.search(hitsLimit, "parentNode:\"" + keyword + "\"");
 			} catch (FederatedRecommenderException e1) {
-				logger.log(Level.SEVERE,"DBPedia index could not be searched for keyword");
-				throw new FederatedRecommenderException("DBPedia index could not be searched for keyword", e1);
+				logger.log(Level.SEVERE,DBPEDIAFAILURE);
+				throw new FederatedRecommenderException(DBPEDIAFAILURE, e1);
 			}
 			
 			for (DbPediaIndexBean doc : results) {
 				
 				String object = doc.childNode;
 				String subject = doc.parentNode;
-				if(object!=null)
-				if(!object.equals(subject)){
-					g.addVertex(object);
-					g.addVertex(subject);
-					g.addEdge(object, subject);
-					if(!visitedNodes.contains(subject)){
-						visitedNodes.add(subject);
-						buildFromKeyword(g, subject, visitedNodes, hitsLimit, depthLimit - 1);
-					}else{
-						logger.log(Level.FINEST,"GRAPH: Node "+subject+" allready in graph ");
-					}
-				}
+				addVertex(g, visitedNodes, hitsLimit, depthLimit, object, subject);
 				}
 				
 	
 		}
 	}
+
+    private void addVertex(SimpleWeightedGraph<String, DefaultEdge> g, List<String> visitedNodes, int hitsLimit, int depthLimit, String object, String subject)
+            throws FederatedRecommenderException {
+        if(object!=null)
+        if(!object.equals(subject)){
+        	g.addVertex(object);
+        	g.addVertex(subject);
+        	g.addEdge(object, subject);
+        	if(!visitedNodes.contains(subject)){
+        		visitedNodes.add(subject);
+        		buildFromKeyword(g, subject, visitedNodes, hitsLimit, depthLimit - 1);
+        	}else{
+        		logger.log(Level.FINEST,"GRAPH: Node "+subject+" allready in graph ");
+        	}
+        }
+    }
 	
 }
