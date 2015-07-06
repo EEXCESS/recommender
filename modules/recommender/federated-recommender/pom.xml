@@ -131,6 +131,11 @@
 			<type>jar</type>
 			<classifier>jdk15</classifier>
 		</dependency>
+				<dependency>
+			<groupId>net.sf.extjwnl</groupId>
+			<artifactId>extjwnl</artifactId>
+			<version>1.7.1</version>
+		</dependency>
 	</dependencies>
 </project>
 
