@@ -83,8 +83,9 @@ public class ESUPLink implements Serializable {
         return false;
     }
 
+    @Override
     public String toString() {
-        return className + " " + link;
+        return "ESUPLink [className=" + className + ", link=" + link + "]";
     }
 
 }

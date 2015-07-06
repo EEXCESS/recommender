@@ -19,7 +19,7 @@ GNU Affero General Public License for more details.
 
 You should have received a copy of the GNU Affero General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
-*/
+ */
 package eu.eexcess.federatedrecommender.utils;
 
 import java.io.FileNotFoundException;
@@ -31,45 +31,48 @@ import java.util.logging.Logger;
 
 /**
  * Reader for Files in the Resources of the Package
+ * 
  * @author hziak
  */
 public class ResourceReader {
-	private static final Logger logger = Logger.getLogger(ResourceReader.class
-			.getName());
-		static final public Object readObjectFromResource(String file) throws FileNotFoundException {
-			InputStream fin = null;
-			
-			fin = ResourceReader.class.getClassLoader().getResourceAsStream(file);
-			if(fin == null)
-				throw new FileNotFoundException(" Resource "+file+" not found");
-			ObjectInputStream ois = null;
-			try {
-				if (fin != null)
-					ois = new ObjectInputStream(fin);
-			} catch (IOException e) {
-				logger.log(Level.SEVERE, "ObjectInputStream could not be read" ,e);
-			}
-			Object result = null;
-			try {
-				if (ois != null)
-					result = ois.readObject();
-			} catch (ClassNotFoundException e) {
-				logger.log(Level.SEVERE, "Class of ObjectInputStream could not be read" ,e);
-			} catch (IOException e) {
-				logger.log(Level.SEVERE, "ObjectInputStream could not be read" ,e);
-			}
-			finally{
-				try {
-					fin.close();
-					if(ois!=null)
-						ois.close();	
-				} catch (IOException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
-				
-			}
-			
-			return result;
-		}
+
+    private ResourceReader() {
+    }
+
+    private static final Logger logger = Logger.getLogger(ResourceReader.class.getName());
+
+    static final public Object readObjectFromResource(String file) throws FileNotFoundException {
+        InputStream fin = null;
+
+        fin = ResourceReader.class.getClassLoader().getResourceAsStream(file);
+        if (fin == null)
+            throw new FileNotFoundException(" Resource " + file + " not found");
+        ObjectInputStream ois = null;
+        try {
+            if (fin != null)
+                ois = new ObjectInputStream(fin);
+        } catch (IOException e) {
+            logger.log(Level.SEVERE, "ObjectInputStream could not be read", e);
+        }
+        Object result = null;
+        try {
+            if (ois != null)
+                result = ois.readObject();
+        } catch (ClassNotFoundException e) {
+            logger.log(Level.SEVERE, "Class of ObjectInputStream could not be read", e);
+        } catch (IOException e) {
+            logger.log(Level.SEVERE, "ObjectInputStream could not be read", e);
+        } finally {
+            try {
+                fin.close();
+                if (ois != null)
+                    ois.close();
+            } catch (IOException e) {
+                logger.log(Level.SEVERE, "IOError", e);
+            }
+
+        }
+
+        return result;
+    }
 }
