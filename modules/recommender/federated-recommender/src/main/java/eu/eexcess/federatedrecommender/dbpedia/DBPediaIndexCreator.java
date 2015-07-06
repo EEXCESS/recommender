@@ -24,6 +24,8 @@ package eu.eexcess.federatedrecommender.dbpedia;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import eu.eexcess.config.FederatedRecommenderConfiguration;
 import eu.eexcess.federatedrecommender.utils.FederatedRecommenderException;
@@ -36,11 +38,16 @@ import eu.eexcess.federatedrecommender.utils.FederatedRecommenderException;
  *
  */
 public class DBPediaIndexCreator {
+    private static final String USAGEMESSAGE = "Usage: \n" + "-s <SolrServerUri>   (e.g. http://localhost:8983/solr/)\n"
+            + "-i <DbpediaMappingBasedFile i> .... <DbpediaMappingBasedFile n>\n"
+            + "Note: For example use the Dbpedia files named mappingbased_properties_en.nt or mappingbased_properties_en_uris_de.nt \n"
+            + "mappingbased_properties_en.nt should always be used as basefile and first file in the index.\n"
+            + "For other languages then english and german adaptation of the SolrSchema should be done";
+    private static final Logger logger = Logger.getLogger(DBPediaIndexCreator.class.getName());
 
     public static void main(String[] args) {
         if (args.length == 0) {
-            String message = UsageMessage();
-            System.out.println(message);
+            logger.log(Level.INFO, USAGEMESSAGE);
             return;
         }
         int solrServerUriIndex = -1;
@@ -56,14 +63,13 @@ public class DBPediaIndexCreator {
         if (solrServerUriIndex >= 0 && solrServerUriIndex + 1 < args.length)
             solrServerUri = args[solrServerUriIndex + 1];
         if (solrServerUri == null) {
-            String message = "Solr server uri not found \n " + UsageMessage();
-            System.out.println(message);
+            logger.log(Level.SEVERE, "Solr server uri not found \n " + USAGEMESSAGE);
             return;
         }
         FederatedRecommenderConfiguration configuration = new FederatedRecommenderConfiguration();
         configuration.solrServerUri = solrServerUri;
         List<String> dbPediaFileList = null;
-        if (dbPediaBaseFilesIndex >= 0 & dbPediaBaseFilesIndex + 1 < args.length) {
+        if (dbPediaBaseFilesIndex >= 0 && dbPediaBaseFilesIndex + 1 < args.length) {
             if (dbPediaBaseFilesIndex < solrServerUriIndex)
                 dbPediaFileList = Arrays.asList(args).subList(dbPediaBaseFilesIndex + 1, solrServerUriIndex);
             else
@@ -90,27 +96,21 @@ public class DBPediaIndexCreator {
                                                                                                * !
                                                                                                */
                 } catch (FederatedRecommenderException e) {
-                    e.printStackTrace();
+                    logger.log(Level.WARNING, "", e);
                 }
             }
 
         } else {
-            System.out.println("No files to index, just doing reference counting");
+            logger.log(Level.INFO, "No files to index, just doing reference counting");
         }
 
         try {
             dbPediaSolrIndex.createReferenceCounts();
         } catch (FederatedRecommenderException e) {
-            e.printStackTrace();
+            logger.log(Level.SEVERE, "", e);
+
         }
 
     }
 
-    private static String UsageMessage() {
-        String message = "Usage: \n" + "-s <SolrServerUri>   (e.g. http://localhost:8983/solr/)\n" + "-i <DbpediaMappingBasedFile i> .... <DbpediaMappingBasedFile n>\n"
-                + "Note: For example use the Dbpedia files named mappingbased_properties_en.nt or mappingbased_properties_en_uris_de.nt \n"
-                + "mappingbased_properties_en.nt should always be used as basefile and first file in the index.\n"
-                + "For other languages then english and german adaptation of the SolrSchema should be done";
-        return message;
-    }
 }

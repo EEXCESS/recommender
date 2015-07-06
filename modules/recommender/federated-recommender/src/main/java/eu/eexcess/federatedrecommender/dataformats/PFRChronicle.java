@@ -19,30 +19,28 @@ GNU Affero General Public License for more details.
 
 You should have received a copy of the GNU Affero General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
-*/
+ */
 package eu.eexcess.federatedrecommender.dataformats;
 
 import java.util.LinkedList;
-
+import java.util.List;
 
 /**
  * Chronicle for the PartnersFederatedRecommendations
  * 
  */
 public class PFRChronicle {
-	private LinkedList<PartnersFederatedRecommendations> chronicle = new LinkedList<PartnersFederatedRecommendations>();
+    private List<PartnersFederatedRecommendations> chronicle = new LinkedList<PartnersFederatedRecommendations>();
 
-	public LinkedList<PartnersFederatedRecommendations> getChronicle() {
-		return chronicle;
-	}
-	
-	public void addRecommendations(
-			PartnersFederatedRecommendations partnersFederatedRecommendations) {
-		chronicle.add(partnersFederatedRecommendations);
-	}
+    public List<PartnersFederatedRecommendations> getChronicle() {
+        return chronicle;
+    }
 
-	public void removeRecommendations(
-			PartnersFederatedRecommendations partnersFederatedRecommendations) {
-		chronicle.remove(partnersFederatedRecommendations);
-	}
+    public void addRecommendations(PartnersFederatedRecommendations partnersFederatedRecommendations) {
+        chronicle.add(partnersFederatedRecommendations);
+    }
+
+    public void removeRecommendations(PartnersFederatedRecommendations partnersFederatedRecommendations) {
+        chronicle.remove(partnersFederatedRecommendations);
+    }
 }
