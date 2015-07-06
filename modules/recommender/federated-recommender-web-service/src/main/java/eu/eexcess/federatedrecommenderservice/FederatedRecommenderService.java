@@ -37,9 +37,7 @@ import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
-import org.codehaus.jackson.JsonParseException;
 import org.codehaus.jackson.JsonParser;
-import org.codehaus.jackson.map.JsonMappingException;
 import org.codehaus.jackson.map.ObjectMapper;
 
 import com.sun.jersey.spi.resource.Singleton;
@@ -74,12 +72,7 @@ import eu.eexcess.federatedrecommender.utils.FederatedRecommenderException;
 @Singleton
 public class FederatedRecommenderService {
     private static final Logger logger = Logger.getLogger(FederatedRecommenderService.class.getName());
-    // @SuppressWarnings("unused")
-    // private static final String EEXCESS_MIMETYPE =
-    // "application/vnd.eexcess.recommendation-results+json";
-    // @SuppressWarnings("unused")
-    // private static final String EEXCESS_NAMESPACE =
-    // "http://eexcess.eu/schema/recommender-results";
+
     private final FederatedRecommenderCore fRC;
 
     private final FederatedRecommenderConfiguration federatedRecommenderConfiguration;
@@ -108,15 +101,9 @@ public class FederatedRecommenderService {
 
         try {
             federatedRecommenderConfiguration = mapper.readValue(new File(resource.getFile()), FederatedRecommenderConfiguration.class);
-        } catch (JsonParseException e) {
-            logger.log(Level.SEVERE, "There was an error parsing the FederationRecommenderConfig File", e);
-            throw new FederatedRecommenderException("There was an error parsing the FederationRecommenderConfig File in FederatedRecommenderCore Module", e);
-        } catch (JsonMappingException e) {
-            logger.log(Level.SEVERE, "There was an error parsing the FederationRecommenderConfig File", e);
-            throw new FederatedRecommenderException("There was an error parsing the FederationRecommenderConfig File in FederatedRecommenderCore Module", e);
         } catch (IOException e) {
-            logger.log(Level.SEVERE, "There was an error reading the FederationRecommenderConfig File", e);
-            throw new FederatedRecommenderException("There was an error reading the FederationRecommenderConfig File in FederatedRecommenderCore Module", e);
+            logger.log(Level.SEVERE, "There was an error parsing the FederationRecommenderConfig File", e);
+            throw new FederatedRecommenderException("There was an error parsing the FederationRecommenderConfig File in FederatedRecommenderCore Module", e);
         }
         try {
             fRC = FederatedRecommenderCore.getInstance(federatedRecommenderConfiguration);
@@ -200,17 +187,6 @@ public class FederatedRecommenderService {
     @Produces({ MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON })
     public PartnerBadgeList getRegisteredPartners() throws IOException {
 
-        /*
-         * PartnerRegister partnerRegister= fRC.getPartnerRegister();
-         * PartnerRegister returnedPartnerRegister= new PartnerRegister(); for
-         * (PartnerBadge partnerBadge: partnerRegister.getPartners()) {
-         * partnerBadge.setEndpoint(""); //clean out the endpoint, user should
-         * perhaps not know that if(partnerBadge.partnerKey==null)
-         * returnedPartnerRegister.addPartner(partnerBadge);
-         * if(partnerBadge.partnerKey.isEmpty())
-         * returnedPartnerRegister.addPartner(partnerBadge); } return
-         * returnedPartnerRegister;
-         */
         PartnerBadgeList partners = new PartnerBadgeList();
 
         partners.partners = fRC.getPartnerRegister().getPartners();
@@ -229,27 +205,6 @@ public class FederatedRecommenderService {
     // End Services
 
     // Begin Test Services
-
-    /*
-     * TEST METHODS:
-     * 
-     * (1) Test recommend -> /testRecommend?context=Keyword -> Generate
-     * recommendations (2) Test badge -> /testBadge -> Retrieve a sample partner
-     * badge (3) Test secure user profile -> /testSUP -> Retrieve a sample
-     * secure user profile
-     */
-
-    /*
-     * @GET
-     * 
-     * @Path("/testRecommend")
-     * 
-     * @Produces(value = MediaType.APPLICATION_XML) public ResultList
-     * testRecommend(@QueryParam("context") String context) throws IOException {
-     * SecureUserProfile userProfile = new SecureUserProfile();
-     * userProfile.contextList = Arrays.asList(context); return
-     * fRC.generateFederatedRecommendation(userProfile); }
-     */
 
     @GET
     @Path("/testRecommend")
