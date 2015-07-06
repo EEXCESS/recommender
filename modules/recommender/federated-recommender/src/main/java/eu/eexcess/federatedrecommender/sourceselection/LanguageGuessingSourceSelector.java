@@ -27,6 +27,7 @@ import java.util.Map;
 
 import org.apache.log4j.Logger;
 
+import eu.eexcess.config.FederatedRecommenderConfiguration;
 import eu.eexcess.dataformats.PartnerBadge;
 import eu.eexcess.dataformats.userprofile.ContextKeyword;
 import eu.eexcess.dataformats.userprofile.SecureUserProfile;
@@ -37,6 +38,9 @@ public class LanguageGuessingSourceSelector implements PartnerSelector {
 
 	private Logger logger = Logger.getLogger(LanguageGuessingSourceSelector.class);
 	private Map<PartnerBadge, List<String>> selectedPartners = new HashMap<>();
+
+	public LanguageGuessingSourceSelector(FederatedRecommenderConfiguration configuration) {
+	}
 
 	/**
 	 * Selects partners according to language matches. Languages may be
@@ -119,10 +123,13 @@ public class LanguageGuessingSourceSelector implements PartnerSelector {
 					if (false == partnerConnectorList.contains(partner)) {
 						partnerConnectorList.add(partner);
 
-						if (!selectedPartners.containsKey(partner)) {
-							selectedPartners.put(partner, new ArrayList<String>());
+						if (false == selectedPartners.containsKey(partner)) {
+							ArrayList<String> newList = new ArrayList<String>();
+							newList.add(language);
+							selectedPartners.put(partner, newList);
+						} else {
+							selectedPartners.get(partner).add(language);
 						}
-						selectedPartners.get(partner).add(language);
 					}
 				}
 			}

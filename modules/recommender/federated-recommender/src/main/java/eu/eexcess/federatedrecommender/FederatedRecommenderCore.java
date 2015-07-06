@@ -23,6 +23,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 package eu.eexcess.federatedrecommender;
 
 import java.io.FileNotFoundException;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -93,6 +95,7 @@ public class FederatedRecommenderCore {
         threadPool = Executors.newFixedThreadPool(federatedRecConfiguration.numRecommenderThreads);
         this.federatedRecConfiguration = federatedRecConfiguration;
         this.recommenderStats = new RecommenderStats();
+        instanciateSourceSelectors(this.federatedRecConfiguration);
     }
 
     /**
@@ -266,9 +269,8 @@ public class FederatedRecommenderCore {
                                                      // partner
             if (!secureUserProfile.partnerList.isEmpty()) {
                 boolean withKey = false;
-                if (partner.partnerKey != null)
-                    if (!partner.partnerKey.isEmpty())
-                        withKey = true;
+                if (partner.partnerKey != null && !partner.partnerKey.isEmpty())
+                    withKey = true;
                 if (!withKey)
                     for (PartnerBadge uBadge : secureUserProfile.partnerList) {
                         if (uBadge.getSystemId().equals(partner.getSystemId()))
@@ -276,9 +278,9 @@ public class FederatedRecommenderCore {
                     }
                 else
                     for (PartnerBadge uBadge : secureUserProfile.protectedPartnerList) {
-                        if (uBadge.partnerKey != null)
-                            if (!uBadge.partnerKey.isEmpty() && partner.partnerKey.equals(uBadge.partnerKey) && uBadge.getSystemId().equals(partner.getSystemId()))
-                                return true;
+                        if (uBadge.partnerKey != null && !uBadge.partnerKey.isEmpty() && partner.partnerKey.equals(uBadge.partnerKey)
+                                && uBadge.getSystemId().equals(partner.getSystemId()))
+                            return true;
                     }
             } else
                 return true;
@@ -295,13 +297,14 @@ public class FederatedRecommenderCore {
      */
     public ResultList generateFederatedRecommendation(SecureUserProfile secureUserProfile) throws FileNotFoundException {
         ResultList resultList = null;
+        SecureUserProfile secureUserProfileTmp = secureUserProfile;
         if (federatedRecConfiguration.sourceSelectors != null) {
-            ArrayList<String> sourceSelectors = new ArrayList<String>();
+            List<String> sourceSelectors = new ArrayList<String>();
             Collections.addAll(sourceSelectors, federatedRecConfiguration.sourceSelectors);
-            secureUserProfile = sourceSelection(secureUserProfile, sourceSelectors);
+            secureUserProfileTmp = sourceSelection(secureUserProfileTmp, sourceSelectors);
         }
         try {
-            resultList = getAndAggregateResults(secureUserProfile, this.federatedRecConfiguration.defaultPickerName);
+            resultList = getAndAggregateResults(secureUserProfileTmp, this.federatedRecConfiguration.defaultPickerName);
         } catch (FederatedRecommenderException e) {
             logger.log(Level.SEVERE, "Some error retrieving or aggregation results occured.", e);
         }
@@ -323,9 +326,7 @@ public class FederatedRecommenderCore {
             Future<DocumentBadgeList> future = threadPool.submit(new Callable<DocumentBadgeList>() {
                 @Override
                 public DocumentBadgeList call() throws Exception {
-
-                    DocumentBadgeList resultList = getDocsResult(partner, tmpClient, currentDocs);
-                    return resultList;
+                    return getDocsResult(partner, tmpClient, currentDocs);
                 }
 
                 /**
@@ -404,6 +405,27 @@ public class FederatedRecommenderCore {
         return sUPDecomposer.decompose(userProfile);
     }
 
+    private void instanciateSourceSelectors(FederatedRecommenderConfiguration recommenderConfig) {
+
+        ArrayList<String> selectorsClassNames = new ArrayList<String>();
+        Collections.addAll(selectorsClassNames, recommenderConfig.sourceSelectors);
+
+        for (String sourceSelectorClassName : selectorsClassNames) {
+            try {
+                PartnerSelector sourceSelector = (PartnerSelector) statelessClassInstances.get(sourceSelectorClassName);
+                if (null == sourceSelector) {
+                    Constructor<?> ctor = Class.forName(sourceSelectorClassName).getConstructor(FederatedRecommenderConfiguration.class);
+
+                    sourceSelector = (PartnerSelector) ctor.newInstance(recommenderConfig);
+                    logger.info("instanciating new source selector [" + sourceSelector.getClass().getSimpleName() + "]");
+                    statelessClassInstances.put(sourceSelectorClassName, sourceSelector);
+                }
+            } catch (InstantiationException | IllegalAccessException | ClassNotFoundException | NoSuchMethodException | InvocationTargetException e) {
+                logger.log(Level.SEVERE, "failed to instanciate source selector [" + sourceSelectorClassName + "]", e);
+            }
+        }
+    }
+
     /**
      * Performs partner source selection according to the given classes and
      * their order. Multiple identical selectors are allowed but instantiated
@@ -422,18 +444,12 @@ public class FederatedRecommenderCore {
         }
 
         SecureUserProfile lastEvaluatedProfile = userProfile;
-
         for (String sourceSelectorClassName : selectorsClassNames) {
-            try {
-                PartnerSelector sourceSelector = (PartnerSelector) statelessClassInstances.get(sourceSelectorClassName);
-                if (null == sourceSelector) {
-                    sourceSelector = (PartnerSelector) Class.forName(sourceSelectorClassName).newInstance();
-                    logger.info("instanciating new source selection [" + sourceSelector.getClass().getSimpleName() + "]");
-                    statelessClassInstances.put(sourceSelectorClassName, sourceSelector);
-                }
+            PartnerSelector sourceSelector = (PartnerSelector) statelessClassInstances.get(sourceSelectorClassName);
+            if (null == sourceSelector) {
+                logger.info("failed to find requested source selector [" + sourceSelectorClassName + "]: ignoring source selection");
+            } else {
                 lastEvaluatedProfile = sourceSelector.sourceSelect(lastEvaluatedProfile, getPartnerRegister().getPartners());
-            } catch (InstantiationException | IllegalAccessException | ClassNotFoundException e) {
-                logger.log(Level.SEVERE, "failed to instanciate source selector [" + sourceSelectorClassName + "] by name: ignoring source selection", e);
             }
         }
         return lastEvaluatedProfile;
@@ -479,6 +495,7 @@ public class FederatedRecommenderCore {
                 // Database Entry Style
                 // ('SYSTEM_ID','REQUESTCOUNT','FAILEDREQUESTCOUNT','FAILEDREQUESTTIMEOUTCOUNT')
 
+                final String dbErrorMsg = "Could not write into StatsDatabase: ";
                 if (updateS != null) {
 
                     try {
@@ -489,7 +506,7 @@ public class FederatedRecommenderCore {
                         updateS.setInt(4, longStats.failedRequestTimeoutCount + shortStats.failedRequestTimeoutCount);
                         updateS.execute();
                     } catch (SQLException e) {
-                        logger.log(Level.INFO, "Could not write into StatsDatabase: " + e.getMessage());
+                        logger.log(Level.INFO, dbErrorMsg, e);
                     } finally {
                         db.commit();
                     }
@@ -511,13 +528,13 @@ public class FederatedRecommenderCore {
                             updateQ.addBatch();
 
                         } catch (SQLException e) {
-                            logger.log(Level.INFO, "Could not write into StatsDatabase: " + e.getMessage());
+                            logger.log(Level.INFO, dbErrorMsg, e);
                         }
                     }
                     try {
                         updateQ.executeBatch();
                     } catch (SQLException e) {
-                        logger.log(Level.INFO, "Could not write into StatsDatabase: " + e.getMessage());
+                        logger.log(Level.INFO, dbErrorMsg, e);
                     }
 
                 } else
@@ -540,9 +557,8 @@ public class FederatedRecommenderCore {
             return "Allready Registered";
         }
 
-        if (badge.partnerKey != null)
-            if (!badge.partnerKey.isEmpty() && badge.partnerKey.length() < 20)
-                return "Partner Key is too short (<20)";
+        if (badge.partnerKey != null && !badge.partnerKey.isEmpty() && badge.partnerKey.length() < 20)
+            return "Partner Key is too short (<20)";
 
         Database db = new Database(this.federatedRecConfiguration.statsLogDatabase, DatabaseQueryStats.values());
         PreparedStatement getS = db.getPreparedSelectStatement(DatabaseQueryStats.REQUESTLOG);

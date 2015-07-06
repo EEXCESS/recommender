@@ -19,7 +19,7 @@ GNU Affero General Public License for more details.
 
 You should have received a copy of the GNU Affero General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
-*/
+ */
 package eu.eexcess.partnerrecommender.reference;
 
 import java.util.regex.Matcher;
@@ -29,36 +29,38 @@ import eu.eexcess.dataformats.result.DocumentBadge;
 import eu.eexcess.dataformats.userprofile.ContextKeyword;
 import eu.eexcess.dataformats.userprofile.SecureUserProfile;
 import eu.eexcess.partnerrecommender.api.QueryGeneratorApi;
+
 /**
  * Generates OR Querys out of SecureUserProfile Context field
+ * 
  * @author hziak
  *
  */
-public class OrQueryGenerator implements QueryGeneratorApi{
+public class OrQueryGenerator implements QueryGeneratorApi {
 
-	private static final String REGEXP = "(?<=\\w)\\s(?=\\w)";
-	@Override
-	public String toQuery(SecureUserProfile userProfile) {
-		StringBuilder builder = new StringBuilder();
-		Pattern replace = Pattern.compile(REGEXP);
-	
+    private static final String REGEXP = "(?<=\\w)\\s(?=\\w)";
+
+    @Override
+    public String toQuery(SecureUserProfile userProfile) {
+        StringBuilder builder = new StringBuilder();
+        Pattern replace = Pattern.compile(REGEXP);
+
         for (ContextKeyword context : userProfile.contextKeywords) {
-        	String keyword = context.text;
-   		 Matcher matcher2 = replace.matcher(keyword);
-   		 keyword=matcher2.replaceAll(" OR ");
-        		
-            	if (builder.length() > 0) { builder.append(" OR "); }
-	    //        builder.append('\"');
-	    		builder.append(keyword);
-	      //      builder.append('\"');
+            String keyword = context.text;
+            Matcher matcher2 = replace.matcher(keyword);
+            keyword = matcher2.replaceAll(" OR ");
+
+            if (builder.length() > 0) {
+                builder.append(" OR ");
+            }
+            builder.append(keyword);
         }
-		return builder.toString();
-	}
+        return builder.toString();
+    }
 
-	@Override
-	public String toDetailQuery(DocumentBadge document) {
-		return document.id;
-	}
-
+    @Override
+    public String toDetailQuery(DocumentBadge document) {
+        return document.id;
+    }
 
 }
