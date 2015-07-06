@@ -95,13 +95,14 @@ public class WndomainSourceSelector implements PartnerSelector {
 
 	}
 
-	private Logger logger = Logger.getLogger(WndomainSourceSelector.class);
-
 	/**
 	 * A map of domain matching partners mapping to a descent sorted set of
 	 * {@link DomainWeight}s
 	 */
 	protected Map<PartnerBadge, TreeSet<DomainWeight>> matchingPartners = new HashMap<>();
+
+	private Logger logger = Logger.getLogger(WndomainSourceSelector.class);
+
 	private DomainDetector domainDetector = null;
 
 	/**
@@ -161,6 +162,30 @@ public class WndomainSourceSelector implements PartnerSelector {
 	}
 
 	/**
+	 * Define whether domain detection should be performed on each keyword
+	 * separately or on the resulting phrase of joined keywords.
+	 * 
+	 * @param enable
+	 *            <p>
+	 *            true - join keywords before domain detection
+	 *            <p>
+	 *            false - perform domain detection on each keyword separately
+	 */
+	public void enableKeywordGroupingStrategy(boolean enable) {
+		isKeywordGroupingEnabled = enable;
+	}
+
+	/**
+	 * Exposes the currently referenced domain detector instance. Domain
+	 * detection is synchronized on the returned instance.
+	 * 
+	 * @return the referenced domain detector instance
+	 */
+	synchronized public DomainDetector getDomainDetector() {
+		return domainDetector;
+	}
+
+	/**
 	 * selects partners from {@link #matchingPartners} and adds their references
 	 * the partner list
 	 * 
@@ -193,12 +218,14 @@ public class WndomainSourceSelector implements PartnerSelector {
 		List<String> keywords = getQueryTerms(contextKeywords);
 		for (String keyword : keywords) {
 			try {
-				for (Domain domain : domainDetector.detect(keyword)) {
-					AtomicInteger timesSeen = seenDomains.get(domain.getName());
-					if (null == timesSeen) {
-						seenDomains.put(domain.getName().toLowerCase(), new AtomicInteger(1));
-					} else {
-						timesSeen.incrementAndGet();
+				synchronized (domainDetector) {
+					for (Domain domain : domainDetector.detect(keyword)) {
+						AtomicInteger timesSeen = seenDomains.get(domain.getName());
+						if (null == timesSeen) {
+							seenDomains.put(domain.getName().toLowerCase(), new AtomicInteger(1));
+						} else {
+							timesSeen.incrementAndGet();
+						}
 					}
 				}
 			} catch (DomainDetectorException e) {
@@ -260,19 +287,5 @@ public class WndomainSourceSelector implements PartnerSelector {
 		}
 
 		return keywords;
-	}
-
-	/**
-	 * Define whether domain detection should be performed on each keyword
-	 * separately or on the resulting phrase of joined keywords.
-	 * 
-	 * @param enable
-	 *            <p>
-	 *            true - join keywords before domain detection
-	 *            <p>
-	 *            false - perform domain detection on each keyword separately
-	 */
-	public void enableKeywordGroupingStrategy(boolean enable) {
-		isKeywordGroupingEnabled = enable;
 	}
 }
