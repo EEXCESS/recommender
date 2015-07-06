@@ -67,6 +67,22 @@ public class EuropeanaPartnerRecommenderTest {
 	}
 
 	@Test
+	public void detailCallRegressionTestRecordWithoutImage() {
+        ArrayList<String> ids = new ArrayList<String>();
+		ArrayList<String> uris = new ArrayList<String>();
+        ids.add("/2058805/PLUS__49ae49a23f67c759bf4fc791ba842aa2__artifact__cho");
+        uris.add("http://europeana.eu/resolve/record/2058805/PLUS__49ae49a23f67c759bf4fc791ba842aa2__artifact__cho");
+        DocumentBadgeList documentDetails = PartnerRecommenderTestHelper.getDetails(DEPLOYMENT_CONTEXT,	
+        		port, 
+        		PartnerRecommenderTestHelper.createParamsForPartnerRecommenderDetailCall(ids, uris, DATAPROVIDER));
+	    
+        assertNotNull(documentDetails);
+        assertTrue(documentDetails.documentBadges.size() > 0 );
+        assertEquals(1, documentDetails.documentBadges.size());
+
+	}
+
+	@Test
 	public void detailCallForEnrichment() {
         ArrayList<String> ids = new ArrayList<String>();
 		ArrayList<String> uris = new ArrayList<String>();
