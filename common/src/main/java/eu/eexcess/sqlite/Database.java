@@ -27,7 +27,10 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 package eu.eexcess.sqlite;
 
-import java.sql.*;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -39,158 +42,141 @@ import java.util.logging.Logger;
  * 
  */
 public class Database {
-	private static final Logger logger = Logger.getLogger(Database.class
-			.getName());
-	private static final String JDBC_DRIVER = "org.sqlite.JDBC";
-	private static String dBName = null;
+    private static final Logger logger = Logger.getLogger(Database.class.getName());
+    private static final String JDBC_DRIVER = "org.sqlite.JDBC";
+    private static String dBName = null;
 
-	private HashMap<String, PreparedStatement> map = new HashMap<String, PreparedStatement>();
+    private HashMap<String, PreparedStatement> map = new HashMap<String, PreparedStatement>();
 
-	private Connection con;
+    private Connection con;
 
-	public Database() {
-		try {
-			Class.forName(JDBC_DRIVER);
-		} catch (ClassNotFoundException e) {
-			logger.log(Level.SEVERE, "Could not load JDBC Driver", e);
-		}
-	}
+    public Database() {
+        try {
+            Class.forName(JDBC_DRIVER);
+        } catch (ClassNotFoundException e) {
+            logger.log(Level.SEVERE, "Could not load JDBC Driver", e);
+        }
+    }
 
-	public <T extends DatabasePreparedQuery> Database(String dBName,
-			T[] preparedStatementsDefinitions) {
-		logger.log(Level.INFO,"Trying to open DB:" +Database.dBName);
-		Database.dBName = dBName;
-		try {
-			Class.forName(JDBC_DRIVER);
-		} catch (ClassNotFoundException e) {
-			logger.log(Level.SEVERE, "Could not load JDBC Driver", e);
-		}
-		try {
-			this.con = DriverManager
-					.getConnection("jdbc:sqlite:" + Database.dBName);
-		} catch (SQLException e) {
-			logger.log(Level.SEVERE, "Could not connect to Database: "
-					+ Database.dBName, e);
-		}
-		if (con != null) {
-			try {
-				initPreparedStatements(con, preparedStatementsDefinitions);
-			} catch (SQLException e) {
-				logger.log(Level.SEVERE,
-						"Prepared Statements could not be created", e);
-			}
-			try {
+    public <T extends DatabasePreparedQuery> Database(String dBName, T[] preparedStatementsDefinitions) {
+        logger.log(Level.INFO, "Trying to open DB:" + Database.dBName);
+        Database.dBName = dBName;
+        try {
+            Class.forName(JDBC_DRIVER);
+        } catch (ClassNotFoundException e) {
+            logger.log(Level.SEVERE, "Could not load JDBC Driver", e);
+        }
+        try {
+            this.con = DriverManager.getConnection("jdbc:sqlite:" + Database.dBName);
+        } catch (SQLException e) {
+            logger.log(Level.SEVERE, "Could not connect to Database: " + Database.dBName, e);
+        }
+        if (con != null) {
+            try {
+                initPreparedStatements(con, preparedStatementsDefinitions);
+            } catch (SQLException e) {
+                logger.log(Level.SEVERE, "Prepared Statements could not be created", e);
+            }
+            try {
 
-				con.setAutoCommit(false);
-			} catch (SQLException e) {
-				logger.log(Level.SEVERE,
-						"Autocommit could not be set to false", e);
-			}
-		}
-	}
+                con.setAutoCommit(false);
+            } catch (SQLException e) {
+                logger.log(Level.SEVERE, "Autocommit could not be set to false", e);
+            }
+        }
+    }
 
-	/**
-	 * Creates a Connection to a Database if the Database wasn't defined in the
-	 * constructor
-	 * 
-	 * @param database
-	 * @return
-	 */
-	public Connection connect(String database) {
+    /**
+     * Creates a Connection to a Database if the Database wasn't defined in the
+     * constructor
+     * 
+     * @param database
+     * @return
+     */
+    public Connection connect(String database) {
 
-		try {
-			Class.forName(JDBC_DRIVER);
-		} catch (ClassNotFoundException e1) {
-			logger.log(Level.SEVERE,
-					"Could not Connec to Database:" + database, e1);
-			return null;
-		}
-		try {
-			this.con = DriverManager.getConnection("jdbc:sqlite:" + database);
-		} catch (SQLException e) {
-			logger.log(Level.SEVERE,
-					"Could not Connec to Database:" + database, e);
-			return null;
-		}
-		return con;
-	}
+        try {
+            Class.forName(JDBC_DRIVER);
+        } catch (ClassNotFoundException e1) {
+            logger.log(Level.SEVERE, "Could not Connec to Database:" + database, e1);
+            return null;
+        }
+        try {
+            this.con = DriverManager.getConnection("jdbc:sqlite:" + database);
+        } catch (SQLException e) {
+            logger.log(Level.SEVERE, "Could not Connec to Database:" + database, e);
+            return null;
+        }
+        return con;
+    }
 
-	/*
-	 * Initializes the Prepared Statements
-	 */
-	private <T extends DatabasePreparedQuery> void initPreparedStatements(
-			Connection con, T[] preparedStatements) throws SQLException {
-		
-		if (con != null) {
-			for (T t : preparedStatements) {
-				PreparedStatement updateStatement = null;
+    /*
+     * Initializes the Prepared Statements
+     */
+    private <T extends DatabasePreparedQuery> void initPreparedStatements(Connection con, T[] preparedStatements) throws SQLException {
 
-				try {
-					updateStatement = con.prepareStatement(t.getUpdateQuery());
-				} catch (SQLException e) {
-					logger.log(Level.SEVERE,
-							"Could not prepare Statement \"QueryLog\"", e);
-					try {
-						con.createStatement().executeUpdate(t.getCreateQuery());
-					} catch (SQLException e1) {
-						logger.log(Level.SEVERE, "Could not create Table  \""
-								+ t.getInternName() + "\"", e);
-					}
-				}
-				if (updateStatement == null)
-					updateStatement = con.prepareStatement(t.getUpdateQuery());
+        if (con != null) {
+            for (T t : preparedStatements) {
+                PreparedStatement updateStatement = null;
 
-				if (updateStatement != null)
-					map.put(t.getInternName() + t.getUpdateQuery(),
-							updateStatement);
+                try {
+                    updateStatement = con.prepareStatement(t.getUpdateQuery());
+                } catch (SQLException e) {
+                    logger.log(Level.SEVERE, "Could not prepare Statement \"QueryLog\"", e);
+                    try {
+                        con.createStatement().executeUpdate(t.getCreateQuery());
+                    } catch (SQLException e1) {
+                        logger.log(Level.SEVERE, "Could not create Table  \"" + t.getInternName() + "\"", e1);
+                    }
+                }
+                if (updateStatement == null)
+                    updateStatement = con.prepareStatement(t.getUpdateQuery());
 
-				PreparedStatement getStatement = null;
-				try {
-					getStatement = con.prepareStatement(t.getSelectQuery());
-				} catch (SQLException e) {
-					logger.log(Level.SEVERE,
-							"Could not prepare Statement \"QueryLog\"", e);
-				}
-				map.put(t.getInternName() + t.getSelectQuery(), getStatement);
-			}
-		}
-	}
+                if (updateStatement != null)
+                    map.put(t.getInternName() + t.getUpdateQuery(), updateStatement);
 
-	/**
-	 * Has to be called to close the Database
-	 * 
-	 * @throws SQLException
-	 */
-	public void close() throws SQLException {
-		this.con.close();
-	}
+                PreparedStatement getStatement = null;
+                try {
+                    getStatement = con.prepareStatement(t.getSelectQuery());
+                } catch (SQLException e) {
+                    logger.log(Level.SEVERE, "Could not prepare Statement \"QueryLog\"", e);
+                }
+                map.put(t.getInternName() + t.getSelectQuery(), getStatement);
+            }
+        }
+    }
 
-	/**
-	 * returns the get statement from the DatabasePreparedQuery
-	 */
-	public <T extends DatabasePreparedQuery> PreparedStatement getPreparedSelectStatement(
-			T preparedQueryType) {
-		return map.get(preparedQueryType.getInternName()
-				+ preparedQueryType.getSelectQuery());
-	}
+    /**
+     * Has to be called to close the Database
+     * 
+     * @throws SQLException
+     */
+    public void close() throws SQLException {
+        this.con.close();
+    }
 
-	/**
-	 * returns the update statement from the DatabasePreparedQuery
-	 */
-	public <T extends DatabasePreparedQuery> PreparedStatement getPreparedUpdateStatement(
-			T preparedQueryType) {
-		return map.get(preparedQueryType.getInternName()
-				+ preparedQueryType.getUpdateQuery());
-	}
+    /**
+     * returns the get statement from the DatabasePreparedQuery
+     */
+    public <T extends DatabasePreparedQuery> PreparedStatement getPreparedSelectStatement(T preparedQueryType) {
+        return map.get(preparedQueryType.getInternName() + preparedQueryType.getSelectQuery());
+    }
 
-	public void commit() {
-		if (con != null) {
-			try {
-				con.commit();
-			} catch (SQLException e) {
-				logger.log(Level.SEVERE, "Could not commit Query", e);
-			}
-		}
+    /**
+     * returns the update statement from the DatabasePreparedQuery
+     */
+    public <T extends DatabasePreparedQuery> PreparedStatement getPreparedUpdateStatement(T preparedQueryType) {
+        return map.get(preparedQueryType.getInternName() + preparedQueryType.getUpdateQuery());
+    }
 
-	}
+    public void commit() {
+        if (con != null) {
+            try {
+                con.commit();
+            } catch (SQLException e) {
+                logger.log(Level.SEVERE, "Could not commit Query", e);
+            }
+        }
+
+    }
 }
