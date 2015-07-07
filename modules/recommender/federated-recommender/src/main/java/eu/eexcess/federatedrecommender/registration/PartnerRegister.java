@@ -19,7 +19,7 @@ GNU Affero General Public License for more details.
 
 You should have received a copy of the GNU Affero General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
-*/
+ */
 package eu.eexcess.federatedrecommender.registration;
 
 import java.util.ArrayList;
@@ -37,73 +37,42 @@ import eu.eexcess.dataformats.PartnerBadge;
 
 /**
  * Registration for the partners PartnerRecommenderApis
+ * 
  * @author hziak
  *
  */
 @XmlRootElement(name = "eexcess-registered-partners")
 public class PartnerRegister {
-    
-    @XmlElement(name="partners")
-	private List<PartnerBadge> partners = new ArrayList<PartnerBadge>();
-	private Map<PartnerBadge, Client> partnerToClient = new HashMap<PartnerBadge, Client>();
 
-	public List<PartnerBadge> getPartners() {
-		synchronized (partners) {
-			return partners;		
-		}
-	
-	}
+    @XmlElement(name = "partners")
+    private List<PartnerBadge> partners = new ArrayList<PartnerBadge>();
+    private Map<String, Client> partnerToClient = new HashMap<String, Client>();
 
-    public  void  addPartner(PartnerBadge badge) {
-    	synchronized (partners) {
-    		partners.add(badge);
-//        String proxyHost = "localhost";//System.getProperty("http.proxyHost");
-//        String proxyPort = "8888";//System.getProperty("http.proxyPort");
-        	DefaultClientConfig config = new DefaultClientConfig();
-       // config.getFeatures().put(ClientConfig.FEATURE_DISABLE_XML_SECURITY, true); //TODO : SWITCHED SECURE FEATURE ON FEATURE_DISABLE_XML_SECURITY 
-        //based on "Feature 'http://javax.xml.XMLConstants/feature/secure-processing' is not recognized" error
-//        config.getProperties().put(DefaultApacheHttpClientConfig.PROPERTY_PROXY_URI, "http://" + proxyHost + ":" + proxyPort);
-//        Client client =new Client(new URLConnectionClientHandler(
-//                new HttpURLConnectionFactory() {
-//                    Proxy p = null;
-//                    @Override
-//                    public HttpURLConnection getHttpURLConnection(URL url)
-//                            throws IOException {
-//                        if (p == null) {
-//                            if (System.getProperties().containsKey("http.proxyHost")) {
-//                                p = new Proxy(Proxy.Type.HTTP,
-//                                        new InetSocketAddress(
-//                                        System.getProperty("http.proxyHost"),
-//                                        Integer.getInteger("http.proxyPort", 80)));
-//                            } else {
-//                                p = Proxy.NO_PROXY;
-//                            }
-//                        }
-//                        return (HttpURLConnection) url.openConnection(p);
-//                    }
-//                }), config); 
-//        		
-//        		
-//        		
-//        		
-//        		
-//        		
-	        Client client= Client.create(config); // new Client(null, config);
-	        partnerToClient.put(badge, client);
-    	}
+    public List<PartnerBadge> getPartners() {
+        synchronized (partners) {
+            return partners;
+        }
+
     }
 
-	public synchronized void removePartner(PartnerBadge badge) {
-		synchronized (partners) {
-			partners.remove(badge);	
-		}
-	}
-	
-	public synchronized Client getClient(PartnerBadge badge) {
-			return partnerToClient.get(badge);	
-		
-	}
+    public void addPartner(PartnerBadge badge) {
+        synchronized (partners) {
+            partners.add(badge);
+            DefaultClientConfig config = new DefaultClientConfig();
+            Client client = Client.create(config); // new Client(null, config);
+            partnerToClient.put(badge.systemId, client);
+        }
+    }
 
-	
+    public synchronized void removePartner(PartnerBadge badge) {
+        synchronized (partners) {
+            partners.remove(badge);
+        }
+    }
+
+    public synchronized Client getClient(String systemID) {
+        return partnerToClient.get(systemID);
+
+    }
 
 }

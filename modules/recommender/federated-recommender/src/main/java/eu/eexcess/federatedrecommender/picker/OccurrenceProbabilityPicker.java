@@ -201,12 +201,15 @@ public class OccurrenceProbabilityPicker extends PartnersFederatedRecommendation
 
     private double calcPartnerWeight(ResultList resultList, SecureUserProfile secureUserProfile) {
         double partnerWeight = 0.0;
-        for (Result result : resultList.results) {
-            partnerWeight += calcResultWeight(result, secureUserProfile);
+            if(resultList!=null){
+            for (Result result : resultList.results) {
+                partnerWeight += calcResultWeight(result, secureUserProfile);
+            }
+            if (!resultList.results.isEmpty())
+                return partnerWeight / resultList.results.size();
+            else
+                return 0.0;
         }
-        if (resultList.results.isEmpty())
-            return partnerWeight / resultList.results.size();
-        else
             return 0.0;
     }
 
