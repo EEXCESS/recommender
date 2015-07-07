@@ -8,10 +8,7 @@
 	<name>EEXCESS - Parent</name>
 	<description>Parent for all EEXCESS related projects.
   </description>
-	<properties>
-		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		 <sonar.language>java</sonar.language>
-	</properties>
+
 	<modules>
 		<module>common/</module>
 		<module>modules/reference/partner-data-layer/</module>
