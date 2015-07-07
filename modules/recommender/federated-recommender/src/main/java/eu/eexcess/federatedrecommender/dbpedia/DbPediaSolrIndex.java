@@ -53,6 +53,11 @@ import com.hp.hpl.jena.graph.Triple;
 import eu.eexcess.config.FederatedRecommenderConfiguration;
 import eu.eexcess.federatedrecommender.utils.FederatedRecommenderException;
 
+/**
+ * Handles the connection and creation of the Solr DBPedia Index
+ * @author hziak
+ *
+ */
 public class DbPediaSolrIndex {
     private static final Logger logger = Logger.getLogger(DbPediaSolrIndex.class.getName());
     private final String solrServer;
@@ -221,7 +226,7 @@ public class DbPediaSolrIndex {
                     return false;
                 }
             } catch (Exception e) {
-                // logger.log(Level.INFO, "Could not parse node correctly", e);
+                logger.log(Level.INFO, "Could not parse node correctly", e);
                 return false;
             }
 

@@ -107,7 +107,7 @@ public class OccurrenceProbabilityPicker extends PartnersFederatedRecommendation
             if (calcPartnerWeight < 0.1)
                 calcPartnerWeight = 0.1;
 
-            Integer d = new Double(calcPartnerWeight * 100).intValue();
+            Integer d =  new Double(calcPartnerWeight * 100).intValue();
             while (d > 0) {
                 listToDraw.add(partnerBadge);
                 d--;
@@ -139,8 +139,6 @@ public class OccurrenceProbabilityPicker extends PartnersFederatedRecommendation
                         break;
                     }
                 }
-                // if (!found)
-                // results.add(resultToAdd);
                 if (found == null) {
                     results.add(resultToAdd);
                 } else {
@@ -152,9 +150,7 @@ public class OccurrenceProbabilityPicker extends PartnersFederatedRecommendation
                     }
 
                 }
-                // else {
-                // numResults++; // leaving one out -> increasing num results
-                // }
+     
                 resultList.getResults().get(partner).results.remove(0);
 
             } catch (Exception e) {
@@ -181,8 +177,7 @@ public class OccurrenceProbabilityPicker extends PartnersFederatedRecommendation
         // TODO: use stemmed versions and preprocess the hole contented in a
         // better way
         for (ContextKeyword context : secureUserProfile.contextKeywords) {
-            if (result.title != null)
-                if (result.title.toLowerCase().contains(context.text.toLowerCase()))
+            if (result.title != null && result.title.toLowerCase().contains(context.text.toLowerCase()))
                     maxTitleEntries++;
             // if (result.description != null)
             // if (result.description.toLowerCase().contains(
@@ -190,8 +185,7 @@ public class OccurrenceProbabilityPicker extends PartnersFederatedRecommendation
             // maxDescriptionEntries++;
         }
         for (Interest interest : secureUserProfile.interestList) {
-            if (result.title != null)
-                if (result.title.toLowerCase().contains(interest.text.toLowerCase()))
+            if (result.title != null && result.title.toLowerCase().contains(interest.text.toLowerCase()))
                     maxTitleEntries++;
             // if (result.description != null)
             // if (result.description.toLowerCase().contains(

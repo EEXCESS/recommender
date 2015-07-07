@@ -171,7 +171,7 @@ public class WordnetDomainsDetector extends DomainDetector {
 				Set<String> allDomains = new HashSet<String>();
 				List<Synset> senses = randomIndexWord.getSenses();
 				for (Synset synset : senses) {
-					String synsetId = String.format("%08d-%s", synset.getKey(), synset.getPOS().getKey());
+					String synsetId = String.format("%08d-%s", (long) synset.getKey(), synset.getPOS().getKey());
 					Set<DomainAssignment> domains = synsetToDomains.get(synsetId);
 					if (domains != null && !domains.isEmpty()) {
 						for (DomainAssignment domain : domains) {
@@ -395,7 +395,7 @@ public class WordnetDomainsDetector extends DomainDetector {
 	 * @param synset
 	 */
 	protected void collectDomains(Synset synset, Map<Synset, Set<DomainAssignment>> synsetToAssignments) {
-		String synsetId = String.format("%08d-%s", synset.getKey(), synset.getPOS().getKey());
+		String synsetId = String.format("%08d-%s", (long)synset.getKey(), synset.getPOS().getKey());
 		Set<DomainAssignment> domains = synsetToDomains.get(synsetId);
 		if (domains != null && !domains.isEmpty()) {
 			// System.out.println("  "+synset.getKey()+", "+synset+", "+domains);

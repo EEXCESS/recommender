@@ -32,7 +32,7 @@ import java.util.List;
  * @author hziak
  *
  */
-public class ESUPPair implements Cloneable, Serializable {
+public class ESUPPair implements  Serializable {
     private static final long serialVersionUID = 6130633513641518529L;
 
     private String source;
@@ -105,5 +105,7 @@ public class ESUPPair implements Cloneable, Serializable {
         }
         return false;
     }
+    
+
 
 }
