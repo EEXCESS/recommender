@@ -182,7 +182,7 @@ public class PartnersDomainsProbe {
     private ResultList getPartnerResult(PartnerBadge partner, SecureUserProfile secureUserProfile) throws RuntimeErrorException {
         ResultList resultList = new ResultList();
 
-        Client client = partnerRegistration.getClient(partner);
+        Client client = partnerRegistration.getClient(partner.systemId);
         if (client != null) {
             try {
                 WebResource resource = null;
