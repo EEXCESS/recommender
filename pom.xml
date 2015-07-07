@@ -8,16 +8,7 @@
 	<name>EEXCESS - Parent</name>
 	<description>Parent for all EEXCESS related projects.
   </description>
-	<properties>
-		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		 <sonar.tests>src/test</sonar.tests>
-	<sonar.binaries>target/classes</sonar.binaries>
-	<sonar.dynamicAnalysis>reuseReports</sonar.dynamicAnalysis>
-	<sonar.junit.reportsPath>target/surefire-reports</sonar.junit.reportsPath>
-	<sonar.java.coveragePlugin>jacoco</sonar.java.coveragePlugin>
-	<sonar.jacoco.reportPath>target/jacoco.exec</sonar.jacoco.reportPath>
-	<sonar.surefire.reportsPath>target/surefire-reports</sonar.surefire.reportsPath>
-	</properties>
+
 	<modules>
 		<module>common/</module>
 		<module>modules/reference/partner-data-layer/</module>
