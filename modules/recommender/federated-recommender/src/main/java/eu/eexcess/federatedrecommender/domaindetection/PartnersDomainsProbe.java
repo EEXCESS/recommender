@@ -95,13 +95,11 @@ public class PartnersDomainsProbe {
             sup.contextKeywords = Arrays.asList(new ContextKeyword(ambiguousPhrase));
 
             for (PartnerBadge partner : partnerRegistration.getPartners()) {
-                System.out.println("Searching partner '" + partner.getSystemId() + "'");
 
                 TermSet<TypedTerm> domainToCount = partnerToDomainProbes.get(partner);
                 ResultList partnerResult = getPartnerResult(partner, sup);
                 Set<String> seenResults = new HashSet<String>();
                 for (Result result : partnerResult.results.subList(0, Math.min(maxResults, partnerResult.results.size()))) {
-                    // System.out.println("Got result '" + result.title + "'");
 
                     if (result.title != null && !result.title.trim().isEmpty()) {
                         String title = result.title.trim();
