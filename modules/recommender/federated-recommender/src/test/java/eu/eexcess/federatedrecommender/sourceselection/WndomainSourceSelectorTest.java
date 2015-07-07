@@ -44,223 +44,220 @@ import eu.eexcess.federatedrecommender.sourceselection.WndomainSourceSelector.Do
 
 public class WndomainSourceSelectorTest {
 
-	private static class TestableWndomainsSourceSelector extends WndomainSourceSelector {
-		public TestableWndomainsSourceSelector(FederatedRecommenderConfiguration configuration) {
-			super(configuration);
-		}
+    private static class TestableWndomainsSourceSelector extends WndomainSourceSelector {
+        public TestableWndomainsSourceSelector(FederatedRecommenderConfiguration configuration) {
+            super(configuration);
+        }
 
-		Map<PartnerBadge, TreeSet<DomainWeight>> getMatchingPartners() {
-			return matchingPartners;
-		}
-	}
+        Map<PartnerBadge, TreeSet<DomainWeight>> getMatchingPartners() {
+            return matchingPartners;
+        }
+    }
 
-	private TestableWndomainsSourceSelector selector = null;
+    private TestableWndomainsSourceSelector selector = null;
 
-	@Before
-	public void initSelector() {
-		FederatedRecommenderConfiguration recommenderConfig = new FederatedRecommenderConfiguration();
-		recommenderConfig.wordnetPath = "/opt/data/wordnet/WordNet-2.0/dict/";
-		recommenderConfig.wordnetDomainFilePath = "/opt/data/wordnet-domains/wn-domains-3.2/wn-domains-3.2-20070223";
-		selector = new TestableWndomainsSourceSelector(recommenderConfig);
-	}
+    @Before
+    public void initSelector() {
+        FederatedRecommenderConfiguration recommenderConfig = new FederatedRecommenderConfiguration();
+        recommenderConfig.wordnetPath = "/opt/data/wordnet/WordNet-2.0/dict/";
+        recommenderConfig.wordnetDomainFilePath = "/opt/data/wordnet-domains/wn-domains-3.2/wn-domains-3.2-20070223";
+        selector = new TestableWndomainsSourceSelector(recommenderConfig);
+        selector.enableKeywordGroupingStrategy(true);
+    }
 
-	@Test
-	public void domainSourceSelector_sourceSelect_expectOneSelection() throws IOException {
+    @Test
+    public void domainSourceSelector_sourceSelect_expectOneSelection() throws IOException {
 
-		// domains of "health": "medicine"
+        // domains of "health": "medicine"
 
-		PartnerBadge humanitiesPartner = new PartnerBadge();
-		humanitiesPartner.setSystemId("humanities-id");
-		ArrayList<PartnerDomain> pdomains = new ArrayList<>();
-		pdomains.add(new PartnerDomain("humanities", 1));
-		humanitiesPartner.setDomainContent(pdomains);
+        PartnerBadge humanitiesPartner = new PartnerBadge();
+        humanitiesPartner.setSystemId("humanities-id");
+        ArrayList<PartnerDomain> pdomains = new ArrayList<>();
+        pdomains.add(new PartnerDomain("humanities", 1));
+        humanitiesPartner.setDomainContent(pdomains);
 
-		PartnerBadge freeTimePartner = new PartnerBadge();
-		freeTimePartner.setSystemId("free_time-id");
-		pdomains = new ArrayList<>();
-		pdomains.add(new PartnerDomain("free_time", 1));
-		freeTimePartner.setDomainContent(pdomains);
+        PartnerBadge freeTimePartner = new PartnerBadge();
+        freeTimePartner.setSystemId("free_time-id");
+        pdomains = new ArrayList<>();
+        pdomains.add(new PartnerDomain("free_time", 1));
+        freeTimePartner.setDomainContent(pdomains);
 
-		PartnerBadge allroundPartner = new PartnerBadge();
-		allroundPartner.setSystemId("allrounder-id");
-		pdomains = new ArrayList<>();
-		pdomains.add(new PartnerDomain("transport", 1));
-		pdomains.add(new PartnerDomain("humanities", 1));
-		pdomains.add(new PartnerDomain("free_time", 1));
-		pdomains.add(new PartnerDomain("applied_science", 1));
-		pdomains.add(new PartnerDomain("medicine", 1));
-		allroundPartner.setDomainContent(pdomains);
+        PartnerBadge allroundPartner = new PartnerBadge();
+        allroundPartner.setSystemId("allrounder-id");
+        pdomains = new ArrayList<>();
+        pdomains.add(new PartnerDomain("transport", 1));
+        pdomains.add(new PartnerDomain("humanities", 1));
+        pdomains.add(new PartnerDomain("free_time", 1));
+        pdomains.add(new PartnerDomain("applied_science", 1));
+        pdomains.add(new PartnerDomain("medicine", 1));
+        allroundPartner.setDomainContent(pdomains);
 
-		List<PartnerBadge> partners = new ArrayList<>();
-		partners.add(humanitiesPartner);
-		partners.add(freeTimePartner);
-		partners.add(allroundPartner);
+        List<PartnerBadge> partners = new ArrayList<>();
+        partners.add(humanitiesPartner);
+        partners.add(freeTimePartner);
+        partners.add(allroundPartner);
 
-		SecureUserProfile userProfile = new SecureUserProfile();
-		userProfile.contextKeywords.addAll(Arrays.asList(new ContextKeyword[] { new ContextKeyword("health") }));
+        SecureUserProfile userProfile = new SecureUserProfile();
+        userProfile.contextKeywords.addAll(Arrays.asList(new ContextKeyword[] { new ContextKeyword("health") }));
 
-		SecureUserProfile refinedUserProfile = selector.sourceSelect(userProfile, partners);
-		assertEquals(1, userProfile.partnerList.size());
-		assertSame(userProfile, refinedUserProfile);
-		assertTrue(userProfile.partnerList.get(0) == allroundPartner);
+        SecureUserProfile refinedUserProfile = selector.sourceSelect(userProfile, partners);
+        assertEquals(1, userProfile.partnerList.size());
+        assertSame(userProfile, refinedUserProfile);
+        assertTrue(userProfile.partnerList.get(0) == allroundPartner);
 
-		// assert domain weights are as expected
-		Iterator<DomainWeight> iterator = selector.getMatchingPartners().get(refinedUserProfile.partnerList.get(0))
-						.iterator();
-		assertEquals(1, iterator.next().weight, 0.0001);
-		assertEquals(false, iterator.hasNext());
-	}
+        // assert domain weights are as expected
+        Iterator<DomainWeight> iterator = selector.getMatchingPartners().get(refinedUserProfile.partnerList.get(0)).iterator();
+        assertEquals(1, iterator.next().weight, 0.0001);
+        assertEquals(false, iterator.hasNext());
+    }
 
-	@Test
-	public void domainSourceSelector_sourceSelect_expectOneSelectionMatchingTwoDmains() throws IOException {
+    @Test
+    public void domainSourceSelector_sourceSelect_expectOneSelectionMatchingTwoDmains() throws IOException {
 
-		// transport -> enterprise, telecommunication
+        // transport -> enterprise, telecommunication
 
-		PartnerBadge humanitiesPartner = new PartnerBadge();
-		humanitiesPartner.setSystemId("humanities-id");
-		ArrayList<PartnerDomain> pdomains = new ArrayList<>();
-		pdomains.add(new PartnerDomain("humanities", 1));
-		humanitiesPartner.setDomainContent(pdomains);
+        PartnerBadge humanitiesPartner = new PartnerBadge();
+        humanitiesPartner.setSystemId("humanities-id");
+        ArrayList<PartnerDomain> pdomains = new ArrayList<>();
+        pdomains.add(new PartnerDomain("humanities", 1));
+        humanitiesPartner.setDomainContent(pdomains);
 
-		PartnerBadge freeTimePartner = new PartnerBadge();
-		freeTimePartner.setSystemId("free_time-id");
-		pdomains = new ArrayList<>();
-		pdomains.add(new PartnerDomain("free_time", 1));
-		freeTimePartner.setDomainContent(pdomains);
+        PartnerBadge freeTimePartner = new PartnerBadge();
+        freeTimePartner.setSystemId("free_time-id");
+        pdomains = new ArrayList<>();
+        pdomains.add(new PartnerDomain("free_time", 1));
+        freeTimePartner.setDomainContent(pdomains);
 
-		PartnerBadge allroundPartner = new PartnerBadge();
-		allroundPartner.setSystemId("allrounder-id");
-		pdomains = new ArrayList<>();
-		pdomains.add(new PartnerDomain("transport", 1));
-		pdomains.add(new PartnerDomain("humanities", 1));
-		pdomains.add(new PartnerDomain("telecommunication", 1));
-		pdomains.add(new PartnerDomain("enterprise", 1));
-		pdomains.add(new PartnerDomain("medicine", 1));
-		allroundPartner.setDomainContent(pdomains);
+        PartnerBadge allroundPartner = new PartnerBadge();
+        allroundPartner.setSystemId("allrounder-id");
+        pdomains = new ArrayList<>();
+        pdomains.add(new PartnerDomain("transport", 1));
+        pdomains.add(new PartnerDomain("humanities", 1));
+        pdomains.add(new PartnerDomain("telecommunication", 1));
+        pdomains.add(new PartnerDomain("enterprise", 1));
+        pdomains.add(new PartnerDomain("medicine", 1));
+        allroundPartner.setDomainContent(pdomains);
 
-		List<PartnerBadge> partners = new ArrayList<>();
-		partners.add(humanitiesPartner);
-		partners.add(freeTimePartner);
-		partners.add(allroundPartner);
+        List<PartnerBadge> partners = new ArrayList<>();
+        partners.add(humanitiesPartner);
+        partners.add(freeTimePartner);
+        partners.add(allroundPartner);
 
-		SecureUserProfile userProfile = new SecureUserProfile();
-		userProfile.contextKeywords.addAll(Arrays.asList(new ContextKeyword[] { new ContextKeyword("transport") }));
+        SecureUserProfile userProfile = new SecureUserProfile();
+        userProfile.contextKeywords.addAll(Arrays.asList(new ContextKeyword[] { new ContextKeyword("transport") }));
 
-		SecureUserProfile refinedUserProfile = selector.sourceSelect(userProfile, partners);
-		assertEquals(1, userProfile.partnerList.size());
-		assertSame(userProfile, refinedUserProfile);
-		assertTrue(userProfile.partnerList.get(0) == allroundPartner);
+        SecureUserProfile refinedUserProfile = selector.sourceSelect(userProfile, partners);
+        assertEquals(1, userProfile.partnerList.size());
+        assertSame(userProfile, refinedUserProfile);
+        assertTrue(userProfile.partnerList.get(0) == allroundPartner);
 
-		// assert domain weights are as expected
-		Iterator<DomainWeight> iterator = selector.getMatchingPartners().get(refinedUserProfile.partnerList.get(0))
-						.iterator();
-		assertEquals(0.5, iterator.next().weight, 0.0001);
-		assertEquals(0.5, iterator.next().weight, 0.0001);
-		assertEquals(false, iterator.hasNext());
-	}
+        // assert domain weights are as expected
+        Iterator<DomainWeight> iterator = selector.getMatchingPartners().get(refinedUserProfile.partnerList.get(0)).iterator();
+        assertEquals(0.5, iterator.next().weight, 0.0001);
+        assertEquals(0.5, iterator.next().weight, 0.0001);
+        assertEquals(false, iterator.hasNext());
+    }
 
-	@Test
-	public void domainSourceSelector_sourceSelect_expectTwoSelectionsMatchingThreeDmains() throws IOException {
+    @Test
+    public void domainSourceSelector_sourceSelect_expectTwoSelectionsMatchingThreeDmains() throws IOException {
 
-		// transport -> enterprise, telecommunication
+        // transport -> enterprise, telecommunication
 
-		PartnerBadge telecommPartner = new PartnerBadge();
-		telecommPartner.setSystemId("telecommunication-id");
-		ArrayList<PartnerDomain> pdomains = new ArrayList<>();
-		pdomains.add(new PartnerDomain("telecommunication", 1));
-		telecommPartner.setDomainContent(pdomains);
+        PartnerBadge telecommPartner = new PartnerBadge();
+        telecommPartner.setSystemId("telecommunication-id");
+        ArrayList<PartnerDomain> pdomains = new ArrayList<>();
+        pdomains.add(new PartnerDomain("telecommunication", 1));
+        telecommPartner.setDomainContent(pdomains);
 
-		PartnerBadge freeTimePartner = new PartnerBadge();
-		freeTimePartner.setSystemId("free_time-id");
-		pdomains = new ArrayList<>();
-		pdomains.add(new PartnerDomain("free_time", 1));
-		freeTimePartner.setDomainContent(pdomains);
+        PartnerBadge freeTimePartner = new PartnerBadge();
+        freeTimePartner.setSystemId("free_time-id");
+        pdomains = new ArrayList<>();
+        pdomains.add(new PartnerDomain("free_time", 1));
+        freeTimePartner.setDomainContent(pdomains);
 
-		PartnerBadge allroundPartner = new PartnerBadge();
-		allroundPartner.setSystemId("allrounder-id");
-		pdomains = new ArrayList<>();
-		pdomains.add(new PartnerDomain("transport", 1));
-		pdomains.add(new PartnerDomain("humanities", 1));
-		pdomains.add(new PartnerDomain("telecommunication", 1));
-		pdomains.add(new PartnerDomain("enterprise", 1));
-		pdomains.add(new PartnerDomain("medicine", 1));
-		allroundPartner.setDomainContent(pdomains);
+        PartnerBadge allroundPartner = new PartnerBadge();
+        allroundPartner.setSystemId("allrounder-id");
+        pdomains = new ArrayList<>();
+        pdomains.add(new PartnerDomain("transport", 1));
+        pdomains.add(new PartnerDomain("humanities", 1));
+        pdomains.add(new PartnerDomain("telecommunication", 1));
+        pdomains.add(new PartnerDomain("enterprise", 1));
+        pdomains.add(new PartnerDomain("medicine", 1));
+        allroundPartner.setDomainContent(pdomains);
 
-		List<PartnerBadge> partners = new ArrayList<>();
-		partners.add(telecommPartner);
-		partners.add(freeTimePartner);
-		partners.add(allroundPartner);
+        List<PartnerBadge> partners = new ArrayList<>();
+        partners.add(telecommPartner);
+        partners.add(freeTimePartner);
+        partners.add(allroundPartner);
 
-		SecureUserProfile userProfile = new SecureUserProfile();
-		userProfile.contextKeywords.addAll(Arrays.asList(new ContextKeyword[] { new ContextKeyword("transport") }));
+        SecureUserProfile userProfile = new SecureUserProfile();
+        userProfile.contextKeywords.addAll(Arrays.asList(new ContextKeyword[] { new ContextKeyword("transport") }));
 
-		SecureUserProfile refinedUserProfile = selector.sourceSelect(userProfile, partners);
-		assertEquals(2, userProfile.partnerList.size());
-		assertSame(userProfile, refinedUserProfile);
-		assertTrue(userProfile.partnerList.get(0) == telecommPartner);
-		assertTrue(userProfile.partnerList.get(1) == allroundPartner);
+        SecureUserProfile refinedUserProfile = selector.sourceSelect(userProfile, partners);
+        assertEquals(2, userProfile.partnerList.size());
+        assertSame(userProfile, refinedUserProfile);
+        assertTrue(userProfile.partnerList.get(0) == telecommPartner);
+        assertTrue(userProfile.partnerList.get(1) == allroundPartner);
 
-		// assert domain weights are as expected
-		Iterator<DomainWeight> iterator = selector.getMatchingPartners().get(refinedUserProfile.partnerList.get(0))
-						.iterator();
-		assertEquals(0.3333, iterator.next().weight, 0.0001);
-		assertEquals(false, iterator.hasNext());
+        // assert domain weights are as expected
+        Iterator<DomainWeight> iterator = selector.getMatchingPartners().get(refinedUserProfile.partnerList.get(0)).iterator();
+        assertEquals(0.3333, iterator.next().weight, 0.0001);
+        assertEquals(false, iterator.hasNext());
 
-		iterator = selector.getMatchingPartners().get(refinedUserProfile.partnerList.get(1)).iterator();
-		assertEquals(0.3333, iterator.next().weight, 0.0001);
-		assertEquals(0.3333, iterator.next().weight, 0.0001);
-		assertEquals(false, iterator.hasNext());
-	}
+        iterator = selector.getMatchingPartners().get(refinedUserProfile.partnerList.get(1)).iterator();
+        assertEquals(0.3333, iterator.next().weight, 0.0001);
+        assertEquals(0.3333, iterator.next().weight, 0.0001);
+        assertEquals(false, iterator.hasNext());
+    }
 
-	@Test
-	public void domainSourceSelector_sourceSelect_expectTwoSelectionsMatchingTwoDmains() throws IOException {
+    @Test
+    public void domainSourceSelector_sourceSelect_expectTwoSelectionsMatchingTwoDmains() throws IOException {
 
-		// transport -> enterprise, telecommunication
+        // transport -> enterprise, telecommunication
 
-		PartnerBadge telecommPartner = new PartnerBadge();
-		telecommPartner.setSystemId("telecommunication-id");
-		ArrayList<PartnerDomain> pdomains = new ArrayList<>();
-		pdomains.add(new PartnerDomain("telecommunication", 1));
-		telecommPartner.setDomainContent(pdomains);
+        PartnerBadge telecommPartner = new PartnerBadge();
+        telecommPartner.setSystemId("telecommunication-id");
+        ArrayList<PartnerDomain> pdomains = new ArrayList<>();
+        pdomains.add(new PartnerDomain("telecommunication", 1));
+        telecommPartner.setDomainContent(pdomains);
 
-		PartnerBadge freeTimePartner = new PartnerBadge();
-		freeTimePartner.setSystemId("free_time-id");
-		pdomains = new ArrayList<>();
-		pdomains.add(new PartnerDomain("free_time", 1));
-		freeTimePartner.setDomainContent(pdomains);
+        PartnerBadge freeTimePartner = new PartnerBadge();
+        freeTimePartner.setSystemId("free_time-id");
+        pdomains = new ArrayList<>();
+        pdomains.add(new PartnerDomain("free_time", 1));
+        freeTimePartner.setDomainContent(pdomains);
 
-		PartnerBadge allroundPartner = new PartnerBadge();
-		allroundPartner.setSystemId("allrounder-id");
-		pdomains = new ArrayList<>();
-		pdomains.add(new PartnerDomain("transport", 1));
-		pdomains.add(new PartnerDomain("humanities", 1));
-		pdomains.add(new PartnerDomain("telecommunication", 1));
-		pdomains.add(new PartnerDomain("applied_science", 1));
-		pdomains.add(new PartnerDomain("medicine", 1));
-		allroundPartner.setDomainContent(pdomains);
+        PartnerBadge allroundPartner = new PartnerBadge();
+        allroundPartner.setSystemId("allrounder-id");
+        pdomains = new ArrayList<>();
+        pdomains.add(new PartnerDomain("transport", 1));
+        pdomains.add(new PartnerDomain("humanities", 1));
+        pdomains.add(new PartnerDomain("telecommunication", 1));
+        pdomains.add(new PartnerDomain("applied_science", 1));
+        pdomains.add(new PartnerDomain("medicine", 1));
+        allroundPartner.setDomainContent(pdomains);
 
-		List<PartnerBadge> partners = new ArrayList<>();
-		partners.add(telecommPartner);
-		partners.add(freeTimePartner);
-		partners.add(allroundPartner);
+        List<PartnerBadge> partners = new ArrayList<>();
+        partners.add(telecommPartner);
+        partners.add(freeTimePartner);
+        partners.add(allroundPartner);
 
-		SecureUserProfile userProfile = new SecureUserProfile();
-		userProfile.contextKeywords.addAll(Arrays.asList(new ContextKeyword[] { new ContextKeyword("transport") }));
+        SecureUserProfile userProfile = new SecureUserProfile();
+        userProfile.contextKeywords.addAll(Arrays.asList(new ContextKeyword[] { new ContextKeyword("transport") }));
 
-		SecureUserProfile refinedUserProfile = selector.sourceSelect(userProfile, partners);
-		assertEquals(2, userProfile.partnerList.size());
-		assertSame(userProfile, refinedUserProfile);
-		assertTrue(userProfile.partnerList.get(1) == allroundPartner);
-		assertTrue(userProfile.partnerList.get(0) == telecommPartner);
+        SecureUserProfile refinedUserProfile = selector.sourceSelect(userProfile, partners);
+        assertEquals(2, userProfile.partnerList.size());
+        assertSame(userProfile, refinedUserProfile);
+        assertTrue(userProfile.partnerList.get(1) == allroundPartner);
+        assertTrue(userProfile.partnerList.get(0) == telecommPartner);
 
-		// assert domain weights are as expected
-		Iterator<DomainWeight> iterator = selector.getMatchingPartners().get(refinedUserProfile.partnerList.get(0))
-						.iterator();
-		assertEquals(0.5, iterator.next().weight, 0.0001);
-		assertEquals(false, iterator.hasNext());
+        // assert domain weights are as expected
+        Iterator<DomainWeight> iterator = selector.getMatchingPartners().get(refinedUserProfile.partnerList.get(0)).iterator();
+        assertEquals(0.5, iterator.next().weight, 0.0001);
+        assertEquals(false, iterator.hasNext());
 
-		iterator = selector.getMatchingPartners().get(refinedUserProfile.partnerList.get(1)).iterator();
-		assertEquals(0.5, iterator.next().weight, 0.0001);
-		assertEquals(false, iterator.hasNext());
-	}
+        iterator = selector.getMatchingPartners().get(refinedUserProfile.partnerList.get(1)).iterator();
+        assertEquals(0.5, iterator.next().weight, 0.0001);
+        assertEquals(false, iterator.hasNext());
+    }
 }
