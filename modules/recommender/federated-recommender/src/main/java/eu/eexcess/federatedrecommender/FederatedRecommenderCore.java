@@ -191,8 +191,9 @@ public class FederatedRecommenderCore {
 												+ " is not working currently.", e);
 								throw e;
 							}
+							client.destroy();
 						}
-						client.destroy();
+						
 						return resultList;
 					}
 				});
@@ -636,8 +637,10 @@ public class FederatedRecommenderCore {
 		long start = System.currentTimeMillis();
 		PartnersFederatedRecommendations pFR = getPartnersRecommendations(userProfile);
 		List<PartnerResponseState> partnerResponseState = new ArrayList<PartnerResponseState>();
+		
 		for (PartnerBadge badge : pFR.getResults().keySet()) {
-			partnerResponseState.addAll(pFR.getResults().get(badge).partnerResponseState);
+		    if(badge!=null && pFR!=null && !pFR.getResults().isEmpty() && pFR.getResults().get(badge)!=null)
+		        partnerResponseState.addAll(pFR.getResults().get(badge).partnerResponseState);
 		}
 		long end = System.currentTimeMillis();
 		long timeToGetPartners = end - start;
