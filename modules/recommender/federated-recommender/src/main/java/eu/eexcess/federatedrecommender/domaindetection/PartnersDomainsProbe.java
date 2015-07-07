@@ -21,11 +21,8 @@
 package eu.eexcess.federatedrecommender.domaindetection;
 
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Locale;
-import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Set;
 
 import javax.management.RuntimeErrorException;
@@ -43,30 +40,51 @@ import eu.eexcess.dataformats.result.Result;
 import eu.eexcess.dataformats.result.ResultList;
 import eu.eexcess.dataformats.userprofile.ContextKeyword;
 import eu.eexcess.dataformats.userprofile.SecureUserProfile;
-import eu.eexcess.federatedrecommender.registration.PartnerRegister;
 
-public class PartnersDomainsProbe {
+public class PartnersDomainsProbe implements Cloneable {
 
     // private Logger logger =
     // Logger.getLogger(PartnersDomainsProbe.class.getName());
-    private PartnerRegister partnerRegistration;
-    private Map<PartnerBadge, TermSet<TypedTerm>> partnerToDomainProbes = null;
+    private TermSet<TypedTerm> partnerDomainsCounter = null;
 
-    private int maxWords = 100;
-    private int maxResults = 10;
-    private DomainDetector domainDetector;
+    protected int maxWords = 100;
+    protected int maxResults = 10;
+    protected DomainDetector domainDetector;
+    protected Set<String> ambiguousPhrases = new HashSet<String>(maxWords);
 
-    private final String recommendationEndpoint = "recommend";
+    private final String recommendationEndpointSuffix = "recommend";
 
     /**
-     * @param partners
-     *            partners to probe
+     * see {@link #PartnersDomainsProbe(DomainDetector, int, int)}
+     */
+    public PartnersDomainsProbe(DomainDetector domainDetector) throws RuntimeException {
+        this.domainDetector = domainDetector;
+        generateRandomPhrases();
+    }
+
+    /**
+     * see {@link #PartnersDomainsProbe(DomainDetector, int, int)}
+     */
+    public PartnersDomainsProbe(DomainDetector domainDetector, int randomPhrases) throws RuntimeException {
+        this.domainDetector = domainDetector;
+        this.maxWords = randomPhrases;
+        generateRandomPhrases();
+    }
+
+    /**
+     * 
      * @param domainDetector
      *            detector to be invoked
+     * @param numProbePhrases
+     * @param considerNumResults
+     * @throws RuntimeException
+     *             if random words cannot be generated
      */
-    public PartnersDomainsProbe(PartnerRegister partners, DomainDetector domainDetector) {
-        this.partnerRegistration = partners;
+    public PartnersDomainsProbe(DomainDetector domainDetector, int numProbePhrases, int considerNumResults) throws RuntimeException {
         this.domainDetector = domainDetector;
+        this.maxWords = numProbePhrases;
+        this.maxResults = considerNumResults;
+        generateRandomPhrases();
     }
 
     /**
@@ -80,116 +98,111 @@ public class PartnersDomainsProbe {
      *             {@link DomainDetector#drawRandomAmbiguousWord(Set)} or
      *             {@link DomainDetector#detect(String)}
      */
-    public Map<PartnerBadge, HashSet<PartnerDomain>> probePartners() throws DomainDetectorException {
+    public HashSet<PartnerDomain> probePartners(Client partnerClient, PartnerBadge partner) throws DomainDetectorException {
 
-        partnerToDomainProbes = newPartnerDomainCounter(partnerRegistration);
-        Set<String> seenWords = new HashSet<String>();
+        partnerDomainsCounter = new TermSet<TypedTerm>(new TypedTerm.AddingWeightTermMerger());
 
-        for (int i = 0; i < maxWords; i++) {
-            String ambiguousPhrase = domainDetector.drawRandomAmbiguousWord(seenWords);
-            // logger.info("searching for ambiguous phrase '" + ambiguousPhrase
-            // + "' (" + (i + 1) + "/" + maxWords + ")");
-            seenWords.add(ambiguousPhrase);
+        for (String ambiguousPhrase : ambiguousPhrases) {
 
-            SecureUserProfile sup = new SecureUserProfile();
-            sup.contextKeywords = Arrays.asList(new ContextKeyword(ambiguousPhrase));
+            SecureUserProfile ambiguousQuery = new SecureUserProfile();
+            ambiguousQuery.contextKeywords = Arrays.asList(new ContextKeyword(ambiguousPhrase));
 
-            for (PartnerBadge partner : partnerRegistration.getPartners()) {
-                System.out.println("Searching partner '" + partner.getSystemId() + "'");
+            ResultList partnerResult = getPartnerResult(partnerClient, partner, ambiguousQuery);
+            Set<String> seenResults = new HashSet<String>();
+            for (Result result : partnerResult.results.subList(0, Math.min(maxResults, partnerResult.results.size()))) {
 
-                TermSet<TypedTerm> domainToCount = partnerToDomainProbes.get(partner);
-                ResultList partnerResult = getPartnerResult(partner, sup);
-                Set<String> seenResults = new HashSet<String>();
-                for (Result result : partnerResult.results.subList(0, Math.min(maxResults, partnerResult.results.size()))) {
-                    // System.out.println("Got result '" + result.title + "'");
+                if (result.title != null && !result.title.trim().isEmpty()) {
+                    String title = result.title.trim();
+                    String titleNormalised = title.replaceAll("\\W", "").toLowerCase(Locale.US);
 
-                    if (result.title != null && !result.title.trim().isEmpty()) {
-                        String title = result.title.trim();
-                        String titleNormalised = title.replaceAll("\\W", "").toLowerCase(Locale.US);
+                    if (!seenResults.contains(titleNormalised)) {
 
-                        if (!seenResults.contains(titleNormalised)) {
-
-                            Set<Domain> detectedDomains = domainDetector.detect(title);
-                            for (Domain domain : detectedDomains) {
-                                domainToCount.add(new TypedTerm(domain.getName(), null, 1f));
-                            }
-                            // logger.info("domains for '" + title + "' -> '" +
-                            // detectedDomains + "'");
-                            seenResults.add(titleNormalised);
+                        Set<Domain> detectedDomains = domainDetector.detect(title);
+                        for (Domain domain : detectedDomains) {
+                            partnerDomainsCounter.add(new TypedTerm(domain.getName(), null, 1f));
                         }
+                        seenResults.add(titleNormalised);
                     }
                 }
             }
-            // logger.info("detected domains:");
-            // for (Entry<PartnerBadge, TermSet<TypedTerm>> e :
-            // partnerToDomainProbes.entrySet()) {
-            // logger.info(e.getKey().getSystemId() + " -> " + e.getValue());
-            // }
         }
-        return getProbes(partnerToDomainProbes);
+        return getProbesFromTerms(partnerDomainsCounter);
     }
 
-    public void setMaxWords(int maxWords) {
-        this.maxWords = maxWords;
-    }
-
-    public void setMaxResults(int maxResults) {
-        this.maxResults = maxResults;
+    @Override
+    public Object clone() throws CloneNotSupportedException {
+        PartnersDomainsProbe clone = (PartnersDomainsProbe) super.clone();
+        clone.domainDetector = domainDetector;
+        clone.maxResults = maxResults;
+        clone.maxWords = maxWords;
+        clone.ambiguousPhrases.addAll(ambiguousPhrases);
+        return clone;
     }
 
     /**
-     * Returns the resulted mapping of {@link #probePartners()}.
+     * Generate once ambiguous phrases to be used for all following probes.
      * 
-     * @return the mapping of partners to their corresponding domains and domain
-     *         weights
+     * @throws DomainDetectorException
      */
-    private Map<PartnerBadge, HashSet<PartnerDomain>> getProbes(Map<PartnerBadge, TermSet<TypedTerm>> partnerProbes) {
+    private void generateRandomPhrases() throws RuntimeException {
+        int tries = 0;
+        while (ambiguousPhrases.size() < maxWords) {
+            try {
+                tries++;
+                if (tries >= (maxWords * 2)) {
+                    throw new RuntimeException("failed to generate random abiguous words: tried [" + tries + "] times to generate [" + maxWords
+                            + "] phrases but generated only [" + ambiguousPhrases.size() + "] phrases so far");
+                }
+                ambiguousPhrases.add(domainDetector.drawRandomAmbiguousWord(ambiguousPhrases));
+            } catch (DomainDetectorException e) {
+                continue;
+            }
+        }
+    }
 
-        Map<PartnerBadge, HashSet<PartnerDomain>> partnerDomains = new HashMap<PartnerBadge, HashSet<PartnerDomain>>(partnerProbes.size());
+    /**
+     * Converts from set if {@link TypedTerm}s to set of {@link PartnerDomain}s.
+     * 
+     * @return the converted set
+     */
+    private HashSet<PartnerDomain> getProbesFromTerms(TermSet<TypedTerm> partnerProbes) {
+
+        HashSet<PartnerDomain> partnerDomains = new HashSet<PartnerDomain>(partnerProbes.size());
 
         if (0 >= partnerProbes.size()) {
             return partnerDomains;
         }
 
-        for (Entry<PartnerBadge, TermSet<TypedTerm>> entry : partnerProbes.entrySet()) {
-            HashSet<PartnerDomain> domains = new HashSet<PartnerDomain>(entry.getValue().size());
-            for (TypedTerm term : entry.getValue()) {
-                PartnerDomain domain = new PartnerDomain(term.getText(), term.getWeight());
-                domains.add(domain);
-            }
-            partnerDomains.put(entry.getKey(), domains);
+        for (TypedTerm entry : partnerProbes) {
+            PartnerDomain domain = new PartnerDomain(entry.getText(), entry.getWeight());
+            partnerDomains.add(domain);
         }
-        return partnerDomains;
-    }
 
-    private Map<PartnerBadge, TermSet<TypedTerm>> newPartnerDomainCounter(PartnerRegister registeredPartners) {
-        Map<PartnerBadge, TermSet<TypedTerm>> partnerToDomainToCount = new HashMap<PartnerBadge, TermSet<TypedTerm>>();
-        for (PartnerBadge partner : registeredPartners.getPartners()) {
-            partnerToDomainToCount.put(partner, new TermSet<TypedTerm>(new TypedTerm.AddingWeightTermMerger()));
-        }
-        return partnerToDomainToCount;
+        return partnerDomains;
     }
 
     /**
      * Sends a secure user profile request to a partner.
      * 
+     * @param client
+     *            client to use for communication
      * @param partner
+     *            the partner to query
      * @param secureUserProfile
      * @return the received result list
      * @throws RuntimeErrorException
      *             if an exception occurs
      */
-    private ResultList getPartnerResult(PartnerBadge partner, SecureUserProfile secureUserProfile) throws RuntimeErrorException {
+    private ResultList getPartnerResult(Client client, PartnerBadge partner, SecureUserProfile secureUserProfile) throws RuntimeErrorException {
         ResultList resultList = new ResultList();
 
-        Client client = partnerRegistration.getClient(partner.systemId);
         if (client != null) {
             try {
                 WebResource resource = null;
                 if (partner.getPartnerConnectorEndpoint().endsWith("/")) {
-                    resource = client.resource(partner.getPartnerConnectorEndpoint() + recommendationEndpoint);
+                    resource = client.resource(partner.getPartnerConnectorEndpoint() + recommendationEndpointSuffix);
                 } else {
-                    resource = client.resource(partner.getPartnerConnectorEndpoint() + "/" + recommendationEndpoint);
+                    resource = client.resource(partner.getPartnerConnectorEndpoint() + "/" + recommendationEndpointSuffix);
                 }
                 resource.accept(MediaType.APPLICATION_JSON);
                 resultList = resource.post(ResultList.class, secureUserProfile);

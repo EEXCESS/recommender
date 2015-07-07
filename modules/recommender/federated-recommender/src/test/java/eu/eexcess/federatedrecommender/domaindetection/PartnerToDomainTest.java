@@ -19,7 +19,7 @@ GNU Affero General Public License for more details.
 
 You should have received a copy of the GNU Affero General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
-*/
+ */
 package eu.eexcess.federatedrecommender.domaindetection;
 
 import java.io.File;
@@ -57,11 +57,8 @@ import eu.eexcess.dataformats.result.Result;
 import eu.eexcess.dataformats.result.ResultList;
 import eu.eexcess.dataformats.userprofile.ContextKeyword;
 import eu.eexcess.dataformats.userprofile.SecureUserProfile;
-import eu.eexcess.federatedrecommender.domaindetection.Domain;
-import eu.eexcess.federatedrecommender.domaindetection.DomainDetector;
 import eu.eexcess.federatedrecommender.domaindetection.wordnet.WordnetDomainsDetector;
 import eu.eexcess.federatedrecommender.registration.PartnerRegister;
-
 
 /**
  * 
@@ -70,118 +67,123 @@ import eu.eexcess.federatedrecommender.registration.PartnerRegister;
  */
 public class PartnerToDomainTest {
     private static final Logger logger = Logger.getLogger(PartnerToDomainTest.class.getName());
-    
+
     private final PartnerRegister partnerRegister = new PartnerRegister();
-    
+
     /**
      * Creates a new instance of this class.
      */
-    
-	public PartnerToDomainTest() {
-		String zbw = null;
-//        String europeana = null, mendeley = null, kimCollect = null, wissensserver = null;
-            
-        
-//        europeana = "http://localhost:38080/eexcess-partner-europeana-1.0-SNAPSHOT/partner/recommend/";
-        
-//        europeana = "http://eexcess-dev.joanneum.at/eexcess-partner-europeana-1.0-SNAPSHOT/partner/recommend/";
-//        mendeley = "http://eexcess-dev.joanneum.at/eexcess-partner-mendeley-1.0-SNAPSHOT/partner/recommend/";
+
+    public PartnerToDomainTest() {
+        String zbw = null;
+        // String europeana = null, mendeley = null, kimCollect = null,
+        // wissensserver = null;
+
+        // europeana =
+        // "http://localhost:38080/eexcess-partner-europeana-1.0-SNAPSHOT/partner/recommend/";
+
+        // europeana =
+        // "http://eexcess-dev.joanneum.at/eexcess-partner-europeana-1.0-SNAPSHOT/partner/recommend/";
+        // mendeley =
+        // "http://eexcess-dev.joanneum.at/eexcess-partner-mendeley-1.0-SNAPSHOT/partner/recommend/";
         zbw = "http://eexcess-dev.joanneum.at/eexcess-partner-zbw-1.0-SNAPSHOT/partner/recommend/";
-		// kimCollect =
-		// "http://eexcess-dev.joanneum.at/eexcess-partner-kim-collect-1.0-SNAPSHOT/partner/recommend/";
-		// wissensserver =
-		// "http://eexcess-dev.joanneum.at/eexcess-partner-wissenmedia-1.0-SNAPSHOT/partner/recommend/";
-     
-//        if (false) { 
-//            PartnerBadge badge = new PartnerBadge();
-//            badge = new PartnerBadge();
-//            badge.setSystemId("Europeana");
-//            badge.setPartnerConnectorEndpoint(europeana);
-//            badge.setTags(new ArrayList<String>() {/**
-//				 * 
-//				 */
-//				private static final long serialVersionUID = 1L;
-//
-//			{
-//                add("Europe");
-//                add("Culture");
-//            }});
-//            partnerRegister.addPartner(badge);
-//        }
-        
-//        if (false) {
-//			PartnerBadge badge2 = new PartnerBadge();
-//			badge2 = new PartnerBadge();
-//			badge2.setSystemId("Mendeley");
-//			badge2.setPartnerConnectorEndpoint(mendeley);
-//			badge2.setTags(new ArrayList<String>() {
-//				/**
-//				 * 
-//				 */
-//				private static final long serialVersionUID = 1L;
-//
-//				{
-//					add("Science");
-//					add("Journals");
-//				}
-//			});
-//			partnerRegister.addPartner(badge2);
-//		}
-		PartnerBadge badge3 = new PartnerBadge();
+        // kimCollect =
+        // "http://eexcess-dev.joanneum.at/eexcess-partner-kim-collect-1.0-SNAPSHOT/partner/recommend/";
+        // wissensserver =
+        // "http://eexcess-dev.joanneum.at/eexcess-partner-wissenmedia-1.0-SNAPSHOT/partner/recommend/";
+
+        // if (false) {
+        // PartnerBadge badge = new PartnerBadge();
+        // badge = new PartnerBadge();
+        // badge.setSystemId("Europeana");
+        // badge.setPartnerConnectorEndpoint(europeana);
+        // badge.setTags(new ArrayList<String>() {/**
+        // *
+        // */
+        // private static final long serialVersionUID = 1L;
+        //
+        // {
+        // add("Europe");
+        // add("Culture");
+        // }});
+        // partnerRegister.addPartner(badge);
+        // }
+
+        // if (false) {
+        // PartnerBadge badge2 = new PartnerBadge();
+        // badge2 = new PartnerBadge();
+        // badge2.setSystemId("Mendeley");
+        // badge2.setPartnerConnectorEndpoint(mendeley);
+        // badge2.setTags(new ArrayList<String>() {
+        // /**
+        // *
+        // */
+        // private static final long serialVersionUID = 1L;
+        //
+        // {
+        // add("Science");
+        // add("Journals");
+        // }
+        // });
+        // partnerRegister.addPartner(badge2);
+        // }
+        PartnerBadge badge3 = new PartnerBadge();
         badge3.setSystemId("ZBW");
         badge3.setPartnerConnectorEndpoint(zbw);
-        badge3.setTags(new ArrayList<String>() {/**
+        badge3.setTags(new ArrayList<String>() {
+            /**
 			 * 
 			 */
-			private static final long serialVersionUID = 1L;
+            private static final long serialVersionUID = 1L;
 
-		{
-            add("Economy");
-            add("Articles");
-        }});
+            {
+                add("Economy");
+                add("Articles");
+            }
+        });
         partnerRegister.addPartner(badge3);
-               
-//        if (false) {
-//			PartnerBadge badge4 = new PartnerBadge();
-//			badge4.setSystemId("KIMCollect");
-//			badge4.setPartnerConnectorEndpoint(kimCollect);
-//			badge4.setTags(new ArrayList<String>() {
-//				/**
-//				 * 
-//				 */
-//				private static final long serialVersionUID = 1L;
-//
-//				{
-//					add("Swiss");
-//					add("Culture");
-//				}
-//			});
-//			partnerRegister.addPartner(badge4);
-//		}
-        
-//		if (false) {
-//			PartnerBadge badge5 = new PartnerBadge();
-//			badge5.setSystemId("Wissenmedia");
-//			badge5.setPartnerConnectorEndpoint(wissensserver);
-//			badge5.setTags(new ArrayList<String>() {
-//				/**
-//				 * 
-//				 */
-//				private static final long serialVersionUID = 1L;
-//
-//				{
-//					add("Articles");
-//					add("Culture");
-//				}
-//			});
-//			partnerRegister.addPartner(badge5);
-//		}
+
+        // if (false) {
+        // PartnerBadge badge4 = new PartnerBadge();
+        // badge4.setSystemId("KIMCollect");
+        // badge4.setPartnerConnectorEndpoint(kimCollect);
+        // badge4.setTags(new ArrayList<String>() {
+        // /**
+        // *
+        // */
+        // private static final long serialVersionUID = 1L;
+        //
+        // {
+        // add("Swiss");
+        // add("Culture");
+        // }
+        // });
+        // partnerRegister.addPartner(badge4);
+        // }
+
+        // if (false) {
+        // PartnerBadge badge5 = new PartnerBadge();
+        // badge5.setSystemId("Wissenmedia");
+        // badge5.setPartnerConnectorEndpoint(wissensserver);
+        // badge5.setTags(new ArrayList<String>() {
+        // /**
+        // *
+        // */
+        // private static final long serialVersionUID = 1L;
+        //
+        // {
+        // add("Articles");
+        // add("Culture");
+        // }
+        // });
+        // partnerRegister.addPartner(badge5);
+        // }
     }
-    
+
     private ResultList getPartnerResult(PartnerBadge partner, SecureUserProfile secureUserProfile) {
         ResultList resultList = new ResultList();
 
-        Client client = partnerRegister.getClient(partner);
+        Client client = partnerRegister.getClient(partner.getSystemId());
         if (client != null) {
             try {
                 WebResource resource = client.resource(partner.getPartnerConnectorEndpoint());
@@ -195,30 +197,32 @@ public class PartnerToDomainTest {
         }
         return resultList;
     }
-    
+
     public void test() throws Exception {
-//        WordnetDomainsDetector domainDetector = new WordnetDomainsDetector(
-//                new File("/opt/data/wordnet/WordNet-3.0/dict"), 
-//                new File("/opt/data/wordnet-domains/xwnd/xwnd-30g"), false);
-        DomainDetector domainDetector = new WordnetDomainsDetector(new File("/opt/data/wordnet/WordNet-2.0/dict"), 
-                new File("/opt/data/wordnet-domains/wn-domains-3.2/wn-domains-3.2-20070223"), true);
-        
-        Language[] languages = new Language[] {
-                Language.English, Language.French, Language.German, Language.Italian, Language.Spanish
-        };
+        // WordnetDomainsDetector domainDetector = new WordnetDomainsDetector(
+        // new File("/opt/data/wordnet/WordNet-3.0/dict"),
+        // new File("/opt/data/wordnet-domains/xwnd/xwnd-30g"), false);
+        DomainDetector domainDetector = new WordnetDomainsDetector(new File("/opt/data/wordnet/WordNet-2.0/dict"), new File(
+                "/opt/data/wordnet-domains/wn-domains-3.2/wn-domains-3.2-20070223"), true);
+
+        Language[] languages = new Language[] { Language.English, Language.French, Language.German, Language.Italian, Language.Spanish };
         LanguageDetector languageDetector = new LanguageDetector(languages);
-        
+
         List<PartnerBadge> partners = partnerRegister.getPartners();
         Map<String, TermSet<TypedTerm>> partnerToDomainToCount = new HashMap<String, TermSet<TypedTerm>>();
-        for (PartnerBadge partner : partners) { partnerToDomainToCount.put(partner.getSystemId(), new TermSet<TypedTerm>(new TypedTerm.AddingWeightTermMerger())); }
+        for (PartnerBadge partner : partners) {
+            partnerToDomainToCount.put(partner.getSystemId(), new TermSet<TypedTerm>(new TypedTerm.AddingWeightTermMerger()));
+        }
         Map<String, TermSet<TypedTerm>> partnerToLanguageToCount = new HashMap<String, TermSet<TypedTerm>>();
-        for (PartnerBadge partner : partners) { partnerToLanguageToCount.put(partner.getSystemId(), new TermSet<TypedTerm>(new TypedTerm.AddingWeightTermMerger())); }
-        
+        for (PartnerBadge partner : partners) {
+            partnerToLanguageToCount.put(partner.getSystemId(), new TermSet<TypedTerm>(new TypedTerm.AddingWeightTermMerger()));
+        }
+
         int maxWords = 1000;
         int maxResults = 10;
-        
+
         Collection<Domain> allDomains = domainDetector.getAllDomains();
-        
+
         FastVector attributes = new FastVector();
         FastVector domainVector = new FastVector();
         for (Domain domain : allDomains) {
@@ -238,30 +242,30 @@ public class PartnerToDomainTest {
         }
         Attribute partnerAttribute = new Attribute("partner", partnerVector);
         attributes.addElement(partnerAttribute);
-        Instances instances = new Instances("results", attributes, maxWords*maxResults);
-        
+        Instances instances = new Instances("results", attributes, maxWords * maxResults);
+
         Set<String> wordsToIgnore = new HashSet<String>();
         for (int i = 0; i < maxWords; i++) {
             String ambiguousPhrase = domainDetector.drawRandomAmbiguousWord(wordsToIgnore);
-            System.out.println("+++ Searching for ambiguous phrase '" + ambiguousPhrase + "' (" + (i+1) + "/" + maxWords + ")");
+            System.out.println("+++ Searching for ambiguous phrase '" + ambiguousPhrase + "' (" + (i + 1) + "/" + maxWords + ")");
             wordsToIgnore.add(ambiguousPhrase);
-            
+
             SecureUserProfile sup = new SecureUserProfile();
             sup.contextKeywords = Arrays.asList(new ContextKeyword(ambiguousPhrase));
-            
+
             for (PartnerBadge partner : partners) {
                 System.out.println("Searching partner '" + partner.getSystemId() + "'");
-                
+
                 TermSet<TypedTerm> domainToCount = partnerToDomainToCount.get(partner.getSystemId());
                 ResultList partnerResult = getPartnerResult(partner, sup);
                 Set<String> seenResults = new HashSet<String>();
                 for (Result result : partnerResult.results.subList(0, Math.min(maxResults, partnerResult.results.size()))) {
-                    //System.out.println("Got result '" + result.title + "'");
-                    
+                    // System.out.println("Got result '" + result.title + "'");
+
                     if (result.title != null && !result.title.trim().isEmpty()) {
                         String title = result.title.trim();
                         String titleNormalised = title.replaceAll("\\W", "").toLowerCase(Locale.US);
-                        
+
                         if (!seenResults.contains(titleNormalised)) {
                             Language language = languageDetector.detect(title);
                             String domainName = null;
@@ -269,7 +273,9 @@ public class PartnerToDomainTest {
                                 // map the result to domains
                                 Set<Domain> detectedDomains = domainDetector.detect(title);
                                 for (Domain domain : detectedDomains) {
-                                    if (domainName == null) { domainName = domain.getName(); }
+                                    if (domainName == null) {
+                                        domainName = domain.getName();
+                                    }
                                     domainToCount.add(new TypedTerm(domain.getName(), null, 1f));
                                 }
                                 System.out.println("Got domains for '" + title + "' -> '" + detectedDomains + "'");
@@ -285,25 +291,24 @@ public class PartnerToDomainTest {
                             instance.setValue(languageAttribute, language.asTwoChars());
                             instance.setValue(partnerAttribute, partner.getSystemId());
                             instances.add(instance);
-                            
+
                             seenResults.add(titleNormalised);
                         }
                     }
                 }
             }
             for (Entry<String, TermSet<TypedTerm>> e : partnerToDomainToCount.entrySet()) {
-                System.out.println(e.getKey()+" -> "+e.getValue());
+                System.out.println(e.getKey() + " -> " + e.getValue());
             }
             for (Entry<String, TermSet<TypedTerm>> e : partnerToLanguageToCount.entrySet()) {
-                System.out.println(e.getKey()+" -> "+e.getValue());
+                System.out.println(e.getKey() + " -> " + e.getValue());
             }
-            
+
             ArffSaver saver = new ArffSaver();
             saver.setDestination(new FileOutputStream(new File("/opt/data/eexcess/partner-to-domain-running.arff")));
             saver.setInstances(instances);
             saver.writeBatch();
         }
-        
 
         // System.out.println(partnerToDomainToCount);
     }

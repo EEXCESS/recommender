@@ -20,7 +20,11 @@
 
 package eu.eexcess.federatedrecommender.domaindetection;
 
+import static org.hamcrest.Matchers.containsInAnyOrder;
+import static org.hamcrest.Matchers.greaterThan;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertSame;
+import static org.junit.Assert.assertThat;
 
 import java.io.File;
 import java.util.HashMap;
@@ -37,40 +41,73 @@ import eu.eexcess.federatedrecommender.registration.PartnerRegister;
 
 public class PartnersDomainsProbeTest {
 
-	private static PartnerRegister partnerRegister = new PartnerRegister();
-	private static DomainDetector detector = null;
+    private static class TestablePartnersDomainsProbe extends PartnersDomainsProbe {
+        TestablePartnersDomainsProbe(DomainDetector detector, int numWords, int numResults) {
+            super(detector, numWords, numResults);
+        }
 
-	@BeforeClass
-	public static void setupDomainDetector() throws DomainDetectorException {
-		PartnersDomainsProbeTest.detector = new WordnetDomainsDetector(new File("/opt/data/wordnet/WordNet-2.0/dict/"),
-						new File("/opt/data/wordnet-domains/wn-domains-3.2/wn-domains-3.2-20070223"), true);
-	}
+        public void assertCloneEquals(PartnersDomainsProbe other) {
+            assertEquals(maxWords, other.maxWords);
+            assertEquals(maxResults, other.maxResults);
+            assertSame(domainDetector, other.domainDetector);
+            assertThat(ambiguousPhrases, containsInAnyOrder(other.ambiguousPhrases.toArray()));
+        }
+    }
 
-	@BeforeClass
-	public static void setupPartners() {
-		Map<String, String> partners = new HashMap<String, String>();
-		partners.put("Opensearch", "http://127.0.0.1/eexcess-partner-reference-opensearch-1.0-SNAPSHOT/partner/");
-		partners.put("Mendeley", "http://127.0.0.1/eexcess-partner-mendeley-1.0-SNAPSHOT/partner/");
-		partners.put("ZBW", "http://127.0.0.1/eexcess-partner-zbw-1.0-SNAPSHOT/partner/");
-		partners.put("Europeana", "http://127.0.0.1/eexcess-partner-europeana-1.0-SNAPSHOT/partner/");
-		partners.put("Wissenmedia", "http://127.0.0.1/eexcess-partner-wissenmedia-1.0-SNAPSHOT/partner/");
+    private static PartnerRegister partnerRegister = new PartnerRegister();
+    private static DomainDetector detector = null;
 
-		for (Map.Entry<String, String> entry : partners.entrySet()) {
-			PartnerBadge partner = new PartnerBadge();
-			partner.setSystemId(entry.getKey());
-			partner.setPartnerConnectorEndpoint(entry.getValue());
-			PartnersDomainsProbeTest.partnerRegister.addPartner(partner);
-		}
-	}
+    @BeforeClass
+    public static void setupDomainDetector() throws DomainDetectorException {
+        PartnersDomainsProbeTest.detector = new WordnetDomainsDetector(new File("/opt/data/wordnet/WordNet-2.0/dict/"), new File(
+                "/opt/data/wordnet-domains/wn-domains-3.2/wn-domains-3.2-20070223"), true);
+    }
 
-	@Test
-	public void probe_withGivenOnlineParnter_expectNotExceptional() throws DomainDetectorException {
+    @BeforeClass
+    public static void setupPartners() {
+        Map<String, String> partners = new HashMap<String, String>();
+        partners.put("Opensearch", "http://127.0.0.1/eexcess-partner-reference-opensearch-1.0-SNAPSHOT/partner/");
+        partners.put("Mendeley", "http://127.0.0.1/eexcess-partner-mendeley-1.0-SNAPSHOT/partner/");
+        partners.put("ZBW", "http://127.0.0.1/eexcess-partner-zbw-1.0-SNAPSHOT/partner/");
+        partners.put("Europeana", "http://127.0.0.1/eexcess-partner-europeana-1.0-SNAPSHOT/partner/");
+        partners.put("Wissenmedia", "http://127.0.0.1/eexcess-partner-wissenmedia-1.0-SNAPSHOT/partner/");
 
-		PartnersDomainsProbe probe = new PartnersDomainsProbe(partnerRegister, detector);
-		probe.setMaxResults(3);
-		probe.setMaxWords(5);
-		Map<PartnerBadge, HashSet<PartnerDomain>> partnerToDomain = probe.probePartners();
+        for (Map.Entry<String, String> entry : partners.entrySet()) {
+            PartnerBadge partner = new PartnerBadge();
+            partner.setSystemId(entry.getKey());
+            partner.setPartnerConnectorEndpoint(entry.getValue());
+            PartnersDomainsProbeTest.partnerRegister.addPartner(partner);
+        }
+    }
 
-		assertEquals(partnerToDomain.size(), partnerToDomain.size());
-	}
+    @Test
+    public void probe_withGivenOnlineParnter_expectNotExceptional_atLea() throws DomainDetectorException {
+
+        int numPartnersHavingNoDomains = 0;
+        PartnersDomainsProbe probe = new PartnersDomainsProbe(detector, 15, 3);
+
+        for (PartnerBadge partner : partnerRegister.getPartners()) {
+            HashSet<PartnerDomain> partnerToDomain = probe.probePartners(partnerRegister.getClient(partner.getSystemId()), partner);
+            System.out.println("domains for partner [" + partner.getSystemId() + "]");
+            for (PartnerDomain domain : partnerToDomain) {
+                System.out.println("name: " + domain.domainName + " weight: " + domain.weight);
+            }
+
+            if (partnerToDomain.size() <= 0) {
+                numPartnersHavingNoDomains++;
+            }
+
+            if (numPartnersHavingNoDomains >= 2) {
+                assertThat("partner [" + partner.getSystemId() + "] has no domains and also do [" + (numPartnersHavingNoDomains - 1) + "] other partners",
+                        partnerToDomain.size(), greaterThan(0));
+            }
+        }
+    }
+
+    @Test
+    public void cloneable_expectNewObjectWithIdenticState() throws CloneNotSupportedException {
+        TestablePartnersDomainsProbe template = new TestablePartnersDomainsProbe(detector, 15, 3);
+        TestablePartnersDomainsProbe clone = (TestablePartnersDomainsProbe) template.clone();
+        template.assertCloneEquals(clone);
+    }
 }

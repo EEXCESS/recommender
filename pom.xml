@@ -24,7 +24,7 @@
 		<module>modules/partners/opensearch/</module>
 		<module>modules/recommender/federated-recommender/</module>
 		<module>modules/recommender/federated-recommender-web-service/</module>
-	<!-- <module>modules/evaluation/</module> -->	
+	 <module>modules/evaluation/</module> 	
 		<module>experimental/misc/</module>
 	</modules>
 	<developers>
