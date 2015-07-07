@@ -151,8 +151,7 @@ public class DbPediaGraph {
 
     private void addVertex(SimpleWeightedGraph<String, DefaultEdge> g, List<String> visitedNodes, int hitsLimit, int depthLimit, String object, String subject)
             throws FederatedRecommenderException {
-        if(object!=null)
-        if(!object.equals(subject)){
+        if(object!=null && !object.equals(subject)){
         	g.addVertex(object);
         	g.addVertex(subject);
         	g.addEdge(object, subject);

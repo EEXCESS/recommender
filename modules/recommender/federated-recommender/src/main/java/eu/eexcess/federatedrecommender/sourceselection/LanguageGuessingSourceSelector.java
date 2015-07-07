@@ -119,12 +119,11 @@ public class LanguageGuessingSourceSelector implements PartnerSelector {
 		}
 		for (PartnerBadge partner : partners) {
 			for (String partnerLanguage : partner.getLanguageContent()) {
-				if (partnerLanguage.compareTo(language) == 0) {
-					if (false == partnerConnectorList.contains(partner)) {
+				if (partnerLanguage.compareTo(language) == 0  && false == partnerConnectorList.contains(partner)) {
 						partnerConnectorList.add(partner);
 
 						if (false == selectedPartners.containsKey(partner)) {
-							ArrayList<String> newList = new ArrayList<String>();
+							List<String> newList = new ArrayList<String>();
 							newList.add(language);
 							selectedPartners.put(partner, newList);
 						} else {
@@ -134,5 +133,5 @@ public class LanguageGuessingSourceSelector implements PartnerSelector {
 				}
 			}
 		}
-	}
+	
 }

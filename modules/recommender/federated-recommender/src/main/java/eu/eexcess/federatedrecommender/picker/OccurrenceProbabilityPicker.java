@@ -179,18 +179,10 @@ public class OccurrenceProbabilityPicker extends PartnersFederatedRecommendation
         for (ContextKeyword context : secureUserProfile.contextKeywords) {
             if (result.title != null && result.title.toLowerCase().contains(context.text.toLowerCase()))
                     maxTitleEntries++;
-            // if (result.description != null)
-            // if (result.description.toLowerCase().contains(
-            // context.text.toLowerCase()))
-            // maxDescriptionEntries++;
         }
         for (Interest interest : secureUserProfile.interestList) {
             if (result.title != null && result.title.toLowerCase().contains(interest.text.toLowerCase()))
                     maxTitleEntries++;
-            // if (result.description != null)
-            // if (result.description.toLowerCase().contains(
-            // interest.text.toLowerCase()))
-            // maxDescriptionEntries++;
         }
         double queryWeight = 0;
         if (secureUserProfile.contextKeywords.size() + secureUserProfile.interestList.size() > 0)

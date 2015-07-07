@@ -79,7 +79,8 @@ public class ESUPPair implements  Serializable {
         }
         return result;
     }
-
+    
+    @Override
     public String toString() {
         return source + " " + getBiggestSourceClass();
 
@@ -99,8 +100,7 @@ public class ESUPPair implements  Serializable {
      */
     @Override
     public boolean equals(Object obj) {
-        if (obj instanceof ESUPPair) {
-            if (this.source.equals(((ESUPPair) obj).getSource()))
+        if (obj instanceof ESUPPair && this.source.equals(((ESUPPair) obj).getSource())){
                 return true;
         }
         return false;

@@ -77,11 +77,9 @@ public class ESUPSource implements Serializable {
      */
     @Override
     public boolean equals(Object o) {
-        if (o instanceof ESUPSource) {
-            if (this.linkClass.equals(((ESUPSource) o).getLinkClass())) {
+        if (o instanceof ESUPSource && this.linkClass.equals(((ESUPSource) o).getLinkClass())) {
                 return true;
             }
-        }
         return false;
     }
 
@@ -105,18 +103,16 @@ public class ESUPSource implements Serializable {
         }
         return value;
     }
-
+    @Override
     public String toString() {
-        return linkClass + " \n"
-        // + links;
-        ;
+        return linkClass + " \n";
     }
 
     public void eraseOwnLink() {
-        loop: for (ESUPLink esupLink : links) {
+        for (ESUPLink esupLink : links) {
             if (esupLink.getClassName().contains(linkClass)) {
                 esupLink.setLink(0.0);
-                break loop;
+                break;
             }
         }
     }
