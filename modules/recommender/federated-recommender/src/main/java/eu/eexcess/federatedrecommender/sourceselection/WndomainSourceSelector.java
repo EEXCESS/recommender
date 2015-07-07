@@ -64,10 +64,10 @@ public class WndomainSourceSelector implements PartnerSelector {
                 return 0;
             } else if (this.weight < o.weight) {
                 return -1;
-            } else if (this.weight.equals(o.weight)) {
-                return (this.name.compareTo(o.name));
+            } else if (this.weight > o.weight) {
+                return 1;
             }
-            return 1;
+            return (this.name.compareTo(o.name));
         }
 
         @Override
