@@ -31,6 +31,7 @@ import eu.eexcess.partnerdata.reference.PartnerdataLogger;
  * 
  * @author plopez@know-center.at
  */
+//TODO: "PartnerConfiguration partnerConfiguration" parameters should be removed from the interface since it reachable via chache-enum
 public interface PartnerConnectorApi {
 	    
 	    /** 
