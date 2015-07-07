@@ -18,7 +18,7 @@
  * @author Raoul Rubien
  */
 
-package eu.eexcess.federatedrecommender.domaindetection;
+package eu.eexcess.federatedrecommender.domaindetection.probing;
 
 import java.util.Arrays;
 import java.util.HashSet;

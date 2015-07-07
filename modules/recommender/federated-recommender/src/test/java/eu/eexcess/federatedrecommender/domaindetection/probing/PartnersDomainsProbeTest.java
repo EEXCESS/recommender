@@ -18,7 +18,7 @@
  * @author Raoul Rubien
  */
 
-package eu.eexcess.federatedrecommender.domaindetection;
+package eu.eexcess.federatedrecommender.domaindetection.probing;
 
 import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.greaterThan;
@@ -36,6 +36,9 @@ import org.junit.Test;
 
 import eu.eexcess.dataformats.PartnerBadge;
 import eu.eexcess.dataformats.PartnerDomain;
+import eu.eexcess.federatedrecommender.domaindetection.probing.DomainDetector;
+import eu.eexcess.federatedrecommender.domaindetection.probing.DomainDetectorException;
+import eu.eexcess.federatedrecommender.domaindetection.probing.PartnersDomainsProbe;
 import eu.eexcess.federatedrecommender.domaindetection.wordnet.WordnetDomainsDetector;
 import eu.eexcess.federatedrecommender.registration.PartnerRegister;
 

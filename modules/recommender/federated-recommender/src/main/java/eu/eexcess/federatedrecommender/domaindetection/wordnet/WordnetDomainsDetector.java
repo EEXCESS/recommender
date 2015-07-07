@@ -57,9 +57,9 @@ import at.knowcenter.ie.opennlp.TokenAnnotator;
 import at.knowcenter.ie.postags.UnifiedTag;
 import at.knowcenter.util.term.TermSet;
 import at.knowcenter.util.term.TypedTerm;
-import eu.eexcess.federatedrecommender.domaindetection.Domain;
-import eu.eexcess.federatedrecommender.domaindetection.DomainDetector;
-import eu.eexcess.federatedrecommender.domaindetection.DomainDetectorException;
+import eu.eexcess.federatedrecommender.domaindetection.probing.Domain;
+import eu.eexcess.federatedrecommender.domaindetection.probing.DomainDetector;
+import eu.eexcess.federatedrecommender.domaindetection.probing.DomainDetectorException;
 
 /**
  * Domain detector based on the wordnet domains dataset.

@@ -37,9 +37,9 @@ import eu.eexcess.dataformats.PartnerBadge;
 import eu.eexcess.dataformats.PartnerDomain;
 import eu.eexcess.dataformats.userprofile.ContextKeyword;
 import eu.eexcess.dataformats.userprofile.SecureUserProfile;
-import eu.eexcess.federatedrecommender.domaindetection.Domain;
-import eu.eexcess.federatedrecommender.domaindetection.DomainDetector;
-import eu.eexcess.federatedrecommender.domaindetection.DomainDetectorException;
+import eu.eexcess.federatedrecommender.domaindetection.probing.Domain;
+import eu.eexcess.federatedrecommender.domaindetection.probing.DomainDetector;
+import eu.eexcess.federatedrecommender.domaindetection.probing.DomainDetectorException;
 import eu.eexcess.federatedrecommender.domaindetection.wordnet.WordnetDomainsDetector;
 import eu.eexcess.federatedrecommender.interfaces.PartnerSelector;
 

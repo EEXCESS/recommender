@@ -57,6 +57,8 @@ import eu.eexcess.dataformats.result.Result;
 import eu.eexcess.dataformats.result.ResultList;
 import eu.eexcess.dataformats.userprofile.ContextKeyword;
 import eu.eexcess.dataformats.userprofile.SecureUserProfile;
+import eu.eexcess.federatedrecommender.domaindetection.probing.Domain;
+import eu.eexcess.federatedrecommender.domaindetection.probing.DomainDetector;
 import eu.eexcess.federatedrecommender.domaindetection.wordnet.WordnetDomainsDetector;
 import eu.eexcess.federatedrecommender.registration.PartnerRegister;
 
