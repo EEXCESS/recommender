@@ -60,12 +60,13 @@ public class WndomainSourceSelector implements PartnerSelector {
 
 		@Override
 		public int compareTo(DomainWeight o) {
-			if (equals(0)) {
+			if (equals(o)) { //TODO: ?!?
 				return 0;
 			} else if (this.weight < o.weight) {
 				return -1;
 			}
 			return 1;
+			
 		}
 
 		@Override
@@ -76,6 +77,7 @@ public class WndomainSourceSelector implements PartnerSelector {
 			return result;
 		}
 
+		//TODO: check aswell -> or document it
 		@Override
 		public boolean equals(Object obj) {
 			if (this == obj)
