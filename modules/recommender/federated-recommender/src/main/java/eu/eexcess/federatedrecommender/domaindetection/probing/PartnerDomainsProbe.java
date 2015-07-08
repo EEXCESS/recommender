@@ -24,6 +24,7 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Locale;
 import java.util.Set;
+import java.util.logging.Logger;
 
 import javax.management.RuntimeErrorException;
 import javax.ws.rs.core.MediaType;
@@ -41,23 +42,31 @@ import eu.eexcess.dataformats.result.ResultList;
 import eu.eexcess.dataformats.userprofile.ContextKeyword;
 import eu.eexcess.dataformats.userprofile.SecureUserProfile;
 
-public class PartnersDomainsProbe implements Cloneable {
+public class PartnerDomainsProbe implements Cloneable {
 
-    // private Logger logger =
-    // Logger.getLogger(PartnersDomainsProbe.class.getName());
-    private TermSet<TypedTerm> partnerDomainsCounter = null;
+    public static interface CancelProbeCondition {
+        public boolean isProbeToBeCancelled();
+    }
 
+    private Logger logger = Logger.getLogger(PartnerDomainsProbe.class.getName());
+    /**
+     * default number of random phrases to generate once
+     */
     protected int maxWords = 100;
+    /**
+     * default maximum amount of partner results to consider for domain
+     * detection
+     */
     protected int maxResults = 10;
     protected DomainDetector domainDetector;
     protected Set<String> ambiguousPhrases = new HashSet<String>(maxWords);
-
     private final String recommendationEndpointSuffix = "recommend";
+    private CancelProbeCondition canelCondition;
 
     /**
      * see {@link #PartnersDomainsProbe(DomainDetector, int, int)}
      */
-    public PartnersDomainsProbe(DomainDetector domainDetector) throws RuntimeException {
+    public PartnerDomainsProbe(DomainDetector domainDetector) throws RuntimeException {
         this.domainDetector = domainDetector;
         generateRandomPhrases();
     }
@@ -65,9 +74,9 @@ public class PartnersDomainsProbe implements Cloneable {
     /**
      * see {@link #PartnersDomainsProbe(DomainDetector, int, int)}
      */
-    public PartnersDomainsProbe(DomainDetector domainDetector, int randomPhrases) throws RuntimeException {
+    public PartnerDomainsProbe(DomainDetector domainDetector, int numProbePhrases) throws RuntimeException {
         this.domainDetector = domainDetector;
-        this.maxWords = randomPhrases;
+        this.maxWords = numProbePhrases;
         generateRandomPhrases();
     }
 
@@ -80,7 +89,7 @@ public class PartnersDomainsProbe implements Cloneable {
      * @throws RuntimeException
      *             if random words cannot be generated
      */
-    public PartnersDomainsProbe(DomainDetector domainDetector, int numProbePhrases, int considerNumResults) throws RuntimeException {
+    public PartnerDomainsProbe(DomainDetector domainDetector, int numProbePhrases, int considerNumResults) throws RuntimeException {
         this.domainDetector = domainDetector;
         this.maxWords = numProbePhrases;
         this.maxResults = considerNumResults;
@@ -98,26 +107,32 @@ public class PartnersDomainsProbe implements Cloneable {
      *             {@link DomainDetector#drawRandomAmbiguousWord(Set)} or
      *             {@link DomainDetector#detect(String)}
      */
-    public HashSet<PartnerDomain> probePartners(Client partnerClient, PartnerBadge partner) throws DomainDetectorException {
+    public HashSet<PartnerDomain> probePartner(Client partnerClient, PartnerBadge partner) throws DomainDetectorException {
 
-        partnerDomainsCounter = new TermSet<TypedTerm>(new TypedTerm.AddingWeightTermMerger());
+        TermSet<TypedTerm> partnerDomainsCounter = new TermSet<TypedTerm>(new TypedTerm.AddingWeightTermMerger());
 
         for (String ambiguousPhrase : ambiguousPhrases) {
-
+            if (isToBeAborted()) {
+                break;
+            }
             SecureUserProfile ambiguousQuery = new SecureUserProfile();
             ambiguousQuery.contextKeywords = Arrays.asList(new ContextKeyword(ambiguousPhrase));
 
             ResultList partnerResult = getPartnerResult(partnerClient, partner, ambiguousQuery);
             Set<String> seenResults = new HashSet<String>();
             for (Result result : partnerResult.results.subList(0, Math.min(maxResults, partnerResult.results.size()))) {
-
+                if (isToBeAborted()) {
+                    break;
+                }
                 if (result.title != null && !result.title.trim().isEmpty()) {
                     String title = result.title.trim();
                     String titleNormalised = title.replaceAll("\\W", "").toLowerCase(Locale.US);
 
                     if (!seenResults.contains(titleNormalised)) {
-
-                        Set<Domain> detectedDomains = domainDetector.detect(title);
+                        Set<Domain> detectedDomains = null;
+                        synchronized (domainDetector) {
+                            detectedDomains = domainDetector.detect(title);
+                        }
                         for (Domain domain : detectedDomains) {
                             partnerDomainsCounter.add(new TypedTerm(domain.getName(), null, 1f));
                         }
@@ -131,12 +146,37 @@ public class PartnersDomainsProbe implements Cloneable {
 
     @Override
     public Object clone() throws CloneNotSupportedException {
-        PartnersDomainsProbe clone = (PartnersDomainsProbe) super.clone();
+        PartnerDomainsProbe clone = (PartnerDomainsProbe) super.clone();
         clone.domainDetector = domainDetector;
         clone.maxResults = maxResults;
         clone.maxWords = maxWords;
         clone.ambiguousPhrases.addAll(ambiguousPhrases);
         return clone;
+    }
+
+    /**
+     * Set the one and only condition that will be checked whenever a new query
+     * is sent to the partner for probing. If
+     * {@link CancelProbeCondition#isProbeToBeCancelled()} == true probing will
+     * terminate after the currently request.
+     * 
+     * @param condition
+     */
+    public void setCondition(CancelProbeCondition condition) {
+        canelCondition = condition;
+    }
+
+    public void removeCondition() {
+        canelCondition = null;
+    }
+
+    private boolean isToBeAborted() {
+        boolean toBeCanceled = false;
+
+        if (canelCondition != null) {
+            toBeCanceled = canelCondition.isProbeToBeCancelled();
+        }
+        return toBeCanceled;
     }
 
     /**
@@ -146,6 +186,7 @@ public class PartnersDomainsProbe implements Cloneable {
      */
     private void generateRandomPhrases() throws RuntimeException {
         int tries = 0;
+        long startTimestamp = System.currentTimeMillis();
         while (ambiguousPhrases.size() < maxWords) {
             try {
                 tries++;
@@ -157,6 +198,11 @@ public class PartnersDomainsProbe implements Cloneable {
             } catch (DomainDetectorException e) {
                 continue;
             }
+        }
+
+        long delayMs = System.currentTimeMillis() - startTimestamp;
+        if (delayMs > (3 * 1000)) {
+            logger.info("drawing [" + maxWords + "] random phrases took [" + delayMs + "ms]");
         }
     }
 
