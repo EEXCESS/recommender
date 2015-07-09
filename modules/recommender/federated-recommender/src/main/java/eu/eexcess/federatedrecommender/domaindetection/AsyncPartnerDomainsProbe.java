@@ -24,6 +24,8 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.logging.Logger;
 
+import no.uib.cipr.matrix.GivensRotation;
+
 import com.sun.jersey.api.client.Client;
 
 import eu.eexcess.dataformats.PartnerBadge;
@@ -32,6 +34,15 @@ import eu.eexcess.federatedrecommender.domaindetection.probing.DomainDetectorExc
 import eu.eexcess.federatedrecommender.domaindetection.probing.PartnerDomainsProbe;
 import eu.eexcess.federatedrecommender.domaindetection.probing.PartnerDomainsProbe.CancelProbeCondition;
 
+/**
+ * This class realizes asynchronous probing of a {@link PartnerBadge} and
+ * returns the results via callback. To prevent run away of the task it is
+ * aborted if it did not finish within the {@link GivensRotation}
+ * {@link #timeout}.
+ * 
+ * @author Raoul Rubien
+ *
+ */
 public class AsyncPartnerDomainsProbe {
 
     public static interface ProbeDoneCallback {
@@ -44,14 +55,17 @@ public class AsyncPartnerDomainsProbe {
 
         @Override
         synchronized public boolean isProbeToBeCancelled() {
-            Exception e = new Exception();
-            System.out.println("call to condition==" + toBeCanceled + " from: " + e.getStackTrace()[1]);
-
             return toBeCanceled;
         }
 
     }
 
+    /**
+     * Aborts the {@link ProbeTask} if not finished within the given timeout.
+     * 
+     * @author Raoul Rubien
+     *
+     */
     private static class TaskController extends Thread {
 
         private Thread task;
@@ -86,6 +100,12 @@ public class AsyncPartnerDomainsProbe {
 
     }
 
+    /**
+     * Thread that performs the asynchronous probing.
+     * 
+     * @author Raoul Rubien
+     *
+     */
     private static class ProbeTask extends Thread {
 
         private PartnerBadge partnerConfig;
@@ -131,7 +151,9 @@ public class AsyncPartnerDomainsProbe {
     private Set<ProbeDoneCallback> callbacks = new HashSet<ProbeDoneCallback>();
 
     /**
-     * Constructs an asynchronous domain probe.
+     * Constructs an asynchronous domain probe that allows asynchronous probing
+     * with timeout. If probing is not done within the specified time, it is
+     * aborted.
      * 
      * @param partnerConfig
      *            partner details
@@ -159,13 +181,16 @@ public class AsyncPartnerDomainsProbe {
     }
 
     /**
-     * Runs an asynchronous domain probe if there is no other task running and
-     * terminates the task if the probe duration exceeds the {@link #timeout}.
+     * Performs an asynchronous domain probe if there is no other task running.
+     * It terminates the task if the probe duration exceeds the {@link #timeout}
+     * . If the task is ready within the timeout, the result is delivered via
+     * {@link ProbeDoneCallback}.
      */
     public void probeAsyncronous() {
         if (isRunning()) {
             logger.info("failed to start new asynchronous probing while task is running");
         } else {
+            cancelCondition.toBeCanceled = false;
             logger.info("starting probe task...");
             probeController.start();
         }
