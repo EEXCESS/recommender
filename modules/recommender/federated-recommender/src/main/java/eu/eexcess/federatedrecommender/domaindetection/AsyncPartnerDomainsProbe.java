@@ -46,7 +46,9 @@ import eu.eexcess.federatedrecommender.domaindetection.probing.PartnerDomainsPro
 public class AsyncPartnerDomainsProbe {
 
     public static interface ProbeDoneCallback {
-        public void probeDoneCallback(String partnerId, Set<PartnerDomain> probeResult);
+        public void onProbeDoneCallback(String partnerId, Set<PartnerDomain> probeResult);
+
+        public void onProbeFailedCallback(String partnerId);
     }
 
     private static class CancelCondition implements CancelProbeCondition {
@@ -87,6 +89,7 @@ public class AsyncPartnerDomainsProbe {
         public void run() {
             task.start();
             try {
+                logger.info("scheduling termination of [" + task.getName() + "] in [" + timeout + "ms]...");
                 task.join(timeout);
             } catch (InterruptedException e) {
                 logger.severe("task controller thread was interrupted, trying to abort task");
@@ -130,15 +133,23 @@ public class AsyncPartnerDomainsProbe {
                 // if probing was interrupted the result is not complete,
                 // for that reason do not notify listener for this result
                 if (condition.isProbeToBeCancelled()) {
+                    synchronized (callbacks) {
+                        for (ProbeDoneCallback callback : callbacks) {
+                            callback.onProbeFailedCallback(partnerConfig.getSystemId());
+                        }
+                    }
                     return;
                 }
                 synchronized (callbacks) {
                     for (ProbeDoneCallback callback : callbacks) {
-                        callback.probeDoneCallback(partnerConfig.getSystemId(), domains);
+                        callback.onProbeDoneCallback(partnerConfig.getSystemId(), domains);
                     }
                 }
             } catch (DomainDetectorException e) {
                 e.printStackTrace();
+                for (ProbeDoneCallback callback : callbacks) {
+                    callback.onProbeFailedCallback(partnerConfig.getSystemId());
+                }
             }
         }
     }
@@ -174,10 +185,12 @@ public class AsyncPartnerDomainsProbe {
         this.timeout = asyncProbeTimeout;
         cancelCondition = new CancelCondition();
         probeTask = new ProbeTask(partnerConfig, partnerClient, domainProbe, callbacks, cancelCondition, logger);
+        probeTask.setName("probe-task-[" + partnerConfig.getSystemId() + "]");
         // this condition allows probing to terminate early and leave the result
         // uncomplete
         domainProbe.setCondition(cancelCondition);
         probeController = new TaskController(probeTask, timeout, cancelCondition, logger);
+        probeController.setName("probe-task-controller-[" + partnerConfig.getSystemId() + "]");
     }
 
     /**
@@ -191,7 +204,7 @@ public class AsyncPartnerDomainsProbe {
             logger.info("failed to start new asynchronous probing while task is running");
         } else {
             cancelCondition.toBeCanceled = false;
-            logger.info("starting probe task...");
+            logger.info("starting probe [" + probeController.getName() + "] ...");
             probeController.start();
         }
     }

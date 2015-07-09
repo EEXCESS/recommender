@@ -54,13 +54,26 @@ public class AsyncPartnerDomainsProbeTest {
         }
 
         @Override
-        synchronized public void probeDoneCallback(String partnerId, Set<PartnerDomain> probeResult) {
-            results.put(++numCallbacks, probeResult);
+        public void onProbeDoneCallback(String partnerId, Set<PartnerDomain> probeResult) {
+            System.out.println("received probe finished callback");
             if (testThread != null) {
-                testThread.notify();
+                synchronized (testThread) {
+                    results.put(++numCallbacks, probeResult);
+
+                    testThread.notify();
+                }
             }
         }
 
+        @Override
+        public void onProbeFailedCallback(String partnerId) {
+            System.out.println("received probe failed callback");
+            if (testThread != null) {
+                synchronized (testThread) {
+                    testThread.notify();
+                }
+            }
+        }
     }
 
     private static PartnerRegister partnerRegister = new PartnerRegister();
@@ -103,12 +116,14 @@ public class AsyncPartnerDomainsProbeTest {
 
         assertTrue(prober.isRunning());
 
+        System.out.print("waiting for termination of probe #");
         while (prober.isRunning()) {
             synchronized (Thread.currentThread()) {
-                Thread.currentThread().wait(300);
+                Thread.currentThread().wait(150);
             }
-            System.out.println("waiting for termination of probe...");
+            System.out.print("#");
         }
+        System.out.print(" done.");
         // expect the controller to have stopped the task and then have
         // terminated itself
         assertFalse(prober.isRunning());

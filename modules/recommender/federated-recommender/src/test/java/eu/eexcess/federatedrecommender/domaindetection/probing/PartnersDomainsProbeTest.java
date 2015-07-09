@@ -84,7 +84,7 @@ public class PartnersDomainsProbeTest {
     }
 
     @Test
-    public void probe_withGivenOnlineParnter_expectNotExceptional_atLea() throws DomainDetectorException {
+    public void probe_withGivenOnlineParnter_expectNotExceptional() throws DomainDetectorException {
 
         int numPartnersHavingNoDomains = 0;
         PartnerDomainsProbe probe = new PartnerDomainsProbe(detector, 15, 3);
