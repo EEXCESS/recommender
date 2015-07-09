@@ -19,6 +19,7 @@ hs_err_pid*
 modules/partners/ddb/src/main/resources/partner-config.json
 #odules/partners/europeana/target/
 modules/partners/europeana/src/main/resources/partner-config.json
+modules/partners/europeana/*-enrichment-stats.csv
 modules/partners/kimportal/target/
 modules/partners/kimcollect/src/main/resources/partner-config.json
 #modules/partners/mendeley/target/
@@ -29,6 +30,7 @@ modules/partners/opensearch/src/main/resources/partner-config.json
 modules/partners/wikipedialocal/src/main/resources/partner-config.json
 #modules/partners/wissenmedia/target/
 modules/partners/wissenmedia/src/main/resources/partner-config.json
+modules/partners/wissenmedia/*-enrichment-stats.csv
 modules/partners/zbw/target/
 modules/partners/zbw/src/main/resources/partner-config.json
 #modules/recommender/federated-recommender/target/
@@ -45,4 +47,7 @@ pom.xml.next
 release.properties
 dependency-reduced-pom.xml
 buildNumber.properties
+
+# deployment script
+tomcat-local-uploadscript.sh
 
