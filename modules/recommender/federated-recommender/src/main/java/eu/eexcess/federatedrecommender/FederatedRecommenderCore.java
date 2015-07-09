@@ -22,6 +22,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 package eu.eexcess.federatedrecommender;
 
+import java.io.File;
 import java.io.FileNotFoundException;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
@@ -34,6 +35,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
@@ -52,6 +54,7 @@ import com.sun.jersey.api.client.WebResource;
 import eu.eexcess.config.FederatedRecommenderConfiguration;
 import eu.eexcess.dataformats.PartnerBadge;
 import eu.eexcess.dataformats.PartnerBadgeStats;
+import eu.eexcess.dataformats.PartnerDomain;
 import eu.eexcess.dataformats.RecommenderStats;
 import eu.eexcess.dataformats.result.DocumentBadge;
 import eu.eexcess.dataformats.result.DocumentBadgeList;
@@ -62,6 +65,8 @@ import eu.eexcess.dataformats.result.ResultStats;
 import eu.eexcess.dataformats.userprofile.SecureUserProfile;
 import eu.eexcess.dataformats.userprofile.SecureUserProfileEvaluation;
 import eu.eexcess.federatedrecommender.dataformats.PartnersFederatedRecommendations;
+import eu.eexcess.federatedrecommender.domaindetection.AsyncPartnerDomainsProbeMonitor;
+import eu.eexcess.federatedrecommender.domaindetection.AsyncPartnerDomainsProbeMonitor.ProbeResultChanged;
 import eu.eexcess.federatedrecommender.interfaces.PartnerSelector;
 import eu.eexcess.federatedrecommender.interfaces.PartnersFederatedRecommendationsPicker;
 import eu.eexcess.federatedrecommender.interfaces.SecureUserProfileDecomposer;
@@ -74,16 +79,15 @@ import eu.eexcess.sqlite.DatabaseQueryStats;
  * FederatedRecommenderCore (Singleton)
  * 
  */
-public class FederatedRecommenderCore {
+public class FederatedRecommenderCore implements ProbeResultChanged {
 
     private static final Logger logger = Logger.getLogger(FederatedRecommenderCore.class.getName());
-
     private static volatile FederatedRecommenderCore instance;
     private final FederatedRecommenderConfiguration federatedRecConfiguration;
-
     private PartnerRegister partnerRegister = new PartnerRegister();
     private ExecutorService threadPool;
     private RecommenderStats recommenderStats;
+    private AsyncPartnerDomainsProbeMonitor partnersDomainsDetectors;
 
     /**
      * references to re-usable state-less source selection instances
@@ -95,6 +99,9 @@ public class FederatedRecommenderCore {
         this.federatedRecConfiguration = federatedRecConfiguration;
         this.recommenderStats = new RecommenderStats();
         instanciateSourceSelectors(this.federatedRecConfiguration);
+        partnersDomainsDetectors = new AsyncPartnerDomainsProbeMonitor(new File(this.federatedRecConfiguration.wordnetPath), new File(
+                this.federatedRecConfiguration.wordnetDomainFilePath), 50, 10, new Double(0.8 * 2000000).longValue());
+        partnersDomainsDetectors.setCallback(this);
     }
 
     /**
@@ -258,41 +265,6 @@ public class FederatedRecommenderCore {
     }
 
     /**
-     * checks which partners are selected and if there is an partner access key
-     * for that partner if one is needed
-     * 
-     * @param secureUserProfile
-     * @param partner
-     * @return true/false
-     */
-    private boolean checkUserSelectedPartners(SecureUserProfile secureUserProfile, PartnerBadge partner) {
-        if (secureUserProfile.partnerList != null) { // if the list is null then
-                                                     // we query every
-                                                     // partner
-            if (!secureUserProfile.partnerList.isEmpty()) {
-                boolean withKey = false;
-                if (partner.partnerKey != null && !partner.partnerKey.isEmpty())
-                    withKey = true;
-                if (!withKey)
-                    for (PartnerBadge uBadge : secureUserProfile.partnerList) {
-                        if (uBadge.getSystemId().equals(partner.getSystemId()))
-                            return true;
-                    }
-                else
-                    for (PartnerBadge uBadge : secureUserProfile.protectedPartnerList) {
-                        if (uBadge.partnerKey != null && !uBadge.partnerKey.isEmpty() && partner.partnerKey.equals(uBadge.partnerKey)
-                                && uBadge.getSystemId().equals(partner.getSystemId()))
-                            return true;
-                    }
-            } else
-                return true;
-        } else
-            return true;
-
-        return false;
-    }
-
-    /**
      * main function to generate a federated recommendation
      * 
      * @return
@@ -371,23 +343,6 @@ public class FederatedRecommenderCore {
     }
 
     /**
-     * Helper function to filter the documents
-     * 
-     * @param documents
-     * @param predicate
-     * @return
-     */
-    private DocumentBadgeList filterDocuments(DocumentBadgeList documents, DocumentBadgePredicate predicate) {
-        DocumentBadgeList result = new DocumentBadgeList();
-        for (DocumentBadge docs : documents.documentBadges) {
-            if (predicate.isPartnerDocument(docs)) {
-                result.documentBadges.add(docs);
-            }
-        }
-        return result;
-    }
-
-    /**
      * calls the given query expansion algorithm
      * 
      * @param userProfile
@@ -405,27 +360,6 @@ public class FederatedRecommenderCore {
         if (sUPDecomposer == null)
             return userProfile;
         return sUPDecomposer.decompose(userProfile);
-    }
-
-    private void instanciateSourceSelectors(FederatedRecommenderConfiguration recommenderConfig) {
-
-        ArrayList<String> selectorsClassNames = new ArrayList<String>();
-        Collections.addAll(selectorsClassNames, recommenderConfig.sourceSelectors);
-
-        for (String sourceSelectorClassName : selectorsClassNames) {
-            try {
-                PartnerSelector sourceSelector = (PartnerSelector) statelessClassInstances.get(sourceSelectorClassName);
-                if (null == sourceSelector) {
-                    Constructor<?> ctor = Class.forName(sourceSelectorClassName).getConstructor(FederatedRecommenderConfiguration.class);
-
-                    sourceSelector = (PartnerSelector) ctor.newInstance(recommenderConfig);
-                    logger.info("instanciating new source selector [" + sourceSelector.getClass().getSimpleName() + "]");
-                    statelessClassInstances.put(sourceSelectorClassName, sourceSelector);
-                }
-            } catch (InstantiationException | IllegalAccessException | ClassNotFoundException | NoSuchMethodException | InvocationTargetException e) {
-                logger.log(Level.SEVERE, "failed to instanciate source selector [" + sourceSelectorClassName + "]", e);
-            }
-        }
     }
 
     /**
@@ -589,7 +523,7 @@ public class FederatedRecommenderCore {
             logger.log(Level.WARNING, "Could read from Statistics Database");
 
         this.addPartner(badge);
-
+        partnersDomainsDetectors.probe(badge, getPartnerRegister().getClient(badge.getSystemId()));
         return "Partner Added";
 
     }
@@ -641,6 +575,92 @@ public class FederatedRecommenderCore {
         resultList.provider = "federated";
         resultList.partnerResponseState = partnerResponseState;
         return resultList;
+    }
+
+    /**
+     * checks which partners are selected and if there is an partner access key
+     * for that partner if one is needed
+     * 
+     * @param secureUserProfile
+     * @param partner
+     * @return true/false
+     */
+    private boolean checkUserSelectedPartners(SecureUserProfile secureUserProfile, PartnerBadge partner) {
+        if (secureUserProfile.partnerList != null) { // if the list is null then
+                                                     // we query every
+                                                     // partner
+            if (!secureUserProfile.partnerList.isEmpty()) {
+                boolean withKey = false;
+                if (partner.partnerKey != null && !partner.partnerKey.isEmpty())
+                    withKey = true;
+                if (!withKey)
+                    for (PartnerBadge uBadge : secureUserProfile.partnerList) {
+                        if (uBadge.getSystemId().equals(partner.getSystemId()))
+                            return true;
+                    }
+                else
+                    for (PartnerBadge uBadge : secureUserProfile.protectedPartnerList) {
+                        if (uBadge.partnerKey != null && !uBadge.partnerKey.isEmpty() && partner.partnerKey.equals(uBadge.partnerKey)
+                                && uBadge.getSystemId().equals(partner.getSystemId()))
+                            return true;
+                    }
+            } else
+                return true;
+        } else
+            return true;
+
+        return false;
+    }
+
+    /**
+     * Helper function to filter the documents
+     * 
+     * @param documents
+     * @param predicate
+     * @return
+     */
+    private DocumentBadgeList filterDocuments(DocumentBadgeList documents, DocumentBadgePredicate predicate) {
+        DocumentBadgeList result = new DocumentBadgeList();
+        for (DocumentBadge docs : documents.documentBadges) {
+            if (predicate.isPartnerDocument(docs)) {
+                result.documentBadges.add(docs);
+            }
+        }
+        return result;
+    }
+
+    private void instanciateSourceSelectors(FederatedRecommenderConfiguration recommenderConfig) {
+
+        ArrayList<String> selectorsClassNames = new ArrayList<String>();
+        Collections.addAll(selectorsClassNames, recommenderConfig.sourceSelectors);
+
+        for (String sourceSelectorClassName : selectorsClassNames) {
+            try {
+                PartnerSelector sourceSelector = (PartnerSelector) statelessClassInstances.get(sourceSelectorClassName);
+                if (null == sourceSelector) {
+                    Constructor<?> ctor = Class.forName(sourceSelectorClassName).getConstructor(FederatedRecommenderConfiguration.class);
+
+                    sourceSelector = (PartnerSelector) ctor.newInstance(recommenderConfig);
+                    logger.info("instanciating new source selector [" + sourceSelector.getClass().getSimpleName() + "]");
+                    statelessClassInstances.put(sourceSelectorClassName, sourceSelector);
+                }
+            } catch (InstantiationException | IllegalAccessException | ClassNotFoundException | NoSuchMethodException | InvocationTargetException e) {
+                logger.log(Level.SEVERE, "failed to instanciate source selector [" + sourceSelectorClassName + "]", e);
+            }
+        }
+    }
+
+    @Override
+    public void onProbeResultsChanged(Map<String, Set<PartnerDomain>> updatedProbes) {
+        logger.info("recieved domain updates of [" + updatedProbes.size() + "] partners:");
+        for (Map.Entry<String, Set<PartnerDomain>> entry : updatedProbes.entrySet()) {
+
+            StringBuilder info = new StringBuilder();
+            for (PartnerDomain domain : entry.getValue()) {
+                info.append(domain.domainName + " ");
+            }
+            logger.info(entry.getKey() + ": " + info.toString());
+        }
     }
 
 }
