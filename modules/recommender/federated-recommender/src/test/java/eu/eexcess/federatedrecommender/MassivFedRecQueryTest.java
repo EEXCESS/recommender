@@ -1,20 +1,20 @@
 package eu.eexcess.federatedrecommender;
 
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-
 public class MassivFedRecQueryTest {
     // private static final String searchRequest =
     // "http://eexcess-dev.joanneum.at/eexcess-federated-recommender-web-service-1.0-SNAPSHOT/recommender/recommend";
     // private static final String searchRequest =
     // "http://localhost/eexcess-federated-recommender-web-service-1.0-SNAPSHOT/recommender/recommend";
-    private static final String searchRequest = "http://eexcess-demo.know-center.tugraz.at/eexcess-federated-recommender-web-service-1.0-SNAPSHOT/recommender/recommend";
 
-    private final ExecutorService threadPool;
+    // TODO: removed because never used
+    // private static final String searchRequest =
+    // "http://eexcess-demo.know-center.tugraz.at/eexcess-federated-recommender-web-service-1.0-SNAPSHOT/recommender/recommend";
+    // TODO: removed because never used
+    // private final ExecutorService threadPool;
 
     public MassivFedRecQueryTest() {
-        threadPool = Executors.newFixedThreadPool(30);
-
+        // TODO: removed because never used
+        // threadPool = Executors.newFixedThreadPool(30);
     }
 
     // @Test
@@ -170,7 +170,8 @@ public class MassivFedRecQueryTest {
     // }
 
     public static void main(String[] args) {
-        MassivFedRecQueryTest m = new MassivFedRecQueryTest();
+        // TODO: removed because unused
+        // MassivFedRecQueryTest m = new MassivFedRecQueryTest();
         // m.singleQuery();
     }
 
