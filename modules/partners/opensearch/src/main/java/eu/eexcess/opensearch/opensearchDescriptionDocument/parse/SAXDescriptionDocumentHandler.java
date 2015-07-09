@@ -1,10 +1,9 @@
 package eu.eexcess.opensearch.opensearchDescriptionDocument.parse;
 
 import java.util.Arrays;
+import java.util.logging.Logger;
 
 import org.apache.commons.lang.StringUtils;
-import org.apache.log4j.Level;
-import org.apache.log4j.Logger;
 import org.xml.sax.Attributes;
 import org.xml.sax.SAXException;
 import org.xml.sax.helpers.DefaultHandler;
@@ -70,7 +69,7 @@ public class SAXDescriptionDocumentHandler extends DefaultHandler {
 			break;
 
 		default:
-			logger.log(Level.WARN, "failed to read attributes from node [" + qName + "]");
+			logger.warning("failed to read attributes from node [" + qName + "]");
 			break;
 		}
 	}
@@ -162,7 +161,7 @@ public class SAXDescriptionDocumentHandler extends DefaultHandler {
 			break;
 
 		default:
-			logger.log(Level.WARN, "failed to read value from node [" + qName + "]");
+			logger.warning("failed to read value from node [" + qName + "]");
 			break;
 		}
 	}
@@ -229,14 +228,14 @@ public class SAXDescriptionDocumentHandler extends DefaultHandler {
 		try {
 			currentSearchLink.indexOffset = Integer.parseInt(indexOffsetValue);
 		} catch (NumberFormatException e) {
-			logger.log(Level.WARN, "failed to parse integer from [" + indexOffsetValue + "]");
+			logger.warning("failed to parse integer from [" + indexOffsetValue + "]");
 		}
 
 		String pageOffsetValue = (pageOffsetIndex >= 0) ? attributes.getValue(pageOffsetIndex) : "-1";
 		try {
 			currentSearchLink.pageOffset = Integer.parseInt(pageOffsetValue);
 		} catch (NumberFormatException e) {
-			logger.log(Level.WARN, "failed to parse integer from [" + pageOffsetIndex + "]");
+			logger.warning("failed to parse integer from [" + pageOffsetIndex + "]");
 		}
 
 		document.searchLinks.add(currentSearchLink);
@@ -316,14 +315,14 @@ public class SAXDescriptionDocumentHandler extends DefaultHandler {
 		try {
 			currentImage.width = Integer.parseInt(widthIndexValue);
 		} catch (NumberFormatException e) {
-			logger.log(Level.WARN, "failed to parse int from [" + widthIndexValue + "]");
+			logger.warning("failed to parse int from [" + widthIndexValue + "]");
 		}
 
 		String heightIndexValue = (heightIndex >= 0) ? attributes.getValue(heightIndex) : "-1";
 		try {
 			currentImage.height = Integer.parseInt(heightIndexValue);
 		} catch (NumberFormatException e) {
-			logger.log(Level.WARN, "failed to parse from int [" + heightIndexValue + "]");
+			logger.warning("failed to parse from int [" + heightIndexValue + "]");
 		}
 
 		currentImage.type = (imageType >= 0) ? attributes.getValue(imageType) : "";
@@ -358,21 +357,21 @@ public class SAXDescriptionDocumentHandler extends DefaultHandler {
 		try {
 			currentQuery.startIndex = Integer.parseInt(startIndexValue);
 		} catch (NumberFormatException e) {
-			logger.log(Level.WARN, "failed to parse int from [" + startIndexValue + "]");
+			logger.warning("failed to parse int from [" + startIndexValue + "]");
 		}
 
 		String startPageIndexValue = (startPageIndex >= 0) ? attributes.getValue(startPageIndex) : "-1";
 		try {
 			currentQuery.startPage = Integer.parseInt(startPageIndexValue);
 		} catch (NumberFormatException e) {
-			logger.log(Level.WARN, "failed to parse int from [" + startPageIndexValue + "]");
+			logger.warning("failed to parse int from [" + startPageIndexValue + "]");
 		}
 
 		String countValue = (countIndex >= 0) ? attributes.getValue(countIndex) : "-1";
 		try {
 			currentQuery.count = Integer.parseInt(countValue);
 		} catch (NumberFormatException e) {
-			logger.log(Level.WARN, "failed to parse int from [" + countValue + "]", e);
+			logger.warning("failed to parse int from [" + countValue + "]: " + e.getMessage());
 		}
 
 		currentQuery.title = (titleIndex >= 0) ? attributes.getValue(titleIndex) : "";

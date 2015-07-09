@@ -28,9 +28,9 @@ import java.util.Map;
 import java.util.TreeMap;
 import java.util.TreeSet;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.logging.Logger;
 
 import org.apache.commons.lang.StringUtils;
-import org.apache.log4j.Logger;
 
 import eu.eexcess.config.FederatedRecommenderConfiguration;
 import eu.eexcess.dataformats.PartnerBadge;
@@ -109,7 +109,7 @@ public class WndomainSourceSelector implements PartnerSelector {
      */
     protected Map<PartnerBadge, TreeSet<DomainWeight>> matchingPartners = new HashMap<>();
 
-    private Logger logger = Logger.getLogger(WndomainSourceSelector.class);
+    private Logger logger = Logger.getLogger(WndomainSourceSelector.class.getName());
 
     private DomainDetector domainDetector = null;
 
@@ -135,7 +135,7 @@ public class WndomainSourceSelector implements PartnerSelector {
         try {
             domainDetector = new WordnetDomainsDetector(new File(configuration.wordnetPath), new File(configuration.wordnetDomainFilePath), true);
         } catch (DomainDetectorException e) {
-            logger.error("unable to instanciate [" + WordnetDomainsDetector.class.getSimpleName() + "]", e);
+            logger.severe("unable to instanciate [" + WordnetDomainsDetector.class.getSimpleName() + "]: " + e.getMessage());
         }
     }
 
@@ -146,7 +146,7 @@ public class WndomainSourceSelector implements PartnerSelector {
     public SecureUserProfile sourceSelect(SecureUserProfile userProfile, List<PartnerBadge> partners) {
 
         if (null == domainDetector) {
-            logger.error("failed to select sources due to missing domain detector: skipping source selection");
+            logger.severe("failed to select sources due to missing domain detector: skipping source selection");
             return userProfile;
         }
 
@@ -171,7 +171,7 @@ public class WndomainSourceSelector implements PartnerSelector {
                 for (PartnerDomain domain : entry.getDomainContent()) {
                     info.append(" [domain.name=" + domain.domainName + ", domain.weight=" + domain.weight + "]");
                 }
-                logger.info(info);
+                logger.info(info.toString());
             }
         } else {
             logger.info("unsuccessfull partner selection");

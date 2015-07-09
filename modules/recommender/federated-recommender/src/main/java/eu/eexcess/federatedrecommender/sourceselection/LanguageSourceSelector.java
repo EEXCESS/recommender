@@ -27,8 +27,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
-import org.apache.log4j.Logger;
+import java.util.logging.Logger;
 
 import eu.eexcess.config.FederatedRecommenderConfiguration;
 import eu.eexcess.dataformats.PartnerBadge;
@@ -41,7 +40,7 @@ import eu.eexcess.federatedrecommender.interfaces.PartnerSelector;
  */
 public class LanguageSourceSelector implements PartnerSelector {
 
-	private Logger logger = Logger.getLogger(LanguageSourceSelector.class);
+	private Logger logger = Logger.getLogger(LanguageSourceSelector.class.getName());
 	private Map<PartnerBadge, List<String>> selectedPartners = new HashMap<>();
 
 	public LanguageSourceSelector(FederatedRecommenderConfiguration configuration) {
@@ -83,7 +82,7 @@ public class LanguageSourceSelector implements PartnerSelector {
 				for (String language : entry.getValue()) {
 					info.append(" [" + language + "]");
 				}
-				logger.info(info);
+				logger.info(info.toString());
 			}
 		} else {
 			logger.info("unsuccessfull partner selection");
