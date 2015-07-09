@@ -42,8 +42,24 @@ import eu.eexcess.dataformats.result.ResultList;
 import eu.eexcess.dataformats.userprofile.ContextKeyword;
 import eu.eexcess.dataformats.userprofile.SecureUserProfile;
 
+/**
+ * This class performs probing of a {@link PartnerBadge} using random phrases
+ * for generating search results. These are then examined by a domain detector
+ * to receive the partner's domains. For multi-threaded probing, cloned
+ * instances can be used.
+ * 
+ * @author Raoul Rubien
+ *
+ */
 public class PartnerDomainsProbe implements Cloneable {
 
+    /**
+     * Interface that is prompted during probing to check whether the current
+     * probing has to be aborted or not.
+     * 
+     * @author Raoul Rubien
+     *
+     */
     public static interface CancelProbeCondition {
         public boolean isProbeToBeCancelled();
     }
@@ -144,6 +160,11 @@ public class PartnerDomainsProbe implements Cloneable {
         return getProbesFromTerms(partnerDomainsCounter);
     }
 
+    /**
+     * Clones this instance but uses the same {@link #domainDetector} reference,
+     * since this object is expensive in memory and construction is time
+     * consuming.
+     */
     @Override
     public Object clone() throws CloneNotSupportedException {
         PartnerDomainsProbe clone = (PartnerDomainsProbe) super.clone();
@@ -170,6 +191,11 @@ public class PartnerDomainsProbe implements Cloneable {
         canelCondition = null;
     }
 
+    /**
+     * Condition when probing is to be aborted.
+     * 
+     * @return
+     */
     private boolean isToBeAborted() {
         boolean toBeCanceled = false;
 
