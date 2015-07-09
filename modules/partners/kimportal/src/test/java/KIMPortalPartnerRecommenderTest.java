@@ -79,7 +79,7 @@ public class KIMPortalPartnerRecommenderTest {
 	@Test
 	public void singleQueryHuelftenschanz() {
 		ArrayList<String> keywords = new ArrayList<String>();
-		keywords.add("Hülftenschanz");
+		keywords.add("HÃ¼lftenschanz");
         ResultList resultList = PartnerRecommenderTestHelper.getRecommendations(DEPLOYMENT_CONTEXT,	
         		port, 
         		PartnerRecommenderTestHelper.createParamsForPartnerRecommender(20,keywords ));
