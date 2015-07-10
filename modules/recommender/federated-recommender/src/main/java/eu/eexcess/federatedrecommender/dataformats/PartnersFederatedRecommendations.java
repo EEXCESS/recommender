@@ -19,23 +19,23 @@ GNU Affero General Public License for more details.
 
 You should have received a copy of the GNU Affero General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
-*/
+ */
 package eu.eexcess.federatedrecommender.dataformats;
 
 import java.util.HashMap;
+import java.util.Map;
 
 import eu.eexcess.dataformats.PartnerBadge;
 import eu.eexcess.dataformats.result.ResultList;
 
 public class PartnersFederatedRecommendations {
-	/**
-	 * hashmap over the partner Results
-	 * key is the hash of the partner result api class
-	 * second the retrieved document 
-	 */
-	private HashMap<PartnerBadge, ResultList> results = new HashMap<PartnerBadge, ResultList>();
+    /**
+     * hashmap over the partner Results key is the hash of the partner result
+     * api class second the retrieved document
+     */
+    private Map<PartnerBadge, ResultList> results = new HashMap<PartnerBadge, ResultList>();
 
-	public HashMap<PartnerBadge,ResultList> getResults() {
-		return results;
-	}
+    public Map<PartnerBadge, ResultList> getResults() {
+        return results;
+    }
 }

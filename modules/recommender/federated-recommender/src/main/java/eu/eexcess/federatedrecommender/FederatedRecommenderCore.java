@@ -50,6 +50,8 @@ import java.util.logging.Logger;
 import javax.ws.rs.core.MediaType;
 
 import com.sun.jersey.api.client.Client;
+import com.sun.jersey.api.client.ClientHandlerException;
+import com.sun.jersey.api.client.UniformInterfaceException;
 import com.sun.jersey.api.client.WebResource;
 
 import eu.eexcess.config.FederatedRecommenderConfiguration;
@@ -83,18 +85,18 @@ import eu.eexcess.sqlite.DatabaseQueryStats;
  */
 public class FederatedRecommenderCore implements ProbeResultChanged {
 
-    private static final Logger logger = Logger.getLogger(FederatedRecommenderCore.class.getName());
+    private static final Logger                      logger                  = Logger.getLogger(FederatedRecommenderCore.class.getName());
     private static volatile FederatedRecommenderCore instance;
-    private final FederatedRecommenderConfiguration federatedRecConfiguration;
-    private PartnerRegister partnerRegister = new PartnerRegister();
-    private ExecutorService threadPool;
-    private RecommenderStats recommenderStats;
-    private AsyncPartnerDomainsProbeMonitor partnersDomainsDetectors;
+    private final FederatedRecommenderConfiguration  federatedRecConfiguration;
+    private PartnerRegister                          partnerRegister         = new PartnerRegister();
+    private ExecutorService                          threadPool;
+    private RecommenderStats                         recommenderStats;
+    private AsyncPartnerDomainsProbeMonitor          partnersDomainsDetectors;
 
     /**
      * references to re-usable state-less source selection instances
      */
-    private Map<String, Object> statelessClassInstances = new HashMap<>();
+    private Map<String, Object>                      statelessClassInstances = new HashMap<>();
 
     private FederatedRecommenderCore(FederatedRecommenderConfiguration federatedRecConfiguration) {
         threadPool = Executors.newFixedThreadPool(federatedRecConfiguration.numRecommenderThreads);
@@ -190,21 +192,12 @@ public class FederatedRecommenderCore implements ProbeResultChanged {
                     /**
                      * trys to recieve the results from the partners
                      * 
-                     * @param partner
-                     * @param secureUserProfile
-                     * @return
                      */
-                    private ResultList getPartnerResult(PartnerBadge partner, Client client, SecureUserProfile secureUserProfile) {
+                    private ResultList getPartnerResult(PartnerBadge partner, Client client, SecureUserProfile secureUserProfile)
+                            throws UniformInterfaceException, ClientHandlerException {
                         ResultList resultList = new ResultList();
                         if (client != null) {
-                            try {
-                                WebResource resource = client.resource(partner.getPartnerConnectorEndpoint() + "recommend");
-                                resource.accept(MediaType.APPLICATION_JSON);
-                                resultList = resource.post(ResultList.class, secureUserProfile);
-                            } catch (Exception e) {
-                                logger.log(Level.WARNING, "Partner: " + partner.getSystemId() + " is not working currently.", e);
-                                throw e;
-                            }
+                            resultList = getPartnerRecommendationResult(partner, client, secureUserProfile, resultList);
                             client.destroy();
                         }
 
@@ -321,19 +314,11 @@ public class FederatedRecommenderCore implements ProbeResultChanged {
                  * @param partner
                  * @param currentDocs
                  * @return
+                 * @throws Exception
                  */
-                private DocumentBadgeList getDocsResult(PartnerBadge partner, Client client, DocumentBadgeList currentDocs) {
-                    DocumentBadgeList docList = new DocumentBadgeList();
-                    if (client != null) {
-                        try {
-                            WebResource resource = client.resource(partner.getPartnerConnectorEndpoint() + "getDetails");
-                            resource.accept(MediaType.APPLICATION_JSON);
-                            docList = resource.post(DocumentBadgeList.class, currentDocs);
-                        } catch (Exception e) {
-                            logger.log(Level.WARNING, "Partner: " + partner.getSystemId() + " is not working currently.", e);
-                            throw e;
-                        }
-                    }
+                private DocumentBadgeList getDocsResult(PartnerBadge partner, Client client, DocumentBadgeList currentDocs) throws UniformInterfaceException,
+                        ClientHandlerException {
+                    DocumentBadgeList docList = getPartnerDetailsResult(partner, client, currentDocs);
                     client.destroy();
                     return docList;
                 }
@@ -691,6 +676,35 @@ public class FederatedRecommenderCore implements ProbeResultChanged {
                 }
             }
         }
+    }
+
+    private DocumentBadgeList getPartnerDetailsResult(PartnerBadge partner, Client client, DocumentBadgeList currentDocs) throws UniformInterfaceException,
+            ClientHandlerException {
+        DocumentBadgeList docList = new DocumentBadgeList();
+        if (client != null) {
+            try {
+                WebResource resource = client.resource(partner.getPartnerConnectorEndpoint() + "getDetails");
+                resource.accept(MediaType.APPLICATION_JSON);
+                docList = resource.post(DocumentBadgeList.class, currentDocs);
+            } catch (UniformInterfaceException | ClientHandlerException e) {
+                logger.log(Level.WARNING, "Partner: " + partner.getSystemId() + " is not working currently.", e);
+                throw e;
+            }
+        }
+        return docList;
+    }
+
+    private ResultList getPartnerRecommendationResult(PartnerBadge partner, Client client, SecureUserProfile secureUserProfile, ResultList resultList)
+            throws UniformInterfaceException, ClientHandlerException {
+        try {
+            WebResource resource = client.resource(partner.getPartnerConnectorEndpoint() + "recommend");
+            resource.accept(MediaType.APPLICATION_JSON);
+            resultList = resource.post(ResultList.class, secureUserProfile);
+        } catch (UniformInterfaceException | ClientHandlerException e) {
+            logger.log(Level.WARNING, "Partner: " + partner.getSystemId() + " is not working currently.", e);
+            throw e;
+        }
+        return resultList;
     }
 
 }

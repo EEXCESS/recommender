@@ -383,19 +383,7 @@ public class DbPediaSolrIndex {
                         dbPediaIndexBean.referringChild = childResponse.getResults().getNumFound();
 
                 processedDocs.add(dbPediaIndexBean);
-                if (processedDocs.size() % 100000 == 0) {
-                    try {
-                        server.addBeans(processedDocs);
-                        server.commit();
-                    } catch (SolrServerException e) {
-                        logger.log(Level.SEVERE, "Could cot commit to DBPedia Index", e);
-                        throw new FederatedRecommenderException("Could cot commit to DBPedia Index", e);
-                    } catch (IOException e) {
-                        logger.log(Level.SEVERE, "Could cot commit to DBPedia Index", e);
-                        throw new FederatedRecommenderException("Could cot commit to DBPedia Index", e);
-                    }
-                    processedDocs.clear();
-                }
+                commitBeans(processedDocs);
             }
         try {
             server.addBeans(processedDocs);
@@ -406,6 +394,22 @@ public class DbPediaSolrIndex {
         } catch (IOException e) {
             logger.log(Level.SEVERE, "Could cot commit to DBPedia Index", e);
             throw new FederatedRecommenderException("Could cot commit to DBPedia Index", e);
+        }
+    }
+
+    private void commitBeans(List<DbPediaIndexBean> processedDocs) throws FederatedRecommenderException {
+        if (processedDocs.size() % 100000 == 0) {
+            try {
+                server.addBeans(processedDocs);
+                server.commit();
+            } catch (SolrServerException e) {
+                logger.log(Level.SEVERE, "Could cot commit to DBPedia Index", e);
+                throw new FederatedRecommenderException("Could cot commit to DBPedia Index", e);
+            } catch (IOException e) {
+                logger.log(Level.SEVERE, "Could cot commit to DBPedia Index", e);
+                throw new FederatedRecommenderException("Could cot commit to DBPedia Index", e);
+            }
+            processedDocs.clear();
         }
     }
 

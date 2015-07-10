@@ -19,12 +19,15 @@ GNU Affero General Public License for more details.
 
 You should have received a copy of the GNU Affero General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
-*/
+ */
 package eu.eexcess.federatedrecommender.diversitymeasurement;
+
 /**
  * MAP-IA[1] Diversity measurement
  * 
- * [1] Diversifying Search Results Rakesh Agrawal, Sreenivas Gollapudi, Alan Halverson,Samuel Ieong
+ * [1] Diversifying Search Results Rakesh Agrawal, Sreenivas Gollapudi, Alan
+ * Halverson,Samuel Ieong
+ * 
  * @author hziak
  *
  */

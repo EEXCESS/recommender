@@ -19,11 +19,13 @@ GNU Affero General Public License for more details.
 
 You should have received a copy of the GNU Affero General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
-*/
+ */
 package eu.eexcess.federatedrecommender.dataformats;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.List;
+
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlElementWrapper;
 
@@ -31,42 +33,39 @@ import org.jgraph.graph.DefaultEdge;
 import org.jgrapht.graph.SimpleWeightedGraph;
 
 import eu.eexcess.federatedrecommender.utils.FederatedRecommenderException;
+
 /**
  * VisualisationDataType (Just to get a json out of the results of the graph)
+ * 
  * @author hziak
  *
  */
-public class D3GraphDocument implements Serializable{
-	private static final long serialVersionUID = 1L;
+public class D3GraphDocument implements Serializable {
+    private static final long serialVersionUID = 1L;
 
+    @XmlElement(name = "node")
+    @XmlElementWrapper(name = "nodes")
+    public List<String> nodes;
 
+    @XmlElement(name = "edge")
+    @XmlElementWrapper(name = "edges")
+    public List<D3GraphDocumentEdge> edges;
 
-	@XmlElement(name="node")
-	@XmlElementWrapper(name="nodes")
-	public ArrayList<String> nodes;
+    public D3GraphDocument(SimpleWeightedGraph<String, DefaultEdge> graph) throws FederatedRecommenderException {
+        if (graph == null)
+            throw new FederatedRecommenderException("graph was null");
+        if (graph.vertexSet() == null)
+            throw new FederatedRecommenderException("graph was null");
 
-	@XmlElement(name="edge")
-	@XmlElementWrapper(name="edges")
-	public ArrayList<D3GraphDocumentEdge> edges;
-	
-	
-	public D3GraphDocument(SimpleWeightedGraph<String, DefaultEdge> graph) throws FederatedRecommenderException {
-		if(graph==null)
-			throw new FederatedRecommenderException("graph was null");
-		if(graph.vertexSet()==null)
-			throw new FederatedRecommenderException("graph was null");
-		
-		if(graph.edgeSet()==null)
-			throw new FederatedRecommenderException("graph was null");
-	
-		nodes = new ArrayList<String>(graph.vertexSet());
-		edges = new ArrayList<D3GraphDocumentEdge>();
-		for (DefaultEdge currentEdge : graph.edgeSet()) {
-			 edges.add(new D3GraphDocumentEdge(graph.getEdgeSource(currentEdge),graph.getEdgeTarget(currentEdge)));
-		}
-		
-		
-	}		
+        if (graph.edgeSet() == null)
+            throw new FederatedRecommenderException("graph was null");
 
+        nodes = new ArrayList<String>(graph.vertexSet());
+        edges = new ArrayList<D3GraphDocumentEdge>();
+        for (DefaultEdge currentEdge : graph.edgeSet()) {
+            edges.add(new D3GraphDocumentEdge(graph.getEdgeSource(currentEdge), graph.getEdgeTarget(currentEdge)));
+        }
 
-	}
+    }
+
+}
