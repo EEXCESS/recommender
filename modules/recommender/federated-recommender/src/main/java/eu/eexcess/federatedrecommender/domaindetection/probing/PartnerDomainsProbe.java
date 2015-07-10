@@ -64,7 +64,7 @@ public class PartnerDomainsProbe implements Cloneable {
         public boolean isProbeToBeCancelled();
     }
 
-    private static final  Logger logger = Logger.getLogger(PartnerDomainsProbe.class.getName());
+    private static final Logger logger = Logger.getLogger(PartnerDomainsProbe.class.getName());
     /**
      * default number of random phrases to generate once
      */
@@ -76,7 +76,7 @@ public class PartnerDomainsProbe implements Cloneable {
     protected int maxResults = 10;
     protected DomainDetector domainDetector;
     protected Set<String> ambiguousPhrases = new HashSet<String>(maxWords);
-    private final String recommendationEndpointSuffix = "recommend";
+    private static final String recommendationEndpointSuffix = "recommend";
     private CancelProbeCondition canelCondition;
 
     /**
@@ -125,7 +125,7 @@ public class PartnerDomainsProbe implements Cloneable {
      *             {@link DomainDetector#drawRandomAmbiguousWord(Set)} or
      *             {@link DomainDetector#detect(String)}
      */
-    public HashSet<PartnerDomain> probePartner(Client partnerClient, PartnerBadge partner) throws DomainDetectorException {
+    public Set<PartnerDomain> probePartner(Client partnerClient, PartnerBadge partner) throws DomainDetectorException {
 
         TermSet<TypedTerm> partnerDomainsCounter = new TermSet<TypedTerm>(new TypedTerm.AddingWeightTermMerger());
 
@@ -240,11 +240,11 @@ public class PartnerDomainsProbe implements Cloneable {
      * 
      * @return the converted set
      */
-    private HashSet<PartnerDomain> getProbesFromTerms(TermSet<TypedTerm> partnerProbes) {
+    private Set<PartnerDomain> getProbesFromTerms(TermSet<TypedTerm> partnerProbes) {
 
         HashSet<PartnerDomain> partnerDomains = new HashSet<PartnerDomain>(partnerProbes.size());
 
-        if (0 >= partnerProbes.size()) {
+        if (partnerProbes.isEmpty()) {
             return partnerDomains;
         }
 

@@ -28,17 +28,14 @@ import static org.junit.Assert.assertThat;
 
 import java.io.File;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
 import org.junit.BeforeClass;
 import org.junit.Test;
 
 import eu.eexcess.dataformats.PartnerBadge;
 import eu.eexcess.dataformats.PartnerDomain;
-import eu.eexcess.federatedrecommender.domaindetection.probing.DomainDetector;
-import eu.eexcess.federatedrecommender.domaindetection.probing.DomainDetectorException;
-import eu.eexcess.federatedrecommender.domaindetection.probing.PartnerDomainsProbe;
 import eu.eexcess.federatedrecommender.domaindetection.wordnet.WordnetDomainsDetector;
 import eu.eexcess.federatedrecommender.registration.PartnerRegister;
 
@@ -90,7 +87,7 @@ public class PartnersDomainsProbeTest {
         PartnerDomainsProbe probe = new PartnerDomainsProbe(detector, 15, 3);
 
         for (PartnerBadge partner : partnerRegister.getPartners()) {
-            HashSet<PartnerDomain> partnerToDomain = probe.probePartner(partnerRegister.getClient(partner.getSystemId()), partner);
+            Set<PartnerDomain> partnerToDomain = probe.probePartner(partnerRegister.getClient(partner.getSystemId()), partner);
             System.out.println("domains for partner [" + partner.getSystemId() + "]");
             for (PartnerDomain domain : partnerToDomain) {
                 System.out.println("name: " + domain.domainName + " weight: " + domain.weight);
