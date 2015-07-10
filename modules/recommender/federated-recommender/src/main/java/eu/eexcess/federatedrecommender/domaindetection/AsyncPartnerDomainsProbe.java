@@ -53,7 +53,7 @@ public class AsyncPartnerDomainsProbe {
 
     private static class CancelCondition implements CancelProbeCondition {
 
-        public boolean toBeCanceled = false;
+        protected boolean toBeCanceled = false;
 
         @Override
         synchronized public boolean isProbeToBeCancelled() {
@@ -118,7 +118,7 @@ public class AsyncPartnerDomainsProbe {
         private CancelCondition condition;
 
         public ProbeTask(PartnerBadge partnerConfig, Client partnerClient, PartnerDomainsProbe probe, Set<ProbeDoneCallback> callbacks,
-                CancelCondition condition, Logger logger) {
+                CancelCondition condition) {
             this.partnerConfig = partnerConfig;
             this.partnerClient = partnerClient;
             this.callbacks = callbacks;
@@ -146,7 +146,6 @@ public class AsyncPartnerDomainsProbe {
                     }
                 }
             } catch (DomainDetectorException e) {
-                e.printStackTrace();
                 for (ProbeDoneCallback callback : callbacks) {
                     callback.onProbeFailedCallback(partnerConfig.getSystemId());
                 }
@@ -154,7 +153,7 @@ public class AsyncPartnerDomainsProbe {
         }
     }
 
-    private Logger logger = Logger.getLogger(AsyncPartnerDomainsProbe.class.getName());
+    private static final  Logger logger = Logger.getLogger(AsyncPartnerDomainsProbe.class.getName());
     private CancelCondition cancelCondition;
     private TaskController probeController;
     private ProbeTask probeTask;
@@ -181,14 +180,14 @@ public class AsyncPartnerDomainsProbe {
      */
     public AsyncPartnerDomainsProbe(PartnerBadge partnerConfig, Client partnerClient, PartnerDomainsProbe domainProbe, long asyncProbeTimeout)
             throws CloneNotSupportedException {
-        domainProbe = (PartnerDomainsProbe) domainProbe.clone();
+        PartnerDomainsProbe domainProbeClone = (PartnerDomainsProbe) domainProbe.clone();
         this.timeout = asyncProbeTimeout;
         cancelCondition = new CancelCondition();
-        probeTask = new ProbeTask(partnerConfig, partnerClient, domainProbe, callbacks, cancelCondition, logger);
+        probeTask = new ProbeTask(partnerConfig, partnerClient, domainProbeClone, callbacks, cancelCondition);
         probeTask.setName("probe-task-[" + partnerConfig.getSystemId() + "]");
         // this condition allows probing to terminate early and leave the result
         // uncomplete
-        domainProbe.setCondition(cancelCondition);
+        domainProbeClone.setCondition(cancelCondition);
         probeController = new TaskController(probeTask, timeout, cancelCondition, logger);
         probeController.setName("probe-task-controller-[" + partnerConfig.getSystemId() + "]");
     }
@@ -236,7 +235,7 @@ public class AsyncPartnerDomainsProbe {
      * @return true if the task is still running
      */
     public boolean isRunning() {
-        return (probeController.isAlive() || probeTask.isAlive());
+        return probeController.isAlive() || probeTask.isAlive();
     }
 
 }

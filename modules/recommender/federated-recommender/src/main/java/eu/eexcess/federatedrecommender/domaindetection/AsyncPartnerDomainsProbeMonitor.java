@@ -51,7 +51,7 @@ public class AsyncPartnerDomainsProbeMonitor implements ProbeDoneCallback {
     private DomainDetector domainDetector;
     private PartnerDomainsProbe probeTemplate;
     private long probeTimeout = 0;
-    private Logger logger = Logger.getLogger(AsyncPartnerDomainsProbeMonitor.class.getName());
+    private static final Logger logger = Logger.getLogger(AsyncPartnerDomainsProbeMonitor.class.getName());
     protected Map<String, AsyncPartnerDomainsProbe> runningProbes = new HashMap<String, AsyncPartnerDomainsProbe>();
     private Map<String, Set<PartnerDomain>> partnersDomains = new HashMap<String, Set<PartnerDomain>>();
     private ProbeResultChanged onDomainsChangedCallback;
@@ -74,7 +74,7 @@ public class AsyncPartnerDomainsProbeMonitor implements ProbeDoneCallback {
         try {
             return new AsyncPartnerDomainsProbe(partnerConfig, partnerClient, probeTemplate, probeTimeout);
         } catch (CloneNotSupportedException e) {
-            logger.severe("failed to create new instance of partner probe because of unsopported clone()");
+            logger.severe("failed to create new instance of partner probe because of unsopported clone(): " + e.getMessage());
             return null;
         }
     }
