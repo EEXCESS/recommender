@@ -51,7 +51,7 @@ public class AsyncPartnerDomainsProbeMonitor implements ProbeDoneCallback {
     private DomainDetector domainDetector;
     private PartnerDomainsProbe probeTemplate;
     private long probeTimeout = 0;
-    private static final Logger logger = Logger.getLogger(AsyncPartnerDomainsProbeMonitor.class.getName());
+    private static final Logger LOGGER = Logger.getLogger(AsyncPartnerDomainsProbeMonitor.class.getName());
     protected Map<String, AsyncPartnerDomainsProbe> runningProbes = new HashMap<String, AsyncPartnerDomainsProbe>();
     private Map<String, Set<PartnerDomain>> partnersDomains = new HashMap<String, Set<PartnerDomain>>();
     private ProbeResultChanged onDomainsChangedCallback;
@@ -62,19 +62,19 @@ public class AsyncPartnerDomainsProbeMonitor implements ProbeDoneCallback {
             domainDetector = new WordnetDomainsDetector(wordnetDir, wordNetFile, true);
             probeTemplate = new PartnerDomainsProbe(domainDetector, numRandomPhrases, considerNumPartnerResults);
         } catch (Exception e) {
-            logger.severe("failed to instanciate domain detection resources: " + e.getMessage());
+            LOGGER.severe("failed to instanciate domain detection resources: " + e.getMessage());
         }
     }
 
     private AsyncPartnerDomainsProbe newAsyncPartnerDomainsProbe(PartnerBadge partnerConfig, Client partnerClient) {
         if (probeTemplate == null) {
-            logger.severe("failed to instanciate domain detection resources");
+            LOGGER.severe("failed to instanciate domain detection resources");
             return null;
         }
         try {
             return new AsyncPartnerDomainsProbe(partnerConfig, partnerClient, probeTemplate, probeTimeout);
         } catch (CloneNotSupportedException e) {
-            logger.severe("failed to create new instance of partner probe because of unsopported clone(): " + e.getMessage());
+            LOGGER.severe("failed to create new instance of partner probe because of unsopported clone(): " + e.getMessage());
             return null;
         }
     }
@@ -82,7 +82,7 @@ public class AsyncPartnerDomainsProbeMonitor implements ProbeDoneCallback {
     public void probe(PartnerBadge partnerConfig, Client partnerClient) {
         synchronized (runningProbes) {
             if (runningProbes.containsKey(partnerConfig.getSystemId())) {
-                logger.info("refusing to start probe for partner [" + partnerConfig.getSystemId() + "] because found already running probe");
+                LOGGER.info("refusing to start probe for partner [" + partnerConfig.getSystemId() + "] because found already running probe");
                 return;
             }
 
@@ -92,7 +92,7 @@ public class AsyncPartnerDomainsProbeMonitor implements ProbeDoneCallback {
                 probe.addCallback(this);
                 probe.probeAsyncronous();
             } else {
-                logger.info("refusing to start probe for partner [" + partnerConfig.getSystemId() + "] because no resources available");
+                LOGGER.info("refusing to start probe for partner [" + partnerConfig.getSystemId() + "] because no resources available");
             }
         }
     }
@@ -104,9 +104,9 @@ public class AsyncPartnerDomainsProbeMonitor implements ProbeDoneCallback {
     public void onProbeDoneCallback(String partnerId, Set<PartnerDomain> probeResult) {
         synchronized (runningProbes) {
             if (null == runningProbes.remove(partnerId)) {
-                logger.warning("failed to remove booked probe of partner [" + partnerId + "]");
+                LOGGER.warning("failed to remove booked probe of partner [" + partnerId + "]");
             } else {
-                logger.info("remove booked partner probe [" + partnerId + "]");
+                LOGGER.info("remove booked partner probe [" + partnerId + "]");
             }
             partnersDomains.put(partnerId, probeResult);
             if (null != onDomainsChangedCallback) {
@@ -121,9 +121,9 @@ public class AsyncPartnerDomainsProbeMonitor implements ProbeDoneCallback {
     @Override
     public void onProbeFailedCallback(String partnerId) {
         synchronized (runningProbes) {
-            logger.warning("removing [" + partnerId + "] probe due to error");
+            LOGGER.warning("removing [" + partnerId + "] probe due to error");
             if (null == runningProbes.remove(partnerId)) {
-                logger.severe("failed to remove probe due to error: [" + partnerId + "] probe not found");
+                LOGGER.severe("failed to remove probe due to error: [" + partnerId + "] probe not found");
             }
         }
     }

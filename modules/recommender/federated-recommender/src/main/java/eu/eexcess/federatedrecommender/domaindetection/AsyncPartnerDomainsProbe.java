@@ -56,7 +56,7 @@ public class AsyncPartnerDomainsProbe {
         protected boolean toBeCanceled = false;
 
         @Override
-        synchronized public boolean isProbeToBeCancelled() {
+        public synchronized boolean isProbeToBeCancelled() {
             return toBeCanceled;
         }
 
@@ -153,7 +153,7 @@ public class AsyncPartnerDomainsProbe {
         }
     }
 
-    private static final  Logger logger = Logger.getLogger(AsyncPartnerDomainsProbe.class.getName());
+    private static final Logger LOGGER = Logger.getLogger(AsyncPartnerDomainsProbe.class.getName());
     private CancelCondition cancelCondition;
     private TaskController probeController;
     private ProbeTask probeTask;
@@ -188,7 +188,7 @@ public class AsyncPartnerDomainsProbe {
         // this condition allows probing to terminate early and leave the result
         // uncomplete
         domainProbeClone.setCondition(cancelCondition);
-        probeController = new TaskController(probeTask, timeout, cancelCondition, logger);
+        probeController = new TaskController(probeTask, timeout, cancelCondition, LOGGER);
         probeController.setName("probe-task-controller-[" + partnerConfig.getSystemId() + "]");
     }
 
@@ -200,10 +200,10 @@ public class AsyncPartnerDomainsProbe {
      */
     public void probeAsyncronous() {
         if (isRunning()) {
-            logger.info("failed to start new asynchronous probing while task is running");
+            LOGGER.info("failed to start new asynchronous probing while task is running");
         } else {
             cancelCondition.toBeCanceled = false;
-            logger.info("starting probe [" + probeController.getName() + "] ...");
+            LOGGER.info("starting probe [" + probeController.getName() + "] ...");
             probeController.start();
         }
     }
