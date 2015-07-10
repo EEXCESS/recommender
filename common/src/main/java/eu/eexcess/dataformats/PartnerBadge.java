@@ -19,7 +19,6 @@ package eu.eexcess.dataformats;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Deque;
-import java.util.LinkedList;
 import java.util.List;
 
 import javax.xml.bind.annotation.XmlAccessType;
@@ -39,42 +38,42 @@ import eu.eexcess.dataformats.result.ResultStats;
 @JsonSerialize(include = JsonSerialize.Inclusion.NON_NULL)
 public class PartnerBadge implements Serializable {
 
-    private static final long serialVersionUID = -6411801334911587483L;
+    private static final long   serialVersionUID = -6411801334911587483L;
 
     @XmlElement(name = "description")
-    private String description;
+    private String              description;
     @XmlElement(name = "favIconURI")
-    private String favIconURI;
+    private String              favIconURI;
     @XmlElement(name = "partnerConnectorEndpoint")
-    private String partnerConnectorEndpoint;
+    private String              partnerConnectorEndpoint;
 
     @XmlElement(name = "tag")
     @XmlElementWrapper(name = "tags")
-    private List<String> tags;
+    private List<String>        tags;
 
     @XmlElement(name = "domainContent")
-    private List<PartnerDomain> domainContent = new ArrayList<PartnerDomain>();
+    private List<PartnerDomain> domainContent    = new ArrayList<PartnerDomain>();
     @XmlElement(name = "languageContent")
-    private List<String> languageContent = new ArrayList<String>();
+    private List<String>        languageContent  = new ArrayList<String>();
 
     @XmlElement(name = "systemId")
-    public String systemId;
+    public String               systemId;
 
     @XmlElement(name = "queryGeneratorClass")
-    public String queryGeneratorClass;
+    public String               queryGeneratorClass;
 
     @XmlElement(name = "partnerKey")
     // has to be the same value than in SecureUserProfile
-    public String partnerKey;
+    public String               partnerKey;
 
     @XmlElement(name = "shortTimeStats", required = false)
-    public PartnerBadgeStats shortTimeStats = new PartnerBadgeStats();
+    public PartnerBadgeStats    shortTimeStats   = new PartnerBadgeStats();
 
     // TODO: Statistics should be moved somewere else! (Specially the logic for
     // it)
 
     @XmlElement(name = "longTimeStats", required = false)
-    public PartnerBadgeStats longTimeStats = new PartnerBadgeStats();
+    public PartnerBadgeStats    longTimeStats    = new PartnerBadgeStats();
 
     public Long getShortTimeResponseTime() {
         return shortTimeStats.shortTimeResponseTime;
@@ -142,11 +141,6 @@ public class PartnerBadge implements Serializable {
         this.shortTimeStats.lastResponseTimes.push(lastResponseTime);
     }
 
-    public void setShortTimeResponsDeviation() {
-        // TODO Auto-generated method stub
-
-    }
-
     /**
      * updates the partner response times (shortTime and longTime) and short
      * time deviation
@@ -178,7 +172,7 @@ public class PartnerBadge implements Serializable {
         }
     }
 
-    public LinkedList<ResultStats> getLastQueries() {
+    public List<ResultStats> getLastQueries() {
         return this.shortTimeStats.lastQueries;
     }
 
