@@ -30,6 +30,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -71,6 +72,7 @@ import eu.eexcess.federatedrecommender.interfaces.PartnerSelector;
 import eu.eexcess.federatedrecommender.interfaces.PartnersFederatedRecommendationsPicker;
 import eu.eexcess.federatedrecommender.interfaces.SecureUserProfileDecomposer;
 import eu.eexcess.federatedrecommender.registration.PartnerRegister;
+import eu.eexcess.federatedrecommender.sourceselection.WndomainSourceSelector;
 import eu.eexcess.federatedrecommender.utils.FederatedRecommenderException;
 import eu.eexcess.sqlite.Database;
 import eu.eexcess.sqlite.DatabaseQueryStats;
@@ -99,9 +101,19 @@ public class FederatedRecommenderCore implements ProbeResultChanged {
         this.federatedRecConfiguration = federatedRecConfiguration;
         this.recommenderStats = new RecommenderStats();
         instanciateSourceSelectors(this.federatedRecConfiguration);
-        partnersDomainsDetectors = new AsyncPartnerDomainsProbeMonitor(new File(this.federatedRecConfiguration.wordnetPath), new File(
-                this.federatedRecConfiguration.wordnetDomainFilePath), 50, 10, new Double(0.8 * 2000000).longValue());
-        partnersDomainsDetectors.setCallback(this);
+
+        // activate partner probing only if the respective source selector is
+        // requested to be applied
+        String[] sourceSelectors = this.federatedRecConfiguration.sourceSelectors;
+        String domainSelectorName = WndomainSourceSelector.class.getCanonicalName();
+        if (sourceSelectors != null && Arrays.asList(sourceSelectors).contains(domainSelectorName)) {
+            logger.info("activating partner domaindetection since [" + domainSelectorName + "] is requested to be applied");
+            partnersDomainsDetectors = new AsyncPartnerDomainsProbeMonitor(new File(this.federatedRecConfiguration.wordnetPath), new File(
+                    this.federatedRecConfiguration.wordnetDomainFilePath), 50, 10, new Double(0.8 * 2000000).longValue());
+            partnersDomainsDetectors.setCallback(this);
+        } else {
+            logger.info("refused to activate partner domaindetection since [" + domainSelectorName + "] is not requested to be applied");
+        }
     }
 
     /**
@@ -523,7 +535,13 @@ public class FederatedRecommenderCore implements ProbeResultChanged {
             logger.log(Level.WARNING, "Could read from Statistics Database");
 
         this.addPartner(badge);
-        partnersDomainsDetectors.probe(badge, getPartnerRegister().getClient(badge.getSystemId()));
+
+        if (null != partnersDomainsDetectors) {
+            if (null == badge.getDomainContent() || badge.getDomainContent().size() <= 0) {
+                partnersDomainsDetectors.probe(badge, getPartnerRegister().getClient(badge.getSystemId()));
+            }
+        }
+
         return "Partner Added";
 
     }
@@ -650,16 +668,23 @@ public class FederatedRecommenderCore implements ProbeResultChanged {
         }
     }
 
+    /**
+     * Stores partner domains mapping to {@link #partnerRegister}.
+     * 
+     * @param updatedProbes
+     *            the latest known {@link PartnerBadge} to {@link PartnerDomain}
+     *            mapping.
+     */
     @Override
     public void onProbeResultsChanged(Map<String, Set<PartnerDomain>> updatedProbes) {
-        logger.info("recieved domain updates of [" + updatedProbes.size() + "] partners:");
-        for (Map.Entry<String, Set<PartnerDomain>> entry : updatedProbes.entrySet()) {
-
-            StringBuilder info = new StringBuilder();
-            for (PartnerDomain domain : entry.getValue()) {
-                info.append(domain.domainName + " ");
+        synchronized (partnerRegister) {
+            for (PartnerBadge partner : partnerRegister.getPartners()) {
+                Set<PartnerDomain> partnerDomains = updatedProbes.get(partner.getSystemId());
+                if (null != partnerDomains) {
+                    partner.setDomainContent(new ArrayList<PartnerDomain>(partnerDomains));
+                    logger.info("stored [" + partnerDomains.size() + "] domains to partner [" + partner.getSystemId() + "]");
+                }
             }
-            logger.info(entry.getKey() + ": " + info.toString());
         }
     }
 

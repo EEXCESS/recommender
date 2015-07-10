@@ -248,7 +248,7 @@ public class PartnerDomainsProbe implements Cloneable {
         }
 
         for (TypedTerm entry : partnerProbes) {
-            PartnerDomain domain = new PartnerDomain(entry.getText(), entry.getWeight());
+            PartnerDomain domain = new PartnerDomain(entry.getText().toLowerCase(), entry.getWeight());
             partnerDomains.add(domain);
         }
 
