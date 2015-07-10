@@ -162,17 +162,11 @@ public class WndomainSourceSelector implements PartnerSelector {
         }
 
         if (userProfile.partnerList.size() > 0) {
-            // logger.info("WordnetDomain-based source selection:");
-            // for (PartnerBadge entry : userProfile.partnerList) {
-            // StringBuilder info = new StringBuilder();
-            // info.append("partner [" + entry.systemId +
-            // "] matching domain(s):");
-            // for (PartnerDomain domain : entry.getDomainContent()) {
-            // info.append(" [domain.name=" + domain.domainName +
-            // ", domain.weight=" + domain.weight + "]");
-            // }
-            // logger.info(info.toString());
-            // }
+            StringBuilder info = new StringBuilder("partners: ");
+            for (PartnerBadge entry : userProfile.partnerList) {
+                info.append("[" + entry.systemId + "] ");
+            }
+            logger.info("WordnetDomain-based source selection selected: " + info.toString());
         } else {
             logger.info("unsuccessfull partner selection");
         }
