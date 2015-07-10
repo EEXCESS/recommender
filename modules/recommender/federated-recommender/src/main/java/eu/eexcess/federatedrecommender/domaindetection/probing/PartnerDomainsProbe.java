@@ -76,7 +76,7 @@ public class PartnerDomainsProbe implements Cloneable {
     protected int maxResults = 10;
     protected DomainDetector domainDetector;
     protected Set<String> ambiguousPhrases = new HashSet<String>(maxWords);
-    private static final String recommendationEndpointSuffix = "recommend";
+    private static final String RECOMMENDATION_ENDPOINT_SUFFIX = "recommend";
     private CancelProbeCondition canelCondition;
 
     /**
@@ -242,7 +242,7 @@ public class PartnerDomainsProbe implements Cloneable {
      */
     private Set<PartnerDomain> getProbesFromTerms(TermSet<TypedTerm> partnerProbes) {
 
-        HashSet<PartnerDomain> partnerDomains = new HashSet<PartnerDomain>(partnerProbes.size());
+        Set<PartnerDomain> partnerDomains = new HashSet<PartnerDomain>(partnerProbes.size());
 
         if (partnerProbes.isEmpty()) {
             return partnerDomains;
@@ -275,9 +275,9 @@ public class PartnerDomainsProbe implements Cloneable {
             try {
                 WebResource resource = null;
                 if (partner.getPartnerConnectorEndpoint().endsWith("/")) {
-                    resource = client.resource(partner.getPartnerConnectorEndpoint() + recommendationEndpointSuffix);
+                    resource = client.resource(partner.getPartnerConnectorEndpoint() + RECOMMENDATION_ENDPOINT_SUFFIX);
                 } else {
-                    resource = client.resource(partner.getPartnerConnectorEndpoint() + "/" + recommendationEndpointSuffix);
+                    resource = client.resource(partner.getPartnerConnectorEndpoint() + "/" + RECOMMENDATION_ENDPOINT_SUFFIX);
                 }
                 resource.accept(MediaType.APPLICATION_JSON);
                 resultList = resource.post(ResultList.class, secureUserProfile);
