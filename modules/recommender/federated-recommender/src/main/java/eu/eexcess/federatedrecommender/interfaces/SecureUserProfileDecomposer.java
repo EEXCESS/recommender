@@ -19,7 +19,7 @@ GNU Affero General Public License for more details.
 
 You should have received a copy of the GNU Affero General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
-*/
+ */
 package eu.eexcess.federatedrecommender.interfaces;
 
 import eu.eexcess.config.FederatedRecommenderConfiguration;
@@ -28,22 +28,24 @@ import eu.eexcess.federatedrecommender.utils.FederatedRecommenderException;
 
 /**
  * SecureUserProfileDecomposer Interface
+ * 
  * @author hziak
  * @param <E>
  *
  */
-public interface SecureUserProfileDecomposer <T extends SecureUserProfile, E extends SecureUserProfile> {
-	
-	/**
-	 * @param inputSecureUserProfile
-	 * @return
-	 */
-	public  T decompose(E inputSecureUserProfile);
-	
-	/**
-	 * @param FederatedRecommenderConfiguration;
-	 * @return
-	 * @throws FederatedRecommenderException 
-	 */
-	public void setConfiguration(FederatedRecommenderConfiguration fedRecConfig) throws FederatedRecommenderException;
+public interface SecureUserProfileDecomposer<T extends SecureUserProfile, E extends SecureUserProfile> {
+
+    /**
+     * @param inputSecureUserProfile
+     * @return
+     */
+    public T decompose(E inputSecureUserProfile);
+
+    /**
+     * @param FederatedRecommenderConfiguration
+     *            ;
+     * @return
+     * @throws FederatedRecommenderException
+     */
+    public void setConfiguration(FederatedRecommenderConfiguration fedRecConfig) throws FederatedRecommenderException;
 }

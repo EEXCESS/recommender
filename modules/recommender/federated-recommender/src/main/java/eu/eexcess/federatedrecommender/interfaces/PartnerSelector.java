@@ -1,4 +1,4 @@
-/* Copyright (C) 2014 
+/* Copyright (C) 2014
 "Kompetenzzentrum fuer wissensbasierte Anwendungen Forschungs- und EntwicklungsgmbH" 
 (Know-Center), Graz, Austria, office@know-center.at.
 
