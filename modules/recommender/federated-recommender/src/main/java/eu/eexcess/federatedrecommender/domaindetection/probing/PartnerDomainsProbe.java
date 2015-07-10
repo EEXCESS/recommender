@@ -64,7 +64,7 @@ public class PartnerDomainsProbe implements Cloneable {
         public boolean isProbeToBeCancelled();
     }
 
-    private Logger logger = Logger.getLogger(PartnerDomainsProbe.class.getName());
+    private static final  Logger logger = Logger.getLogger(PartnerDomainsProbe.class.getName());
     /**
      * default number of random phrases to generate once
      */
@@ -224,6 +224,7 @@ public class PartnerDomainsProbe implements Cloneable {
                 }
                 ambiguousPhrases.add(domainDetector.drawRandomAmbiguousWord(ambiguousPhrases));
             } catch (DomainDetectorException e) {
+                logger.info("failed to draw random phrase and going to retry but reason was: " + e.getMessage());
                 continue;
             }
         }
@@ -267,7 +268,7 @@ public class PartnerDomainsProbe implements Cloneable {
      * @throws RuntimeErrorException
      *             if an exception occurs
      */
-    private ResultList getPartnerResult(Client client, PartnerBadge partner, SecureUserProfile secureUserProfile) throws RuntimeErrorException {
+    private ResultList getPartnerResult(Client client, PartnerBadge partner, SecureUserProfile secureUserProfile) throws RuntimeException {
         ResultList resultList = new ResultList();
 
         if (client != null) {

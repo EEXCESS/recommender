@@ -626,6 +626,12 @@ public class FederatedRecommenderCore implements ProbeResultChanged {
     private void instanciateSourceSelectors(FederatedRecommenderConfiguration recommenderConfig) {
 
         List<String> selectorsClassNames = new ArrayList<String>();
+
+        if (null == recommenderConfig.sourceSelectors) {
+            logger.info("failed to instanciate source selectors");
+            return;
+        }
+
         Collections.addAll(selectorsClassNames, recommenderConfig.sourceSelectors);
 
         for (String sourceSelectorClassName : selectorsClassNames) {
