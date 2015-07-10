@@ -51,34 +51,37 @@ public class BlockPicker extends PartnersFederatedRecommendationsPicker {
     }
 
     private static final Logger logger = Logger.getLogger(BlockPicker.class.getName());
-    final private String basic = "Basic";
-    final private String diversity = "Diversity";
-    final private String serendiptiy = "Serendipity";
+    private static final  String BASIC = "Basic";
+    private static final String DIVERSITY = "Diversity";
+    private static final String SERENDIPITY = "Serendipity";
 
     @Override
     public ResultList pickResults(PFRChronicle pFRChronicle, int numResults) {
         // TODO Auto-generated method stub
         return null;
     }
-
-    void getTopResults(SecureUserProfile secureUserProfile, EvaluationResultList list, int numResults, ResultList result, Integer totalResults) {
-
-        // ArrayList<Result> results = new ArrayList<Result>();
-
-        for (int i = 0; i < numResults && i < list.results.size() && result.results.size() < totalResults; i++) {
+    /**
+     * returnes the top results and checks with a fuzzyHash 
+     * @param resultsToAdd
+     * @param numResultsToAdd
+     * @param finalResultList
+     * @param totalResults
+     */
+    void getTopResults(ResultList resultsToAdd, int numResultsToAdd, ResultList finalResultList, Integer totalResults) {
+        for (int i = 0; i < numResultsToAdd && i < resultsToAdd.results.size() && finalResultList.results.size() < totalResults; i++) {
             boolean found = false;
-            Result o = list.results.get(i);
+            Result o = resultsToAdd.results.get(i);
             byte[] signNewResult = getFuzzyHashSignature(o);
-            for (Result selectedResult : result.results) {
+            for (Result selectedResult : finalResultList.results) {
                 if (Arrays.equals(signNewResult, getFuzzyHashSignature(selectedResult))) {
                     found = true;
                     break;
                 }
             }
             if (!found)
-                result.results.add(o);
+                finalResultList.results.add(o);
             else {
-                numResults++; // leaving one out -> increasing num results
+                numResultsToAdd++; // leaving one out -> increasing num results
                 totalResults++;
             }
         }
@@ -127,13 +130,13 @@ public class BlockPicker extends PartnersFederatedRecommendationsPicker {
         int unknownCounter = 0;
         for (EvaluationResultList list : resultLists.results) {
             switch (list.provider) {
-            case basic:
+            case BASIC:
                 basicList = list;
                 break;
-            case diversity:
+            case DIVERSITY:
                 diversityList = list;
                 break;
-            case serendiptiy:
+            case SERENDIPITY:
                 serendipityList = list;
                 break;
 
@@ -163,94 +166,50 @@ public class BlockPicker extends PartnersFederatedRecommendationsPicker {
 
     private ResultList splitAndGetResultsFromBlockLists(EvaluationResultLists resultLists, Integer numResults, Integer numBlocks,
             EvaluationResultList basicList, EvaluationResultList diversityList, EvaluationResultList serendipityList) {
-        //
-        //
-        // if (basicList == null || basicList.results.isEmpty()) {
-        // numBlocks--;
-        // basicResultListBlock = 0.0;
-        // }
-        // if (diversityList == null || diversityList.results.isEmpty()) {
-        // numBlocks--;
-        // diversityResultListBlock = 0.0;
-        // }
-        //
-        // if (serendipityList == null || serendipityList.results.isEmpty()) {
-        // numBlocks--;
-        // serendipityResultListBlock = 0.0;
-        // }
-        // Double numResultsPerBlock = (((double) numResults) / numBlocks);
-        // basicResultListBlock = assignTemporaryBlockSize(basicList,
-        // basicResultListBlock, numResultsPerBlock);
-        // diversityResultListBlock = assignTemporaryBlockSize(diversityList,
-        // diversityResultListBlock, numResultsPerBlock);
-        // serendipityResultListBlock =
-        // assignTemporaryBlockSize(serendipityList, serendipityResultListBlock,
-        // numResultsPerBlock);
-        //
-        // while (basicResultListBlock + diversityResultListBlock +
-        // serendipityResultListBlock < numResults && numResultsPerBlock % 1 >
-        // 0.0) {
-        // double basicTempSize = assignTemporaryBlockSize(basicList,
-        // basicResultListBlock, numResultsPerBlock + 1);
-        // if (basicTempSize > basicResultListBlock) {
-        // basicResultListBlock = basicTempSize;
-        // }
-        //
-        // }
-
-        ResultList selectedBasicList = new ResultList();
-        if (basicList != null)
-            selectedBasicList.provider = basicList.provider;
-        ResultList selectedDiversityList = new ResultList();
-        if (diversityList != null)
-            selectedDiversityList.provider = diversityList.provider;
-        ResultList selectedSerendipityList = new ResultList();
-        if (serendipityList != null)
-            selectedSerendipityList.provider = serendipityList.provider;
+    	int basicCount=0;
+    	int diversityCount=0;
+    	int serendipityCount=0;
         ResultList resultList = new ResultList();
-        while (selectedBasicList.results.size() + selectedDiversityList.results.size() + selectedSerendipityList.results.size() < numResults) {
-            if (popAndAddsListElement(numResults, basicList, selectedBasicList, selectedDiversityList.results.size() + selectedSerendipityList.results.size()))
+        int basicSize=0;
+    	if(basicList!=null)
+    		basicSize= basicList.results.size();
+    	int diversitySize=0;
+    	if(diversityList!=null)
+    		diversitySize= diversityList.results.size();
+    	int serendipitySize=0;
+    	if(serendipityList!=null)
+    		serendipitySize = serendipityList.results.size();
+    	
+        while ((basicCount+diversityCount+serendipityCount) < numResults) {
+        	
+        	
+			if( basicSize>basicCount ){
+				basicCount+=1;
+				if(basicCount+diversityCount+serendipityCount>=numResults)
                 break;
-            if (popAndAddsListElement(numResults, diversityList, selectedDiversityList,
-                    selectedSerendipityList.results.size() + selectedBasicList.results.size()))
+			}
+        	
+			if(diversitySize>diversityCount ){
+				diversityCount+=1;
+					if(basicCount+diversityCount+serendipityCount>=numResults)
                 break;
-            if (popAndAddsListElement(numResults, serendipityList, selectedSerendipityList,
-                    selectedDiversityList.results.size() + selectedBasicList.results.size()))
+			}
+			if( serendipitySize>serendipityCount){
+				serendipityCount+=1;
+				if(basicCount+diversityCount+serendipityCount>=numResults)
                 break;
+			}
+        	int allTogether = basicSize +diversitySize+serendipitySize;
+			if((diversityList==null || diversityList.results.isEmpty()) && (diversityList==null || diversityList.results.isEmpty())&& (basicList==null || basicList.results.isEmpty())
+        			|| (allTogether < numResults && allTogether==basicCount+diversityCount+serendipityCount))
+        		break;
         }
-        resultList = assignAndGetTopResults(numBlocks, selectedBasicList, selectedDiversityList, selectedSerendipityList, resultList);
+        resultList= assignAndGetTopResults(numBlocks, basicList, diversityList, serendipityList, resultList,basicCount,diversityCount,serendipityCount,numResults);
         resultList.totalResults = resultList.results.size();
         return resultList;
     }
 
-    private Boolean popAndAddsListElement(Integer numResults, EvaluationResultList originList, ResultList selectedList, Integer otherListsElementCount) {
-        if (originList != null && !originList.results.isEmpty()) {
-            if ((selectedList.results.size() + otherListsElementCount) == numResults)
-                return true;
-            selectedList.results.add(originList.results.pop());
-
-        }
-        return false;
-
-    }
-
-    /**
-     * assigns the themporary block size and checks if size is not higher the
-     * number of avaiable results
-     * 
-     * @param basicList
-     * @param basicResultListBlock
-     * @param numResultsPerBlock
-     * @return
-     */
-    private Double assignTemporaryBlockSize(EvaluationResultList basicList, Double basicResultListBlock, Double numResultsPerBlock) {
-        if (basicResultListBlock == null)
-            if (basicList.results.size() > numResultsPerBlock)
-                basicResultListBlock = numResultsPerBlock;
-            else
-                basicResultListBlock = (double) basicList.results.size();
-        return basicResultListBlock;
-    }
+ 
 
     /**
      * assigns calculated amount of documents to the lists and retrieves the top
@@ -266,34 +225,42 @@ public class BlockPicker extends PartnersFederatedRecommendationsPicker {
      * @param serendipityResultListBlock
      * @param diversityResultListBlock
      * @param resultList
+     * @param serendipityCount 
+     * @param diversityCount 
+     * @param basicCount 
+     * @param numResults 
      */
     private ResultList assignAndGetTopResults(Integer blockCount, ResultList basicList, ResultList diversityList, ResultList serendipityList,
-            ResultList resultList) {
+            ResultList resultList, int basicCount, int diversityCount, int serendipityCount, Integer numResults ) {
         resultList.provider = "BlockPicker (";
         int counter = 0;
-        int numListResults = 0;
+        int numListResultsToAdd = 0;
         while (counter < blockCount) {
 
-            ResultList list = null;
+            ResultList resultListToAdd = null;
             switch (counter) {
             case 0:
                 if (basicList != null && !basicList.results.isEmpty()) {
-                    list = basicList;
-                    numListResults = basicList.results.size();
+                    resultListToAdd = basicList;
+                    numListResultsToAdd = basicCount;
                     break;
-                } else
+                } else{
                     counter++;
+                    blockCount++;
+                }
             case 1:
                 if (diversityList != null && !diversityList.results.isEmpty()) {
-                    list = diversityList;
-                    numListResults = diversityList.results.size();
+                    resultListToAdd = diversityList;
+                    numListResultsToAdd = diversityCount;
                     break;
-                } else
+                } else{
                     counter++;
+                    blockCount++;
+                }
             case 2:
                 if (serendipityList != null) {
-                    list = serendipityList;
-                    numListResults = serendipityList.results.size();
+                    resultListToAdd = serendipityList;
+                    numListResultsToAdd = serendipityCount;
                     break;
                 }
 
@@ -301,13 +268,13 @@ public class BlockPicker extends PartnersFederatedRecommendationsPicker {
                 break;
             }
             counter++;
-            if (list != null) {
+            if (resultListToAdd != null) {
 
-                resultList.provider += list.provider + "(" + numListResults + ")";
-                if (list.provider != serendiptiy)
+                resultList.provider += resultListToAdd.provider + "(" + numListResultsToAdd + ")";
+                if (resultListToAdd.provider != SERENDIPITY)
                     resultList.provider += ",";
-
-                resultList.results.addAll(list.results);
+                getTopResults(resultListToAdd, numListResultsToAdd, resultList, numResults);
+                
             } else
                 blockCount++;
         }
