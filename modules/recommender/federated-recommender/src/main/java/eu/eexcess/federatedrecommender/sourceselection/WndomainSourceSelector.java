@@ -30,8 +30,6 @@ import java.util.TreeSet;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Logger;
 
-import org.apache.commons.lang.StringUtils;
-
 import eu.eexcess.config.FederatedRecommenderConfiguration;
 import eu.eexcess.dataformats.PartnerBadge;
 import eu.eexcess.dataformats.PartnerDomain;
@@ -164,15 +162,17 @@ public class WndomainSourceSelector implements PartnerSelector {
         }
 
         if (userProfile.partnerList.size() > 0) {
-            logger.info("WordnetDomain-based source selection:");
-            for (PartnerBadge entry : userProfile.partnerList) {
-                StringBuilder info = new StringBuilder();
-                info.append("partner [" + entry.systemId + "] matching domain(s):");
-                for (PartnerDomain domain : entry.getDomainContent()) {
-                    info.append(" [domain.name=" + domain.domainName + ", domain.weight=" + domain.weight + "]");
-                }
-                logger.info(info.toString());
-            }
+            // logger.info("WordnetDomain-based source selection:");
+            // for (PartnerBadge entry : userProfile.partnerList) {
+            // StringBuilder info = new StringBuilder();
+            // info.append("partner [" + entry.systemId +
+            // "] matching domain(s):");
+            // for (PartnerDomain domain : entry.getDomainContent()) {
+            // info.append(" [domain.name=" + domain.domainName +
+            // ", domain.weight=" + domain.weight + "]");
+            // }
+            // logger.info(info.toString());
+            // }
         } else {
             logger.info("unsuccessfull partner selection");
         }
@@ -286,7 +286,8 @@ public class WndomainSourceSelector implements PartnerSelector {
     /**
      * Takes the query text form context keywords. When
      * {@link #isKeywordGroupingEnabled} is true the keywords are joined
-     * (separated by " ") altogether into the fist list entry.
+     * (separated by " ") altogether into the fist list entry. Resulted keywords
+     * are lower case.
      * 
      * @param contextKeywords
      * @return
@@ -294,16 +295,17 @@ public class WndomainSourceSelector implements PartnerSelector {
     private List<String> getQueryTerms(List<ContextKeyword> contextKeywords) {
         ArrayList<String> keywords = new ArrayList<>(contextKeywords.size());
 
-        for (ContextKeyword contextKeyword : contextKeywords) {
-            keywords.add(contextKeyword.text);
-        }
-
         if (isKeywordGroupingEnabled) {
-            List<String> joinedKeywords = new ArrayList<String>();
-            joinedKeywords.add(StringUtils.join(keywords, " "));
-            return joinedKeywords;
+            StringBuilder joinedKeywords = new StringBuilder();
+            for (ContextKeyword contextKeyword : contextKeywords) {
+                joinedKeywords.append(contextKeyword.text.toLowerCase() + " ");
+            }
+            keywords.add(joinedKeywords.toString().trim());
+        } else {
+            for (ContextKeyword contextKeyword : contextKeywords) {
+                keywords.add(contextKeyword.text.toLowerCase());
+            }
         }
-
         return keywords;
     }
 }
