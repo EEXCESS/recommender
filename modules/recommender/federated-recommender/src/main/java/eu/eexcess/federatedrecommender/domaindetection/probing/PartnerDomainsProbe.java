@@ -64,7 +64,7 @@ public class PartnerDomainsProbe implements Cloneable {
         public boolean isProbeToBeCancelled();
     }
 
-    private static final Logger logger = Logger.getLogger(PartnerDomainsProbe.class.getName());
+    private static final Logger LOGGER = Logger.getLogger(PartnerDomainsProbe.class.getName());
     /**
      * default number of random phrases to generate once
      */
@@ -224,14 +224,14 @@ public class PartnerDomainsProbe implements Cloneable {
                 }
                 ambiguousPhrases.add(domainDetector.drawRandomAmbiguousWord(ambiguousPhrases));
             } catch (DomainDetectorException e) {
-                logger.info("failed to draw random phrase and going to retry but reason was: " + e.getMessage());
+                LOGGER.info("failed to draw random phrase and going to retry but reason was: " + e.getMessage());
                 continue;
             }
         }
 
         long delayMs = System.currentTimeMillis() - startTimestamp;
         if (delayMs > (3 * 1000)) {
-            logger.info("drawing [" + maxWords + "] random phrases took [" + delayMs + "ms]");
+            LOGGER.info("drawing [" + maxWords + "] random phrases took [" + delayMs + "ms]");
         }
     }
 
