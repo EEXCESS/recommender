@@ -11,6 +11,7 @@ import eu.eexcess.dataformats.result.DocumentBadge;
 import eu.eexcess.dataformats.result.Result;
 import eu.eexcess.dataformats.result.ResultList;
 import eu.eexcess.dataformats.userprofile.SecureUserProfile;
+import eu.eexcess.federatedrecommender.evaluation.picker.BlockPicker;
 
 public class BlockPickerTest extends TestCase {
 
@@ -29,12 +30,12 @@ public class BlockPickerTest extends TestCase {
         e.documentBadge = new DocumentBadge("test1");
 
         parent.results.add(e);
-        EvaluationResultList list = new EvaluationResultList(parent);
+        ResultList list = new EvaluationResultList(parent);
         SecureUserProfile secureUserProfile = null;
 
-        blockPicker.getTopResults(secureUserProfile, list, numResults, result, numResults);
+        blockPicker.getTopResults(list, numResults, result, numResults);
         ResultList result2 = (ResultList) SerializationUtils.clone(result);
-        blockPicker.getTopResults(secureUserProfile, list, numResults, result2, numResults);
+        blockPicker.getTopResults( list, numResults, result2, numResults);
         assertEquals(result, result2);
     }
 
@@ -174,7 +175,7 @@ public class BlockPickerTest extends TestCase {
         BlockPicker blockPicker = new BlockPicker();
 
         // EvaluationResultLists resultLists = new EvaluationResultLists();
-        EvaluationResultList resultList1 = new EvaluationResultList(new ResultList());
+       ResultList resultList1 = new EvaluationResultList(new ResultList());
         for (int i = 0; i < 200; i++) {
             Result result = new Result();
             result.title = "RL1T" + i;
@@ -183,7 +184,7 @@ public class BlockPickerTest extends TestCase {
 
         for (int j = 0; j < resultList1.results.size(); j++) {
             ResultList result = new ResultList();
-            blockPicker.getTopResults(null, resultList1, j, result, j);
+            blockPicker.getTopResults(resultList1, j, result, j);
             assertEquals(j, result.results.size());
         }
 
@@ -276,14 +277,7 @@ public class BlockPickerTest extends TestCase {
         BlockPicker blockPicker = new BlockPicker();
         Integer numResults = 10;
         EvaluationResultLists resultLists = new EvaluationResultLists();
-        EvaluationResultList resultList1 = new EvaluationResultList(new ResultList());
-        for (int i = 0; i < 30; i++) {
-            Result result = new Result();
-            result.title = "RL1T" + i;
-            resultList1.results.add(result);
-        }
-        resultList1.provider = "Basic";
-        resultLists.results.add(resultList1);
+      
         EvaluationResultList resultList2 = new EvaluationResultList(new ResultList());
         for (int i = 0; i < 30; i++) {
             Result result = new Result();
@@ -292,7 +286,14 @@ public class BlockPickerTest extends TestCase {
         }
         resultList2.provider = "Diversity";
         resultLists.results.add(resultList2);
-
+        EvaluationResultList resultList1 = new EvaluationResultList(new ResultList());
+        for (int i = 0; i < 30; i++) {
+            Result result = new Result();
+            result.title = "RL3T" + i;
+            resultList1.results.add(result);
+        }
+        resultList1.provider = "Serendipity";
+        resultLists.results.add(resultList1);
         EvaluationResultList evalList = null;
         try {
             evalList = blockPicker.pickBlockResults(resultLists, numResults);
@@ -361,7 +362,7 @@ public class BlockPickerTest extends TestCase {
 
         assertEquals(true, evalList.results.size() == 10);
         assertEquals(true, evalList.results.get(0).title.equals("RL1T0"));
-        assertEquals(true, evalList.results.get(5).title.equals("RL2T4"));
+        assertEquals(true, evalList.results.get(4).title.equals("RL2T4"));
         assertEquals(true, evalList.results.get(7).title.equals("RL3T4"));
 
     }
