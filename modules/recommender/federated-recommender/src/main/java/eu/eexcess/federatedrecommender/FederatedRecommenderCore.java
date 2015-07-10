@@ -111,7 +111,8 @@ public class FederatedRecommenderCore implements ProbeResultChanged {
         if (sourceSelectors != null && Arrays.asList(sourceSelectors).contains(domainSelectorName)) {
             logger.info("activating partner domaindetection since [" + domainSelectorName + "] is requested to be applied");
             partnersDomainsDetectors = new AsyncPartnerDomainsProbeMonitor(new File(this.federatedRecConfiguration.wordnetPath), new File(
-                    this.federatedRecConfiguration.wordnetDomainFilePath), 50, 10, new Double(0.8 * 2000000).longValue());
+                    this.federatedRecConfiguration.wordnetDomainFilePath), 50, 10, Double.doubleToLongBits(0.8 * 2000000));
+
             partnersDomainsDetectors.setCallback(this);
         } else {
             logger.info("refused to activate partner domaindetection since [" + domainSelectorName + "] is not requested to be applied");
@@ -180,27 +181,16 @@ public class FederatedRecommenderCore implements ProbeResultChanged {
 
                 Future<ResultList> future = threadPool.submit(new Callable<ResultList>() {
                     @Override
-                    public ResultList call() throws Exception {
+                    public ResultList call() throws UniformInterfaceException, ClientHandlerException {
                         long startTime = System.currentTimeMillis();
-                        ResultList resultList = getPartnerResult(partner, tmpClient, secureUserProfile);
+                        ResultList resultList = new ResultList();
+                        if (tmpClient != null) {
+                            resultList = getPartnerRecommendationResult(partner, tmpClient, secureUserProfile);
+                            tmpClient.destroy();
+                        }
                         long endTime = System.currentTimeMillis();
                         long respTime = endTime - startTime;
                         partner.updatePartnerResponseTime(respTime);
-                        return resultList;
-                    }
-
-                    /**
-                     * trys to recieve the results from the partners
-                     * 
-                     */
-                    private ResultList getPartnerResult(PartnerBadge partner, Client client, SecureUserProfile secureUserProfile)
-                            throws UniformInterfaceException, ClientHandlerException {
-                        ResultList resultList = new ResultList();
-                        if (client != null) {
-                            resultList = getPartnerRecommendationResult(partner, client, secureUserProfile, resultList);
-                            client.destroy();
-                        }
-
                         return resultList;
                     }
                 });
@@ -310,11 +300,6 @@ public class FederatedRecommenderCore implements ProbeResultChanged {
 
                 /**
                  * trys to recieve the results from the partners
-                 * 
-                 * @param partner
-                 * @param currentDocs
-                 * @return
-                 * @throws Exception
                  */
                 private DocumentBadgeList getDocsResult(PartnerBadge partner, Client client, DocumentBadgeList currentDocs) throws UniformInterfaceException,
                         ClientHandlerException {
@@ -424,57 +409,66 @@ public class FederatedRecommenderCore implements ProbeResultChanged {
                 PartnerBadgeStats longStats = partner.longTimeStats;
                 PartnerBadgeStats shortStats = partner.shortTimeStats;
                 logger.log(Level.INFO, "Writing " + partner.systemId + " statistics into Database");
-                PreparedStatement updateS = db.getPreparedUpdateStatement(DatabaseQueryStats.REQUESTLOG);
-                // Database Entry Style
-                // ('SYSTEM_ID','REQUESTCOUNT','FAILEDREQUESTCOUNT','FAILEDREQUESTTIMEOUTCOUNT')
-
                 final String dbErrorMsg = "Could not write into StatsDatabase: ";
-                if (updateS != null) {
-
-                    try {
-                        updateS.clearBatch();
-                        updateS.setString(1, partner.getSystemId());
-                        updateS.setInt(2, longStats.requestCount + shortStats.requestCount);
-                        updateS.setInt(3, longStats.failedRequestCount + shortStats.failedRequestCount);
-                        updateS.setInt(4, longStats.failedRequestTimeoutCount + shortStats.failedRequestTimeoutCount);
-                        updateS.execute();
-                    } catch (SQLException e) {
-                        logger.log(Level.INFO, dbErrorMsg, e);
-                    } finally {
-                        db.commit();
-                    }
-                } else
-                    logger.log(Level.INFO, "Could write into request statistics database");
-                PreparedStatement updateQ = db.getPreparedUpdateStatement(DatabaseQueryStats.QUERYLOG);
-                if (updateQ != null) {
-                    for (ResultStats queryStats : partner.getLastQueries()) {
-                        try {
-                            updateQ.clearBatch();
-
-                            updateQ.setString(1, partner.getSystemId());
-                            updateQ.setString(2, queryStats.getPartnerQuery());
-                            updateQ.setInt(3, (int) queryStats.getPartnerCallTime());
-                            updateQ.setInt(4, (int) queryStats.getFirstTransformationTime());
-                            updateQ.setInt(5, (int) queryStats.getSecondTransformationTime());
-                            updateQ.setInt(6, (int) queryStats.getEnrichmentTime());
-                            updateQ.setInt(7, queryStats.getResultCount());
-                            updateQ.addBatch();
-
-                        } catch (SQLException e) {
-                            logger.log(Level.INFO, dbErrorMsg, e);
-                        }
-                    }
-                    try {
-                        updateQ.executeBatch();
-                    } catch (SQLException e) {
-                        logger.log(Level.INFO, dbErrorMsg, e);
-                    }
-
-                } else
-                    logger.log(Level.INFO, "Could not write into query statistics database");
+                writeRequestStatsToDb(db, partner, longStats, shortStats, dbErrorMsg);
+                writeQueryStatsToDb(db, partner, dbErrorMsg);
             }
         }
 
+    }
+
+    private void writeQueryStatsToDb(Database db, PartnerBadge partner, final String dbErrorMsg) {
+        PreparedStatement updateQ = db.getPreparedUpdateStatement(DatabaseQueryStats.QUERYLOG);
+        if (updateQ != null) {
+            for (ResultStats queryStats : partner.getLastQueries()) {
+                try {
+                    updateQ.clearBatch();
+
+                    updateQ.setString(1, partner.getSystemId());
+                    updateQ.setString(2, queryStats.getPartnerQuery());
+                    updateQ.setInt(3, (int) queryStats.getPartnerCallTime());
+                    updateQ.setInt(4, (int) queryStats.getFirstTransformationTime());
+                    updateQ.setInt(5, (int) queryStats.getSecondTransformationTime());
+                    updateQ.setInt(6, (int) queryStats.getEnrichmentTime());
+                    updateQ.setInt(7, queryStats.getResultCount());
+                    updateQ.addBatch();
+
+                } catch (SQLException e) {
+                    logger.log(Level.INFO, dbErrorMsg, e);
+                }
+            }
+            try {
+                updateQ.executeBatch();
+            } catch (SQLException e) {
+                logger.log(Level.INFO, dbErrorMsg, e);
+            }
+
+        } else
+            logger.log(Level.INFO, "Could not write into query statistics database");
+    }
+
+    private String writeRequestStatsToDb(Database db, PartnerBadge partner, PartnerBadgeStats longStats, PartnerBadgeStats shortStats, String dbErrorMsg) {
+        PreparedStatement updateS = db.getPreparedUpdateStatement(DatabaseQueryStats.REQUESTLOG);
+        // Database Entry Style
+        // ('SYSTEM_ID','REQUESTCOUNT','FAILEDREQUESTCOUNT','FAILEDREQUESTTIMEOUTCOUNT')
+
+        if (updateS != null) {
+
+            try {
+                updateS.clearBatch();
+                updateS.setString(1, partner.getSystemId());
+                updateS.setInt(2, longStats.requestCount + shortStats.requestCount);
+                updateS.setInt(3, longStats.failedRequestCount + shortStats.failedRequestCount);
+                updateS.setInt(4, longStats.failedRequestTimeoutCount + shortStats.failedRequestTimeoutCount);
+                updateS.execute();
+            } catch (SQLException e) {
+                logger.log(Level.INFO, dbErrorMsg, e);
+            } finally {
+                db.commit();
+            }
+        } else
+            logger.log(Level.INFO, "Could write into request statistics database");
+        return dbErrorMsg;
     }
 
     /**
@@ -521,12 +515,9 @@ public class FederatedRecommenderCore implements ProbeResultChanged {
 
         this.addPartner(badge);
 
-        if (null != partnersDomainsDetectors) {
-            if (null == badge.getDomainContent() || badge.getDomainContent().size() <= 0) {
-                partnersDomainsDetectors.probe(badge, getPartnerRegister().getClient(badge.getSystemId()));
-            }
+        if (null != partnersDomainsDetectors && (null == badge.getDomainContent() || badge.getDomainContent().isEmpty())) {
+            partnersDomainsDetectors.probe(badge, getPartnerRegister().getClient(badge.getSystemId()));
         }
-
         return "Partner Added";
 
     }
@@ -634,7 +625,7 @@ public class FederatedRecommenderCore implements ProbeResultChanged {
 
     private void instanciateSourceSelectors(FederatedRecommenderConfiguration recommenderConfig) {
 
-        ArrayList<String> selectorsClassNames = new ArrayList<String>();
+        List<String> selectorsClassNames = new ArrayList<String>();
         Collections.addAll(selectorsClassNames, recommenderConfig.sourceSelectors);
 
         for (String sourceSelectorClassName : selectorsClassNames) {
@@ -689,8 +680,9 @@ public class FederatedRecommenderCore implements ProbeResultChanged {
         return docList;
     }
 
-    private ResultList getPartnerRecommendationResult(PartnerBadge partner, Client client, SecureUserProfile secureUserProfile, ResultList resultList)
+    private ResultList getPartnerRecommendationResult(PartnerBadge partner, Client client, SecureUserProfile secureUserProfile)
             throws UniformInterfaceException, ClientHandlerException {
+        ResultList resultList = new ResultList();
         try {
             WebResource resource = client.resource(partner.getPartnerConnectorEndpoint() + "recommend");
             resource.accept(MediaType.APPLICATION_JSON);
