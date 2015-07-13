@@ -29,7 +29,8 @@ public enum DatabaseQueryStats implements DatabasePreparedQuery {
 
 	}
 
-	public String getUpdateQuery() {
+	@Override
+    public String getUpdateQuery() {
 		return updateQuery;
 	}
 
@@ -37,7 +38,8 @@ public enum DatabaseQueryStats implements DatabasePreparedQuery {
 		this.updateQuery = updateQuery;
 	}
 
-	public String getSelectQuery() {
+	@Override
+    public String getSelectQuery() {
 		return getQuery;
 	}
 
@@ -45,7 +47,8 @@ public enum DatabaseQueryStats implements DatabasePreparedQuery {
 		this.getQuery = getQuery;
 	}
 
-	public String getCreateQuery() {
+	@Override
+    public String getCreateQuery() {
 		return createQuery;
 	}
 
@@ -53,7 +56,8 @@ public enum DatabaseQueryStats implements DatabasePreparedQuery {
 		this.createQuery = createQuery;
 	}
 
-	public String getInternName() {
+	@Override
+    public String getInternName() {
 		return internName;
 	}
 
