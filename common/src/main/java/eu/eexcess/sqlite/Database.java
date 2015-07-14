@@ -27,6 +27,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 package eu.eexcess.sqlite;
 
+import java.io.Closeable;
+import java.io.IOException;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
@@ -42,7 +44,7 @@ import java.util.logging.Logger;
  * @author hziak
  * 
  */
-public class Database {
+public class Database <T extends DatabasePreparedQuery> implements Closeable {
     private static final Logger            logger      = Logger.getLogger(Database.class.getName());
     private static final String            JDBC_DRIVER = "org.sqlite.JDBC";
     private static String                  dBName      = null;
@@ -59,7 +61,7 @@ public class Database {
         }
     }
 
-    public <T extends DatabasePreparedQuery> Database(String dBName, T[] preparedStatementsDefinitions) {
+    public Database(String dBName, T[] preparedStatementsDefinitions) {
         logger.log(Level.INFO, "Trying to open DB:" + Database.dBName);
         Database.dBName = dBName;
         try {
@@ -114,7 +116,7 @@ public class Database {
     /*
      * Initializes the Prepared Statements
      */
-    private <T extends DatabasePreparedQuery> void initPreparedStatements(Connection con, T[] preparedStatements) throws SQLException {
+    private void initPreparedStatements(Connection con, T[] preparedStatements) throws SQLException {
 
         if (con != null) {
             for (T t : preparedStatements) {
@@ -152,21 +154,25 @@ public class Database {
      * 
      * @throws SQLException
      */
-    public void close() throws SQLException {
-        this.con.close();
+    public void close() throws IOException {
+        try {
+            this.con.close();
+        } catch (SQLException sqe) {
+            throw new IOException(sqe);
+        }
     }
 
     /**
      * returns the get statement from the DatabasePreparedQuery
      */
-    public <T extends DatabasePreparedQuery> PreparedStatement getPreparedSelectStatement(T preparedQueryType) {
+    public PreparedStatement getPreparedSelectStatement(T preparedQueryType) {
         return map.get(preparedQueryType.getInternName() + preparedQueryType.getSelectQuery());
     }
 
     /**
      * returns the update statement from the DatabasePreparedQuery
      */
-    public <T extends DatabasePreparedQuery> PreparedStatement getPreparedUpdateStatement(T preparedQueryType) {
+    public PreparedStatement getPreparedUpdateStatement(T preparedQueryType) {
         return map.get(preparedQueryType.getInternName() + preparedQueryType.getUpdateQuery());
     }
 

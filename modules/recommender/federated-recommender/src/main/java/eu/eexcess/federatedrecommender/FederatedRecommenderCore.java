@@ -24,6 +24,7 @@ package eu.eexcess.federatedrecommender;
 
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.sql.PreparedStatement;
@@ -403,7 +404,7 @@ public class FederatedRecommenderCore implements ProbeResultChanged {
     public void writeStatsToDB() {
 
         logger.log(Level.INFO, "Writing statistics into Database");
-        Database db = new Database(this.federatedRecConfiguration.statsLogDatabase, DatabaseQueryStats.values());
+        Database<DatabaseQueryStats> db = new Database<DatabaseQueryStats>(this.federatedRecConfiguration.statsLogDatabase, DatabaseQueryStats.values());
         for (PartnerBadge partner : this.partnerRegister.getPartners()) {
             if (partner != null) {
                 PartnerBadgeStats longStats = partner.longTimeStats;
@@ -417,7 +418,7 @@ public class FederatedRecommenderCore implements ProbeResultChanged {
 
     }
 
-    private void writeQueryStatsToDb(Database db, PartnerBadge partner, final String dbErrorMsg) {
+    private void writeQueryStatsToDb(Database<DatabaseQueryStats> db, PartnerBadge partner, final String dbErrorMsg) {
         PreparedStatement updateQ = db.getPreparedUpdateStatement(DatabaseQueryStats.QUERYLOG);
         if (updateQ != null) {
             for (ResultStats queryStats : partner.getLastQueries()) {
@@ -447,7 +448,7 @@ public class FederatedRecommenderCore implements ProbeResultChanged {
             logger.log(Level.INFO, "Could not write into query statistics database");
     }
 
-    private String writeRequestStatsToDb(Database db, PartnerBadge partner, PartnerBadgeStats longStats, PartnerBadgeStats shortStats, String dbErrorMsg) {
+    private String writeRequestStatsToDb(Database<DatabaseQueryStats> db, PartnerBadge partner, PartnerBadgeStats longStats, PartnerBadgeStats shortStats, String dbErrorMsg) {
         PreparedStatement updateS = db.getPreparedUpdateStatement(DatabaseQueryStats.REQUESTLOG);
         // Database Entry Style
         // ('SYSTEM_ID','REQUESTCOUNT','FAILEDREQUESTCOUNT','FAILEDREQUESTTIMEOUTCOUNT')
@@ -487,7 +488,7 @@ public class FederatedRecommenderCore implements ProbeResultChanged {
         if (badge.partnerKey != null && !badge.partnerKey.isEmpty() && badge.partnerKey.length() < 20)
             return "Partner Key is too short (<20)";
 
-        Database db = new Database(this.federatedRecConfiguration.statsLogDatabase, DatabaseQueryStats.values());
+        Database<DatabaseQueryStats> db = new Database<DatabaseQueryStats>(this.federatedRecConfiguration.statsLogDatabase, DatabaseQueryStats.values());
         PreparedStatement getS = db.getPreparedSelectStatement(DatabaseQueryStats.REQUESTLOG);
         // Database Entry Style
         // ('SYSTEM_ID','REQUESTCOUNT','FAILEDREQUESTCOUNT','FAILEDREQUESTTIMEOUTCOUNT')
@@ -507,7 +508,7 @@ public class FederatedRecommenderCore implements ProbeResultChanged {
 
             try {
                 db.close();
-            } catch (SQLException e) {
+            } catch (IOException e) {
                 logger.log(Level.WARNING, "Could not close Database", e);
             }
         } else

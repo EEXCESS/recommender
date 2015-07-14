@@ -25,6 +25,7 @@ package sqlite;
 import java.sql.*;
 
 import eu.eexcess.sqlite.Database;
+import eu.eexcess.sqlite.DatabaseQueryStats;
 
 public class Main {
 
@@ -34,7 +35,7 @@ public class Main {
 	  {
 	  
           Connection dbConnection;
-          Database db=new Database();
+          Database<DatabaseQueryStats> db=new Database<DatabaseQueryStats>();
 		try {
 			
 			dbConnection = db.connect(DATABASE);
