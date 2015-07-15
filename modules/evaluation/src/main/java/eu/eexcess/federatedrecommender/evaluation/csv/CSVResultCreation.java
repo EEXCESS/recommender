@@ -97,8 +97,8 @@ public class CSVResultCreation {
             if (finalCSVString != null)
                 try {
                     ofrw.write(finalCSVString);
-                    logger.log(Level.INFO, finalCSVString);
-                    System.out.println(finalCSVString);
+                    // logger.log(Level.INFO, finalCSVString);
+                    // System.out.println(finalCSVString);
                 } catch (IOException e) {
                     logger.log(Level.WARNING, "", e);
                 }
@@ -206,13 +206,31 @@ public class CSVResultCreation {
         // }
 
         ObjectMapper mapper = new ObjectMapper();
+        boolean isValidBlock = false;
+        boolean isValidBasic = false;
+        for (EvaluationResultList evalResultList : resp.results) {
 
-        try {
-            File file = new File(DIRECTORYPATH + "results/" + secureUserProfileEvaluation.queryID + ".json");
-            mapper.defaultPrettyPrintingWriter().writeValue(file, resp);
-            System.out.println("Writing to file:" + file.getAbsolutePath());
-        } catch (IOException e) {
-            logger.log(Level.WARNING, "", e);
+            if (evalResultList.provider.equals("Basic"))
+                if (evalResultList.results.size() == 10)
+                    isValidBasic = true;
+                else
+                    logger.log(Level.INFO, "Not used: " + evalResultList.provider + " " + evalResultList.results.size());
+
+            if (evalResultList.provider.equals("BlockPicker (Basic(4),Diversity(3),Serendipity(3))"))
+                if (evalResultList.results.size() == 10)
+                    isValidBlock = true;
+                else
+                    logger.log(Level.INFO, "Not used: " + evalResultList.provider + " " + evalResultList.results.size());
+        }
+        if (isValidBlock && isValidBasic) {
+            try {
+                File file = new File(DIRECTORYPATH + "results/" + secureUserProfileEvaluation.queryID + ".json");
+                mapper.defaultPrettyPrintingWriter().writeValue(file, resp);
+                // System.out.println("Writing to file:" +
+                // file.getAbsolutePath());
+            } catch (IOException e) {
+                logger.log(Level.WARNING, "", e);
+            }
         }
 
         for (EvaluationResultList resultList : resp.results) {
@@ -230,7 +248,7 @@ public class CSVResultCreation {
             builder.append(",");
         }
         String string = builder.toString();
-        logger.log(Level.INFO, "returned " + string);
+        // logger.log(Level.INFO, "returned " + string);
 
         return string;
     }

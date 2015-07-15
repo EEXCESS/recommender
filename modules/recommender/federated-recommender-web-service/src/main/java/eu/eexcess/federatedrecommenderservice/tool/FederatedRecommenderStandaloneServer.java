@@ -49,7 +49,7 @@ public class FederatedRecommenderStandaloneServer {
 
     }
 
-    public static synchronized void start(int port) throws Exception {
+    public static synchronized void start(int port) throws IllegalStateException {
         if (server != null) {
             throw new IllegalStateException("Server is already running");
         }
@@ -74,14 +74,23 @@ public class FederatedRecommenderStandaloneServer {
         server = new Server(port);
         server.setHandler(handlers);
 
-        server.start();
+        try {
+            server.start();
+        } catch (Exception e) {
+            logger.log(Level.SEVERE, "Could not start server", e);
+        }
+
     }
 
-    public static synchronized void stop() throws Exception {
+    public static synchronized void stop() throws IllegalStateException {
         if (server == null) {
             throw new IllegalStateException("Server not running");
         }
-        server.stop();
+        try {
+            server.stop();
+        } catch (Exception e) {
+            logger.log(Level.SEVERE, "Could not stop server", e);
+        }
     }
 
     public static void main(String[] args) throws Exception {

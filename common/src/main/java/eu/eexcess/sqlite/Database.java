@@ -44,14 +44,14 @@ import java.util.logging.Logger;
  * @author hziak
  * 
  */
-public class Database <T extends DatabasePreparedQuery> implements Closeable {
-    private static final Logger            logger      = Logger.getLogger(Database.class.getName());
-    private static final String            JDBC_DRIVER = "org.sqlite.JDBC";
-    private static String                  dBName      = null;
+public class Database<T extends DatabasePreparedQuery> implements Closeable {
+    private static final Logger logger = Logger.getLogger(Database.class.getName());
+    private static final String JDBC_DRIVER = "org.sqlite.JDBC";
+    private static String dBName = null;
 
-    private Map<String, PreparedStatement> map         = new HashMap<String, PreparedStatement>();
+    private Map<String, PreparedStatement> map = new HashMap<String, PreparedStatement>();
 
-    private Connection                     con;
+    private Connection con;
 
     public Database() {
         try {
@@ -101,13 +101,13 @@ public class Database <T extends DatabasePreparedQuery> implements Closeable {
         try {
             Class.forName(JDBC_DRIVER);
         } catch (ClassNotFoundException e1) {
-            logger.log(Level.SEVERE, "Could not Connec to Database:" + database, e1);
+            logger.log(Level.SEVERE, "Could not Connect to Database:" + database, e1);
             return null;
         }
         try {
             this.con = DriverManager.getConnection("jdbc:sqlite:" + database);
         } catch (SQLException e) {
-            logger.log(Level.SEVERE, "Could not Connec to Database:" + database, e);
+            logger.log(Level.SEVERE, "Could not Connect to Database:" + database, e);
             return null;
         }
         return con;

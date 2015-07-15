@@ -51,7 +51,7 @@ public class BlockPicker extends PartnersFederatedRecommendationsPicker {
     }
 
     private static final Logger logger = Logger.getLogger(BlockPicker.class.getName());
-    private static final  String BASIC = "Basic";
+    private static final String BASIC = "Basic";
     private static final String DIVERSITY = "Diversity";
     private static final String SERENDIPITY = "Serendipity";
 
@@ -60,8 +60,10 @@ public class BlockPicker extends PartnersFederatedRecommendationsPicker {
         // TODO Auto-generated method stub
         return null;
     }
+
     /**
-     * returnes the top results and checks with a fuzzyHash 
+     * returnes the top results and checks with a fuzzyHash
+     * 
      * @param resultsToAdd
      * @param numResultsToAdd
      * @param finalResultList
@@ -95,11 +97,10 @@ public class BlockPicker extends PartnersFederatedRecommendationsPicker {
         ResultList result = new ResultList();
         for (int i = 0; i <= numResults; i++)
             for (PartnerBadge partnerBadge : partners) {
-                if (resultList.getResults().get(partnerBadge) != null)
-                    if (resultList.getResults().get(partnerBadge).results.size() > 0) {
-                        result.results.add(resultList.getResults().get(partnerBadge).results.get(0));
-                        resultList.getResults().get(partnerBadge).results.remove(0);
-                    }
+                if (resultList.getResults().get(partnerBadge) != null && !resultList.getResults().get(partnerBadge).results.isEmpty()) {
+                    result.results.add(resultList.getResults().get(partnerBadge).results.get(0));
+                    resultList.getResults().get(partnerBadge).results.remove(0);
+                }
             }
 
         return result;
@@ -158,58 +159,54 @@ public class BlockPicker extends PartnersFederatedRecommendationsPicker {
             maxSize += basicList.results.size();
         if (maxSize < numResults)
             numResults = maxSize;
-        EvaluationResultList resultList = new EvaluationResultList(splitAndGetResultsFromBlockLists(resultLists, numResults, blocks, basicList, diversityList,
-                serendipityList));
+        EvaluationResultList resultList = new EvaluationResultList(splitAndGetResultsFromBlockLists(resultLists, numResults, blocks, basicList, diversityList, serendipityList));
 
         return resultList;
     }
 
-    private ResultList splitAndGetResultsFromBlockLists(EvaluationResultLists resultLists, Integer numResults, Integer numBlocks,
-            EvaluationResultList basicList, EvaluationResultList diversityList, EvaluationResultList serendipityList) {
-    	int basicCount=0;
-    	int diversityCount=0;
-    	int serendipityCount=0;
+    private ResultList splitAndGetResultsFromBlockLists(EvaluationResultLists resultLists, Integer numResults, Integer numBlocks, EvaluationResultList basicList,
+            EvaluationResultList diversityList, EvaluationResultList serendipityList) {
+        int basicCount = 0;
+        int diversityCount = 0;
+        int serendipityCount = 0;
         ResultList resultList = new ResultList();
-        int basicSize=0;
-    	if(basicList!=null)
-    		basicSize= basicList.results.size();
-    	int diversitySize=0;
-    	if(diversityList!=null)
-    		diversitySize= diversityList.results.size();
-    	int serendipitySize=0;
-    	if(serendipityList!=null)
-    		serendipitySize = serendipityList.results.size();
-    	
-        while ((basicCount+diversityCount+serendipityCount) < numResults) {
-        	
-        	
-			if( basicSize>basicCount ){
-				basicCount+=1;
-				if(basicCount+diversityCount+serendipityCount>=numResults)
+        int basicSize = 0;
+        if (basicList != null)
+            basicSize = basicList.results.size();
+        int diversitySize = 0;
+        if (diversityList != null)
+            diversitySize = diversityList.results.size();
+        int serendipitySize = 0;
+        if (serendipityList != null)
+            serendipitySize = serendipityList.results.size();
+
+        while ((basicCount + diversityCount + serendipityCount) < numResults) {
+
+            if (basicSize > basicCount) {
+                basicCount += 1;
+                if (basicCount + diversityCount + serendipityCount >= numResults)
+                    break;
+            }
+
+            if (diversitySize > diversityCount) {
+                diversityCount += 1;
+                if (basicCount + diversityCount + serendipityCount >= numResults)
+                    break;
+            }
+            if (serendipitySize > serendipityCount) {
+                serendipityCount += 1;
+                if (basicCount + diversityCount + serendipityCount >= numResults)
+                    break;
+            }
+            int allTogether = basicSize + diversitySize + serendipitySize;
+            if ((diversityList == null || diversityList.results.isEmpty()) && (diversityList == null || diversityList.results.isEmpty())
+                    && (basicList == null || basicList.results.isEmpty()) || (allTogether < numResults && allTogether == basicCount + diversityCount + serendipityCount))
                 break;
-			}
-        	
-			if(diversitySize>diversityCount ){
-				diversityCount+=1;
-					if(basicCount+diversityCount+serendipityCount>=numResults)
-                break;
-			}
-			if( serendipitySize>serendipityCount){
-				serendipityCount+=1;
-				if(basicCount+diversityCount+serendipityCount>=numResults)
-                break;
-			}
-        	int allTogether = basicSize +diversitySize+serendipitySize;
-			if((diversityList==null || diversityList.results.isEmpty()) && (diversityList==null || diversityList.results.isEmpty())&& (basicList==null || basicList.results.isEmpty())
-        			|| (allTogether < numResults && allTogether==basicCount+diversityCount+serendipityCount))
-        		break;
         }
-        resultList= assignAndGetTopResults(numBlocks, basicList, diversityList, serendipityList, resultList,basicCount,diversityCount,serendipityCount,numResults);
+        resultList = assignAndGetTopResults(numBlocks, basicList, diversityList, serendipityList, resultList, basicCount, diversityCount, serendipityCount, numResults);
         resultList.totalResults = resultList.results.size();
         return resultList;
     }
-
- 
 
     /**
      * assigns calculated amount of documents to the lists and retrieves the top
@@ -225,13 +222,13 @@ public class BlockPicker extends PartnersFederatedRecommendationsPicker {
      * @param serendipityResultListBlock
      * @param diversityResultListBlock
      * @param resultList
-     * @param serendipityCount 
-     * @param diversityCount 
-     * @param basicCount 
-     * @param numResults 
+     * @param serendipityCount
+     * @param diversityCount
+     * @param basicCount
+     * @param numResults
      */
-    private ResultList assignAndGetTopResults(Integer blockCount, ResultList basicList, ResultList diversityList, ResultList serendipityList,
-            ResultList resultList, int basicCount, int diversityCount, int serendipityCount, Integer numResults ) {
+    private ResultList assignAndGetTopResults(Integer blockCount, ResultList basicList, ResultList diversityList, ResultList serendipityList, ResultList resultList,
+            int basicCount, int diversityCount, int serendipityCount, Integer numResults) {
         resultList.provider = "BlockPicker (";
         int counter = 0;
         int numListResultsToAdd = 0;
@@ -244,7 +241,7 @@ public class BlockPicker extends PartnersFederatedRecommendationsPicker {
                     resultListToAdd = basicList;
                     numListResultsToAdd = basicCount;
                     break;
-                } else{
+                } else {
                     counter++;
                     blockCount++;
                 }
@@ -253,7 +250,7 @@ public class BlockPicker extends PartnersFederatedRecommendationsPicker {
                     resultListToAdd = diversityList;
                     numListResultsToAdd = diversityCount;
                     break;
-                } else{
+                } else {
                     counter++;
                     blockCount++;
                 }
@@ -274,7 +271,7 @@ public class BlockPicker extends PartnersFederatedRecommendationsPicker {
                 if (resultListToAdd.provider != SERENDIPITY)
                     resultList.provider += ",";
                 getTopResults(resultListToAdd, numListResultsToAdd, resultList, numResults);
-                
+
             } else
                 blockCount++;
         }

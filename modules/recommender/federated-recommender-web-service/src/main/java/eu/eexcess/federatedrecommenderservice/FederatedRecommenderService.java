@@ -18,6 +18,7 @@ package eu.eexcess.federatedrecommenderservice;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
@@ -200,6 +201,41 @@ public class FederatedRecommenderService {
     @Produces({ MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON })
     public RecommenderStats getRecommenderStats() throws IOException {
         return fRC.getRecommenderStats();
+    }
+
+    @GET
+    @Path("/getPreviewImage")
+    @Produces("image/png")
+    public Response getPreviewImage(@QueryParam("type") String type) throws IOException {
+        logger.log(Level.INFO, type);
+        if (type == null)
+            return Response.serverError().build();
+        InputStream resourceAsStream = null;
+        switch (type) {
+        case "unknown":
+            resourceAsStream = this.getClass().getResourceAsStream("/Thumbnails_EECXESS_unknown.png");
+            break;
+        case "text":
+            resourceAsStream = this.getClass().getResourceAsStream("/Thumbnails_EECXESS_text.png");
+            break;
+        case "audio":
+            resourceAsStream = this.getClass().getResourceAsStream("/Thumbnails_EECXESS_audio.png");
+            break;
+        case "3d":
+            resourceAsStream = this.getClass().getResourceAsStream("/Thumbnails_EECXESS_3d.png");
+            break;
+        case "image":
+            resourceAsStream = this.getClass().getResourceAsStream("/Thumbnails_EECXESS_image.png");
+            break;
+        case "video":
+            resourceAsStream = this.getClass().getResourceAsStream("/Thumbnails_EECXESS_video.png");
+            break;
+        default:
+            break;
+        }
+        if (resourceAsStream != null)
+            return Response.ok(resourceAsStream).build();
+        return Response.serverError().build();
     }
 
     // End Services
