@@ -1,17 +1,26 @@
 package eu.eexcess.sqlite;
 
 /**
- * interface for getting
+ * interface for getting simple queries regarding to a table
  * 
  * @author hziak
  * 
  */
 public interface DatabasePreparedQuery {
-	public String getUpdateQuery();
+    public String getUpdateQuery();
 
-	public String getSelectQuery();
+    /**
+     * @return a SQL select statement
+     */
+    public String getSelectQuery();
 
-	public String getCreateQuery();
+    /**
+     * @return a SQL create statement
+     */
+    public String getCreateQuery();
 
-	public String getInternName();
+    /**
+     * @return the table's name
+     */
+    public String getInternName();
 }
