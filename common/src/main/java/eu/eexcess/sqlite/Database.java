@@ -44,6 +44,7 @@ import java.util.logging.Logger;
  * @author hziak
  * 
  */
+
 public class Database<T extends DatabasePreparedQuery> implements Closeable {
     private static final Logger logger = Logger.getLogger(Database.class.getName());
     private static final String JDBC_DRIVER = "org.sqlite.JDBC";
@@ -62,17 +63,17 @@ public class Database<T extends DatabasePreparedQuery> implements Closeable {
     }
 
     public Database(String dBName, T[] preparedStatementsDefinitions) {
-        logger.log(Level.INFO, "Trying to open DB:" + Database.dBName);
-        Database.dBName = dBName;
+        this.dBName = dBName;
+        logger.log(Level.INFO, "Trying to open DB:" + this.dBName);
         try {
             Class.forName(JDBC_DRIVER);
         } catch (ClassNotFoundException e) {
             logger.log(Level.SEVERE, "Could not load JDBC Driver", e);
         }
         try {
-            this.con = DriverManager.getConnection("jdbc:sqlite:" + Database.dBName);
+            this.con = DriverManager.getConnection("jdbc:sqlite:" + this.dBName);
         } catch (SQLException e) {
-            logger.log(Level.SEVERE, "Could not connect to Database: " + Database.dBName, e);
+            logger.log(Level.SEVERE, "Could not connect to Database: " + this.dBName, e);
         }
         if (con != null) {
             try {

@@ -82,7 +82,7 @@
 					<plugin>
 					<groupId>org.jacoco</groupId>
 					<artifactId>jacoco-maven-plugin</artifactId>
-					<version>0.7.1.201405082137</version>
+					<version>0.7.4.201502262128</version>
 					<executions>
 					<execution>
 					<goals>
@@ -95,11 +95,6 @@
 			</pluginManagement>
 
 		<plugins>
-	<plugin>
-	<groupId>org.jacoco</groupId>
-	<artifactId>jacoco-maven-plugin</artifactId>
-	<version>0.7.5.201505241946</version>
-</plugin>
 
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
@@ -113,7 +108,7 @@
 	  <plugin>
        	<groupId>org.codehaus.sonar</groupId>
 	<artifactId>sonar-maven-plugin</artifactId>
-	<version>4.5.1</version>
+	<version>5.1.1</version>
       </plugin>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
