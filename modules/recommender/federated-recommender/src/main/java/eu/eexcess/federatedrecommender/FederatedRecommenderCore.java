@@ -86,7 +86,7 @@ import eu.eexcess.sqlite.DatabaseQueryStats;
  */
 public class FederatedRecommenderCore implements ProbeResultChanged {
 
-    private static final Logger                      logger                  = Logger.getLogger(FederatedRecommenderCore.class.getName());
+    private static final Logger                      LOGGER                  = Logger.getLogger(FederatedRecommenderCore.class.getName());
     private static volatile FederatedRecommenderCore instance;
     private final FederatedRecommenderConfiguration  federatedRecConfiguration;
     private PartnerRegister                          partnerRegister         = new PartnerRegister();
@@ -110,13 +110,13 @@ public class FederatedRecommenderCore implements ProbeResultChanged {
         String[] sourceSelectors = this.federatedRecConfiguration.sourceSelectors;
         String domainSelectorName = WndomainSourceSelector.class.getCanonicalName();
         if (sourceSelectors != null && Arrays.asList(sourceSelectors).contains(domainSelectorName)) {
-            logger.info("activating partner domaindetection since [" + domainSelectorName + "] is requested to be applied");
+            LOGGER.info("activating partner domaindetection since [" + domainSelectorName + "] is requested to be applied");
             partnersDomainsDetectors = new AsyncPartnerDomainsProbeMonitor(new File(this.federatedRecConfiguration.wordnetPath), new File(
                     this.federatedRecConfiguration.wordnetDomainFilePath), 50, 10, Double.doubleToLongBits(0.8 * 2000000));
 
             partnersDomainsDetectors.setCallback(this);
         } else {
-            logger.info("refused to activate partner domaindetection since [" + domainSelectorName + "] is not requested to be applied");
+            LOGGER.info("refused to activate partner domaindetection since [" + domainSelectorName + "] is not requested to be applied");
         }
     }
 
@@ -235,7 +235,7 @@ public class FederatedRecommenderCore implements ProbeResultChanged {
                 responseState.systemID = entry.getKey().systemId;
                 rL.partnerResponseState.add(responseState);
                 partnersFederatedResults.getResults().put(entry.getKey(), rL);
-                logger.log(Level.WARNING, msg, e);
+                LOGGER.log(Level.WARNING, msg, e);
             } catch (Exception e) {
                 if (entry.getKey() != null) {
                     entry.getKey().shortTimeStats.failedRequestCount++;
@@ -249,13 +249,13 @@ public class FederatedRecommenderCore implements ProbeResultChanged {
                 responseState.systemID = entry.getKey().systemId;
                 ResultList rL = new ResultList();
                 rL.partnerResponseState.add(responseState);
-                logger.log(Level.SEVERE, msg, e);
+                LOGGER.log(Level.SEVERE, msg, e);
             }
             entry.setValue(null);
 
         }
         long end = System.currentTimeMillis();
-        logger.log(Level.INFO, "Federated Recommender took " + (end - start) + "ms for query '" + secureUserProfile.contextKeywords + "'");
+        LOGGER.log(Level.INFO, "Federated Recommender took " + (end - start) + "ms for query '" + secureUserProfile.contextKeywords + "'");
 
         return partnersFederatedResults;
     }
@@ -276,7 +276,7 @@ public class FederatedRecommenderCore implements ProbeResultChanged {
         try {
             resultList = getAndAggregateResults(secureUserProfileTmp, this.federatedRecConfiguration.defaultPickerName);
         } catch (FederatedRecommenderException e) {
-            logger.log(Level.SEVERE, "Some error retrieving or aggregation results occured.", e);
+            LOGGER.log(Level.SEVERE, "Some error retrieving or aggregation results occured.", e);
         }
         return resultList;
 
@@ -317,9 +317,9 @@ public class FederatedRecommenderCore implements ProbeResultChanged {
             try {
                 resultDocs.documentBadges.addAll(futures.get(partner).get(timeout, TimeUnit.MILLISECONDS).documentBadges);
             } catch (TimeoutException e) {
-                logger.log(Level.WARNING, "Parnter " + partner.systemId + " timed out for document detail call", e);
+                LOGGER.log(Level.WARNING, "Parnter " + partner.systemId + " timed out for document detail call", e);
             } catch (ExecutionException | InterruptedException e) {
-                logger.log(Level.WARNING, "Can not get detail results from parnter:" + partner.systemId, e);
+                LOGGER.log(Level.WARNING, "Can not get detail results from parnter:" + partner.systemId, e);
             }
         }
         return resultDocs;
@@ -338,7 +338,7 @@ public class FederatedRecommenderCore implements ProbeResultChanged {
             sUPDecomposer = (SecureUserProfileDecomposer<SecureUserProfile, SecureUserProfile>) Class.forName(qEClass).newInstance();
             sUPDecomposer.setConfiguration(federatedRecConfiguration);
         } catch (InstantiationException | FederatedRecommenderException | IllegalAccessException | ClassNotFoundException e) {
-            logger.log(Level.WARNING, "Could not initalize query expansion algorithm", e);
+            LOGGER.log(Level.WARNING, "Could not initalize query expansion algorithm", e);
         }
         if (sUPDecomposer == null)
             return userProfile;
@@ -366,7 +366,7 @@ public class FederatedRecommenderCore implements ProbeResultChanged {
         for (String sourceSelectorClassName : selectorsClassNames) {
             PartnerSelector sourceSelector = (PartnerSelector) statelessClassInstances.get(sourceSelectorClassName);
             if (null == sourceSelector) {
-                logger.info("failed to find requested source selector [" + sourceSelectorClassName + "]: ignoring source selection");
+                LOGGER.info("failed to find requested source selector [" + sourceSelectorClassName + "]: ignoring source selection");
             } else {
                 lastEvaluatedProfile = sourceSelector.sourceSelect(lastEvaluatedProfile, getPartnerRegister().getPartners());
             }
@@ -403,19 +403,23 @@ public class FederatedRecommenderCore implements ProbeResultChanged {
      */
     public void writeStatsToDB() {
 
-        logger.log(Level.INFO, "Writing statistics into Database");
+        LOGGER.log(Level.INFO, "Writing statistics into Database");
         Database<DatabaseQueryStats> db = new Database<DatabaseQueryStats>(this.federatedRecConfiguration.statsLogDatabase, DatabaseQueryStats.values());
         for (PartnerBadge partner : this.partnerRegister.getPartners()) {
             if (partner != null) {
                 PartnerBadgeStats longStats = partner.longTimeStats;
                 PartnerBadgeStats shortStats = partner.shortTimeStats;
-                logger.log(Level.INFO, "Writing " + partner.systemId + " statistics into Database");
+                LOGGER.log(Level.INFO, "Writing " + partner.systemId + " statistics into Database");
                 final String dbErrorMsg = "Could not write into StatsDatabase: ";
                 writeRequestStatsToDb(db, partner, longStats, shortStats, dbErrorMsg);
                 writeQueryStatsToDb(db, partner, dbErrorMsg);
             }
         }
-
+        try {
+            db.close();
+        } catch (IOException e) {
+            LOGGER.log(Level.SEVERE, "failed to close database", e);
+        }
     }
 
     private void writeQueryStatsToDb(Database<DatabaseQueryStats> db, PartnerBadge partner, final String dbErrorMsg) {
@@ -435,17 +439,17 @@ public class FederatedRecommenderCore implements ProbeResultChanged {
                     updateQ.addBatch();
 
                 } catch (SQLException e) {
-                    logger.log(Level.INFO, dbErrorMsg, e);
+                    LOGGER.log(Level.INFO, dbErrorMsg, e);
                 }
             }
             try {
                 updateQ.executeBatch();
             } catch (SQLException e) {
-                logger.log(Level.INFO, dbErrorMsg, e);
+                LOGGER.log(Level.INFO, dbErrorMsg, e);
             }
 
         } else
-            logger.log(Level.INFO, "Could not write into query statistics database");
+            LOGGER.log(Level.INFO, "Could not write into query statistics database");
     }
 
     private String writeRequestStatsToDb(Database<DatabaseQueryStats> db, PartnerBadge partner, PartnerBadgeStats longStats, PartnerBadgeStats shortStats, String dbErrorMsg) {
@@ -463,12 +467,12 @@ public class FederatedRecommenderCore implements ProbeResultChanged {
                 updateS.setInt(4, longStats.failedRequestTimeoutCount + shortStats.failedRequestTimeoutCount);
                 updateS.execute();
             } catch (SQLException e) {
-                logger.log(Level.INFO, dbErrorMsg, e);
+                LOGGER.log(Level.INFO, dbErrorMsg, e);
             } finally {
                 db.commit();
             }
         } else
-            logger.log(Level.INFO, "Could write into request statistics database");
+            LOGGER.log(Level.INFO, "Could write into request statistics database");
         return dbErrorMsg;
     }
 
@@ -481,7 +485,7 @@ public class FederatedRecommenderCore implements ProbeResultChanged {
      */
     public String registerPartner(PartnerBadge badge) {
         if (this.getPartnerRegister().getPartners().contains(badge)) {
-            logger.log(Level.INFO, "Partner: " + badge.getSystemId() + " allready registered!");
+            LOGGER.log(Level.INFO, "Partner: " + badge.getSystemId() + " allready registered!");
             return "Allready Registered";
         }
 
@@ -503,16 +507,16 @@ public class FederatedRecommenderCore implements ProbeResultChanged {
                     badge.longTimeStats.failedRequestTimeoutCount = rs.getInt(4);
                 }
             } catch (SQLException e) {
-                logger.log(Level.SEVERE, "could net get statistics for partner " + badge.getSystemId(), e);
+                LOGGER.log(Level.SEVERE, "could net get statistics for partner " + badge.getSystemId(), e);
             }
 
             try {
                 db.close();
             } catch (IOException e) {
-                logger.log(Level.WARNING, "Could not close Database", e);
+                LOGGER.log(Level.WARNING, "Could not close Database", e);
             }
         } else
-            logger.log(Level.WARNING, "Could read from Statistics Database");
+            LOGGER.log(Level.WARNING, "Could read from Statistics Database");
 
         this.addPartner(badge);
 
@@ -542,7 +546,7 @@ public class FederatedRecommenderCore implements ProbeResultChanged {
             }
             pFRPicker = (PartnersFederatedRecommendationsPicker) newInstance;
         } catch (InstantiationException | IllegalAccessException | ClassNotFoundException e) {
-            logger.log(Level.SEVERE, "Could not get Picker from Class: " + pickerName, e);
+            LOGGER.log(Level.SEVERE, "Could not get Picker from Class: " + pickerName, e);
             throw new FederatedRecommenderException("Could not get Picker from Class: " + pickerName, e);
         }
         long start = System.currentTimeMillis();
@@ -564,7 +568,7 @@ public class FederatedRecommenderCore implements ProbeResultChanged {
         long timeToPickResults = end - start;
         recommenderStats.setAverageGlobalTime(timeToGetPartners);
         recommenderStats.setAverageAggregationTime(timeToPickResults);
-        logger.log(Level.INFO, " Time to get " + resultList.results.size() + " Results from the Partners: " + timeToGetPartners
+        LOGGER.log(Level.INFO, " Time to get " + resultList.results.size() + " Results from the Partners: " + timeToGetPartners
                 + "ms. Time to pick the best results: " + timeToPickResults + "ms");
         resultList.totalResults = resultList.results.size();
         resultList.provider = "federated";
@@ -629,7 +633,7 @@ public class FederatedRecommenderCore implements ProbeResultChanged {
         List<String> selectorsClassNames = new ArrayList<String>();
 
         if (null == recommenderConfig.sourceSelectors) {
-            logger.info("failed to instanciate source selectors");
+            LOGGER.info("failed to instanciate source selectors");
             return;
         }
 
@@ -642,11 +646,11 @@ public class FederatedRecommenderCore implements ProbeResultChanged {
                     Constructor<?> ctor = Class.forName(sourceSelectorClassName).getConstructor(FederatedRecommenderConfiguration.class);
 
                     sourceSelector = (PartnerSelector) ctor.newInstance(recommenderConfig);
-                    logger.info("instanciating new source selector [" + sourceSelector.getClass().getSimpleName() + "]");
+                    LOGGER.info("instanciating new source selector [" + sourceSelector.getClass().getSimpleName() + "]");
                     statelessClassInstances.put(sourceSelectorClassName, sourceSelector);
                 }
             } catch (InstantiationException | IllegalAccessException | ClassNotFoundException | NoSuchMethodException | InvocationTargetException e) {
-                logger.log(Level.SEVERE, "failed to instanciate source selector [" + sourceSelectorClassName + "]", e);
+                LOGGER.log(Level.SEVERE, "failed to instanciate source selector [" + sourceSelectorClassName + "]", e);
             }
         }
     }
@@ -665,7 +669,7 @@ public class FederatedRecommenderCore implements ProbeResultChanged {
                 Set<PartnerDomain> partnerDomains = updatedProbes.get(partner.getSystemId());
                 if (null != partnerDomains) {
                     partner.setDomainContent(new ArrayList<PartnerDomain>(partnerDomains));
-                    logger.info("stored [" + partnerDomains.size() + "] domains to partner [" + partner.getSystemId() + "]");
+                    LOGGER.info("stored [" + partnerDomains.size() + "] domains to partner [" + partner.getSystemId() + "]");
                 }
             }
         }
@@ -680,7 +684,7 @@ public class FederatedRecommenderCore implements ProbeResultChanged {
                 resource.accept(MediaType.APPLICATION_JSON);
                 docList = resource.post(DocumentBadgeList.class, currentDocs);
             } catch (UniformInterfaceException | ClientHandlerException e) {
-                logger.log(Level.WARNING, "Partner: " + partner.getSystemId() + " is not working currently.", e);
+                LOGGER.log(Level.WARNING, "Partner: " + partner.getSystemId() + " is not working currently.", e);
                 throw e;
             }
         }
@@ -695,7 +699,7 @@ public class FederatedRecommenderCore implements ProbeResultChanged {
             resource.accept(MediaType.APPLICATION_JSON);
             resultList = resource.post(ResultList.class, secureUserProfile);
         } catch (UniformInterfaceException | ClientHandlerException e) {
-            logger.log(Level.WARNING, "Partner: " + partner.getSystemId() + " is not working currently.", e);
+            LOGGER.log(Level.WARNING, "Partner: " + partner.getSystemId() + " is not working currently.", e);
             throw e;
         }
         return resultList;
