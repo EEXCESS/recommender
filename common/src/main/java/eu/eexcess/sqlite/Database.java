@@ -46,10 +46,16 @@ import java.util.logging.Logger;
  */
 
 public class Database<T extends DatabasePreparedQuery> implements Closeable {
+    private static final Logger LOGGER = Logger.getLogger(Database.class.getName());
+    private static final String JDBC_DRIVER = "org.sqlite.JDBC";
+    private String dBName = null;
+
+public class Database<T extends DatabasePreparedQuery> implements Closeable {
     private static final Logger logger = Logger.getLogger(Database.class.getName());
     private static final String JDBC_DRIVER = "org.sqlite.JDBC";
     private static String dBName = null;
 
+    private Map<String, PreparedStatement> map = new HashMap<String, PreparedStatement>();
     private Map<String, PreparedStatement> map = new HashMap<String, PreparedStatement>();
 
     private Connection con;

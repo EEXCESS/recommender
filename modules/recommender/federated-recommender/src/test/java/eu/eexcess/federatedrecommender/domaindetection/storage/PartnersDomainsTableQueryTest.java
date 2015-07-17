@@ -49,6 +49,20 @@ public class PartnersDomainsTableQueryTest {
     }
 
     @Test
+    public void createEmptyTmpDb_executeNotImplementedStatement_expectNotExceptional() throws SQLException {
+        PartnersDomainsTableQuery qs = PartnersDomainsTableQuery.PARTNER_DOMAINS_TABLE_QUERY;
+        PreparedStatement pst = dbConnection.prepareStatement(qs.getDropQuery());
+        pst.execute();
+
+        // create new table
+        pst = dbConnection.prepareStatement(qs.getCreateQuery());
+        assertEquals(false, pst.execute());
+
+        pst = dbConnection.prepareStatement(qs.getUpdateQuery());
+        assertEquals(true, pst.execute());
+    }
+
+    @Test
     public void createEmptyTmpDb_readFromTable_insertIntoTable_readFromTable_clearTable_removeTale_expectNotExceptional() throws SQLException {
 
         PartnersDomainsTableQuery qs = PartnersDomainsTableQuery.PARTNER_DOMAINS_TABLE_QUERY;
@@ -70,7 +84,7 @@ public class PartnersDomainsTableQueryTest {
         assertEquals(false, pst.execute());
 
         // insert value into table
-        pst = dbConnection.prepareStatement(qs.getUpdateQuery());
+        pst = dbConnection.prepareStatement(qs.getInsertQuery());
         pst.setString(1, "zwb");
         pst.setInt(2, 123);
         pst.setString(3, "domain-x");
@@ -78,7 +92,7 @@ public class PartnersDomainsTableQueryTest {
         assertEquals(1, pst.executeUpdate());
 
         // remove value from table
-        pst = dbConnection.prepareStatement(qs.getDeletePartnerProbes());
+        pst = dbConnection.prepareStatement(qs.getDeleteQuery());
         pst.setString(1, "zwb");
         assertEquals(1, pst.executeUpdate());
 
@@ -102,7 +116,7 @@ public class PartnersDomainsTableQueryTest {
     }
 
     @Test
-    public void contatenateTwoQueries_expectError() throws SQLException {
+    public void concatenateTwoQueries_expectError() throws SQLException {
         PartnersDomainsTableQuery qs = PartnersDomainsTableQuery.PARTNER_DOMAINS_TABLE_QUERY;
         String insertQuery = "INSERT INTO PartnerDomainProbes (PartnerName, ProbeTimestamp, PartnerDomain, DomainWeight) VALUES (\"zbwxx\", 123, \"foobardomain\", ?)";
         PreparedStatement pst = dbConnection.prepareStatement(qs.getCreateQuery() + "; " + insertQuery);

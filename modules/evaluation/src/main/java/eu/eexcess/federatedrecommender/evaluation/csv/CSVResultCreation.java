@@ -48,6 +48,7 @@ import eu.eexcess.dataformats.evaluation.EvaluationResultList;
 import eu.eexcess.dataformats.evaluation.EvaluationResultLists;
 import eu.eexcess.dataformats.result.Result;
 import eu.eexcess.dataformats.userprofile.ContextKeyword;
+import eu.eexcess.dataformats.userprofile.Interest;
 import eu.eexcess.dataformats.userprofile.SecureUserProfileEvaluation;
 import eu.eexcess.federatedrecommender.evaluation.evaluation.EvaluationQuery;
 
@@ -67,10 +68,12 @@ public class CSVResultCreation {
     public static void main(String[] args) {
         CSVResultCreation creation = new CSVResultCreation();
         EvaluationQueryList queries = creation.getEvaluationQueriesFromJson("finalSelectedQueries.json");
-
+        FileWriter ofqw = creation.openCSV();
         // creation.writeQueriesToQueryCSVFile(queries);
 
         creation.createCSVResultsFile(queries);
+
+        creation.closeCSV(ofqw);
 
     }
 
@@ -104,12 +107,7 @@ public class CSVResultCreation {
                 }
         }
 
-        try {
-            ofrw.flush();
-            ofrw.close();
-        } catch (IOException e) {
-            logger.log(Level.WARNING, "", e);
-        }
+        closeCSV(ofrw);
     }
 
     public EvaluationQueryList getEvaluationQueriesFromJson(String fileName) {
@@ -130,22 +128,17 @@ public class CSVResultCreation {
 
     @SuppressWarnings("unused")
     private void writeQueriesToQueryCSVFile(EvaluationQueryList queries) {
-        FileWriter ofqw = null;
-        try {
-            ofqw = new FileWriter(new File(DIRECTORYPATH + "query.csv"));
-        } catch (IOException e1) {
-            logger.log(Level.WARNING, "", e1);
-        }
-        for (EvaluationQuery evalQueries : queries.getQueries()) {
+        FileWriter ofqw = openCSV();
+        writeCSVLine(queries, ofqw);
+        closeCSV(ofqw);
+    }
 
-            String result = getQueryCSV(evalQueries);
-            try {
-                ofqw.write(result);
-            } catch (IOException e) {
-                logger.log(Level.WARNING, "", e);
-            }
-
-        }
+    /**
+     * Closed the csv file
+     * 
+     * @param ofqw
+     */
+    private void closeCSV(FileWriter ofqw) {
         try {
             ofqw.flush();
             ofqw.close();
@@ -154,8 +147,44 @@ public class CSVResultCreation {
         }
     }
 
+    /**
+     * writes a new line to the csv file
+     * 
+     * @param queries
+     * @param ofqw
+     */
+    private void writeCSVLine(EvaluationQueryList queries, FileWriter ofqw) {
+        for (EvaluationQuery evalQueries : queries.getQueries()) {
+
+            String result = getQueryCSV(evalQueries);
+            try {
+
+                ofqw.write(result);
+            } catch (IOException e) {
+                logger.log(Level.WARNING, "", e);
+            }
+
+        }
+    }
+
+    /**
+     * opens the CSV file
+     * 
+     * @return
+     */
+    private FileWriter openCSV() {
+        FileWriter ofqw = null;
+        try {
+            ofqw = new FileWriter(new File(DIRECTORYPATH + "query.csv"));
+        } catch (IOException e1) {
+            logger.log(Level.WARNING, "", e1);
+        }
+        return ofqw;
+    }
+
     private String getQueryCSV(EvaluationQuery evalQueries) {
         StringBuilder builder = new StringBuilder();
+
         builder.append("\"");
         builder.append(evalQueries.query.replaceAll(",|\"|\n|\r", ""));
         builder.append("\"");
@@ -163,6 +192,14 @@ public class CSVResultCreation {
         builder.append("\"");
         builder.append(evalQueries.description.replaceAll(",|\"|\n|\r", ""));
         builder.append("\"");
+        builder.append(",");
+        for (Interest interest : evalQueries.interests) {
+            builder.append("\"");
+            builder.append(interest.text);
+            builder.append("\"");
+            builder.append(",");
+        }
+        builder.append("\n");
         // builder.append(System.lineSeparator());
         return builder.toString();
     }

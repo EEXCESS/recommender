@@ -1,5 +1,7 @@
 package eu.eexcess.federatedrecommender.domaindetection.storage;
 
+import java.util.logging.Logger;
+
 import eu.eexcess.sqlite.DatabasePreparedQuery;
 
 /**
@@ -25,6 +27,8 @@ import eu.eexcess.sqlite.DatabasePreparedQuery;
 public enum PartnersDomainsTableQuery implements DatabasePreparedQuery {
     PARTNER_DOMAINS_TABLE_QUERY;
 
+    private final static Logger LOGGER = Logger.getLogger(PartnersDomainsTableQuery.class.getName());
+
     protected static class Domain {
         public final String NAME;
         public final String SQL_TYPE;
@@ -45,27 +49,37 @@ public enum PartnersDomainsTableQuery implements DatabasePreparedQuery {
                 public static final Domain DOMAIN_WEIGHT = new Domain("DomainWeight", "REAL");
             }
 
+            /**
+             * the table name
+             */
             private static final String NAME = "PartnerDomainProbes";
+
             private static final String CREATE_TABLE = "CREATE TABLE IF NOT EXISTS " + NAME + " (" + PartnerProbes.Domains.ID_PRIMARY_KEY.NAME + " "
                     + PartnerProbes.Domains.ID_PRIMARY_KEY.SQL_TYPE + " PRIMARY KEY NOT NULL, " + PartnerProbes.Domains.PROBE_TIMESTAMP.NAME + " "
                     + PartnerProbes.Domains.PROBE_TIMESTAMP.SQL_TYPE + " NOT NULL, " + PartnerProbes.Domains.PARTNER_NAME.NAME + " "
                     + PartnerProbes.Domains.PARTNER_NAME.SQL_TYPE + " NOT NULL, " + PartnerProbes.Domains.DOMAIN_NAME.NAME + " "
                     + PartnerProbes.Domains.DOMAIN_NAME.SQL_TYPE + " NOT NULL, " + PartnerProbes.Domains.DOMAIN_WEIGHT.NAME + " "
                     + PartnerProbes.Domains.DOMAIN_WEIGHT.SQL_TYPE + " NOT NULL)";
+            /**
+             * 1st ?: table name @see {@link PartnerProbes#NAME}
+             */
             private static final String DROP_TABLE = "DROP TABLE IF EXISTS " + PartnerProbes.NAME;
-
-            // TODO: write the insert statement statement -> behaves like
-            // update!
-            // TODO: write the select statement: return the last probes
-            // TODO: create some tests to verify the queries
-            // TODO: use the db-table as storage for new probes
-
+            /**
+             * 1st ?: partner name
+             */
             private static final String DELETE_PARTNER_PROBES = "DELETE FROM " + PartnerProbes.NAME + " WHERE " + PartnerProbes.Domains.PARTNER_NAME.NAME
                     + " LIKE ?";
-            private static final String INSERT_INTO_TABLE = "INSERT INTO " + PartnerProbes.NAME + " (" + PartnerProbes.Domains.PARTNER_NAME.NAME + ", "
+            /**
+             * 1st ?: partner name, 2nd ?: time stamp, 3rd ?: domain name, 4th
+             * ?: domain weight
+             */
+            private static final String INSERT_PROBE_INTO_TABLE = "INSERT OR REPLACE INTO " + PartnerProbes.NAME + " (" + PartnerProbes.Domains.PARTNER_NAME.NAME + ", "
                     + PartnerProbes.Domains.PROBE_TIMESTAMP.NAME + ", " + PartnerProbes.Domains.DOMAIN_NAME.NAME + ", "
                     + PartnerProbes.Domains.DOMAIN_WEIGHT.NAME + ") VALUES (?, ?, ?, ?)";
 
+            /**
+             * 1st ?: partner name
+             */
             private static final String SELECT_FROM_TABLE = "SELECT * FROM " + PartnerProbes.NAME + " WHERE " + PartnerProbes.Domains.PARTNER_NAME.NAME
                     + " LIKE ?";
         }
@@ -74,32 +88,58 @@ public enum PartnersDomainsTableQuery implements DatabasePreparedQuery {
     private PartnersDomainsTableQuery() {
     }
 
-    @Override
-    public String getUpdateQuery() {
-        return Tables.PartnerProbes.INSERT_INTO_TABLE;
-    }
-
-    @Override
-    public String getSelectQuery() {
-        return Tables.PartnerProbes.SELECT_FROM_TABLE;
-    }
-
-    @Override
-    public String getCreateQuery() {
-        return Tables.PartnerProbes.CREATE_TABLE;
-    }
-
+    /**
+     * @see {@link Tables.PartnerProbes#NAME}
+     */
     @Override
     public String getInternName() {
         return Tables.PartnerProbes.NAME;
     }
 
+    /**
+     * @see {@link Tables.PartnerProbes.Domains#CREATE_TABLE}
+     */
+    @Override
+    public String getCreateQuery() {
+        return Tables.PartnerProbes.CREATE_TABLE;
+    }
+
+    /**
+     * @see {@link Tables.PartnerProbes.Domains#DROP_TABLE}
+     */
+    @Override
     public String getDropQuery() {
         return Tables.PartnerProbes.DROP_TABLE;
     }
 
-    public String getDeletePartnerProbes() {
+    /**
+     * @see {@link Tables.PartnerProbes.Domains#INSERT_PROPE_INTO_TABLE}
+     */
+    @Override
+    public String getInsertQuery() {
+        return Tables.PartnerProbes.INSERT_PROBE_INTO_TABLE;
+    }
+
+    @Override
+    public String getUpdateQuery() {
+        LOGGER.warning("requested not implemented SQL query");
+        return "select 1 union select 42";
+    }
+
+    /**
+     * @see {@link Tables.PartnerProbes.Domains#SDELETE_PARTNER_PROBES}
+     */
+    @Override
+    public String getDeleteQuery() {
         return Tables.PartnerProbes.DELETE_PARTNER_PROBES;
+    }
+
+    /**
+     * @see {@link Tables.PartnerProbes.Domains#SELECT_FROM_TABLE}
+     */
+    @Override
+    public String getSelectQuery() {
+        return Tables.PartnerProbes.SELECT_FROM_TABLE;
     }
 
 }

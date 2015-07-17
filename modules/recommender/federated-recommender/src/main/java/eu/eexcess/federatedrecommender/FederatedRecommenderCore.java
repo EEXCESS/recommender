@@ -71,6 +71,7 @@ import eu.eexcess.dataformats.userprofile.SecureUserProfileEvaluation;
 import eu.eexcess.federatedrecommender.dataformats.PartnersFederatedRecommendations;
 import eu.eexcess.federatedrecommender.domaindetection.AsyncPartnerDomainsProbeMonitor;
 import eu.eexcess.federatedrecommender.domaindetection.AsyncPartnerDomainsProbeMonitor.ProbeResultChanged;
+import eu.eexcess.federatedrecommender.domaindetection.storage.PartnersDomainsTableQuery;
 import eu.eexcess.federatedrecommender.interfaces.PartnerSelector;
 import eu.eexcess.federatedrecommender.interfaces.PartnersFederatedRecommendationsPicker;
 import eu.eexcess.federatedrecommender.interfaces.SecureUserProfileDecomposer;
@@ -86,18 +87,18 @@ import eu.eexcess.sqlite.DatabaseQueryStats;
  */
 public class FederatedRecommenderCore implements ProbeResultChanged {
 
-    private static final Logger                      LOGGER                  = Logger.getLogger(FederatedRecommenderCore.class.getName());
+    private static final Logger LOGGER = Logger.getLogger(FederatedRecommenderCore.class.getName());
     private static volatile FederatedRecommenderCore instance;
-    private final FederatedRecommenderConfiguration  federatedRecConfiguration;
-    private PartnerRegister                          partnerRegister         = new PartnerRegister();
-    private ExecutorService                          threadPool;
-    private RecommenderStats                         recommenderStats;
-    private AsyncPartnerDomainsProbeMonitor          partnersDomainsDetectors;
+    private final FederatedRecommenderConfiguration federatedRecConfiguration;
+    private PartnerRegister partnerRegister = new PartnerRegister();
+    private ExecutorService threadPool;
+    private RecommenderStats recommenderStats;
+    private AsyncPartnerDomainsProbeMonitor partnersDomainsDetectors;
 
     /**
      * references to re-usable state-less source selection instances
      */
-    private Map<String, Object>                      statelessClassInstances = new HashMap<>();
+    private Map<String, Object> statelessClassInstances = new HashMap<>();
 
     private FederatedRecommenderCore(FederatedRecommenderConfiguration federatedRecConfiguration) {
         threadPool = Executors.newFixedThreadPool(federatedRecConfiguration.numRecommenderThreads);
@@ -112,7 +113,7 @@ public class FederatedRecommenderCore implements ProbeResultChanged {
         if (sourceSelectors != null && Arrays.asList(sourceSelectors).contains(domainSelectorName)) {
             LOGGER.info("activating partner domaindetection since [" + domainSelectorName + "] is requested to be applied");
             partnersDomainsDetectors = new AsyncPartnerDomainsProbeMonitor(new File(this.federatedRecConfiguration.wordnetPath), new File(
-                    this.federatedRecConfiguration.wordnetDomainFilePath), 50, 10, Double.doubleToLongBits(0.8 * 2000000));
+                    this.federatedRecConfiguration.wordnetDomainFilePath), 50, 10, new Double(0.8 * 2000000).intValue());
 
             partnersDomainsDetectors.setCallback(this);
         } else {
@@ -452,7 +453,8 @@ public class FederatedRecommenderCore implements ProbeResultChanged {
             LOGGER.log(Level.INFO, "Could not write into query statistics database");
     }
 
-    private String writeRequestStatsToDb(Database<DatabaseQueryStats> db, PartnerBadge partner, PartnerBadgeStats longStats, PartnerBadgeStats shortStats, String dbErrorMsg) {
+    private String writeRequestStatsToDb(Database<DatabaseQueryStats> db, PartnerBadge partner, PartnerBadgeStats longStats, PartnerBadgeStats shortStats,
+            String dbErrorMsg) {
         PreparedStatement updateS = db.getPreparedUpdateStatement(DatabaseQueryStats.REQUESTLOG);
         // Database Entry Style
         // ('SYSTEM_ID','REQUESTCOUNT','FAILEDREQUESTCOUNT','FAILEDREQUESTTIMEOUTCOUNT')
@@ -477,8 +479,8 @@ public class FederatedRecommenderCore implements ProbeResultChanged {
     }
 
     /**
-     * Adds the partner to the partner register if not existing allready and
-     * trys to get the old statistics for this partner from the database
+     * Adds the partner to the partner register if not existing already and
+     * tries to get the old statistics for this partner from the database
      * 
      * @param badge
      * @return
@@ -656,7 +658,7 @@ public class FederatedRecommenderCore implements ProbeResultChanged {
     }
 
     /**
-     * Stores partner domains mapping to {@link #partnerRegister}.
+     * Stores partner domains mapping to {@link #partnerRegister} and database.
      * 
      * @param updatedProbes
      *            the latest known {@link PartnerBadge} to {@link PartnerDomain}
@@ -665,11 +667,66 @@ public class FederatedRecommenderCore implements ProbeResultChanged {
     @Override
     public void onProbeResultsChanged(Map<String, Set<PartnerDomain>> updatedProbes) {
         synchronized (partnerRegister) {
-            for (PartnerBadge partner : partnerRegister.getPartners()) {
-                Set<PartnerDomain> partnerDomains = updatedProbes.get(partner.getSystemId());
-                if (null != partnerDomains) {
-                    partner.setDomainContent(new ArrayList<PartnerDomain>(partnerDomains));
-                    LOGGER.info("stored [" + partnerDomains.size() + "] domains to partner [" + partner.getSystemId() + "]");
+            Database<PartnersDomainsTableQuery> db = new Database<PartnersDomainsTableQuery>(federatedRecConfiguration.statsLogDatabase,
+                    PartnersDomainsTableQuery.values());
+            PreparedStatement deleteStatement = db.getPreparedDeleStatement(PartnersDomainsTableQuery.PARTNER_DOMAINS_TABLE_QUERY);
+            PreparedStatement insertStatement = db.getPreparedInsertStatement(PartnersDomainsTableQuery.PARTNER_DOMAINS_TABLE_QUERY);
+
+            try {
+                for (PartnerBadge partner : partnerRegister.getPartners()) {
+
+                    Set<PartnerDomain> partnerDomains = updatedProbes.get(partner.getSystemId());
+                    if (null != partnerDomains) {
+                        // apply changes to memory
+                        partner.setDomainContent(new ArrayList<PartnerDomain>(partnerDomains));
+
+                        // apply changes to database
+                        if (deleteStatement != null) {
+                            try {
+                                deleteStatement.clearParameters();
+                                deleteStatement.setString(1, partner.getSystemId());
+                                deleteStatement.execute();
+
+                                insertStatement.clearBatch();
+                                for (PartnerDomain domain : partnerDomains) {
+                                    insertStatement.setString(1, partner.getSystemId());
+                                    insertStatement.setLong(2, System.currentTimeMillis());
+                                    insertStatement.setString(3, domain.domainName);
+                                    insertStatement.setDouble(4, domain.weight);
+                                    insertStatement.addBatch();
+                                }
+                                insertStatement.executeBatch();
+                                db.commit();
+
+                                // make some noise about the batch result(s)
+                                int index = 0;
+                                int numFailed = 0;
+                                for (Integer resultStatus : insertStatement.executeBatch()) {
+                                    if (PreparedStatement.EXECUTE_FAILED == resultStatus) {
+                                        LOGGER.warning("failed to execute batch [" + index + "/" + partnerDomains.size() + "] of partner ["
+                                                + partner.getSystemId() + "]");
+                                        numFailed++;
+                                    }
+                                    index++;
+                                }
+                                LOGGER.info("stored [" + (partnerDomains.size() - numFailed) + "/" + partnerDomains.size() + "] domains of partner ["
+                                        + partner.getSystemId() + "] to database");
+
+                            } catch (SQLException e) {
+                                LOGGER.log(Level.SEVERE, "failed storing partners domains do database ["
+                                        + PartnersDomainsTableQuery.PARTNER_DOMAINS_TABLE_QUERY.getInternName() + "]", e);
+                            }
+
+                        } else {
+                            LOGGER.log(Level.WARNING, "failed retrieving an expected prepared statement of [" + PartnersDomainsTableQuery.class.getName() + "]");
+                        }
+                    }
+                }
+            } finally {
+                try {
+                    db.close();
+                } catch (IOException e) {
+                    LOGGER.log(Level.WARNING, "failed to close database [" + PartnersDomainsTableQuery.PARTNER_DOMAINS_TABLE_QUERY.getInternName() + "]", e);
                 }
             }
         }
