@@ -29,24 +29,40 @@ public enum PartnersDomainsTableQuery implements DatabasePreparedQuery {
 
     private final static Logger LOGGER = Logger.getLogger(PartnersDomainsTableQuery.class.getName());
 
-    protected static class Domain {
+    public static class Domain {
         public final String NAME;
         public final String SQL_TYPE;
+        /**
+         * provides information about the row position i.e. for "SELECT *"
+         * queries
+         */
+        public final int ROW_NUMBER;
 
-        public Domain(String domainName, String domainSqlType) {
+        /**
+         * 
+         * @param domainName
+         *            the column's name
+         * @param domainSqlType
+         *            the type of the column
+         * @param rowNumber
+         *            the position of the column beginning with 1, useful for
+         *            "SELECT *" queries
+         */
+        public Domain(String domainName, String domainSqlType, int rowNumber) {
             this.NAME = domainName;
             this.SQL_TYPE = domainSqlType;
+            this.ROW_NUMBER = rowNumber;
         }
     }
 
-    private static class Tables {
-        private static class PartnerProbes {
-            private static class Domains {
-                public static final Domain ID_PRIMARY_KEY = new Domain("ID", "INTEGER");
-                public static final Domain PROBE_TIMESTAMP = new Domain("ProbeTimestamp", "INTEGER");
-                public static final Domain PARTNER_NAME = new Domain("PartnerName", "TEXT");
-                public static final Domain DOMAIN_NAME = new Domain("PartnerDomain", "TEXT");
-                public static final Domain DOMAIN_WEIGHT = new Domain("DomainWeight", "REAL");
+    public static class Tables {
+        public static class PartnerProbes {
+            public static class Domains {
+                public static final Domain ID_PRIMARY_KEY = new Domain("ID", "INTEGER", 1);
+                public static final Domain PROBE_TIMESTAMP = new Domain("ProbeTimestamp", "INTEGER", 2);
+                public static final Domain PARTNER_NAME = new Domain("PartnerName", "TEXT", 3);
+                public static final Domain DOMAIN_NAME = new Domain("PartnerDomain", "TEXT", 4);
+                public static final Domain DOMAIN_WEIGHT = new Domain("DomainWeight", "REAL", 5);
             }
 
             /**
@@ -73,9 +89,9 @@ public enum PartnersDomainsTableQuery implements DatabasePreparedQuery {
              * 1st ?: partner name, 2nd ?: time stamp, 3rd ?: domain name, 4th
              * ?: domain weight
              */
-            private static final String INSERT_PROBE_INTO_TABLE = "INSERT OR REPLACE INTO " + PartnerProbes.NAME + " (" + PartnerProbes.Domains.PARTNER_NAME.NAME + ", "
-                    + PartnerProbes.Domains.PROBE_TIMESTAMP.NAME + ", " + PartnerProbes.Domains.DOMAIN_NAME.NAME + ", "
-                    + PartnerProbes.Domains.DOMAIN_WEIGHT.NAME + ") VALUES (?, ?, ?, ?)";
+            private static final String INSERT_PROBE_INTO_TABLE = "INSERT OR REPLACE INTO " + PartnerProbes.NAME + " ("
+                    + PartnerProbes.Domains.PARTNER_NAME.NAME + ", " + PartnerProbes.Domains.PROBE_TIMESTAMP.NAME + ", "
+                    + PartnerProbes.Domains.DOMAIN_NAME.NAME + ", " + PartnerProbes.Domains.DOMAIN_WEIGHT.NAME + ") VALUES (?, ?, ?, ?)";
 
             /**
              * 1st ?: partner name

@@ -1,40 +1,40 @@
-import static org.junit.Assert.*;
-
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
-
-import javax.xml.bind.JAXBContext;
-
-import org.junit.Test;
-import org.xml.sax.SAXNotRecognizedException;
-
-import com.sun.jersey.api.client.Client;
-import com.sun.jersey.api.client.WebResource;
-import com.sun.jersey.api.client.config.ClientConfig;
-import com.sun.jersey.api.client.config.DefaultClientConfig;
-
-import eu.eexcess.dataformats.result.ResultList;
-import eu.eexcess.dataformats.userprofile.ContextKeyword;
-import eu.eexcess.dataformats.userprofile.SecureUserProfile;
+//import static org.junit.Assert.*;
+//
+//import java.util.ArrayList;
+//import java.util.HashMap;
+//import java.util.List;
+//import java.util.concurrent.Callable;
+//import java.util.concurrent.ExecutionException;
+//import java.util.concurrent.ExecutorService;
+//import java.util.concurrent.Executors;
+//import java.util.concurrent.Future;
+//import java.util.concurrent.TimeUnit;
+//import java.util.concurrent.TimeoutException;
+//
+//import javax.xml.bind.JAXBContext;
+//
+//import org.junit.Test;
+//import org.xml.sax.SAXNotRecognizedException;
+//
+//import com.sun.jersey.api.client.Client;
+//import com.sun.jersey.api.client.WebResource;
+//import com.sun.jersey.api.client.config.ClientConfig;
+//import com.sun.jersey.api.client.config.DefaultClientConfig;
+//
+//import eu.eexcess.dataformats.result.ResultList;
+//import eu.eexcess.dataformats.userprofile.ContextKeyword;
+//import eu.eexcess.dataformats.userprofile.SecureUserProfile;
 
 
 public class MassivFedRecQueryTest {
 	//private static final String searchRequest = "http://eexcess.joanneum.at/eexcess-federated-recommender-web-service-1.0-SNAPSHOT/recommender/recommend";
 	//private static final String searchRequest = "http://eexcess-dev.joanneum.at/eexcess-federated-recommender-web-service-1.0-SNAPSHOT/recommender/recommend";
-private static final String searchRequest = "http://eexcess-demo.know-center.tugraz.at/eexcess-federated-recommender-web-service-1.0-SNAPSHOT/recommender/recommend";
+//private static final String searchRequest = "http://eexcess-demo.know-center.tugraz.at/eexcess-federated-recommender-web-service-1.0-SNAPSHOT/recommender/recommend";
 //	private static final String searchRequest = "http://localhost/eexcess-federated-recommender-web-service-1.0-SNAPSHOT/recommender/recommend";
 	//private static final String searchRequest = "http://eexcess-demo.know-center.tugraz.at/eexcess-federated-recommender-web-service-evaluation-1.0-SNAPSHOT/evaluation/recommend";
-	private final ExecutorService threadPool;
+//	private final ExecutorService threadPool;
 	public  MassivFedRecQueryTest() {
-		threadPool= Executors.newFixedThreadPool(30);
+//		threadPool= Executors.newFixedThreadPool(30);
 		
 	}
 //	@Test
@@ -339,7 +339,7 @@ private static final String searchRequest = "http://eexcess-demo.know-center.tug
 //		return queries;
 //	}
 	public static void main(String [ ] args){
-		MassivFedRecQueryTest m=new MassivFedRecQueryTest();
+//		MassivFedRecQueryTest m=new MassivFedRecQueryTest();
 //		m.singleQuery();
 	}
 

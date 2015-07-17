@@ -480,10 +480,13 @@ public class FederatedRecommenderCore implements ProbeResultChanged {
 
     /**
      * Adds the partner to the partner register if not existing already and
-     * tries to get the old statistics for this partner from the database
+     * tries to get the old statistics for this partner from the database.
+     * Adding a new partner also triggers domain detection if the respective
+     * partner does not explicitly define domains.
      * 
      * @param badge
-     * @return
+     *            partner information
+     * @return an informative human readable message
      */
     public String registerPartner(PartnerBadge badge) {
         if (this.getPartnerRegister().getPartners().contains(badge)) {
@@ -522,11 +525,70 @@ public class FederatedRecommenderCore implements ProbeResultChanged {
 
         this.addPartner(badge);
 
+        // if recommender has domain detectors instanced but partner does not
+        // provide any domain information
         if (null != partnersDomainsDetectors && (null == badge.getDomainContent() || badge.getDomainContent().isEmpty())) {
-            partnersDomainsDetectors.probe(badge, getPartnerRegister().getClient(badge.getSystemId()));
+
+            if (false == restoreDomainsFromDatabase(badge)) {
+                // if no domain informations can be retrieved from database
+                // start domain detectors
+                partnersDomainsDetectors.probe(badge, getPartnerRegister().getClient(badge.getSystemId()));
+            }
         }
         return "Partner Added";
 
+    }
+
+    /**
+     * Reads domain(s) information of the respective partner from database and
+     * stores it back to {@link PartnerBadge}.
+     * 
+     * @param partnerConfig
+     *            supplies the {@link PartnerBadge#getSystemId()} and where to
+     *            store {@link PartnerBadge#getDomainContent()} the restored
+     *            domain information
+     * @return false if no domain was restored from database
+     */
+    private boolean restoreDomainsFromDatabase(PartnerBadge partnerConfig) {
+        synchronized (partnerRegister) {
+            boolean hasDomainsRestored = false;
+            Database<PartnersDomainsTableQuery> db = new Database<PartnersDomainsTableQuery>(federatedRecConfiguration.statsLogDatabase,
+                    PartnersDomainsTableQuery.values());
+            PreparedStatement selectStatement = db.getPreparedSelectStatement(PartnersDomainsTableQuery.PARTNER_DOMAINS_TABLE_QUERY);
+
+            try {
+                selectStatement.setString(1, partnerConfig.getSystemId());
+                if (true == selectStatement.execute()) {
+                    ResultSet results = selectStatement.getResultSet();
+
+                    if (partnerConfig.getDomainContent() == null) {
+                        partnerConfig.setDomainContent(new ArrayList<PartnerDomain>());
+                    }
+
+                    int restoredDomainsCount = 0;
+                    while (results.next()) {
+                        restoredDomainsCount++;
+                        PartnerDomain domain = new PartnerDomain();
+                        domain.domainName = results.getString(PartnersDomainsTableQuery.Tables.PartnerProbes.Domains.DOMAIN_NAME.ROW_NUMBER);
+                        domain.weight = results.getDouble(PartnersDomainsTableQuery.Tables.PartnerProbes.Domains.DOMAIN_WEIGHT.ROW_NUMBER);
+                        hasDomainsRestored = true;
+                        partnerConfig.getDomainContent().add(domain);
+                    }
+                    LOGGER.info("restored [" + restoredDomainsCount + "] domain(s) of partner [" + partnerConfig.getSystemId() + "] from database");
+                }
+            } catch (SQLException sqe) {
+                LOGGER.log(Level.SEVERE, "failed to retrieve partner's domain information from database ["
+                        + PartnersDomainsTableQuery.PARTNER_DOMAINS_TABLE_QUERY.getInternName() + "]");
+                sqe.printStackTrace();
+            } finally {
+                try {
+                    db.close();
+                } catch (IOException e) {
+                    LOGGER.log(Level.WARNING, "failed to close database [" + PartnersDomainsTableQuery.PARTNER_DOMAINS_TABLE_QUERY.getInternName() + "]", e);
+                }
+            }
+            return hasDomainsRestored;
+        }
     }
 
     /**

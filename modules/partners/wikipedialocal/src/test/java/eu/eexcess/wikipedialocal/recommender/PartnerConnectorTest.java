@@ -41,12 +41,10 @@ public class PartnerConnectorTest {
         userProfile.contextKeywords.add(schroedinger);
         PartnerConnector connector = new PartnerConnector();
 
-        String baseSearchEndpoint = configuration.searchEndpoint;
         ResultList firstTryResults = null;
         try {
             firstTryResults = connector.queryPartnerNative(configuration, userProfile, null);
         } catch (IOException e) {
-            // TODO Auto-generated catch block
             e.printStackTrace();
         }
         if (firstTryResults != null) {
