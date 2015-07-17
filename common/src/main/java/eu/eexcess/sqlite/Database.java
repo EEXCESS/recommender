@@ -48,14 +48,8 @@ import java.util.logging.Logger;
 public class Database<T extends DatabasePreparedQuery> implements Closeable {
     private static final Logger LOGGER = Logger.getLogger(Database.class.getName());
     private static final String JDBC_DRIVER = "org.sqlite.JDBC";
-    private String dBName = null;
-
-public class Database<T extends DatabasePreparedQuery> implements Closeable {
-    private static final Logger logger = Logger.getLogger(Database.class.getName());
-    private static final String JDBC_DRIVER = "org.sqlite.JDBC";
     private static String dBName = null;
 
-    private Map<String, PreparedStatement> map = new HashMap<String, PreparedStatement>();
     private Map<String, PreparedStatement> map = new HashMap<String, PreparedStatement>();
 
     private Connection con;
@@ -64,34 +58,34 @@ public class Database<T extends DatabasePreparedQuery> implements Closeable {
         try {
             Class.forName(JDBC_DRIVER);
         } catch (ClassNotFoundException e) {
-            logger.log(Level.SEVERE, "Could not load JDBC Driver", e);
+            LOGGER.log(Level.SEVERE, "Could not load JDBC Driver", e);
         }
     }
 
     public Database(String dBName, T[] preparedStatementsDefinitions) {
         this.dBName = dBName;
-        logger.log(Level.INFO, "Trying to open DB:" + this.dBName);
+        LOGGER.log(Level.INFO, "Trying to open DB:" + this.dBName);
         try {
             Class.forName(JDBC_DRIVER);
         } catch (ClassNotFoundException e) {
-            logger.log(Level.SEVERE, "Could not load JDBC Driver", e);
+            LOGGER.log(Level.SEVERE, "Could not load JDBC Driver", e);
         }
         try {
             this.con = DriverManager.getConnection("jdbc:sqlite:" + this.dBName);
         } catch (SQLException e) {
-            logger.log(Level.SEVERE, "Could not connect to Database: " + this.dBName, e);
+            LOGGER.log(Level.SEVERE, "Could not connect to Database: " + this.dBName, e);
         }
         if (con != null) {
             try {
                 initPreparedStatements(con, preparedStatementsDefinitions);
             } catch (SQLException e) {
-                logger.log(Level.SEVERE, "Prepared Statements could not be created", e);
+                LOGGER.log(Level.SEVERE, "Prepared Statements could not be created", e);
             }
             try {
 
                 con.setAutoCommit(false);
             } catch (SQLException e) {
-                logger.log(Level.SEVERE, "Autocommit could not be set to false", e);
+                LOGGER.log(Level.SEVERE, "Autocommit could not be set to false", e);
             }
         }
     }
@@ -108,13 +102,13 @@ public class Database<T extends DatabasePreparedQuery> implements Closeable {
         try {
             Class.forName(JDBC_DRIVER);
         } catch (ClassNotFoundException e1) {
-            logger.log(Level.SEVERE, "Could not Connect to Database:" + database, e1);
+            LOGGER.log(Level.SEVERE, "Could not Connect to Database:" + database, e1);
             return null;
         }
         try {
             this.con = DriverManager.getConnection("jdbc:sqlite:" + database);
         } catch (SQLException e) {
-            logger.log(Level.SEVERE, "Could not Connect to Database:" + database, e);
+            LOGGER.log(Level.SEVERE, "Could not Connect to Database:" + database, e);
             return null;
         }
         return con;
@@ -132,11 +126,11 @@ public class Database<T extends DatabasePreparedQuery> implements Closeable {
                 try {
                     updateStatement = con.prepareStatement(t.getUpdateQuery());
                 } catch (SQLException e) {
-                    logger.log(Level.SEVERE, "Could not prepare Statement \"QueryLog\"", e);
+                    LOGGER.log(Level.SEVERE, "Could not prepare Statement \"QueryLog\"", e);
                     try {
                         con.createStatement().executeUpdate(t.getCreateQuery());
                     } catch (SQLException e1) {
-                        logger.log(Level.SEVERE, "Could not create Table  \"" + t.getInternName() + "\"", e1);
+                        LOGGER.log(Level.SEVERE, "Could not create Table  \"" + t.getInternName() + "\"", e1);
                     }
                 }
                 if (updateStatement == null)
@@ -149,7 +143,7 @@ public class Database<T extends DatabasePreparedQuery> implements Closeable {
                 try {
                     getStatement = con.prepareStatement(t.getSelectQuery());
                 } catch (SQLException e) {
-                    logger.log(Level.SEVERE, "Could not prepare Statement \"QueryLog\"", e);
+                    LOGGER.log(Level.SEVERE, "Could not prepare Statement \"QueryLog\"", e);
                 }
                 map.put(t.getInternName() + t.getSelectQuery(), getStatement);
             }
@@ -188,7 +182,7 @@ public class Database<T extends DatabasePreparedQuery> implements Closeable {
             try {
                 con.commit();
             } catch (SQLException e) {
-                logger.log(Level.SEVERE, "Could not commit Query", e);
+                LOGGER.log(Level.SEVERE, "Could not commit Query", e);
             }
         }
 
