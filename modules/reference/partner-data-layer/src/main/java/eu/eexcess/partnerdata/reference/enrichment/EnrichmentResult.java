@@ -30,10 +30,10 @@ public class EnrichmentResult {
 		this.enrichmentSource = source;
 	}
 	
-	private EnrichmentResult()
-	{
-		
-	}
+//	private EnrichmentResult()
+//	{
+//		
+//	}
 	
 	public String getEnrichmentSource() {
 		return enrichmentSource.toString();
