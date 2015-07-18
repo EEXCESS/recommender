@@ -52,14 +52,9 @@ public class D3GraphDocument implements Serializable {
     public List<D3GraphDocumentEdge> edges;
 
     public D3GraphDocument(SimpleWeightedGraph<String, DefaultEdge> graph) throws FederatedRecommenderException {
-        if (graph == null)
+        if (graph == null && graph.vertexSet() == null && graph.edgeSet() == null)
             throw new FederatedRecommenderException("graph was null");
-        if (graph.vertexSet() == null)
-            throw new FederatedRecommenderException("graph was null");
-
-        if (graph.edgeSet() == null)
-            throw new FederatedRecommenderException("graph was null");
-
+        
         nodes = new ArrayList<String>(graph.vertexSet());
         edges = new ArrayList<D3GraphDocumentEdge>();
         for (DefaultEdge currentEdge : graph.edgeSet()) {
