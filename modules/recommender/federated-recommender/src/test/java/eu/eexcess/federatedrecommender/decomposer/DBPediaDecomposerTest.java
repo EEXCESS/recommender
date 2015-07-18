@@ -28,6 +28,7 @@ public class DBPediaDecomposerTest {
 	private static final String CLINTON = "Clinton";
 	private static final String SCHWARZENEGGER = "schwarzenegger";
 	private static final String TERMINATOR = "terminator";
+	private static final String CONAN = "conan";
 	private static final String CHINA = "china";
 	private static final String FRANCE = "france";
 	private static final String BOMB = "bomb";
@@ -40,7 +41,7 @@ public class DBPediaDecomposerTest {
 		DBPediaDecomposer dbPediaDecomposer = new DBPediaDecomposer();
 		FederatedRecommenderConfiguration fedRecConfig = null;
 		try {
-			fedRecConfig = mapper.readValue(new File("/home/hziak/workspaces/eexcess/recommender/modules/recommender/federated-recommender-web-service/src/main/resources/federatedRecommenderConfig.json"), FederatedRecommenderConfiguration.class);
+			fedRecConfig = mapper.readValue(new File("/home/hziak/workspaces/eexcess/recommender/modules/evaluation/src/main/resources/federatedRecommenderConfig.json"), FederatedRecommenderConfiguration.class);
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -55,7 +56,8 @@ public class DBPediaDecomposerTest {
 //		inputSecureUserProfile.contextKeywords.add(new ContextKeyword(OBAMA));
 //		inputSecureUserProfile.contextKeywords.add(new ContextKeyword(CLINTON));
 		inputSecureUserProfile.contextKeywords.add(new ContextKeyword(SCHWARZENEGGER));
-//		inputSecureUserProfile.contextKeywords.add(new ContextKeyword(TERMINATOR));
+		inputSecureUserProfile.contextKeywords.add(new ContextKeyword(TERMINATOR));
+		inputSecureUserProfile.contextKeywords.add(new ContextKeyword(CONAN));
 		inputSecureUserProfile.contextKeywords.add(new ContextKeyword(FRANCE));
 		inputSecureUserProfile.contextKeywords.add(new ContextKeyword(CHINA));
 		inputSecureUserProfile.contextKeywords.add(new ContextKeyword(BOMB));
