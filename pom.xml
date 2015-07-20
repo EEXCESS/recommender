@@ -10,7 +10,7 @@
   </description>
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		 <sonar.language>java</sonar.language>
+		<sonar.language>java</sonar.language>
 	</properties>
 	<modules>
 		<module>common/</module>
@@ -27,7 +27,7 @@
 		<module>modules/partners/opensearch/</module>
 		<module>modules/recommender/federated-recommender/</module>
 		<module>modules/recommender/federated-recommender-web-service/</module>
-	<!-- <module>modules/evaluation/</module> -->	
+		<!-- <module>modules/evaluation/</module>-->
 		<module>experimental/misc/</module>
 	</modules>
 	<developers>
@@ -79,12 +79,11 @@
 	</distributionManagement>
 	<build>
 		<plugins>
-	<plugin>
-	<groupId>org.jacoco</groupId>
-	<artifactId>jacoco-maven-plugin</artifactId>
-	<version>0.7.5.201505241946</version>
-</plugin>
-
+			<plugin>
+				<groupId>org.jacoco</groupId>
+				<artifactId>jacoco-maven-plugin</artifactId>
+				<version>0.7.5.201505241946</version>
+			</plugin>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-dependency-plugin</artifactId>
@@ -94,11 +93,11 @@
 				<groupId>org.mortbay.jetty</groupId>
 				<artifactId>maven-jetty-plugin</artifactId>
 			</plugin>
-	  <plugin>
-       	<groupId>org.codehaus.sonar</groupId>
-	<artifactId>sonar-maven-plugin</artifactId>
-	<version>4.5.1</version>
-      </plugin>
+			<plugin>
+				<groupId>org.codehaus.sonar</groupId>
+				<artifactId>sonar-maven-plugin</artifactId>
+				<version>4.5.1</version>
+			</plugin>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-compiler-plugin</artifactId>
@@ -107,6 +106,32 @@
 					<target>1.8</target>
 				</configuration>
 			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-source-plugin</artifactId>
+				<executions>
+					<execution>
+						<id>attach-sources</id>
+						<goals>
+							<goal>jar</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+<!--			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-javadoc-plugin</artifactId>
+				<executions>
+					<execution>
+						<id>attach-javadocs</id>
+						<goals>
+							<goal>jar</goal>
+						</goals>
+					</execution>
+				</executions>
+
+			</plugin>
+		-->
 		</plugins>
 	</build>
 </project>
