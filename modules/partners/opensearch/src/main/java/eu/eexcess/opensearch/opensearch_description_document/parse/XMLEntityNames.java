@@ -39,10 +39,16 @@ public class XMLEntityNames {
 
     public static class Tags {
         public static final String NODE = "Tags";
+
+        private Tags() {
+        }
     }
 
     public static class Contact {
         public static final String NODE = "Contact";
+
+        private Contact() {
+        }
     }
 
     public static class Url {
@@ -188,5 +194,8 @@ public class XMLEntityNames {
 
         private AdultContent() {
         }
+    }
+
+    private XMLEntityNames() {
     }
 }
