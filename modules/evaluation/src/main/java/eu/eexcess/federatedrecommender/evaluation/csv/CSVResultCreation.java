@@ -76,8 +76,7 @@ public class CSVResultCreation {
         try {
             ofqw.write(HEADER + "\n");
         } catch (IOException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+            LOGGER.log(Level.WARNING, "Could not write file", e);
         }
         creation.createCSVResultsFile(queries, ofqw);
 
@@ -295,9 +294,7 @@ public class CSVResultCreation {
             }
             builder.append(",");
         }
-        String string = builder.toString();
-
-        return string;
+        return builder.toString();
     }
 
     public WebResource getwRBlock() {
