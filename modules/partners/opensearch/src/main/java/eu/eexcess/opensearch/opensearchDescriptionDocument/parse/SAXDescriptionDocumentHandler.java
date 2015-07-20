@@ -56,7 +56,7 @@ public class SAXDescriptionDocumentHandler extends DefaultHandler {
 			// this nodes have no attributes
 			break;
 
-		case XMLEntityNames.Query.Node:
+		case XMLEntityNames.Query.NODE:
 			readAttributesFromQueryNode(uri, localName, qName, attributes);
 			break;
 
@@ -86,7 +86,7 @@ public class SAXDescriptionDocumentHandler extends DefaultHandler {
 
 		switch (qName) {
 		case XMLEntityNames.OpenSearchDescription.NODE:
-		case XMLEntityNames.Query.Node:
+		case XMLEntityNames.Query.NODE:
 		case XMLEntityNames.Url.NODE:
 			// this nodes have no values
 			break;
