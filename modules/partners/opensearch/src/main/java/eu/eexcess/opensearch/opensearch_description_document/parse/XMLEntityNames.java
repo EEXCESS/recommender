@@ -1,4 +1,4 @@
-package eu.eexcess.opensearch.opensearchDescriptionDocument.parse;
+package eu.eexcess.opensearch.opensearch_description_document.parse;
 
 /**
  * Node Names explained in <a
@@ -31,14 +31,14 @@ public class XMLEntityNames {
     }
 
     public static class Description {
-        public final static String NODE = "Description";
+        public static final String NODE = "Description";
 
         private Description() {
         }
     }
 
     public static class Tags {
-        public final static String NODE = "Tags";
+        public static final String NODE = "Tags";
     }
 
     public static class Contact {
@@ -139,7 +139,7 @@ public class XMLEntityNames {
     }
 
     public static class Attribution {
-        public final static String NODE = "Attribution";
+        public static final String NODE = "Attribution";
 
         private Attribution() {
         }

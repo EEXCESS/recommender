@@ -27,7 +27,7 @@ import org.json.JSONException;
 import eu.eexcess.dataformats.result.DocumentBadge;
 import eu.eexcess.dataformats.result.Result;
 import eu.eexcess.dataformats.result.ResultList;
-import eu.eexcess.opensearch.opensearchDescriptionDocument.OpensearchDescription;
+import eu.eexcess.opensearch.opensearch_description_document.OpensearchDescription;
 
 /**
  * Builds an {@link ResultList} from JSON.

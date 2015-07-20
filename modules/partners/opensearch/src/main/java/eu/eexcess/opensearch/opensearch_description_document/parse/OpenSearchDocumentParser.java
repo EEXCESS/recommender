@@ -1,4 +1,4 @@
-package eu.eexcess.opensearch.opensearchDescriptionDocument.parse;
+package eu.eexcess.opensearch.opensearch_description_document.parse;
 
 import java.io.IOException;
 import java.io.StringReader;
@@ -13,7 +13,7 @@ import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 import org.xml.sax.XMLReader;
 
-import eu.eexcess.opensearch.opensearchDescriptionDocument.OpensearchDescription;
+import eu.eexcess.opensearch.opensearch_description_document.OpensearchDescription;
 
 /**
  * Parses an XML OpenSearch Description Document.
