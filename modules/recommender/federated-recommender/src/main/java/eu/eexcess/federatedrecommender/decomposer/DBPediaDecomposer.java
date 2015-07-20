@@ -29,6 +29,8 @@ import java.util.logging.Logger;
 
 import org.jgraph.graph.DefaultEdge;
 import org.jgrapht.alg.DijkstraShortestPath;
+import org.jgrapht.alg.FloydWarshallShortestPaths;
+import org.jgrapht.alg.KShortestPaths;
 import org.jgrapht.graph.SimpleWeightedGraph;
 
 import eu.eexcess.config.FederatedRecommenderConfiguration;
@@ -145,13 +147,14 @@ public class DBPediaDecomposer implements SecureUserProfileDecomposer<SecureUser
         {
             restOfdbPediaEntityNames.remove(dbPediaEntityName);
             for (String dbPediaEntityName2 : restOfdbPediaEntityNames) {
+//            	KShortestPaths<String, DefaultEdge> path = new KShortestPaths<String, DefaultEdge>(semanticGraph, dbPediaEntityName, dbPediaEntityName2);
                 DijkstraShortestPath<String, DefaultEdge> path = new DijkstraShortestPath<String, DefaultEdge>(semanticGraph, dbPediaEntityName, dbPediaEntityName2);
                 System.out.println("[" + dbPediaEntityName + ", " + dbPediaEntityName2 + "] - path length: " + path.getPathLength());
-                if (path.getPathLength() < semanticDistanceThreshold) {
+//                if (path.getPathLength() < semanticDistanceThreshold) {
                     ArrayList<ContextKeyword> contextKeywordGroup = new ArrayList<ContextKeyword>();
                     contextKeywordGroup.add(new ContextKeyword(dbPediaEntityName));
                     contextKeywordGroup.add(new ContextKeyword(dbPediaEntityName2));
-                }
+//                }
             }
 
         }

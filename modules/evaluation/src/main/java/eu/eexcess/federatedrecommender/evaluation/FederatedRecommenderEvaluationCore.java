@@ -437,9 +437,10 @@ public class FederatedRecommenderEvaluationCore {
         int hitsLimit = federatedRecommenderConfiguration.graphHitsLimitPerQuery;
         int depthLimit = federatedRecommenderConfiguration.graphQueryDepthLimit;
         SimpleWeightedGraph<String, DefaultEdge> graph = null;
+        
         try {
             graph = dbPediaGraph.getFromKeywords(userProfile.contextKeywords, keynodes, hitsLimit, depthLimit);
-            System.out.println(graph + " graph");
+         
         } catch (Exception e) {
             logger.log(Level.SEVERE, "There was an error while building the graph", e);
             throw new FederatedRecommenderException("There was an error while building the graph", e);

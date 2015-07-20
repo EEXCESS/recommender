@@ -212,6 +212,9 @@ public class FederatedRecommenderService {
             return Response.serverError().build();
         InputStream resourceAsStream = null;
         switch (type) {
+        case "other":
+            resourceAsStream = this.getClass().getResourceAsStream("/Thumbnails_EECXESS_unknown.png");
+            break;
         case "unknown":
             resourceAsStream = this.getClass().getResourceAsStream("/Thumbnails_EECXESS_unknown.png");
             break;

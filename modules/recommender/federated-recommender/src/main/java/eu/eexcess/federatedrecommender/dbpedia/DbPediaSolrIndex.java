@@ -270,14 +270,14 @@ public class DbPediaSolrIndex {
         ModifiableSolrParams solrParams = new ModifiableSolrParams();
         solrParams.set("q", query);
         solrParams.set("rows", hitsLimit);
-        solrParams.set("sort", "referringParent DESC , referringChild DESC");
+        solrParams.set("sort", "referringParent DESC");
 
         QueryResponse queryResponse = null;
 
         try {
             queryResponse = server.query(solrParams);
         } catch (SolrServerException e) {
-            logger.log(Level.SEVERE, "Query " + query + " was not foung in DBPediaIndex", e);
+            logger.log(Level.SEVERE, "Query " + query + " was not found in DBPediaIndex", e);
             throw new FederatedRecommenderException("Query " + query + " was not foung in DBPediaIndex, server is perhabs not running", e);
         }
         return queryResponse.getBeans(DbPediaIndexBean.class);
