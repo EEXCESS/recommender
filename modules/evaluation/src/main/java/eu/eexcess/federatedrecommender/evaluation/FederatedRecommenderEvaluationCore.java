@@ -458,11 +458,11 @@ public class FederatedRecommenderEvaluationCore {
             d3GraphDocument.nodes.set(i, node);
         }
         for (int i = 0; i < d3GraphDocument.edges.size(); i++) {
-            String targetShortString = d3GraphDocument.edges.get(i).target.replaceAll(regexp, "");
-            String sourceShortString = d3GraphDocument.edges.get(i).source.replaceAll(regexp, "");
+            String targetShortString = d3GraphDocument.edges.get(i).getTarget().replaceAll(regexp, "");
+            String sourceShortString = d3GraphDocument.edges.get(i).getSource().replaceAll(regexp, "");
 
-            d3GraphDocument.edges.get(i).target = targetShortString;
-            d3GraphDocument.edges.get(i).source = sourceShortString;
+            d3GraphDocument.edges.get(i).setTarget(targetShortString);
+            d3GraphDocument.edges.get(i).setSource(sourceShortString);
         }
 
         return d3GraphDocument;

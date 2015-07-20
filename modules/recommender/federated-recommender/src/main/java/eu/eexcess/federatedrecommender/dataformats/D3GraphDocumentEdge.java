@@ -29,13 +29,37 @@ import java.io.Serializable;
  */
 public class D3GraphDocumentEdge implements Serializable {
     private static final long serialVersionUID = 1937873166249578293L;
-    public String target;
-    public String source;
-    public String value;
+    private String target;
+    private String source;
+    private String value;
 
     public D3GraphDocumentEdge(String source, String target) {
+        this.setTarget(target);
+        this.setSource(source);
+        this.setValue(Integer.toString(1));
+    }
+
+    public String getTarget() {
+        return target;
+    }
+
+    public void setTarget(String target) {
         this.target = target;
+    }
+
+    public String getSource() {
+        return source;
+    }
+
+    public void setSource(String source) {
         this.source = source;
-        this.value = Integer.toString(1);
+    }
+
+    public String getValue() {
+        return value;
+    }
+
+    public void setValue(String value) {
+        this.value = value;
     }
 }
