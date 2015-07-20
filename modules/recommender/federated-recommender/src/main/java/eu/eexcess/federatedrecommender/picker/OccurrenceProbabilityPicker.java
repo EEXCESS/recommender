@@ -107,7 +107,7 @@ public class OccurrenceProbabilityPicker extends PartnersFederatedRecommendation
             if (calcPartnerWeight < 0.1)
                 calcPartnerWeight = 0.1;
 
-            Integer d =  new Double(calcPartnerWeight * 100).intValue();
+            Integer d = new Double(calcPartnerWeight * 100).intValue();
             while (d > 0) {
                 listToDraw.add(partnerBadge);
                 d--;
@@ -150,7 +150,7 @@ public class OccurrenceProbabilityPicker extends PartnersFederatedRecommendation
                     }
 
                 }
-     
+
                 resultList.getResults().get(partner).results.remove(0);
 
             } catch (Exception e) {
@@ -178,11 +178,11 @@ public class OccurrenceProbabilityPicker extends PartnersFederatedRecommendation
         // better way
         for (ContextKeyword context : secureUserProfile.contextKeywords) {
             if (result.title != null && result.title.toLowerCase().contains(context.text.toLowerCase()))
-                    maxTitleEntries++;
+                maxTitleEntries++;
         }
         for (Interest interest : secureUserProfile.interestList) {
             if (result.title != null && result.title.toLowerCase().contains(interest.text.toLowerCase()))
-                    maxTitleEntries++;
+                maxTitleEntries++;
         }
         double queryWeight = 0;
         if (secureUserProfile.contextKeywords.size() + secureUserProfile.interestList.size() > 0)
@@ -201,7 +201,7 @@ public class OccurrenceProbabilityPicker extends PartnersFederatedRecommendation
 
     private double calcPartnerWeight(ResultList resultList, SecureUserProfile secureUserProfile) {
         double partnerWeight = 0.0;
-            if(resultList!=null){
+        if (resultList != null) {
             for (Result result : resultList.results) {
                 partnerWeight += calcResultWeight(result, secureUserProfile);
             }
@@ -210,7 +210,7 @@ public class OccurrenceProbabilityPicker extends PartnersFederatedRecommendation
             else
                 return 0.0;
         }
-            return 0.0;
+        return 0.0;
     }
 
     /**

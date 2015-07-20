@@ -199,7 +199,7 @@ public class BlockPicker extends PartnersFederatedRecommendationsPicker {
                     break;
             }
             int allTogether = basicSize + diversitySize + serendipitySize;
-            if ((diversityList == null || diversityList.results.isEmpty()) && (diversityList == null || diversityList.results.isEmpty())
+            if ((diversityList == null || diversityList.results.isEmpty()) && (serendipityList == null || serendipityList.results.isEmpty())
                     && (basicList == null || basicList.results.isEmpty()) || (allTogether < numResults && allTogether == basicCount + diversityCount + serendipityCount))
                 break;
         }
