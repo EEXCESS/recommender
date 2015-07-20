@@ -8,10 +8,17 @@
 	<name>EEXCESS - Parent</name>
 	<description>Parent for all EEXCESS related projects.
   </description>
+<<<<<<< .mine
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<sonar.language>java</sonar.language>
 	</properties>
+=======
+
+
+
+
+>>>>>>> .theirs
 	<modules>
 		<module>common/</module>
 		<module>modules/reference/partner-data-layer/</module>
@@ -27,7 +34,11 @@
 		<module>modules/partners/opensearch/</module>
 		<module>modules/recommender/federated-recommender/</module>
 		<module>modules/recommender/federated-recommender-web-service/</module>
+<<<<<<< .mine
 		<!-- <module>modules/evaluation/</module>-->
+=======
+	 <module>modules/evaluation/</module> 	
+>>>>>>> .theirs
 		<module>experimental/misc/</module>
 	</modules>
 	<developers>
@@ -78,7 +89,31 @@
 		</repository>
 	</distributionManagement>
 	<build>
+
+<!--  Addition for Sonarqube, comment out if build fails   -->
+			<pluginManagement>
+				<plugins>
+					<plugin>
+					<groupId>org.jacoco</groupId>
+					<artifactId>jacoco-maven-plugin</artifactId>
+					<version>0.7.4.201502262128</version>
+					<executions>
+					<execution>
+					<goals>
+					<goal>prepare-agent</goal>
+					</goals>
+					</execution>
+					</executions>
+					</plugin>
+				</plugins>
+			</pluginManagement>
+
 		<plugins>
+<<<<<<< .mine
+
+=======
+
+>>>>>>> .theirs
 			<plugin>
 				<groupId>org.jacoco</groupId>
 				<artifactId>jacoco-maven-plugin</artifactId>
@@ -93,6 +128,11 @@
 				<groupId>org.mortbay.jetty</groupId>
 				<artifactId>maven-jetty-plugin</artifactId>
 			</plugin>
+	  <plugin>
+       	<groupId>org.codehaus.sonar</groupId>
+	<artifactId>sonar-maven-plugin</artifactId>
+	<version>5.1.1</version>
+      </plugin>
 			<plugin>
 				<groupId>org.codehaus.sonar</groupId>
 				<artifactId>sonar-maven-plugin</artifactId>

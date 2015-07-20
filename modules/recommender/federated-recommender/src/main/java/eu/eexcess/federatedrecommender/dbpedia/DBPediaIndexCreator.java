@@ -45,6 +45,9 @@ public class DBPediaIndexCreator {
             + "For other languages then english and german adaptation of the SolrSchema should be done";
     private static final Logger logger = Logger.getLogger(DBPediaIndexCreator.class.getName());
 
+    private DBPediaIndexCreator() {
+    }
+
     public static void main(String[] args) {
         if (args.length == 0) {
             logger.log(Level.INFO, USAGEMESSAGE);

@@ -74,20 +74,20 @@ import eu.eexcess.utils.URLParamEncoder;
  */
 
 public class PartnerConnector extends PartnerConnectorBase implements PartnerConnectorApi {
-	private static final Logger log = Logger.getLogger(PartnerConnector.class.getName());
+	private static final Logger logger = Logger.getLogger(PartnerConnector.class.getName());
 	private static final String TOKEN_URL = "https://api.mendeley.com/oauth/token";
     public static final MediaType APPLICATION_MENDELEY_TYPE = new MediaType("application", "vnd.mendeley-document.1+json");
 
     public PartnerConnector(){}
     
 	@Override
-	public ResultList queryPartnerNative(PartnerConfiguration partnerConfiguration, SecureUserProfile userProfile, PartnerdataLogger logger)
+	public ResultList queryPartnerNative(PartnerConfiguration partnerConfiguration, SecureUserProfile userProfile, PartnerdataLogger log)
 					throws IOException {
 		return null;
 	}
 	
 	@Override
-	public Document queryPartner(PartnerConfiguration partnerConfiguration, SecureUserProfile userProfile, PartnerdataLogger logger) throws IOException {
+	public Document queryPartner(PartnerConfiguration partnerConfiguration, SecureUserProfile userProfile, PartnerdataLogger log) throws IOException {
         ClientConfig clientConfig = new DefaultClientConfig();
         clientConfig.getFeatures().put(JSONConfiguration.FEATURE_POJO_MAPPING, Boolean.TRUE);
 
@@ -99,7 +99,7 @@ public class PartnerConnector extends PartnerConnectorBase implements PartnerCon
             mR = fetchSearchResults(client, userProfile, accessTokenResponse, partnerConfiguration);
         } catch (InstantiationException | IllegalAccessException
                 | ClassNotFoundException e1) {
-            log.log(Level.SEVERE,"Could not get results from partner for query: "+userProfile +"\n with accestoken:"+accessTokenResponse+"\n and configuration:"+partnerConfiguration ,e1);
+            logger.log(Level.SEVERE,"Could not get results from partner for query: "+userProfile +"\n with accestoken:"+accessTokenResponse+"\n and configuration:"+partnerConfiguration ,e1);
             throw new IOException(e1);
         }
         client.destroy();
@@ -112,7 +112,7 @@ public class PartnerConnector extends PartnerConnectorBase implements PartnerCon
         try {
             newResponse = transformJSON2XML(mapper.writeValueAsString(mR));
         } catch (EEXCESSDataTransformationException e) {
-            log.log(Level.SEVERE,"Partners response could not be transformed to xml for query: "+userProfile +"\n with accestoken:"+accessTokenResponse+"\n configuration:"+partnerConfiguration+"\n and repsonse:"+mR,e);
+            logger.log(Level.SEVERE,"Partners response could not be transformed to xml for query: "+userProfile +"\n with accestoken:"+accessTokenResponse+"\n configuration:"+partnerConfiguration+"\n and repsonse:"+mR,e);
             throw new IOException(e);
         }
         return newResponse;
@@ -122,7 +122,7 @@ public class PartnerConnector extends PartnerConnectorBase implements PartnerCon
 
 	protected MendeleyResponse fetchSearchResults(Client client, SecureUserProfile userProfile, AccessTokenResponse accessTokenResponse,
 			PartnerConfiguration partnerConfiguration) throws InstantiationException, IllegalAccessException, ClassNotFoundException {
-		log.log(Level.INFO,"Query Generator fetch Partner: "+partnerConfiguration.queryGeneratorClass);
+		logger.log(Level.INFO,"Query Generator fetch Partner: "+partnerConfiguration.queryGeneratorClass);
 		String query = PartnerConfigurationCache.CONFIG.getQueryGenerator(partnerConfiguration.queryGeneratorClass).toQuery(userProfile);
 		Map<String, String> valuesMap = new HashMap<String, String>();
 		valuesMap.put("query", URLParamEncoder.encode(query));       
@@ -130,7 +130,7 @@ public class PartnerConnector extends PartnerConnectorBase implements PartnerCon
 		MendeleyResponse jsonResponse = getJSONResponse(client, accessTokenResponse, searchRequest);
 
 		if(jsonResponse==null || jsonResponse.getDocuments()==null )
-			log.log(Level.WARNING,"Mendeley returned an empty result list");
+			logger.log(Level.WARNING,"Mendeley returned an empty result list");
 
         int numResults=100;
         if(userProfile.numResults!=null)
@@ -144,7 +144,7 @@ public class PartnerConnector extends PartnerConnectorBase implements PartnerCon
 	private MendeleyResponse getJSONResponse(Client client, AccessTokenResponse accessTokenResponse, String request) {
 		MendeleyResponse result =null;
 		try {
-			client.addFilter(new LoggingFilter(log));
+			client.addFilter(new LoggingFilter(logger));
 			MendeleyDocs[] docs = client.resource(request)
 					.header("Authorization", "Bearer " + accessTokenResponse.getAccessToken()).accept(APPLICATION_MENDELEY_TYPE)
 					.get(MendeleyDocs[].class);
@@ -153,7 +153,7 @@ public class PartnerConnector extends PartnerConnectorBase implements PartnerCon
 			String resultString = e.getResponse().getEntity(String.class);
 			ClientResponse header = client.resource(request).header("Authorization", "Bearer " + accessTokenResponse.getAccessToken()).head();
 						
-			log.log(Level.WARNING,"Server returned equal or above 300 \nResponse as String:\n"+resultString+"\n Header: "+header+
+			logger.log(Level.WARNING,"Server returned equal or above 300 \nResponse as String:\n"+resultString+"\n Header: "+header+
 					"\n Request: "+request+
 					"\n AccessTokenResponse: "+accessTokenResponse.toString(),e);
 
@@ -204,7 +204,7 @@ public class PartnerConnector extends PartnerConnectorBase implements PartnerCon
 	@Override
 	public Document queryPartnerDetails(
 			PartnerConfiguration partnerConfiguration,
-			DocumentBadge document, PartnerdataLogger logger)
+			DocumentBadge document, PartnerdataLogger log)
 			throws IOException {
 		// Configure
 		try {	
@@ -231,7 +231,7 @@ public class PartnerConnector extends PartnerConnectorBase implements PartnerCon
 	        */
 			String httpJSONResult ="";
 			try {
-				client.addFilter(new LoggingFilter(log));
+				client.addFilter(new LoggingFilter(logger));
 				httpJSONResult = client.resource(searchRequest)
 						.header("Authorization", "Bearer " + accessTokenResponse.getAccessToken()).accept(APPLICATION_MENDELEY_TYPE)
 						.get(String.class);
@@ -240,7 +240,7 @@ public class PartnerConnector extends PartnerConnectorBase implements PartnerCon
 				
 				ClientResponse header = client.resource(searchRequest).header("Authorization", "Bearer " + accessTokenResponse.getAccessToken()).head();
 							
-				log.log(Level.WARNING,"Server returned equal or above 300 \nResponse as String:\n"+resultString+"\n Header: "+header+
+				logger.log(Level.WARNING,"Server returned equal or above 300 \nResponse as String:\n"+resultString+"\n Header: "+header+
 						"\n Request: "+searchRequest+
 						"\n AccessTokenResponse: "+accessTokenResponse.toString(),e);
 
@@ -252,7 +252,7 @@ public class PartnerConnector extends PartnerConnectorBase implements PartnerCon
 			} catch (EEXCESSDataTransformationException e) {
 				// TODO logger
 				
-				log.log(Level.INFO,"Error Transforming Json to xml",e );
+				logger.log(Level.INFO,"Error Transforming Json to xml",e );
 				
 			}
 	        return newResponse;

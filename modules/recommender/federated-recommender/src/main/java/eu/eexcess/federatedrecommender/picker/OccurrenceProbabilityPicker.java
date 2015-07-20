@@ -139,8 +139,6 @@ public class OccurrenceProbabilityPicker extends PartnersFederatedRecommendation
                         break;
                     }
                 }
-                // if (!found)
-                // results.add(resultToAdd);
                 if (found == null) {
                     results.add(resultToAdd);
                 } else {
@@ -152,9 +150,7 @@ public class OccurrenceProbabilityPicker extends PartnersFederatedRecommendation
                     }
 
                 }
-                // else {
-                // numResults++; // leaving one out -> increasing num results
-                // }
+
                 resultList.getResults().get(partner).results.remove(0);
 
             } catch (Exception e) {
@@ -181,22 +177,12 @@ public class OccurrenceProbabilityPicker extends PartnersFederatedRecommendation
         // TODO: use stemmed versions and preprocess the hole contented in a
         // better way
         for (ContextKeyword context : secureUserProfile.contextKeywords) {
-            if (result.title != null)
-                if (result.title.toLowerCase().contains(context.text.toLowerCase()))
-                    maxTitleEntries++;
-            // if (result.description != null)
-            // if (result.description.toLowerCase().contains(
-            // context.text.toLowerCase()))
-            // maxDescriptionEntries++;
+            if (result.title != null && result.title.toLowerCase().contains(context.text.toLowerCase()))
+                maxTitleEntries++;
         }
         for (Interest interest : secureUserProfile.interestList) {
-            if (result.title != null)
-                if (result.title.toLowerCase().contains(interest.text.toLowerCase()))
-                    maxTitleEntries++;
-            // if (result.description != null)
-            // if (result.description.toLowerCase().contains(
-            // interest.text.toLowerCase()))
-            // maxDescriptionEntries++;
+            if (result.title != null && result.title.toLowerCase().contains(interest.text.toLowerCase()))
+                maxTitleEntries++;
         }
         double queryWeight = 0;
         if (secureUserProfile.contextKeywords.size() + secureUserProfile.interestList.size() > 0)
@@ -215,13 +201,16 @@ public class OccurrenceProbabilityPicker extends PartnersFederatedRecommendation
 
     private double calcPartnerWeight(ResultList resultList, SecureUserProfile secureUserProfile) {
         double partnerWeight = 0.0;
-        for (Result result : resultList.results) {
-            partnerWeight += calcResultWeight(result, secureUserProfile);
+        if (resultList != null) {
+            for (Result result : resultList.results) {
+                partnerWeight += calcResultWeight(result, secureUserProfile);
+            }
+            if (!resultList.results.isEmpty())
+                return partnerWeight / resultList.results.size();
+            else
+                return 0.0;
         }
-        if (resultList.results.isEmpty())
-            return partnerWeight / resultList.results.size();
-        else
-            return 0.0;
+        return 0.0;
     }
 
     /**

@@ -34,8 +34,8 @@ import net.sf.extjwnl.JWNLException;
 
 import org.junit.Test;
 
-import eu.eexcess.federatedrecommender.domaindetection.Domain;
-import eu.eexcess.federatedrecommender.domaindetection.DomainDetectorException;
+import eu.eexcess.federatedrecommender.domaindetection.probing.Domain;
+import eu.eexcess.federatedrecommender.domaindetection.probing.DomainDetectorException;
 import eu.eexcess.federatedrecommender.domaindetection.wordnet.WordnetDomainsDetector;
 import eu.eexcess.sourceselection.redde.config.Settings;
 import eu.eexcess.sourceselection.redde.tree.TreeNode;

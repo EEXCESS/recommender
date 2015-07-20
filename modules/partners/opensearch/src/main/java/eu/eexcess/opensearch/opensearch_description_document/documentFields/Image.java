@@ -16,7 +16,7 @@
  * limitations under the License.
  */
 
-package eu.eexcess.opensearch.opensearchDescriptionDocument.documentFields;
+package eu.eexcess.opensearch.opensearch_description_document.documentFields;
 
 /**
  * Holds attributes of an xml image tag.

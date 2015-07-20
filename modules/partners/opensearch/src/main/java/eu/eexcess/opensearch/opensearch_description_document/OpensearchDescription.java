@@ -16,15 +16,15 @@
  * limitations under the License.
  */
 
-package eu.eexcess.opensearch.opensearchDescriptionDocument;
+package eu.eexcess.opensearch.opensearch_description_document;
 
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 
-import eu.eexcess.opensearch.opensearchDescriptionDocument.documentFields.Image;
-import eu.eexcess.opensearch.opensearchDescriptionDocument.documentFields.Query;
-import eu.eexcess.opensearch.opensearchDescriptionDocument.documentFields.Url;
+import eu.eexcess.opensearch.opensearch_description_document.documentFields.Image;
+import eu.eexcess.opensearch.opensearch_description_document.documentFields.Query;
+import eu.eexcess.opensearch.opensearch_description_document.documentFields.Url;
 
 /**
  * Holds fields and attributes of an OpenSearch Description Document.

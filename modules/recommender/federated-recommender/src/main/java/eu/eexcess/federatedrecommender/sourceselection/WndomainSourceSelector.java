@@ -28,251 +28,278 @@ import java.util.Map;
 import java.util.TreeMap;
 import java.util.TreeSet;
 import java.util.concurrent.atomic.AtomicInteger;
-
-import org.apache.commons.lang.StringUtils;
-import org.apache.log4j.Logger;
+import java.util.logging.Logger;
 
 import eu.eexcess.config.FederatedRecommenderConfiguration;
 import eu.eexcess.dataformats.PartnerBadge;
 import eu.eexcess.dataformats.PartnerDomain;
 import eu.eexcess.dataformats.userprofile.ContextKeyword;
 import eu.eexcess.dataformats.userprofile.SecureUserProfile;
-import eu.eexcess.federatedrecommender.domaindetection.Domain;
-import eu.eexcess.federatedrecommender.domaindetection.DomainDetector;
-import eu.eexcess.federatedrecommender.domaindetection.DomainDetectorException;
+import eu.eexcess.federatedrecommender.domaindetection.probing.Domain;
+import eu.eexcess.federatedrecommender.domaindetection.probing.DomainDetector;
+import eu.eexcess.federatedrecommender.domaindetection.probing.DomainDetectorException;
 import eu.eexcess.federatedrecommender.domaindetection.wordnet.WordnetDomainsDetector;
 import eu.eexcess.federatedrecommender.interfaces.PartnerSelector;
 
 public class WndomainSourceSelector implements PartnerSelector {
 
-	/**
-	 * @author Raoul Rubien
-	 *
-	 */
-	protected static class DomainWeight implements Comparable<DomainWeight> {
-		public Double weight;
-		public String name;
+    /**
+     * @author Raoul Rubien
+     *
+     */
+    protected static class DomainWeight implements Comparable<DomainWeight> {
+        public Double weight;
+        public String name;
 
-		public DomainWeight(String name, Double weight) {
-			this.name = name;
-			this.weight = weight;
-		}
+        public DomainWeight(String name, Double weight) {
+            this.name = name;
+            this.weight = weight;
+        }
 
-		@Override
-		public int compareTo(DomainWeight o) {
-			if (equals(0)) {
-				return 0;
-			} else if (this.weight < o.weight) {
-				return -1;
-			}
-			return 1;
-		}
+        @Override
+        public int compareTo(DomainWeight o) {
+            if (equals(o)) {
+                return 0;
+            } else if (this.weight < o.weight) {
+                return -1;
+            } else if (this.weight > o.weight) {
+                return 1;
+            }
+            return (this.name.compareTo(o.name));
+        }
 
-		@Override
-		public int hashCode() {
-			final int prime = 31;
-			int result = 1;
-			result = prime * result + ((weight == null) ? 0 : weight.hashCode());
-			return result;
-		}
+        @Override
+        public int hashCode() {
+            final int prime = 31;
+            int result = 1;
+            result = prime * result + ((name == null) ? 0 : name.hashCode());
+            result = prime * result + ((weight == null) ? 0 : weight.hashCode());
+            return result;
+        }
 
-		@Override
-		public boolean equals(Object obj) {
-			if (this == obj)
-				return true;
-			if (obj == null)
-				return false;
-			if (getClass() != obj.getClass())
-				return false;
-			DomainWeight other = (DomainWeight) obj;
-			if (weight == null) {
-				if (other.weight != null)
-					return false;
-			} else if (!weight.equals(other.weight))
-				return false;
-			return true;
-		}
+        @Override
+        public boolean equals(Object obj) {
+            if (this == obj)
+                return true;
+            if (obj == null)
+                return false;
+            if (getClass() != obj.getClass())
+                return false;
+            DomainWeight other = (DomainWeight) obj;
+            if (name == null) {
+                if (other.name != null)
+                    return false;
+            } else if (!name.equals(other.name))
+                return false;
+            if (weight == null) {
+                if (other.weight != null)
+                    return false;
+            } else if (!weight.equals(other.weight))
+                return false;
+            return true;
+        }
 
-	}
+    }
 
-	private Logger logger = Logger.getLogger(WndomainSourceSelector.class);
+    /**
+     * A map of domain matching partners mapping to a descent sorted set of
+     * {@link DomainWeight}s
+     */
+    protected Map<PartnerBadge, TreeSet<DomainWeight>> matchingPartners = new HashMap<>();
 
-	/**
-	 * A map of domain matching partners mapping to a descent sorted set of
-	 * {@link DomainWeight}s
-	 */
-	protected Map<PartnerBadge, TreeSet<DomainWeight>> matchingPartners = new HashMap<>();
-	private DomainDetector domainDetector = null;
+    private Logger logger = Logger.getLogger(WndomainSourceSelector.class.getName());
 
-	/**
-	 * A descent value-sorted map of domains detected in
-	 * <code>ecureUserProfile</code> at one a call of
-	 * {@link #sourceSelect(SecureUserProfile, List)} and how many times
-	 */
-	private Map<String, AtomicInteger> seenDomains = new TreeMap<>();
+    private DomainDetector domainDetector = null;
 
-	private boolean isKeywordGroupingEnabled;
+    /**
+     * A descent value-sorted map of domains detected in
+     * <code>ecureUserProfile</code> at one a call of
+     * {@link #sourceSelect(SecureUserProfile, List)} and how many times
+     */
+    private Map<String, AtomicInteger> seenDomains = new TreeMap<>();
 
-	public WndomainSourceSelector(FederatedRecommenderConfiguration configuration) {
-		try {
-			domainDetector = new WordnetDomainsDetector(new File(configuration.wordnetPath), new File(
-							configuration.wordnetDomainFilePath), true);
-		} catch (DomainDetectorException e) {
-			logger.error("unable to instanciate [" + WordnetDomainsDetector.class.getSimpleName() + "]", e);
-		}
-	}
+    private boolean isKeywordGroupingEnabled = true;
 
-	@Override
-	public SecureUserProfile sourceSelect(SecureUserProfile userProfile, List<PartnerBadge> partners) {
+    /**
+     * Constructs an intance of this class and a needed instance interfacing
+     * {@link DomainDetector}. This instance,being rather consuming, can later
+     * be exposed for other usage.
+     * 
+     * @param configuration
+     *            containing information where to find resources needed for the
+     *            domain detector
+     */
+    public WndomainSourceSelector(FederatedRecommenderConfiguration configuration) {
+        try {
+            domainDetector = new WordnetDomainsDetector(new File(configuration.wordnetPath), new File(configuration.wordnetDomainFilePath), true);
+        } catch (DomainDetectorException e) {
+            logger.severe("unable to instanciate [" + WordnetDomainsDetector.class.getSimpleName() + "]: " + e.getMessage());
+        }
+    }
 
-		if (null == domainDetector) {
-			logger.error("failed to select sources due to missing domain detector: skipping source selection");
-			return userProfile;
-		}
+    // TODO: Domain detection does not consider weights and ordering of domains
+    // now. Therefore source selection is based only on domain hits, regardless
+    // of their weights or partner domain weights.
+    @Override
+    public SecureUserProfile sourceSelect(SecureUserProfile userProfile, List<PartnerBadge> partners) {
 
-		matchingPartners.clear();
-		seenDomains.clear();
+        if (null == domainDetector) {
+            logger.severe("failed to select sources due to missing domain detector: skipping source selection");
+            return userProfile;
+        }
 
-		// don't touch if already selected
-		if (userProfile.partnerList.size() <= 0) {
-			// match partners and user profile languages
-			matchKeywordDomainsOnParterDomains(userProfile.contextKeywords, partners);
-			selectPartners(partners, userProfile.partnerList);
-		} else {
-			logger.info("refusing to select partners due to [" + userProfile.partnerList.size()
-							+ "] prevoiously selected partners");
-			return userProfile;
-		}
+        matchingPartners.clear();
+        seenDomains.clear();
 
-		if (userProfile.partnerList.size() > 0) {
-			logger.info("WordnetDomain-based source selection:");
-			for (PartnerBadge entry : userProfile.partnerList) {
-				StringBuilder info = new StringBuilder();
-				info.append("partner [" + entry.systemId + "] matching domain(s):");
-				for (PartnerDomain domain : entry.getDomainContent()) {
-					info.append(" [domain.name=" + domain.domainName + ", domain.weight=" + domain.weight + "]");
-				}
-				logger.info(info);
-			}
-		} else {
-			logger.info("unsuccessfull partner selection");
-		}
-		return userProfile;
-	}
+        // don't touch if already selected
+        if (userProfile.partnerList.size() <= 0) {
+            // match partners and user profile languages
+            matchKeywordDomainsOnParterDomains(userProfile.contextKeywords, partners);
+            selectPartners(partners, userProfile.partnerList);
+        } else {
+            logger.info("refusing to select partners due to [" + userProfile.partnerList.size() + "] prevoiously selected partners");
+            return userProfile;
+        }
 
-	/**
-	 * selects partners from {@link #matchingPartners} and adds their references
-	 * the partner list
-	 * 
-	 * @param partnerList
-	 *            list where selected partners are added to
-	 */
-	private void selectPartners(List<PartnerBadge> partners, List<PartnerBadge> partnerList) {
-		// TODO: This a straight forward implementation not considering domain
-		// weights specified in partners' configuration or detected domains.
-		for (PartnerBadge partner : partners) {
-			if (matchingPartners.containsKey(partner)) {
-				partnerList.add(partner);
-			}
-		}
-	}
+        if (userProfile.partnerList.size() > 0) {
+            StringBuilder info = new StringBuilder("partners: ");
+            for (PartnerBadge entry : userProfile.partnerList) {
+                info.append("[" + entry.systemId + "] ");
+            }
+            logger.info("WordnetDomain-based source selection selected: " + info.toString());
+        } else {
+            logger.info("unsuccessfull partner selection");
+        }
+        return userProfile;
+    }
 
-	/**
-	 * Matches parter domains with detected domains of context keywords.
-	 * Considers the amount of domain occurrences and normalizes their weight in
-	 * {@link #matchingPartners}.
-	 * 
-	 * @param contextKeywords
-	 *            context keywords
-	 * @param partners
-	 * @param partnersConnector
-	 */
-	private void matchKeywordDomainsOnParterDomains(List<ContextKeyword> contextKeywords, List<PartnerBadge> partners) {
+    /**
+     * Define whether domain detection should be performed on each keyword
+     * separately or on the resulting phrase of joined keywords.
+     * 
+     * @param enable
+     *            <p>
+     *            true - join keywords before domain detection
+     *            <p>
+     *            false - perform domain detection on each keyword separately
+     */
+    public void enableKeywordGroupingStrategy(boolean enable) {
+        isKeywordGroupingEnabled = enable;
+    }
 
-		// find keywords' domains
-		List<String> keywords = getQueryTerms(contextKeywords);
-		for (String keyword : keywords) {
-			try {
-				for (Domain domain : domainDetector.detect(keyword)) {
-					AtomicInteger timesSeen = seenDomains.get(domain.getName());
-					if (null == timesSeen) {
-						seenDomains.put(domain.getName().toLowerCase(), new AtomicInteger(1));
-					} else {
-						timesSeen.incrementAndGet();
-					}
-				}
-			} catch (DomainDetectorException e) {
-				logger.info("failed to detect domain(s) for kontext keyword");
-				return;
-			}
-		}
+    /**
+     * Exposes the currently referenced domain detector instance. Domain
+     * detection is synchronized on the returned instance.
+     * 
+     * @return the referenced domain detector instance
+     */
+    synchronized public DomainDetector getDomainDetector() {
+        return domainDetector;
+    }
 
-		// match keywords' domains with partners' domains
-		Double totalWeight = 0.0;
-		for (PartnerBadge partner : partners) {
-			for (PartnerDomain partnerContentDomain : partner.getDomainContent()) {
+    /**
+     * selects partners from {@link #matchingPartners} and adds their references
+     * the partner list
+     * 
+     * @param partnerList
+     *            list where selected partners are added to
+     */
+    private void selectPartners(List<PartnerBadge> partners, List<PartnerBadge> partnerList) {
+        // TODO: This a straight forward implementation not considering domain
+        // weights specified in partners' configuration or detected domains.
+        for (PartnerBadge partner : partners) {
+            if (matchingPartners.containsKey(partner)) {
+                partnerList.add(partner);
+            }
+        }
+    }
 
-				// TODO: This is a very simple match implementation, but since
-				// domains have a tree structure, utilizing a simple string
-				// comparison is a weak matching method. Instead a
-				// "is X sub domain of Y" comparison should be performed.
-				AtomicInteger timesSeen = seenDomains.get(partnerContentDomain.domainName.toLowerCase());
-				if (null == timesSeen) {
-					continue;
-				} else {
-					if (false == matchingPartners.containsKey(partner)) {
-						matchingPartners.put(partner, new TreeSet<>());
-					}
-					DomainWeight domain = new DomainWeight(partnerContentDomain.domainName, timesSeen.doubleValue());
-					matchingPartners.get(partner).add(domain);
-					totalWeight += domain.weight;
-				}
-			}
-		}
+    /**
+     * Matches parter domains with detected domains of context keywords.
+     * Considers the amount of domain occurrences and normalizes their weight in
+     * {@link #matchingPartners}.
+     * 
+     * @param contextKeywords
+     *            context keywords
+     * @param partners
+     * @param partnersConnector
+     */
+    private void matchKeywordDomainsOnParterDomains(List<ContextKeyword> contextKeywords, List<PartnerBadge> partners) {
 
-		// normalize domain weights to {weight ∈ [0.0;1.0]}
-		for (Map.Entry<PartnerBadge, TreeSet<DomainWeight>> entry : matchingPartners.entrySet()) {
-			for (DomainWeight domainWeight : entry.getValue()) {
-				domainWeight.weight = domainWeight.weight / totalWeight;
-			}
-		}
-	}
+        // find keywords' domains
+        List<String> keywords = getQueryTerms(contextKeywords);
+        for (String keyword : keywords) {
+            try {
+                synchronized (domainDetector) {
+                    for (Domain domain : domainDetector.detect(keyword)) {
+                        AtomicInteger timesSeen = seenDomains.get(domain.getName());
+                        if (null == timesSeen) {
+                            seenDomains.put(domain.getName().toLowerCase(), new AtomicInteger(1));
+                        } else {
+                            timesSeen.incrementAndGet();
+                        }
+                    }
+                }
+            } catch (DomainDetectorException e) {
+                logger.info("failed to detect domain(s) for kontext keyword");
+                return;
+            }
+        }
 
-	/**
-	 * Takes the query text form context keywords. When
-	 * {@link #isKeywordGroupingEnabled} is true the keywords are joined
-	 * (separated by " ") altogether into the fist list entry.
-	 * 
-	 * @param contextKeywords
-	 * @return
-	 */
-	private List<String> getQueryTerms(List<ContextKeyword> contextKeywords) {
-		ArrayList<String> keywords = new ArrayList<>(contextKeywords.size());
+        // match keywords' domains with partners' domains
+        Double totalWeight = 0.0;
+        for (PartnerBadge partner : partners) {
+            for (PartnerDomain partnerContentDomain : partner.getDomainContent()) {
 
-		for (ContextKeyword contextKeyword : contextKeywords) {
-			keywords.add(contextKeyword.text);
-		}
+                // TODO: This is a very simple match implementation, but since
+                // domains have a tree structure, utilizing a simple string
+                // comparison is a weak matching method. Instead a
+                // "is X sub domain of Y" comparison should be performed.
+                AtomicInteger timesSeen = seenDomains.get(partnerContentDomain.domainName.toLowerCase());
+                if (null == timesSeen) {
+                    continue;
+                } else {
+                    if (false == matchingPartners.containsKey(partner)) {
+                        matchingPartners.put(partner, new TreeSet<>());
+                    }
+                    DomainWeight domain = new DomainWeight(partnerContentDomain.domainName, timesSeen.doubleValue());
+                    matchingPartners.get(partner).add(domain);
+                    totalWeight += domain.weight;
+                }
+            }
+        }
 
-		if (isKeywordGroupingEnabled) {
-			List<String> joinedKeywords = new ArrayList<String>();
-			joinedKeywords.add(StringUtils.join(keywords, " "));
-			return joinedKeywords;
-		}
+        // normalize domain weights to {weight ∈ [0.0;1.0]}
+        for (Map.Entry<PartnerBadge, TreeSet<DomainWeight>> entry : matchingPartners.entrySet()) {
+            for (DomainWeight domainWeight : entry.getValue()) {
+                domainWeight.weight = domainWeight.weight / totalWeight;
+            }
+        }
+    }
 
-		return keywords;
-	}
+    /**
+     * Takes the query text form context keywords. When
+     * {@link #isKeywordGroupingEnabled} is true the keywords are joined
+     * (separated by " ") altogether into the fist list entry. Resulted keywords
+     * are lower case.
+     * 
+     * @param contextKeywords
+     * @return
+     */
+    private List<String> getQueryTerms(List<ContextKeyword> contextKeywords) {
+        ArrayList<String> keywords = new ArrayList<>(contextKeywords.size());
 
-	/**
-	 * Define whether domain detection should be performed on each keyword
-	 * separately or on the resulting phrase of joined keywords.
-	 * 
-	 * @param enable
-	 *            <p>
-	 *            true - join keywords before domain detection
-	 *            <p>
-	 *            false - perform domain detection on each keyword separately
-	 */
-	public void enableKeywordGroupingStrategy(boolean enable) {
-		isKeywordGroupingEnabled = enable;
-	}
+        if (isKeywordGroupingEnabled) {
+            StringBuilder joinedKeywords = new StringBuilder();
+            for (ContextKeyword contextKeyword : contextKeywords) {
+                joinedKeywords.append(contextKeyword.text.toLowerCase() + " ");
+            }
+            keywords.add(joinedKeywords.toString().trim());
+        } else {
+            for (ContextKeyword contextKeyword : contextKeywords) {
+                keywords.add(contextKeyword.text.toLowerCase());
+            }
+        }
+        return keywords;
+    }
 }

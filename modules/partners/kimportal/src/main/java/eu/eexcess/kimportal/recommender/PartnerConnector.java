@@ -31,12 +31,11 @@ import com.sun.jersey.api.client.WebResource.Builder;
 
 import eu.eexcess.config.PartnerConfiguration;
 import eu.eexcess.dataformats.result.DocumentBadge;
-import eu.eexcess.dataformats.result.ResultList;
 import eu.eexcess.dataformats.userprofile.SecureUserProfile;
 import eu.eexcess.partnerdata.reference.PartnerdataLogger;
 import eu.eexcess.partnerrecommender.api.PartnerConfigurationCache;
 import eu.eexcess.partnerrecommender.api.PartnerConnectorApi;
-import eu.eexcess.partnerrecommender.api.QueryGeneratorApi;
+import eu.eexcess.partnerrecommender.reference.PartnerConnectorBase;
 
 /**
  * Query generator for KIM.Collect.
@@ -44,23 +43,8 @@ import eu.eexcess.partnerrecommender.api.QueryGeneratorApi;
  * @author thomas.orgel@joanneum.at
  */
 
-public class PartnerConnector implements PartnerConnectorApi {
-	
-    private QueryGeneratorApi queryGenerator;
-
-    /**
-     * Returns the query generator for the partner search engine.
-     * @return the query generator
-     */
-    protected QueryGeneratorApi getQueryGenerator() {
-        return queryGenerator;
-    }
-    
-    @Override
-    public ResultList queryPartnerNative(PartnerConfiguration partnerConfiguration, SecureUserProfile userProfile, PartnerdataLogger logger)
-    				throws IOException {
-    	return null;
-    }
+public class PartnerConnector extends PartnerConnectorBase implements PartnerConnectorApi {
+	/*
     
 	@Override
 	public Document queryPartner(PartnerConfiguration partnerConfiguration, SecureUserProfile userProfile, PartnerdataLogger logger) throws IOException {
@@ -120,5 +104,5 @@ public class PartnerConnector implements PartnerConnectorApi {
 				throw new IOException("Cannot query partner REST API!", e);
 		}
 	}
-
+*/
 }

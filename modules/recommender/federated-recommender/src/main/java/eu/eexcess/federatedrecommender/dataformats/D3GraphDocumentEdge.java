@@ -19,7 +19,7 @@ GNU Affero General Public License for more details.
 
 You should have received a copy of the GNU Affero General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
-*/
+ */
 package eu.eexcess.federatedrecommender.dataformats;
 
 import java.io.Serializable;
@@ -28,14 +28,38 @@ import java.io.Serializable;
  * 
  */
 public class D3GraphDocumentEdge implements Serializable {
-	private static final long serialVersionUID = 1937873166249578293L;
-	public String target;
-	public String source;
-	public String value;
-	
-	public D3GraphDocumentEdge(String source, String target){
-		this.target=target;
-		this.source=source;
-		this.value= new Integer(1).toString();
-	}
+    private static final long serialVersionUID = 1937873166249578293L;
+    private String target;
+    private String source;
+    private String value;
+
+    public D3GraphDocumentEdge(String source, String target) {
+        this.setTarget(target);
+        this.setSource(source);
+        this.setValue(Integer.toString(1));
+    }
+
+    public String getTarget() {
+        return target;
+    }
+
+    public void setTarget(String target) {
+        this.target = target;
+    }
+
+    public String getSource() {
+        return source;
+    }
+
+    public void setSource(String source) {
+        this.source = source;
+    }
+
+    public String getValue() {
+        return value;
+    }
+
+    public void setValue(String value) {
+        this.value = value;
+    }
 }

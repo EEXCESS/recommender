@@ -26,6 +26,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.logging.Level;
@@ -109,24 +110,18 @@ public class PseudoRelevanceWikipediaDecomposer implements SecureUserProfileDeco
 		try {
 			TermSet<TypedTerm> queryExpansionTerms;
 			queryExpansionTerms = wikipediaQueryExpansion.expandQuery(query);
-//			for (TypedTerm typedTerm : queryExpansionTerms.getTopTerms(100)) {
-//				System.out.println("TypedTerm: "+ typedTerm.getText() +" Type: "+typedTerm.getType() +" Weight: " +typedTerm.getWeight());
-//			}
-//			System.out.println(query  +" query #############################");
 			terms.addAll(queryExpansionTerms.getTopTerms(numTermsToExpand));
 		} catch (IOException e) {
 			logger.log(Level.SEVERE, "Cannot expand the query using Wikipedia", e);
 		}
 		
-		ArrayList<ContextKeyword> newContextKeywords = new ArrayList<ContextKeyword>();
+		List<ContextKeyword> newContextKeywords = new ArrayList<ContextKeyword>();
 		for (TypedTerm typedTerm : terms.getTopTerms(numTermsToExpand)) {
 			newContextKeywords.add(new ContextKeyword(typedTerm.getText(),ExpansionType.PSEUDORELEVANCEWP));
 		}
 		inputSecureUserProfile.contextKeywords.addAll(newContextKeywords);
 		logger.log(Level.INFO, "Wikipedia Expansion: " + newContextKeywords.toString());
 		return inputSecureUserProfile;
-
-		//return null;
 	}
 	
 	/**

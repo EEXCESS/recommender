@@ -53,7 +53,17 @@ import com.hp.hpl.jena.graph.Triple;
 import eu.eexcess.config.FederatedRecommenderConfiguration;
 import eu.eexcess.federatedrecommender.utils.FederatedRecommenderException;
 
+/**
+ * Handles the connection and creation of the Solr DBPedia Index
+ * @author hziak
+ *
+ */
 public class DbPediaSolrIndex {
+    private static final String PARENT_NODE = "parentNode";
+    private static final String EDGE = "edge";
+    private static final String ENITY_DE = "enity_de";
+    private static final String ENITY_EN = "enity_en";
+    private static final String CHILD_NODE = "childNode";
     private static final Logger logger = Logger.getLogger(DbPediaSolrIndex.class.getName());
     private final String solrServer;
     private final SolrServer server;
@@ -152,33 +162,24 @@ public class DbPediaSolrIndex {
      * @return
      * @throws Exception
      */
-    private SolrInputDocument createDocument(int counter, Triple t) throws Exception {
+    private SolrInputDocument createDocument(int counter, Triple t) throws FederatedRecommenderException {
         // TODO: Refactoring Use the Beans
         SolrInputDocument doc = new SolrInputDocument();
         doc.addField("id", "Doc " + counter);
-        doc.addField("parentNode", t.getSubject().toString());
-        doc.addField("edge", t.getPredicate().toString());
+        doc.addField(PARENT_NODE, t.getSubject().toString());
+        doc.addField(EDGE, t.getPredicate().toString());
         doc.addField("relevance", 0);
         if (getIndexableObject(t.getObject(), doc)) {
 
-            String query = "";
-            if (doc.getField("childNode") != null)
-                query += doc.getField("childNode").getName() + ":\"" + doc.getField("childNode").getFirstValue() + "\" AND ";
-            if (doc.getField("enity_en") != null)
-                query += doc.getField("enity_en").getName() + ":\"" + doc.getField("enity_en").getFirstValue() + "\" AND ";
-            if (doc.getField("enity_de") != null)
-                query += doc.getField("enity_de").getName() + ":\"" + doc.getField("enity_de").getFirstValue() + "\" AND ";
-            query += doc.getField("edge").getName() + ":\"" + doc.getField("edge").getFirstValue() + "\" AND ";
-            query += doc.getField("parentNode").getName() + ":\"" + doc.getField("parentNode").getFirstValue() + "\"";
+            String query = generateSolrQuery(doc);
             ModifiableSolrParams solrParams = new ModifiableSolrParams();
             solrParams.set("q", query);
             QueryResponse queryResponse = null;
             try {
                 queryResponse = server.query(solrParams);
-            } catch (SolrServerException e) { // Exception is ignored on
-                                              // purpose
-                // logger.log(Level.INFO);
-                // e.printStackTrace();
+            } catch (SolrServerException e) {
+                 logger.log(Level.INFO,"",e);
+
             }
             if (queryResponse == null)
                 return doc;
@@ -192,12 +193,34 @@ public class DbPediaSolrIndex {
                     dbPediaDoc.relevance += 1;
                 }
 
-                server.addBeans(dbPediaIndexBeans);
+                try {
+                    server.addBeans(dbPediaIndexBeans);
+                } catch (SolrServerException | IOException e) {
+                   logger.log(Level.SEVERE,"Some exception happened while adding the solr beans",e);
+                   throw new FederatedRecommenderException("Some exception happened while adding the solr beans",e);
+                }
                 return null;
             }
         }
         return null;
 
+    }
+    /**
+     * generates the solr query for the new node
+     * @param doc
+     * @return
+     */
+    private String generateSolrQuery(SolrInputDocument doc) {
+        String query = "";
+        if (doc.getField(CHILD_NODE) != null)
+            query += doc.getField(CHILD_NODE).getName() + ":\"" + doc.getField(CHILD_NODE).getFirstValue() + "\" AND ";
+        if (doc.getField(ENITY_EN) != null)
+            query += doc.getField(ENITY_EN).getName() + ":\"" + doc.getField(ENITY_EN).getFirstValue() + "\" AND ";
+        if (doc.getField(ENITY_DE) != null)
+            query += doc.getField(ENITY_DE).getName() + ":\"" + doc.getField(ENITY_DE).getFirstValue() + "\" AND ";
+        query += doc.getField(EDGE).getName() + ":\"" + doc.getField(EDGE).getFirstValue() + "\" AND ";
+        query += doc.getField(PARENT_NODE).getName() + ":\"" + doc.getField(PARENT_NODE).getFirstValue() + "\"";
+        return query;
     }
 
     /**
@@ -214,14 +237,14 @@ public class DbPediaSolrIndex {
             try {
                 String dataTypeUri = object.toString();
                 if (dataTypeUri.contains("resource")) {
-                    doc.addField("childNode", object.toString());
+                    doc.addField(CHILD_NODE, object.toString());
                     return true;
 
                 } else if (dataTypeUri.contains("XMLSchema")) {
                     return false;
                 }
             } catch (Exception e) {
-                // logger.log(Level.INFO, "Could not parse node correctly", e);
+                logger.log(Level.INFO, "Could not parse node correctly", e);
                 return false;
             }
 
@@ -247,14 +270,14 @@ public class DbPediaSolrIndex {
         ModifiableSolrParams solrParams = new ModifiableSolrParams();
         solrParams.set("q", query);
         solrParams.set("rows", hitsLimit);
-        solrParams.set("sort", "referringParent DESC , referringChild DESC");
+        solrParams.set("sort", "referringParent DESC");
 
         QueryResponse queryResponse = null;
 
         try {
             queryResponse = server.query(solrParams);
         } catch (SolrServerException e) {
-            logger.log(Level.SEVERE, "Query " + query + " was not foung in DBPediaIndex", e);
+            logger.log(Level.SEVERE, "Query " + query + " was not found in DBPediaIndex", e);
             throw new FederatedRecommenderException("Query " + query + " was not foung in DBPediaIndex, server is perhabs not running", e);
         }
         return queryResponse.getBeans(DbPediaIndexBean.class);
@@ -342,8 +365,7 @@ public class DbPediaSolrIndex {
                     logger.log(Level.INFO, "No Results in the index for query " + parentQuery, e);
                 }
                 dbPediaIndexBean.referringParent = 0;
-                if (parentResponse != null)
-                    if (parentResponse.getResults() != null)
+                if (parentResponse != null && parentResponse.getResults() != null)
                         dbPediaIndexBean.referringParent = parentResponse.getResults().getNumFound();
 
                 ModifiableSolrParams childParam = new ModifiableSolrParams();
@@ -357,24 +379,11 @@ public class DbPediaSolrIndex {
                     logger.log(Level.INFO, "No Results in the index for query " + childQuery, e);
                 }
                 dbPediaIndexBean.referringChild = 0;
-                if (childResponse != null)
-                    if (childResponse.getResults() != null)
+                if (childResponse != null && childResponse.getResults() != null)
                         dbPediaIndexBean.referringChild = childResponse.getResults().getNumFound();
 
                 processedDocs.add(dbPediaIndexBean);
-                if (processedDocs.size() % 100000 == 0) {
-                    try {
-                        server.addBeans(processedDocs);
-                        server.commit();
-                    } catch (SolrServerException e) {
-                        logger.log(Level.SEVERE, "Could cot commit to DBPedia Index", e);
-                        throw new FederatedRecommenderException("Could cot commit to DBPedia Index", e);
-                    } catch (IOException e) {
-                        logger.log(Level.SEVERE, "Could cot commit to DBPedia Index", e);
-                        throw new FederatedRecommenderException("Could cot commit to DBPedia Index", e);
-                    }
-                    processedDocs.clear();
-                }
+                commitBeans(processedDocs);
             }
         try {
             server.addBeans(processedDocs);
@@ -385,6 +394,22 @@ public class DbPediaSolrIndex {
         } catch (IOException e) {
             logger.log(Level.SEVERE, "Could cot commit to DBPedia Index", e);
             throw new FederatedRecommenderException("Could cot commit to DBPedia Index", e);
+        }
+    }
+
+    private void commitBeans(List<DbPediaIndexBean> processedDocs) throws FederatedRecommenderException {
+        if (processedDocs.size() % 100000 == 0) {
+            try {
+                server.addBeans(processedDocs);
+                server.commit();
+            } catch (SolrServerException e) {
+                logger.log(Level.SEVERE, "Could cot commit to DBPedia Index", e);
+                throw new FederatedRecommenderException("Could cot commit to DBPedia Index", e);
+            } catch (IOException e) {
+                logger.log(Level.SEVERE, "Could cot commit to DBPedia Index", e);
+                throw new FederatedRecommenderException("Could cot commit to DBPedia Index", e);
+            }
+            processedDocs.clear();
         }
     }
 

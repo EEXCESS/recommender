@@ -18,6 +18,7 @@ package eu.eexcess.federatedrecommenderservice;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
@@ -37,9 +38,7 @@ import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
-import org.codehaus.jackson.JsonParseException;
 import org.codehaus.jackson.JsonParser;
-import org.codehaus.jackson.map.JsonMappingException;
 import org.codehaus.jackson.map.ObjectMapper;
 
 import com.sun.jersey.spi.resource.Singleton;
@@ -74,12 +73,7 @@ import eu.eexcess.federatedrecommender.utils.FederatedRecommenderException;
 @Singleton
 public class FederatedRecommenderService {
     private static final Logger logger = Logger.getLogger(FederatedRecommenderService.class.getName());
-    // @SuppressWarnings("unused")
-    // private static final String EEXCESS_MIMETYPE =
-    // "application/vnd.eexcess.recommendation-results+json";
-    // @SuppressWarnings("unused")
-    // private static final String EEXCESS_NAMESPACE =
-    // "http://eexcess.eu/schema/recommender-results";
+
     private final FederatedRecommenderCore fRC;
 
     private final FederatedRecommenderConfiguration federatedRecommenderConfiguration;
@@ -108,15 +102,9 @@ public class FederatedRecommenderService {
 
         try {
             federatedRecommenderConfiguration = mapper.readValue(new File(resource.getFile()), FederatedRecommenderConfiguration.class);
-        } catch (JsonParseException e) {
-            logger.log(Level.SEVERE, "There was an error parsing the FederationRecommenderConfig File", e);
-            throw new FederatedRecommenderException("There was an error parsing the FederationRecommenderConfig File in FederatedRecommenderCore Module", e);
-        } catch (JsonMappingException e) {
-            logger.log(Level.SEVERE, "There was an error parsing the FederationRecommenderConfig File", e);
-            throw new FederatedRecommenderException("There was an error parsing the FederationRecommenderConfig File in FederatedRecommenderCore Module", e);
         } catch (IOException e) {
-            logger.log(Level.SEVERE, "There was an error reading the FederationRecommenderConfig File", e);
-            throw new FederatedRecommenderException("There was an error reading the FederationRecommenderConfig File in FederatedRecommenderCore Module", e);
+            logger.log(Level.SEVERE, "There was an error parsing the FederationRecommenderConfig File", e);
+            throw new FederatedRecommenderException("There was an error parsing the FederationRecommenderConfig File in FederatedRecommenderCore Module", e);
         }
         try {
             fRC = FederatedRecommenderCore.getInstance(federatedRecommenderConfiguration);
@@ -200,17 +188,6 @@ public class FederatedRecommenderService {
     @Produces({ MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON })
     public PartnerBadgeList getRegisteredPartners() throws IOException {
 
-        /*
-         * PartnerRegister partnerRegister= fRC.getPartnerRegister();
-         * PartnerRegister returnedPartnerRegister= new PartnerRegister(); for
-         * (PartnerBadge partnerBadge: partnerRegister.getPartners()) {
-         * partnerBadge.setEndpoint(""); //clean out the endpoint, user should
-         * perhaps not know that if(partnerBadge.partnerKey==null)
-         * returnedPartnerRegister.addPartner(partnerBadge);
-         * if(partnerBadge.partnerKey.isEmpty())
-         * returnedPartnerRegister.addPartner(partnerBadge); } return
-         * returnedPartnerRegister;
-         */
         PartnerBadgeList partners = new PartnerBadgeList();
 
         partners.partners = fRC.getPartnerRegister().getPartners();
@@ -226,30 +203,47 @@ public class FederatedRecommenderService {
         return fRC.getRecommenderStats();
     }
 
+    @GET
+    @Path("/getPreviewImage")
+    @Produces("image/png")
+    public Response getPreviewImage(@QueryParam("type") String type) throws IOException {
+        logger.log(Level.INFO, type);
+        if (type == null)
+            return Response.serverError().build();
+        InputStream resourceAsStream = null;
+        switch (type) {
+        case "other":
+            resourceAsStream = this.getClass().getResourceAsStream("/Thumbnails_EECXESS_unknown.png");
+            break;
+        case "unknown":
+            resourceAsStream = this.getClass().getResourceAsStream("/Thumbnails_EECXESS_unknown.png");
+            break;
+        case "text":
+            resourceAsStream = this.getClass().getResourceAsStream("/Thumbnails_EECXESS_text.png");
+            break;
+        case "audio":
+            resourceAsStream = this.getClass().getResourceAsStream("/Thumbnails_EECXESS_audio.png");
+            break;
+        case "3d":
+            resourceAsStream = this.getClass().getResourceAsStream("/Thumbnails_EECXESS_3d.png");
+            break;
+        case "image":
+            resourceAsStream = this.getClass().getResourceAsStream("/Thumbnails_EECXESS_image.png");
+            break;
+        case "video":
+            resourceAsStream = this.getClass().getResourceAsStream("/Thumbnails_EECXESS_video.png");
+            break;
+        default:
+            break;
+        }
+        if (resourceAsStream != null)
+            return Response.ok(resourceAsStream).build();
+        return Response.serverError().build();
+    }
+
     // End Services
 
     // Begin Test Services
-
-    /*
-     * TEST METHODS:
-     * 
-     * (1) Test recommend -> /testRecommend?context=Keyword -> Generate
-     * recommendations (2) Test badge -> /testBadge -> Retrieve a sample partner
-     * badge (3) Test secure user profile -> /testSUP -> Retrieve a sample
-     * secure user profile
-     */
-
-    /*
-     * @GET
-     * 
-     * @Path("/testRecommend")
-     * 
-     * @Produces(value = MediaType.APPLICATION_XML) public ResultList
-     * testRecommend(@QueryParam("context") String context) throws IOException {
-     * SecureUserProfile userProfile = new SecureUserProfile();
-     * userProfile.contextList = Arrays.asList(context); return
-     * fRC.generateFederatedRecommendation(userProfile); }
-     */
 
     @GET
     @Path("/testRecommend")
@@ -330,23 +324,24 @@ public class FederatedRecommenderService {
         secureUserProfile.userCredentials = userCredentials;
 
         ContextNamedEntity contextNamedEntitie = new ContextNamedEntity();
-        ContextNamedEntitiesElement location = new ContextNamedEntitiesElement("graz", 0.1, 0.1, "http://dbpedia.url.org");
+        final String dbPediaUrl = "http://dbpedia.url.org";
+        ContextNamedEntitiesElement location = new ContextNamedEntitiesElement("graz", 0.1, 0.1, dbPediaUrl);
         contextNamedEntitie.locations.add(location);
         contextNamedEntitie.locations.add(location);
-        ContextNamedEntitiesElement misc = new ContextNamedEntitiesElement("something", 0.1, 0.1, "http://dbpedia.url.org");
+        ContextNamedEntitiesElement misc = new ContextNamedEntitiesElement("something", 0.1, 0.1, dbPediaUrl);
         contextNamedEntitie.misc.add(misc);
         contextNamedEntitie.misc.add(misc);
-        ContextNamedEntitiesElement org1 = new ContextNamedEntitiesElement("know-center", 0.1, 0.1, "http://dbpedia.url.org");
+        ContextNamedEntitiesElement org1 = new ContextNamedEntitiesElement("know-center", 0.1, 0.1, dbPediaUrl);
         contextNamedEntitie.organizations.add(org1);
-        ContextNamedEntitiesElement org2 = new ContextNamedEntitiesElement("mendeley", 0.1, 0.1, "http://dbpedia.url.org");
+        ContextNamedEntitiesElement org2 = new ContextNamedEntitiesElement("mendeley", 0.1, 0.1, dbPediaUrl);
         contextNamedEntitie.organizations.add(org2);
-        ContextNamedEntitiesElement pers1 = new ContextNamedEntitiesElement("Michael Jackson", 0.1, 0.1, "http://dbpedia.url.org");
+        ContextNamedEntitiesElement pers1 = new ContextNamedEntitiesElement("Michael Jackson", 0.1, 0.1, dbPediaUrl);
         contextNamedEntitie.persons.add(pers1);
-        ContextNamedEntitiesElement pers2 = new ContextNamedEntitiesElement("Bill Clinton", 0.1, 0.1, "http://dbpedia.url.org");
+        ContextNamedEntitiesElement pers2 = new ContextNamedEntitiesElement("Bill Clinton", 0.1, 0.1, dbPediaUrl);
         contextNamedEntitie.persons.add(pers2);
-        ContextNamedEntitiesElement top1 = new ContextNamedEntitiesElement("Trees", 0.1, 0.1, "http://dbpedia.url.org");
+        ContextNamedEntitiesElement top1 = new ContextNamedEntitiesElement("Trees", 0.1, 0.1, dbPediaUrl);
         contextNamedEntitie.topics.add(top1);
-        ContextNamedEntitiesElement top2 = new ContextNamedEntitiesElement("Animal", 0.1, 0.1, "http://dbpedia.url.org");
+        ContextNamedEntitiesElement top2 = new ContextNamedEntitiesElement("Animal", 0.1, 0.1, dbPediaUrl);
         contextNamedEntitie.topics.add(top2);
 
         secureUserProfile.contextNamedEntities = contextNamedEntitie;

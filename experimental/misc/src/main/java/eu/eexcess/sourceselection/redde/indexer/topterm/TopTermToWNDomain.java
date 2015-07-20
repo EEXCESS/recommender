@@ -33,7 +33,7 @@ import net.sf.extjwnl.JWNLException;
 
 import org.apache.commons.io.LineIterator;
 
-import eu.eexcess.federatedrecommender.domaindetection.Domain;
+import eu.eexcess.federatedrecommender.domaindetection.probing.Domain;
 import eu.eexcess.federatedrecommender.domaindetection.wordnet.WordnetDomainsDetector;
 import eu.eexcess.sourceselection.redde.tree.TreeNode;
 import eu.eexcess.sourceselection.redde.tree.ValueTreeNode;

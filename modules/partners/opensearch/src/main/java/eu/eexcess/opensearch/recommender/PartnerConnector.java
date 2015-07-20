@@ -39,9 +39,9 @@ import eu.eexcess.config.PartnerConfiguration;
 import eu.eexcess.dataformats.result.DocumentBadge;
 import eu.eexcess.dataformats.result.ResultList;
 import eu.eexcess.dataformats.userprofile.SecureUserProfile;
-import eu.eexcess.opensearch.opensearchDescriptionDocument.OpensearchDescription;
-import eu.eexcess.opensearch.opensearchDescriptionDocument.documentFields.Url;
-import eu.eexcess.opensearch.opensearchDescriptionDocument.parse.OpenSearchDocumentParser;
+import eu.eexcess.opensearch.opensearch_description_document.OpensearchDescription;
+import eu.eexcess.opensearch.opensearch_description_document.documentFields.Url;
+import eu.eexcess.opensearch.opensearch_description_document.parse.OpenSearchDocumentParser;
 import eu.eexcess.opensearch.recommender.dataformat.JsonOpensearchResultListBuilder;
 import eu.eexcess.opensearch.recommender.dataformat.OpensearchResultListBuilder;
 import eu.eexcess.opensearch.recommender.searchLink.SearchLinkFilter;
@@ -59,172 +59,162 @@ import eu.eexcess.partnerrecommender.reference.PartnerConnectorBase;
  */
 public class PartnerConnector extends PartnerConnectorBase implements PartnerConnectorApi {
 
-	private static final Logger logger = Logger.getLogger(PartnerConnector.class.getName());
+    private static final Logger logger = Logger.getLogger(PartnerConnector.class.getName());
 
-	private static final String searchTermsVariableName = "searchTerms";
-	private static final String substitutorPrefix = "{";
-	private static final String substitutorSuffix = "}";
+    private static final String searchTermsVariableName = "searchTerms";
+    private static final String substitutorPrefix = "{";
+    private static final String substitutorSuffix = "}";
 
-	private static final String searchLinkType = "application/x-suggestions+json";
+    private static final String searchLinkType = "application/x-suggestions+json";
 
-	private PartnerConfiguration partnerConfig = null;
-	private OpensearchDescription descriptionDocument = null;
+    private OpensearchDescription descriptionDocument = null;
 
-	public PartnerConnector() {
-	}
+    public PartnerConnector() {
+    }
 
-	@Override
-	public ResultList queryPartnerNative(PartnerConfiguration partnerConfiguration, SecureUserProfile userProfile, PartnerdataLogger logger)
-					throws IOException {
-		partnerConfig = partnerConfiguration;
+    @Override
+    public ResultList queryPartnerNative(PartnerConfiguration partnerConfiguration, SecureUserProfile userProfile, PartnerdataLogger logger) throws IOException {
 
-		if (PartnerConfigurationCache.CONFIG.getIntializedFlag() == false) {
-			descriptionDocument = readOpensearchDescriptionDocument(partnerConfiguration.searchEndpoint);
-			PartnerConfigurationCache.CONFIG.setIntializedFlag(bootstrapSearchEndpoint(descriptionDocument));
-		}
-		
-		String query = PartnerConfigurationCache.CONFIG.getQueryGenerator(partnerConfiguration.queryGeneratorClass).toQuery(userProfile);
-		return fetchSearchResults(query, descriptionDocument);
-	}
+        if (PartnerConfigurationCache.CONFIG.getIntializedFlag() == false) {
+            descriptionDocument = readOpensearchDescriptionDocument(partnerConfiguration.searchEndpoint);
+            PartnerConfigurationCache.CONFIG.setIntializedFlag(bootstrapSearchEndpoint(descriptionDocument));
+        }
 
-	@Override
-	public Document queryPartner(PartnerConfiguration partnerConfiguration, SecureUserProfile userProfile, PartnerdataLogger logger)
-					throws IOException {
+        String query = PartnerConfigurationCache.CONFIG.getQueryGenerator(partnerConfiguration.queryGeneratorClass).toQuery(userProfile);
+        return fetchSearchResults(query, descriptionDocument);
+    }
 
-		return null;
-	}
+    @Override
+    public Document queryPartner(PartnerConfiguration partnerConfiguration, SecureUserProfile userProfile, PartnerdataLogger logger) throws IOException {
 
-	/**
-	 * Reads OpenSearch Description document from {@code searchEndpoint} and
-	 * replaces {@code searchEndpoint} by a new link (search link).
-	 * 
-	 * @param descriptionDocument
-	 *            description document that describes the OpenSearch api
-	 * @return true if exactly one valid link was found
-	 */
-	private boolean bootstrapSearchEndpoint(OpensearchDescription descriptionDocument) {
+        return null;
+    }
 
-		SearchLinkFilter linkFilter = new SearchLinkFilter();
-		linkFilter.setType(searchLinkType);
-		SearchLinkSelector linkSelector = new SearchLinkSelector();
-		List<Url> selection = linkSelector.select(descriptionDocument.searchLinks, linkFilter);
+    /**
+     * Reads OpenSearch Description document from {@code searchEndpoint} and
+     * replaces {@code searchEndpoint} by a new link (search link).
+     * 
+     * @param descriptionDocument
+     *            description document that describes the OpenSearch api
+     * @return true if exactly one valid link was found
+     */
+    private boolean bootstrapSearchEndpoint(OpensearchDescription descriptionDocument) {
 
-		if (selection.size() <= 0) {
-			logger.log(Level.WARNING, "no search link found in [" + partnerConfig.searchEndpoint + "]");
-			return false;
-		} else if (selection.size() > 1) {
-			logger.log(Level.WARNING, "ambiguous search links found in [" + partnerConfig.searchEndpoint + "] - take ["
-							+ selection.get(0).template + "]");
-			return false;
-		}
+        SearchLinkFilter linkFilter = new SearchLinkFilter();
+        linkFilter.setType(searchLinkType);
+        SearchLinkSelector linkSelector = new SearchLinkSelector();
+        List<Url> selection = linkSelector.select(descriptionDocument.searchLinks, linkFilter);
 
-		partnerConfig.searchEndpoint = selection.get(0).template;
-		return true;
-	}
+        if (selection.size() <= 0) {
+            logger.log(Level.WARNING, "no search link found in [" + PartnerConfigurationCache.CONFIG.getPartnerConfiguration().searchEndpoint + "]");
+            return false;
+        } else if (selection.size() > 1) {
+            logger.log(Level.WARNING, "ambiguous search links found in [" + PartnerConfigurationCache.CONFIG.getPartnerConfiguration().searchEndpoint
+                    + "] - take [" + selection.get(0).template + "]");
+            return false;
+        }
 
-	/**
-	 * Performs a search with {@code query}.
-	 * 
-	 * @param query
-	 *            query to be used for fetching results
-	 * @param descriptionDocument
-	 *            description document that describes the open search api
-	 * @return the search results for that {@code query} or null on error
-	 */
-	private ResultList fetchSearchResults(String query, OpensearchDescription descriptionDocument) {
+        PartnerConfigurationCache.CONFIG.getPartnerConfiguration().searchEndpoint = selection.get(0).template;
+        return true;
+    }
 
-		Client client = new Client(PartnerConfigurationCache.CONFIG.getClientJacksonJson());
-		String searchRequestUrl = injectSearchQuery(partnerConfig.searchEndpoint, query);
+    /**
+     * Performs a search with {@code query}.
+     * 
+     * @param query
+     *            query to be used for fetching results
+     * @param descriptionDocument
+     *            description document that describes the open search api
+     * @return the search results for that {@code query} or null on error
+     */
+    private ResultList fetchSearchResults(String query, OpensearchDescription descriptionDocument) {
 
-		WebResource documentResource = client.resource(searchRequestUrl);
+        Client client = new Client(PartnerConfigurationCache.CONFIG.getClientJacksonJson());
+        String searchRequestUrl = injectSearchQuery(PartnerConfigurationCache.CONFIG.getPartnerConfiguration().searchEndpoint, query);
 
-		ClientResponse searchResult = documentResource.accept(MediaType.APPLICATION_JSON).get(ClientResponse.class);
+        WebResource documentResource = client.resource(searchRequestUrl);
 
-		if (searchResult.getStatus() != 200) {
-			logger.log(Level.WARNING, "failed receiving search result for [" + query + "]");
-			return null;
-		}
+        ClientResponse searchResult = documentResource.accept(MediaType.APPLICATION_JSON).get(ClientResponse.class);
 
-		String jsonResponseString = searchResult.getEntity(String.class);
-		JSONArray jsonResponse = new org.json.JSONArray(jsonResponseString);
+        if (searchResult.getStatus() != 200) {
+            logger.log(Level.WARNING, "failed receiving search result for [" + query + "]");
+            return null;
+        }
 
-		OpensearchResultListBuilder osResponseBuilder = new JsonOpensearchResultListBuilder(jsonResponse,
-						descriptionDocument);
-		return osResponseBuilder.build();
-	}
+        String jsonResponseString = searchResult.getEntity(String.class);
+        JSONArray jsonResponse = new org.json.JSONArray(jsonResponseString);
 
-	/**
-	 * Replace the "{searchTerm}" in {@code searchEndpointTemplate} with
-	 * {@code searchQuery}.
-	 * 
-	 * @param searchEndpointTemplate
-	 *            the search end point link containing searchTerm placeholder
-	 * @param searchQuery
-	 *            the search term
-	 * @return the substituted link or null on error
-	 */
-	private String injectSearchQuery(String searchEndpointTemplate, String searchQuery) {
+        OpensearchResultListBuilder osResponseBuilder = new JsonOpensearchResultListBuilder(jsonResponse, descriptionDocument);
+        return osResponseBuilder.build();
+    }
 
-		try {
-			Map<String, String> valuesMap = new HashMap<String, String>();
-			valuesMap.put(searchTermsVariableName, searchQuery);
-			StrSubstitutor substitutor = new StrSubstitutor(valuesMap, substitutorPrefix, substitutorSuffix);
-			return substitutor.replace(partnerConfig.searchEndpoint);
-		} catch (Exception e) {
-		}
+    /**
+     * Replace the "{searchTerm}" in {@code searchEndpointTemplate} with
+     * {@code searchQuery}.
+     * 
+     * @param searchEndpointTemplate
+     *            the search end point link containing searchTerm placeholder
+     * @param searchQuery
+     *            the search term
+     * @return the substituted link or null on error
+     */
+    private String injectSearchQuery(String searchEndpointTemplate, String searchQuery) {
 
-		logger.log(Level.WARNING, "failed to prepare search request url [" + searchEndpointTemplate + "] with query ["
-						+ searchQuery + "]");
-		return null;
-	}
+        try {
+            Map<String, String> valuesMap = new HashMap<String, String>();
+            valuesMap.put(searchTermsVariableName, searchQuery);
+            StrSubstitutor substitutor = new StrSubstitutor(valuesMap, substitutorPrefix, substitutorSuffix);
+            return substitutor.replace(PartnerConfigurationCache.CONFIG.getPartnerConfiguration().searchEndpoint);
+        } catch (Exception e) {
+        }
 
-	/**
-	 * Fetch and parse the OpenSearch document found at
-	 * {@code PartnerConfigurationEnum.CONFIG.getPartnerConfiguration().searchEndpoint}
-	 * 
-	 * @return parsed OpenSearch description document or null on error
-	 */
-	private OpensearchDescription readOpensearchDescriptionDocument(String searchEndpoint) {
+        logger.log(Level.WARNING, "failed to prepare search request url [" + searchEndpointTemplate + "] with query [" + searchQuery + "]");
+        return null;
+    }
 
-		OpensearchDescription document = null;
+    /**
+     * Fetch and parse the OpenSearch document found at
+     * {@code PartnerConfigurationEnum.CONFIG.getPartnerConfiguration().searchEndpoint}
+     * 
+     * @return parsed OpenSearch description document or null on error
+     */
+    private OpensearchDescription readOpensearchDescriptionDocument(String searchEndpoint) {
 
-		try {
-			Client client = PartnerConfigurationCache.CONFIG.getClientDefault();
-			WebResource documentResource = client.resource(searchEndpoint);
-			ClientResponse response = documentResource.accept(MediaType.APPLICATION_XML_TYPE).get(ClientResponse.class);
+        OpensearchDescription document = null;
 
-			if (response.getStatus() != 200) {
+        try {
+            Client client = PartnerConfigurationCache.CONFIG.getClientDefault();
+            WebResource documentResource = client.resource(searchEndpoint);
+            ClientResponse response = documentResource.accept(MediaType.APPLICATION_XML_TYPE).get(ClientResponse.class);
 
-				logger.log(Level.WARNING, "failed receiving document [" + searchEndpoint + "]");
-				return null;
-			}
-			String xmlResponse = response.getEntity(String.class);
+            if (response.getStatus() != 200) {
 
-			OpenSearchDocumentParser osParser = new OpenSearchDocumentParser();
-			document = osParser.toDescriptionDocument(xmlResponse);
-			if (null == document) {
-				logger.log(Level.WARNING, "failed parsing document from xml");
-			}
+                logger.log(Level.WARNING, "failed receiving document [" + searchEndpoint + "]");
+                return null;
+            }
+            String xmlResponse = response.getEntity(String.class);
 
-		} catch (Exception e) {
-			logger.log(Level.WARNING, "failed reading description document [" + searchEndpoint + "]", e);
-		}
+            OpenSearchDocumentParser osParser = new OpenSearchDocumentParser();
+            document = osParser.toDescriptionDocument(xmlResponse);
+            if (null == document) {
+                logger.log(Level.WARNING, "failed parsing document from xml");
+            }
 
-		if (document == null) {
-			logger.log(Level.WARNING, "failed creating description document [=NULL]");
-			return null;
-		}
-		return document;
-	}
+        } catch (Exception e) {
+            logger.log(Level.WARNING, "failed reading description document [" + searchEndpoint + "]", e);
+        }
 
-	@Override
-	public Document queryPartnerDetails(
-			PartnerConfiguration partnerConfiguration,
-			DocumentBadge document, PartnerdataLogger logger)
-			throws IOException {
-		// TODO Auto-generated method stub
-		return null;
-	}
+        if (document == null) {
+            logger.log(Level.WARNING, "failed creating description document [=NULL]");
+            return null;
+        }
+        return document;
+    }
 
+    @Override
+    public Document queryPartnerDetails(PartnerConfiguration partnerConfiguration, DocumentBadge document, PartnerdataLogger logger) throws IOException {
+        // TODO Auto-generated method stub
+        return null;
+    }
 
 }

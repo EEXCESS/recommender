@@ -6,6 +6,7 @@ import static org.junit.Assert.assertTrue;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.junit.Before;
 import org.junit.Test;
 
 import eu.eexcess.config.FederatedRecommenderConfiguration;
@@ -22,7 +23,7 @@ public class FederatedRecommenderCoreTest {
         public static int invocationCount = 0;
         public static long lastInvocationTime = 0;
 
-        public TestableSourceSelectorA() {
+        public TestableSourceSelectorA(FederatedRecommenderConfiguration configuration) {
             instantiationCount++;
         }
 
@@ -36,6 +37,7 @@ public class FederatedRecommenderCoreTest {
             }
             return null;
         }
+
     }
 
     public static class TestableSourceSelectorB implements PartnerSelector {
@@ -43,7 +45,7 @@ public class FederatedRecommenderCoreTest {
         public static int invocationCount = 0;
         public static long lastInvocationTime = 0;
 
-        public TestableSourceSelectorB() {
+        public TestableSourceSelectorB(FederatedRecommenderConfiguration configuration) {
             instantiationCount++;
         }
 
@@ -57,6 +59,7 @@ public class FederatedRecommenderCoreTest {
             }
             return null;
         }
+
     }
 
     // @Test
@@ -96,6 +99,8 @@ public class FederatedRecommenderCoreTest {
         frcc.numRecommenderThreads = 20;
         frcc.partnersTimeout = 1000;
         frcc.solrServerUri = "";
+        frcc.sourceSelectors = new String[] { "eu.eexcess.federatedrecommender.FederatedRecommenderCoreTest$TestableSourceSelectorA",
+                "eu.eexcess.federatedrecommender.FederatedRecommenderCoreTest$TestableSourceSelectorB" };
         FederatedRecommenderCore frc = FederatedRecommenderCore.getInstance(frcc);
 
         ArrayList<String> selectorsClassNames = new ArrayList<>(3);
@@ -111,6 +116,12 @@ public class FederatedRecommenderCoreTest {
         assertTrue(TestableSourceSelectorA.lastInvocationTime < TestableSourceSelectorB.lastInvocationTime);
     }
 
+    @Before
+    public void resetCounters() {
+        TestableSourceSelectorA.invocationCount = 0;
+        TestableSourceSelectorB.invocationCount = 0;
+    }
+
     @Test
     public void sourceSelection_givenSetWithDuplicates_expectSingleInstantiation() throws FederatedRecommenderException {
 
@@ -118,6 +129,8 @@ public class FederatedRecommenderCoreTest {
         frcc.numRecommenderThreads = 20;
         frcc.partnersTimeout = 1000;
         frcc.solrServerUri = "";
+        frcc.sourceSelectors = new String[] { "eu.eexcess.federatedrecommender.FederatedRecommenderCoreTest$TestableSourceSelectorA",
+                "eu.eexcess.federatedrecommender.FederatedRecommenderCoreTest$TestableSourceSelectorB" };
         FederatedRecommenderCore frc = FederatedRecommenderCore.getInstance(frcc);
 
         ArrayList<String> selectorsClassNames = new ArrayList<>(3);

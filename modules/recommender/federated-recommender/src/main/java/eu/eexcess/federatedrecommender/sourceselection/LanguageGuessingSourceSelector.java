@@ -24,8 +24,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
-import org.apache.log4j.Logger;
+import java.util.logging.Logger;
 
 import eu.eexcess.config.FederatedRecommenderConfiguration;
 import eu.eexcess.dataformats.PartnerBadge;
@@ -36,7 +35,7 @@ import eu.eexcess.utils.LanguageGuesser;
 
 public class LanguageGuessingSourceSelector implements PartnerSelector {
 
-	private Logger logger = Logger.getLogger(LanguageGuessingSourceSelector.class);
+	private Logger logger = Logger.getLogger(LanguageGuessingSourceSelector.class.getName());
 	private Map<PartnerBadge, List<String>> selectedPartners = new HashMap<>();
 
 	public LanguageGuessingSourceSelector(FederatedRecommenderConfiguration configuration) {
@@ -81,7 +80,7 @@ public class LanguageGuessingSourceSelector implements PartnerSelector {
 				for (String language : entry.getValue()) {
 					info.append(" [" + language + "]");
 				}
-				logger.info(info);
+				logger.info(info.toString());
 			}
 		} else {
 			logger.info("unsuccessfull partner selection");
@@ -119,12 +118,11 @@ public class LanguageGuessingSourceSelector implements PartnerSelector {
 		}
 		for (PartnerBadge partner : partners) {
 			for (String partnerLanguage : partner.getLanguageContent()) {
-				if (partnerLanguage.compareTo(language) == 0) {
-					if (false == partnerConnectorList.contains(partner)) {
+				if (partnerLanguage.compareTo(language) == 0  && false == partnerConnectorList.contains(partner)) {
 						partnerConnectorList.add(partner);
 
 						if (false == selectedPartners.containsKey(partner)) {
-							ArrayList<String> newList = new ArrayList<String>();
+							List<String> newList = new ArrayList<String>();
 							newList.add(language);
 							selectedPartners.put(partner, newList);
 						} else {
@@ -134,5 +132,5 @@ public class LanguageGuessingSourceSelector implements PartnerSelector {
 				}
 			}
 		}
-	}
+	
 }

@@ -22,19 +22,22 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 package eu.eexcess.federatedrecommender;
 
+import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
@@ -48,11 +51,14 @@ import java.util.logging.Logger;
 import javax.ws.rs.core.MediaType;
 
 import com.sun.jersey.api.client.Client;
+import com.sun.jersey.api.client.ClientHandlerException;
+import com.sun.jersey.api.client.UniformInterfaceException;
 import com.sun.jersey.api.client.WebResource;
 
 import eu.eexcess.config.FederatedRecommenderConfiguration;
 import eu.eexcess.dataformats.PartnerBadge;
 import eu.eexcess.dataformats.PartnerBadgeStats;
+import eu.eexcess.dataformats.PartnerDomain;
 import eu.eexcess.dataformats.RecommenderStats;
 import eu.eexcess.dataformats.result.DocumentBadge;
 import eu.eexcess.dataformats.result.DocumentBadgeList;
@@ -63,10 +69,14 @@ import eu.eexcess.dataformats.result.ResultStats;
 import eu.eexcess.dataformats.userprofile.SecureUserProfile;
 import eu.eexcess.dataformats.userprofile.SecureUserProfileEvaluation;
 import eu.eexcess.federatedrecommender.dataformats.PartnersFederatedRecommendations;
+import eu.eexcess.federatedrecommender.domaindetection.AsyncPartnerDomainsProbeMonitor;
+import eu.eexcess.federatedrecommender.domaindetection.AsyncPartnerDomainsProbeMonitor.ProbeResultChanged;
+import eu.eexcess.federatedrecommender.domaindetection.storage.PartnersDomainsTableQuery;
 import eu.eexcess.federatedrecommender.interfaces.PartnerSelector;
 import eu.eexcess.federatedrecommender.interfaces.PartnersFederatedRecommendationsPicker;
 import eu.eexcess.federatedrecommender.interfaces.SecureUserProfileDecomposer;
 import eu.eexcess.federatedrecommender.registration.PartnerRegister;
+import eu.eexcess.federatedrecommender.sourceselection.WndomainSourceSelector;
 import eu.eexcess.federatedrecommender.utils.FederatedRecommenderException;
 import eu.eexcess.sqlite.Database;
 import eu.eexcess.sqlite.DatabaseQueryStats;
@@ -75,16 +85,15 @@ import eu.eexcess.sqlite.DatabaseQueryStats;
  * FederatedRecommenderCore (Singleton)
  * 
  */
-public class FederatedRecommenderCore {
+public class FederatedRecommenderCore implements ProbeResultChanged {
 
-    private static final Logger logger = Logger.getLogger(FederatedRecommenderCore.class.getName());
-
+    private static final Logger LOGGER = Logger.getLogger(FederatedRecommenderCore.class.getName());
     private static volatile FederatedRecommenderCore instance;
     private final FederatedRecommenderConfiguration federatedRecConfiguration;
-
     private PartnerRegister partnerRegister = new PartnerRegister();
     private ExecutorService threadPool;
     private RecommenderStats recommenderStats;
+    private AsyncPartnerDomainsProbeMonitor partnersDomainsDetectors;
 
     /**
      * references to re-usable state-less source selection instances
@@ -96,6 +105,20 @@ public class FederatedRecommenderCore {
         this.federatedRecConfiguration = federatedRecConfiguration;
         this.recommenderStats = new RecommenderStats();
         instanciateSourceSelectors(this.federatedRecConfiguration);
+
+        // activate partner probing only if the respective source selector is
+        // requested to be applied
+        String[] sourceSelectors = this.federatedRecConfiguration.sourceSelectors;
+        String domainSelectorName = WndomainSourceSelector.class.getCanonicalName();
+        if (sourceSelectors != null && Arrays.asList(sourceSelectors).contains(domainSelectorName)) {
+            LOGGER.info("activating partner domaindetection since [" + domainSelectorName + "] is requested to be applied");
+            partnersDomainsDetectors = new AsyncPartnerDomainsProbeMonitor(new File(this.federatedRecConfiguration.wordnetPath), new File(
+                    this.federatedRecConfiguration.wordnetDomainFilePath), 50, 10, new Double(0.8 * 2000000).intValue());
+
+            partnersDomainsDetectors.setCallback(this);
+        } else {
+            LOGGER.info("refused to activate partner domaindetection since [" + domainSelectorName + "] is not requested to be applied");
+        }
     }
 
     /**
@@ -127,7 +150,8 @@ public class FederatedRecommenderCore {
      * @return
      * @throws FederatedRecommenderException
      */
-    public static FederatedRecommenderCore getInstance(FederatedRecommenderConfiguration federatedRecommenderConfiguration) throws FederatedRecommenderException {
+    public static FederatedRecommenderCore getInstance(FederatedRecommenderConfiguration federatedRecommenderConfiguration)
+            throws FederatedRecommenderException {
         if (instance == null) {
             synchronized (FederatedRecommenderCore.class) {
                 // Double check
@@ -152,42 +176,23 @@ public class FederatedRecommenderCore {
 
         long start = System.currentTimeMillis();
         Map<PartnerBadge, Future<ResultList>> futures = new HashMap<PartnerBadge, Future<ResultList>>();
-        List<PartnerBadge> partners = new LinkedList<PartnerBadge>(getPartnerRegister().getPartners());
+        List<PartnerBadge> partners = getPartnerRegister().getPartners();
         for (final PartnerBadge partner : partners) {
             if (checkUserSelectedPartners(secureUserProfile, partner)) {
-                final Client tmpClient = partnerRegister.getClient(partner);
+                final Client tmpClient = partnerRegister.getClient(partner.getSystemId());
 
                 Future<ResultList> future = threadPool.submit(new Callable<ResultList>() {
                     @Override
-                    public ResultList call() throws Exception {
+                    public ResultList call() throws UniformInterfaceException, ClientHandlerException {
                         long startTime = System.currentTimeMillis();
-                        ResultList resultList = getPartnerResult(partner, tmpClient, secureUserProfile);
+                        ResultList resultList = new ResultList();
+                        if (tmpClient != null) {
+                            resultList = getPartnerRecommendationResult(partner, tmpClient, secureUserProfile);
+                            tmpClient.destroy();
+                        }
                         long endTime = System.currentTimeMillis();
                         long respTime = endTime - startTime;
                         partner.updatePartnerResponseTime(respTime);
-                        return resultList;
-                    }
-
-                    /**
-                     * trys to recieve the results from the partners
-                     * 
-                     * @param partner
-                     * @param secureUserProfile
-                     * @return
-                     */
-                    private ResultList getPartnerResult(PartnerBadge partner, Client client, SecureUserProfile secureUserProfile) {
-                        ResultList resultList = new ResultList();
-                        if (client != null) {
-                            try {
-                                WebResource resource = client.resource(partner.getPartnerConnectorEndpoint() + "recommend");
-                                resource.accept(MediaType.APPLICATION_JSON);
-                                resultList = resource.post(ResultList.class, secureUserProfile);
-                            } catch (Exception e) {
-                                logger.log(Level.WARNING, "Partner: " + partner.getSystemId() + " is not working currently.", e);
-                                throw e;
-                            }
-                        }
-                        client.destroy();
                         return resultList;
                     }
                 });
@@ -222,7 +227,8 @@ public class FederatedRecommenderCore {
                 entry.getValue().cancel(true);
 
                 timeout -= System.currentTimeMillis() - startT;
-                String msg = "Waited too long for partner system '" + entry.getKey().systemId + "' to respond " + (federatedRecConfiguration.partnersTimeout - timeout) + " ms ";
+                String msg = "Waited too long for partner system '" + entry.getKey().systemId + "' to respond "
+                        + (federatedRecConfiguration.partnersTimeout - timeout) + " ms ";
                 ResultList rL = new ResultList();
                 PartnerResponseState responseState = new PartnerResponseState();
                 responseState.errorMessage = msg;
@@ -230,7 +236,7 @@ public class FederatedRecommenderCore {
                 responseState.systemID = entry.getKey().systemId;
                 rL.partnerResponseState.add(responseState);
                 partnersFederatedResults.getResults().put(entry.getKey(), rL);
-                logger.log(Level.WARNING, msg, e);
+                LOGGER.log(Level.WARNING, msg, e);
             } catch (Exception e) {
                 if (entry.getKey() != null) {
                     entry.getKey().shortTimeStats.failedRequestCount++;
@@ -244,15 +250,394 @@ public class FederatedRecommenderCore {
                 responseState.systemID = entry.getKey().systemId;
                 ResultList rL = new ResultList();
                 rL.partnerResponseState.add(responseState);
-                logger.log(Level.SEVERE, msg, e);
+                LOGGER.log(Level.SEVERE, msg, e);
             }
             entry.setValue(null);
 
         }
         long end = System.currentTimeMillis();
-        logger.log(Level.INFO, "Federated Recommender took " + (end - start) + "ms for query '" + secureUserProfile.contextKeywords + "'");
+        LOGGER.log(Level.INFO, "Federated Recommender took " + (end - start) + "ms for query '" + secureUserProfile.contextKeywords + "'");
 
         return partnersFederatedResults;
+    }
+
+    /**
+     * main function to generate a federated recommendation
+     * 
+     * @return
+     */
+    public ResultList generateFederatedRecommendation(SecureUserProfile secureUserProfile) throws FileNotFoundException {
+        ResultList resultList = null;
+        SecureUserProfile secureUserProfileTmp = secureUserProfile;
+        if (federatedRecConfiguration.sourceSelectors != null) {
+            List<String> sourceSelectors = new ArrayList<String>();
+            Collections.addAll(sourceSelectors, federatedRecConfiguration.sourceSelectors);
+            secureUserProfileTmp = sourceSelection(secureUserProfileTmp, sourceSelectors);
+        }
+        try {
+            resultList = getAndAggregateResults(secureUserProfileTmp, this.federatedRecConfiguration.defaultPickerName);
+        } catch (FederatedRecommenderException e) {
+            LOGGER.log(Level.SEVERE, "Some error retrieving or aggregation results occured.", e);
+        }
+        return resultList;
+
+    }
+
+    /**
+     * Distributes the documents to each of the
+     * 
+     * @param documents
+     * @return
+     */
+    public DocumentBadgeList getDocumentDetails(DocumentBadgeList documents) {
+        Map<PartnerBadge, Future<DocumentBadgeList>> futures = new HashMap<>();
+        for (PartnerBadge partner : getPartnerRegister().getPartners()) {
+            final Client tmpClient = partnerRegister.getClient(partner.systemId);
+            DocumentBadgeList currentDocs = filterDocuments(documents, (DocumentBadge document) -> partner.systemId.equals(document.provider));
+            Future<DocumentBadgeList> future = threadPool.submit(new Callable<DocumentBadgeList>() {
+                @Override
+                public DocumentBadgeList call() throws Exception {
+                    return getDocsResult(partner, tmpClient, currentDocs);
+                }
+
+                /**
+                 * trys to recieve the results from the partners
+                 */
+                private DocumentBadgeList getDocsResult(PartnerBadge partner, Client client, DocumentBadgeList currentDocs) throws UniformInterfaceException,
+                        ClientHandlerException {
+                    DocumentBadgeList docList = getPartnerDetailsResult(partner, client, currentDocs);
+                    client.destroy();
+                    return docList;
+                }
+            });
+            futures.put(partner, future);
+        }
+        DocumentBadgeList resultDocs = new DocumentBadgeList();
+        long timeout = federatedRecConfiguration.partnersTimeout;
+        for (PartnerBadge partner : futures.keySet()) {
+            try {
+                resultDocs.documentBadges.addAll(futures.get(partner).get(timeout, TimeUnit.MILLISECONDS).documentBadges);
+            } catch (TimeoutException e) {
+                LOGGER.log(Level.WARNING, "Parnter " + partner.systemId + " timed out for document detail call", e);
+            } catch (ExecutionException | InterruptedException e) {
+                LOGGER.log(Level.WARNING, "Can not get detail results from parnter:" + partner.systemId, e);
+            }
+        }
+        return resultDocs;
+    }
+
+    /**
+     * calls the given query expansion algorithm
+     * 
+     * @param userProfile
+     * @return
+     */
+    @SuppressWarnings("unchecked")
+    public SecureUserProfile addQueryExpansionTerms(SecureUserProfileEvaluation userProfile, String qEClass) {
+        SecureUserProfileDecomposer<SecureUserProfile, SecureUserProfile> sUPDecomposer = null;
+        try {
+            sUPDecomposer = (SecureUserProfileDecomposer<SecureUserProfile, SecureUserProfile>) Class.forName(qEClass).newInstance();
+            sUPDecomposer.setConfiguration(federatedRecConfiguration);
+        } catch (InstantiationException | FederatedRecommenderException | IllegalAccessException | ClassNotFoundException e) {
+            LOGGER.log(Level.WARNING, "Could not initalize query expansion algorithm", e);
+        }
+        if (sUPDecomposer == null)
+            return userProfile;
+        return sUPDecomposer.decompose(userProfile);
+    }
+
+    /**
+     * Performs partner source selection according to the given classes and
+     * their order. Multiple identical selectors are allowed but instantiated
+     * only once.
+     * 
+     * @param userProfile
+     * 
+     * @param sourceSelectorClassName
+     *            class names of source selectors to be applied in same order
+     * @return same userProfile but with changed partner list
+     */
+    public SecureUserProfile sourceSelection(SecureUserProfile userProfile, List<String> selectorsClassNames) {
+
+        if (selectorsClassNames == null || selectorsClassNames.isEmpty()) {
+            return userProfile;
+        }
+
+        SecureUserProfile lastEvaluatedProfile = userProfile;
+        for (String sourceSelectorClassName : selectorsClassNames) {
+            PartnerSelector sourceSelector = (PartnerSelector) statelessClassInstances.get(sourceSelectorClassName);
+            if (null == sourceSelector) {
+                LOGGER.info("failed to find requested source selector [" + sourceSelectorClassName + "]: ignoring source selection");
+            } else {
+                lastEvaluatedProfile = sourceSelector.sourceSelect(lastEvaluatedProfile, getPartnerRegister().getPartners());
+            }
+        }
+        return lastEvaluatedProfile;
+    }
+
+    /**
+     * returns the statistics of the federated recommender
+     * 
+     * @return
+     */
+    public RecommenderStats getRecommenderStats() {
+        return recommenderStats;
+
+    }
+
+    /**
+     * removes partners from the partner register
+     * 
+     * @param badge
+     */
+    public void unregisterPartner(PartnerBadge badge) {
+        synchronized (partnerRegister) {
+            if (this.getPartnerRegister().getPartners().contains(badge)) {
+                writeStatsToDB();
+                this.getPartnerRegister().getPartners().remove(badge);
+            }
+        }
+    }
+
+    /**
+     * Writes the statistics for all the partners into the Database
+     */
+    public void writeStatsToDB() {
+
+        LOGGER.log(Level.INFO, "Writing statistics into Database");
+        Database<DatabaseQueryStats> db = new Database<DatabaseQueryStats>(this.federatedRecConfiguration.statsLogDatabase, DatabaseQueryStats.values());
+        for (PartnerBadge partner : this.partnerRegister.getPartners()) {
+            if (partner != null) {
+                PartnerBadgeStats longStats = partner.longTimeStats;
+                PartnerBadgeStats shortStats = partner.shortTimeStats;
+                LOGGER.log(Level.INFO, "Writing " + partner.systemId + " statistics into Database");
+                final String dbErrorMsg = "Could not write into StatsDatabase: ";
+                writeRequestStatsToDb(db, partner, longStats, shortStats, dbErrorMsg);
+                writeQueryStatsToDb(db, partner, dbErrorMsg);
+            }
+        }
+        try {
+            db.close();
+        } catch (IOException e) {
+            LOGGER.log(Level.SEVERE, "failed to close database", e);
+        }
+    }
+
+    private void writeQueryStatsToDb(Database<DatabaseQueryStats> db, PartnerBadge partner, final String dbErrorMsg) {
+        PreparedStatement updateQ = db.getPreparedUpdateStatement(DatabaseQueryStats.QUERYLOG);
+        if (updateQ != null) {
+            for (ResultStats queryStats : partner.getLastQueries()) {
+                try {
+                    updateQ.clearBatch();
+
+                    updateQ.setString(1, partner.getSystemId());
+                    updateQ.setString(2, queryStats.getPartnerQuery());
+                    updateQ.setInt(3, (int) queryStats.getPartnerCallTime());
+                    updateQ.setInt(4, (int) queryStats.getFirstTransformationTime());
+                    updateQ.setInt(5, (int) queryStats.getSecondTransformationTime());
+                    updateQ.setInt(6, (int) queryStats.getEnrichmentTime());
+                    updateQ.setInt(7, queryStats.getResultCount());
+                    updateQ.addBatch();
+
+                } catch (SQLException e) {
+                    LOGGER.log(Level.INFO, dbErrorMsg, e);
+                }
+            }
+            try {
+                updateQ.executeBatch();
+            } catch (SQLException e) {
+                LOGGER.log(Level.INFO, dbErrorMsg, e);
+            }
+
+        } else
+            LOGGER.log(Level.INFO, "Could not write into query statistics database");
+    }
+
+    private String writeRequestStatsToDb(Database<DatabaseQueryStats> db, PartnerBadge partner, PartnerBadgeStats longStats, PartnerBadgeStats shortStats,
+            String dbErrorMsg) {
+        PreparedStatement updateS = db.getPreparedUpdateStatement(DatabaseQueryStats.REQUESTLOG);
+        // Database Entry Style
+        // ('SYSTEM_ID','REQUESTCOUNT','FAILEDREQUESTCOUNT','FAILEDREQUESTTIMEOUTCOUNT')
+
+        if (updateS != null) {
+
+            try {
+                updateS.clearBatch();
+                updateS.setString(1, partner.getSystemId());
+                updateS.setInt(2, longStats.requestCount + shortStats.requestCount);
+                updateS.setInt(3, longStats.failedRequestCount + shortStats.failedRequestCount);
+                updateS.setInt(4, longStats.failedRequestTimeoutCount + shortStats.failedRequestTimeoutCount);
+                updateS.execute();
+            } catch (SQLException e) {
+                LOGGER.log(Level.INFO, dbErrorMsg, e);
+            } finally {
+                db.commit();
+            }
+        } else
+            LOGGER.log(Level.INFO, "Could write into request statistics database");
+        return dbErrorMsg;
+    }
+
+    /**
+     * Adds the partner to the partner register if not existing already and
+     * tries to get the old statistics for this partner from the database.
+     * Adding a new partner also triggers domain detection if the respective
+     * partner does not explicitly define domains.
+     * 
+     * @param badge
+     *            partner information
+     * @return an informative human readable message
+     */
+    public String registerPartner(PartnerBadge badge) {
+        if (this.getPartnerRegister().getPartners().contains(badge)) {
+            LOGGER.log(Level.INFO, "Partner: " + badge.getSystemId() + " allready registered!");
+            return "Allready Registered";
+        }
+
+        if (badge.partnerKey != null && !badge.partnerKey.isEmpty() && badge.partnerKey.length() < 20)
+            return "Partner Key is too short (<20)";
+
+        Database<DatabaseQueryStats> db = new Database<DatabaseQueryStats>(this.federatedRecConfiguration.statsLogDatabase, DatabaseQueryStats.values());
+        PreparedStatement getS = db.getPreparedSelectStatement(DatabaseQueryStats.REQUESTLOG);
+        // Database Entry Style
+        // ('SYSTEM_ID','REQUESTCOUNT','FAILEDREQUESTCOUNT','FAILEDREQUESTTIMEOUTCOUNT')
+
+        if (getS != null) {
+            try {
+                getS.setString(1, badge.getSystemId());
+                ResultSet rs = getS.executeQuery();
+                if (rs.next()) {
+                    badge.longTimeStats.requestCount = rs.getInt(2);
+                    badge.longTimeStats.failedRequestCount = rs.getInt(3);
+                    badge.longTimeStats.failedRequestTimeoutCount = rs.getInt(4);
+                }
+            } catch (SQLException e) {
+                LOGGER.log(Level.SEVERE, "could net get statistics for partner " + badge.getSystemId(), e);
+            }
+
+            try {
+                db.close();
+            } catch (IOException e) {
+                LOGGER.log(Level.WARNING, "Could not close Database", e);
+            }
+        } else
+            LOGGER.log(Level.WARNING, "Could read from Statistics Database");
+
+        this.addPartner(badge);
+
+        // if recommender has domain detectors instanced but partner does not
+        // provide any domain information
+        if (null != partnersDomainsDetectors && (null == badge.getDomainContent() || badge.getDomainContent().isEmpty())) {
+
+            if (false == restoreDomainsFromDatabase(badge)) {
+                // if no domain informations can be retrieved from database
+                // start domain detectors
+                partnersDomainsDetectors.probe(badge, getPartnerRegister().getClient(badge.getSystemId()));
+            }
+        }
+        return "Partner Added";
+
+    }
+
+    /**
+     * Reads domain(s) information of the respective partner from database and
+     * stores it back to {@link PartnerBadge}.
+     * 
+     * @param partnerConfig
+     *            supplies the {@link PartnerBadge#getSystemId()} and where to
+     *            store {@link PartnerBadge#getDomainContent()} the restored
+     *            domain information
+     * @return false if no domain was restored from database
+     */
+    private boolean restoreDomainsFromDatabase(PartnerBadge partnerConfig) {
+        synchronized (partnerRegister) {
+            boolean hasDomainsRestored = false;
+            Database<PartnersDomainsTableQuery> db = new Database<PartnersDomainsTableQuery>(federatedRecConfiguration.statsLogDatabase,
+                    PartnersDomainsTableQuery.values());
+            PreparedStatement selectStatement = db.getPreparedSelectStatement(PartnersDomainsTableQuery.PARTNER_DOMAINS_TABLE_QUERY);
+
+            try {
+                selectStatement.setString(1, partnerConfig.getSystemId());
+                if (true == selectStatement.execute()) {
+                    ResultSet results = selectStatement.getResultSet();
+
+                    if (partnerConfig.getDomainContent() == null) {
+                        partnerConfig.setDomainContent(new ArrayList<PartnerDomain>());
+                    }
+
+                    int restoredDomainsCount = 0;
+                    while (results.next()) {
+                        restoredDomainsCount++;
+                        PartnerDomain domain = new PartnerDomain();
+                        domain.domainName = results.getString(PartnersDomainsTableQuery.Tables.PartnerProbes.Domains.DOMAIN_NAME.ROW_NUMBER);
+                        domain.weight = results.getDouble(PartnersDomainsTableQuery.Tables.PartnerProbes.Domains.DOMAIN_WEIGHT.ROW_NUMBER);
+                        hasDomainsRestored = true;
+                        partnerConfig.getDomainContent().add(domain);
+                    }
+                    LOGGER.info("restored [" + restoredDomainsCount + "] domain(s) of partner [" + partnerConfig.getSystemId() + "] from database");
+                }
+            } catch (SQLException sqe) {
+                LOGGER.log(Level.SEVERE, "failed to retrieve partner's domain information from database ["
+                        + PartnersDomainsTableQuery.PARTNER_DOMAINS_TABLE_QUERY.getInternName() + "]");
+                sqe.printStackTrace();
+            } finally {
+                try {
+                    db.close();
+                } catch (IOException e) {
+                    LOGGER.log(Level.WARNING, "failed to close database [" + PartnersDomainsTableQuery.PARTNER_DOMAINS_TABLE_QUERY.getInternName() + "]", e);
+                }
+            }
+            return hasDomainsRestored;
+        }
+    }
+
+    /**
+     * gets the Partners Results and calls the given picker to aggregate results
+     * between the partners result lists
+     * 
+     * @param userProfile
+     * @return
+     * @throws FederatedRecommenderException
+     */
+    public ResultList getAndAggregateResults(SecureUserProfile userProfile, String pickerName) throws FederatedRecommenderException {
+        ResultList resultList;
+        PartnersFederatedRecommendationsPicker pFRPicker = null;
+        try {
+            Object newInstance = statelessClassInstances.get(pickerName);
+            if (newInstance == null) {
+                newInstance = Class.forName(pickerName).newInstance();
+                statelessClassInstances.put(pickerName, newInstance);
+            }
+            pFRPicker = (PartnersFederatedRecommendationsPicker) newInstance;
+        } catch (InstantiationException | IllegalAccessException | ClassNotFoundException e) {
+            LOGGER.log(Level.SEVERE, "Could not get Picker from Class: " + pickerName, e);
+            throw new FederatedRecommenderException("Could not get Picker from Class: " + pickerName, e);
+        }
+        long start = System.currentTimeMillis();
+        PartnersFederatedRecommendations pFR = getPartnersRecommendations(userProfile);
+        List<PartnerResponseState> partnerResponseState = new ArrayList<PartnerResponseState>();
+
+        for (PartnerBadge badge : pFR.getResults().keySet()) {
+            if (badge != null && pFR != null && !pFR.getResults().isEmpty() && pFR.getResults().get(badge) != null)
+                partnerResponseState.addAll(pFR.getResults().get(badge).partnerResponseState);
+        }
+        long end = System.currentTimeMillis();
+        long timeToGetPartners = end - start;
+        start = System.currentTimeMillis();
+        int numResults = 10;
+        if (userProfile.numResults != null)
+            numResults = userProfile.numResults;
+        resultList = pFRPicker.pickResults(userProfile, pFR, partnerRegister.getPartners(), numResults);
+        end = System.currentTimeMillis();
+        long timeToPickResults = end - start;
+        recommenderStats.setAverageGlobalTime(timeToGetPartners);
+        recommenderStats.setAverageAggregationTime(timeToPickResults);
+        LOGGER.log(Level.INFO, " Time to get " + resultList.results.size() + " Results from the Partners: " + timeToGetPartners
+                + "ms. Time to pick the best results: " + timeToPickResults + "ms");
+        resultList.totalResults = resultList.results.size();
+        resultList.provider = "federated";
+        resultList.partnerResponseState = partnerResponseState;
+        return resultList;
     }
 
     /**
@@ -291,84 +676,6 @@ public class FederatedRecommenderCore {
     }
 
     /**
-     * main function to generate a federated recommendation
-     * 
-     * @return
-     */
-    public ResultList generateFederatedRecommendation(SecureUserProfile secureUserProfile) throws FileNotFoundException {
-        ResultList resultList = null;
-        SecureUserProfile secureUserProfileTmp = secureUserProfile;
-        if (federatedRecConfiguration.sourceSelectors != null) {
-            List<String> sourceSelectors = new ArrayList<String>();
-            Collections.addAll(sourceSelectors, federatedRecConfiguration.sourceSelectors);
-            secureUserProfileTmp = sourceSelection(secureUserProfileTmp, sourceSelectors);
-        }
-        try {
-            resultList = getAndAggregateResults(secureUserProfileTmp, this.federatedRecConfiguration.defaultPickerName);
-        } catch (FederatedRecommenderException e) {
-            logger.log(Level.SEVERE, "Some error retrieving or aggregation results occured.", e);
-        }
-        return resultList;
-
-    }
-
-    /**
-     * Distributes the documents to each of the
-     * 
-     * @param documents
-     * @return
-     */
-    public DocumentBadgeList getDocumentDetails(DocumentBadgeList documents) {
-        Map<PartnerBadge, Future<DocumentBadgeList>> futures = new HashMap<>();
-        for (PartnerBadge partner : getPartnerRegister().getPartners()) {
-            final Client tmpClient = partnerRegister.getClient(partner);
-            DocumentBadgeList currentDocs = filterDocuments(documents, (DocumentBadge document) -> partner.systemId.equals(document.provider));
-            Future<DocumentBadgeList> future = threadPool.submit(new Callable<DocumentBadgeList>() {
-                @Override
-                public DocumentBadgeList call() throws Exception {
-                    return getDocsResult(partner, tmpClient, currentDocs);
-                }
-
-                /**
-                 * trys to recieve the results from the partners
-                 * 
-                 * @param partner
-                 * @param currentDocs
-                 * @return
-                 */
-                private DocumentBadgeList getDocsResult(PartnerBadge partner, Client client, DocumentBadgeList currentDocs) {
-                    DocumentBadgeList docList = new DocumentBadgeList();
-                    if (client != null) {
-                        try {
-                            WebResource resource = client.resource(partner.getPartnerConnectorEndpoint() + "getDetails");
-                            resource.accept(MediaType.APPLICATION_JSON);
-                            docList = resource.post(DocumentBadgeList.class, currentDocs);
-                        } catch (Exception e) {
-                            logger.log(Level.WARNING, "Partner: " + partner.getSystemId() + " is not working currently.", e);
-                            throw e;
-                        }
-                    }
-                    client.destroy();
-                    return docList;
-                }
-            });
-            futures.put(partner, future);
-        }
-        DocumentBadgeList resultDocs = new DocumentBadgeList();
-        long timeout = federatedRecConfiguration.partnersTimeout;
-        for (PartnerBadge partner : futures.keySet()) {
-            try {
-                resultDocs.documentBadges.addAll(futures.get(partner).get(timeout, TimeUnit.MILLISECONDS).documentBadges);
-            } catch (TimeoutException e) {
-                logger.log(Level.WARNING, "Parnter " + partner.systemId + " timed out for document detail call", e);
-            } catch (ExecutionException | InterruptedException e) {
-                logger.log(Level.WARNING, "Can not get detail results from parnter:" + partner.systemId, e);
-            }
-        }
-        return resultDocs;
-    }
-
-    /**
      * Helper function to filter the documents
      * 
      * @param documents
@@ -385,29 +692,15 @@ public class FederatedRecommenderCore {
         return result;
     }
 
-    /**
-     * calls the given query expansion algorithm
-     * 
-     * @param userProfile
-     * @return
-     */
-    @SuppressWarnings("unchecked")
-    public SecureUserProfile addQueryExpansionTerms(SecureUserProfileEvaluation userProfile, String qEClass) {
-        SecureUserProfileDecomposer<SecureUserProfile, SecureUserProfile> sUPDecomposer = null;
-        try {
-            sUPDecomposer = (SecureUserProfileDecomposer<SecureUserProfile, SecureUserProfile>) Class.forName(qEClass).newInstance();
-            sUPDecomposer.setConfiguration(federatedRecConfiguration);
-        } catch (InstantiationException | FederatedRecommenderException | IllegalAccessException | ClassNotFoundException e) {
-            logger.log(Level.WARNING, "Could not initalize query expansion algorithm", e);
-        }
-        if (sUPDecomposer == null)
-            return userProfile;
-        return sUPDecomposer.decompose(userProfile);
-    }
-
     private void instanciateSourceSelectors(FederatedRecommenderConfiguration recommenderConfig) {
 
-        ArrayList<String> selectorsClassNames = new ArrayList<String>();
+        List<String> selectorsClassNames = new ArrayList<String>();
+
+        if (null == recommenderConfig.sourceSelectors) {
+            LOGGER.info("failed to instanciate source selectors");
+            return;
+        }
+
         Collections.addAll(selectorsClassNames, recommenderConfig.sourceSelectors);
 
         for (String sourceSelectorClassName : selectorsClassNames) {
@@ -417,225 +710,117 @@ public class FederatedRecommenderCore {
                     Constructor<?> ctor = Class.forName(sourceSelectorClassName).getConstructor(FederatedRecommenderConfiguration.class);
 
                     sourceSelector = (PartnerSelector) ctor.newInstance(recommenderConfig);
-                    logger.info("instanciating new source selector [" + sourceSelector.getClass().getSimpleName() + "]");
+                    LOGGER.info("instanciating new source selector [" + sourceSelector.getClass().getSimpleName() + "]");
                     statelessClassInstances.put(sourceSelectorClassName, sourceSelector);
                 }
             } catch (InstantiationException | IllegalAccessException | ClassNotFoundException | NoSuchMethodException | InvocationTargetException e) {
-                logger.log(Level.SEVERE, "failed to instanciate source selector [" + sourceSelectorClassName + "]", e);
+                LOGGER.log(Level.SEVERE, "failed to instanciate source selector [" + sourceSelectorClassName + "]", e);
             }
         }
     }
 
     /**
-     * Performs partner source selection according to the given classes and
-     * their order. Multiple identical selectors are allowed but instantiated
-     * only once.
+     * Stores partner domains mapping to {@link #partnerRegister} and database.
      * 
-     * @param userProfile
-     * 
-     * @param sourceSelectorClassName
-     *            class names of source selectors to be applied in same order
-     * @return same userProfile but with changed partner list
+     * @param updatedProbes
+     *            the latest known {@link PartnerBadge} to {@link PartnerDomain}
+     *            mapping.
      */
-    public SecureUserProfile sourceSelection(SecureUserProfile userProfile, List<String> selectorsClassNames) {
-
-        if (selectorsClassNames == null || selectorsClassNames.isEmpty()) {
-            return userProfile;
-        }
-
-        SecureUserProfile lastEvaluatedProfile = userProfile;
-        for (String sourceSelectorClassName : selectorsClassNames) {
-            PartnerSelector sourceSelector = (PartnerSelector) statelessClassInstances.get(sourceSelectorClassName);
-            if (null == sourceSelector) {
-                logger.info("failed to find requested source selector [" + sourceSelectorClassName + "]: ignoring source selection");
-            } else {
-                lastEvaluatedProfile = sourceSelector.sourceSelect(lastEvaluatedProfile, getPartnerRegister().getPartners());
-            }
-        }
-        return lastEvaluatedProfile;
-    }
-
-    /**
-     * returns the statistics of the federated recommender
-     * 
-     * @return
-     */
-    public RecommenderStats getRecommenderStats() {
-        return recommenderStats;
-
-    }
-
-    /**
-     * removes partners from the partner register
-     * 
-     * @param badge
-     */
-    public void unregisterPartner(PartnerBadge badge) {
+    @Override
+    public void onProbeResultsChanged(Map<String, Set<PartnerDomain>> updatedProbes) {
         synchronized (partnerRegister) {
-            if (this.getPartnerRegister().getPartners().contains(badge)) {
-                writeStatsToDB();
-                this.getPartnerRegister().getPartners().remove(badge);
-            }
-        }
-    }
+            Database<PartnersDomainsTableQuery> db = new Database<PartnersDomainsTableQuery>(federatedRecConfiguration.statsLogDatabase,
+                    PartnersDomainsTableQuery.values());
+            PreparedStatement deleteStatement = db.getPreparedDeleStatement(PartnersDomainsTableQuery.PARTNER_DOMAINS_TABLE_QUERY);
+            PreparedStatement insertStatement = db.getPreparedInsertStatement(PartnersDomainsTableQuery.PARTNER_DOMAINS_TABLE_QUERY);
 
-    /**
-     * Writes the statistics for all the partners into the Database
-     */
-    public void writeStatsToDB() {
+            try {
+                for (PartnerBadge partner : partnerRegister.getPartners()) {
 
-        logger.log(Level.INFO, "Writing statistics into Database");
-        Database db = new Database(this.federatedRecConfiguration.statsLogDatabase, DatabaseQueryStats.values());
-        for (PartnerBadge partner : this.partnerRegister.getPartners()) {
-            if (partner != null) {
-                PartnerBadgeStats longStats = partner.longTimeStats;
-                PartnerBadgeStats shortStats = partner.shortTimeStats;
-                logger.log(Level.INFO, "Writing " + partner.systemId + " statistics into Database");
-                PreparedStatement updateS = db.getPreparedUpdateStatement(DatabaseQueryStats.REQUESTLOG);
-                // Database Entry Style
-                // ('SYSTEM_ID','REQUESTCOUNT','FAILEDREQUESTCOUNT','FAILEDREQUESTTIMEOUTCOUNT')
+                    Set<PartnerDomain> partnerDomains = updatedProbes.get(partner.getSystemId());
+                    if (null != partnerDomains) {
+                        // apply changes to memory
+                        partner.setDomainContent(new ArrayList<PartnerDomain>(partnerDomains));
 
-                final String dbErrorMsg = "Could not write into StatsDatabase: ";
-                if (updateS != null) {
+                        // apply changes to database
+                        if (deleteStatement != null) {
+                            try {
+                                deleteStatement.clearParameters();
+                                deleteStatement.setString(1, partner.getSystemId());
+                                deleteStatement.execute();
 
-                    try {
-                        updateS.clearBatch();
-                        updateS.setString(1, partner.getSystemId());
-                        updateS.setInt(2, longStats.requestCount + shortStats.requestCount);
-                        updateS.setInt(3, longStats.failedRequestCount + shortStats.failedRequestCount);
-                        updateS.setInt(4, longStats.failedRequestTimeoutCount + shortStats.failedRequestTimeoutCount);
-                        updateS.execute();
-                    } catch (SQLException e) {
-                        logger.log(Level.INFO, dbErrorMsg, e);
-                    } finally {
-                        db.commit();
-                    }
-                } else
-                    logger.log(Level.INFO, "Could write into request statistics database");
-                PreparedStatement updateQ = db.getPreparedUpdateStatement(DatabaseQueryStats.QUERYLOG);
-                if (updateQ != null) {
-                    for (ResultStats queryStats : partner.getLastQueries()) {
-                        try {
-                            updateQ.clearBatch();
+                                insertStatement.clearBatch();
+                                for (PartnerDomain domain : partnerDomains) {
+                                    insertStatement.setString(1, partner.getSystemId());
+                                    insertStatement.setLong(2, System.currentTimeMillis());
+                                    insertStatement.setString(3, domain.domainName);
+                                    insertStatement.setDouble(4, domain.weight);
+                                    insertStatement.addBatch();
+                                }
+                                insertStatement.executeBatch();
+                                db.commit();
 
-                            updateQ.setString(1, partner.getSystemId());
-                            updateQ.setString(2, queryStats.getPartnerQuery());
-                            updateQ.setInt(3, (int) queryStats.getPartnerCallTime());
-                            updateQ.setInt(4, (int) queryStats.getFirstTransformationTime());
-                            updateQ.setInt(5, (int) queryStats.getSecondTransformationTime());
-                            updateQ.setInt(6, (int) queryStats.getEnrichmentTime());
-                            updateQ.setInt(7, queryStats.getResultCount());
-                            updateQ.addBatch();
+                                // make some noise about the batch result(s)
+                                int index = 0;
+                                int numFailed = 0;
+                                for (Integer resultStatus : insertStatement.executeBatch()) {
+                                    if (PreparedStatement.EXECUTE_FAILED == resultStatus) {
+                                        LOGGER.warning("failed to execute batch [" + index + "/" + partnerDomains.size() + "] of partner ["
+                                                + partner.getSystemId() + "]");
+                                        numFailed++;
+                                    }
+                                    index++;
+                                }
+                                LOGGER.info("stored [" + (partnerDomains.size() - numFailed) + "/" + partnerDomains.size() + "] domains of partner ["
+                                        + partner.getSystemId() + "] to database");
 
-                        } catch (SQLException e) {
-                            logger.log(Level.INFO, dbErrorMsg, e);
+                            } catch (SQLException e) {
+                                LOGGER.log(Level.SEVERE, "failed storing partners domains do database ["
+                                        + PartnersDomainsTableQuery.PARTNER_DOMAINS_TABLE_QUERY.getInternName() + "]", e);
+                            }
+
+                        } else {
+                            LOGGER.log(Level.WARNING, "failed retrieving an expected prepared statement of [" + PartnersDomainsTableQuery.class.getName() + "]");
                         }
                     }
-                    try {
-                        updateQ.executeBatch();
-                    } catch (SQLException e) {
-                        logger.log(Level.INFO, dbErrorMsg, e);
-                    }
-
-                } else
-                    logger.log(Level.INFO, "Could not write into query statistics database");
-            }
-        }
-
-    }
-
-    /**
-     * Adds the partner to the partner register if not existing allready and
-     * trys to get the old statistics for this partner from the database
-     * 
-     * @param badge
-     * @return
-     */
-    public String registerPartner(PartnerBadge badge) {
-        if (this.getPartnerRegister().getPartners().contains(badge)) {
-            logger.log(Level.INFO, "Partner: " + badge.getSystemId() + " allready registered!");
-            return "Allready Registered";
-        }
-
-        if (badge.partnerKey != null && !badge.partnerKey.isEmpty() && badge.partnerKey.length() < 20)
-            return "Partner Key is too short (<20)";
-
-        Database db = new Database(this.federatedRecConfiguration.statsLogDatabase, DatabaseQueryStats.values());
-        PreparedStatement getS = db.getPreparedSelectStatement(DatabaseQueryStats.REQUESTLOG);
-        // Database Entry Style
-        // ('SYSTEM_ID','REQUESTCOUNT','FAILEDREQUESTCOUNT','FAILEDREQUESTTIMEOUTCOUNT')
-
-        if (getS != null) {
-            try {
-                getS.setString(1, badge.getSystemId());
-                ResultSet rs = getS.executeQuery();
-                if (rs.next()) {
-                    badge.longTimeStats.requestCount = rs.getInt(2);
-                    badge.longTimeStats.failedRequestCount = rs.getInt(3);
-                    badge.longTimeStats.failedRequestTimeoutCount = rs.getInt(4);
                 }
-            } catch (SQLException e) {
-                logger.log(Level.SEVERE, "could net get statistics for partner " + badge.getSystemId(), e);
+            } finally {
+                try {
+                    db.close();
+                } catch (IOException e) {
+                    LOGGER.log(Level.WARNING, "failed to close database [" + PartnersDomainsTableQuery.PARTNER_DOMAINS_TABLE_QUERY.getInternName() + "]", e);
+                }
             }
-
-            try {
-                db.close();
-            } catch (SQLException e) {
-                logger.log(Level.WARNING, "Could not close Database", e);
-            }
-        } else
-            logger.log(Level.WARNING, "Could read from Statistics Database");
-
-        this.addPartner(badge);
-
-        return "Partner Added";
-
+        }
     }
 
-    /**
-     * gets the Partners Results and calls the given picker to aggregate results
-     * between the partners result lists
-     * 
-     * @param userProfile
-     * @return
-     * @throws FederatedRecommenderException
-     */
-    public ResultList getAndAggregateResults(SecureUserProfile userProfile, String pickerName) throws FederatedRecommenderException {
-        ResultList resultList;
-        PartnersFederatedRecommendationsPicker pFRPicker = null;
-        try {
-            Object newInstance = statelessClassInstances.get(pickerName);
-            if (newInstance == null) {
-                newInstance = Class.forName(pickerName).newInstance();
-                statelessClassInstances.put(pickerName, newInstance);
+    private DocumentBadgeList getPartnerDetailsResult(PartnerBadge partner, Client client, DocumentBadgeList currentDocs) throws UniformInterfaceException,
+            ClientHandlerException {
+        DocumentBadgeList docList = new DocumentBadgeList();
+        if (client != null) {
+            try {
+                WebResource resource = client.resource(partner.getPartnerConnectorEndpoint() + "getDetails");
+                resource.accept(MediaType.APPLICATION_JSON);
+                docList = resource.post(DocumentBadgeList.class, currentDocs);
+            } catch (UniformInterfaceException | ClientHandlerException e) {
+                LOGGER.log(Level.WARNING, "Partner: " + partner.getSystemId() + " is not working currently.", e);
+                throw e;
             }
-            pFRPicker = (PartnersFederatedRecommendationsPicker) newInstance;
-        } catch (InstantiationException | IllegalAccessException | ClassNotFoundException e) {
-            logger.log(Level.SEVERE, "Could not get Picker from Class: " + pickerName, e);
-            throw new FederatedRecommenderException("Could not get Picker from Class: " + pickerName, e);
         }
-        long start = System.currentTimeMillis();
-        PartnersFederatedRecommendations pFR = getPartnersRecommendations(userProfile);
-        List<PartnerResponseState> partnerResponseState = new ArrayList<PartnerResponseState>();
-        for (PartnerBadge badge : pFR.getResults().keySet()) {
-            partnerResponseState.addAll(pFR.getResults().get(badge).partnerResponseState);
+        return docList;
+    }
+
+    private ResultList getPartnerRecommendationResult(PartnerBadge partner, Client client, SecureUserProfile secureUserProfile)
+            throws UniformInterfaceException, ClientHandlerException {
+        ResultList resultList = new ResultList();
+        try {
+            WebResource resource = client.resource(partner.getPartnerConnectorEndpoint() + "recommend");
+            resource.accept(MediaType.APPLICATION_JSON);
+            resultList = resource.post(ResultList.class, secureUserProfile);
+        } catch (UniformInterfaceException | ClientHandlerException e) {
+            LOGGER.log(Level.WARNING, "Partner: " + partner.getSystemId() + " is not working currently.", e);
+            throw e;
         }
-        long end = System.currentTimeMillis();
-        long timeToGetPartners = end - start;
-        start = System.currentTimeMillis();
-        int numResults = 10;
-        if (userProfile.numResults != null)
-            numResults = userProfile.numResults;
-        resultList = pFRPicker.pickResults(userProfile, pFR, partnerRegister.getPartners(), numResults);
-        end = System.currentTimeMillis();
-        long timeToPickResults = end - start;
-        recommenderStats.setAverageGlobalTime(timeToGetPartners);
-        recommenderStats.setAverageAggregationTime(timeToPickResults);
-        logger.log(Level.INFO, " Time to get " + resultList.results.size() + " Results from the Partners: " + timeToGetPartners + "ms. Time to pick the best results: "
-                + timeToPickResults + "ms");
-        resultList.totalResults = resultList.results.size();
-        resultList.provider = "federated";
-        resultList.partnerResponseState = partnerResponseState;
         return resultList;
     }
 

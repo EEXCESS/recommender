@@ -20,16 +20,32 @@ GNU Affero General Public License for more details.
 You should have received a copy of the GNU Affero General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
-package eu.eexcess.federatedrecommender.domaindetection;
+package eu.eexcess.federatedrecommender.domaindetection.probing;
 
 /**
- * Base class for a domain, which represent the topics from a collection, for example a library.
+ * Exception thrown by the domain classifier classes.
  * 
  * @author rkern@know-center.at
  */
-public abstract class Domain {
+public class DomainDetectorException extends Exception {
+    /** long serialVersionUID */
+    private static final long serialVersionUID = 3659634393053549617L;
+
     /**
-     * @return
+     * Creates a new instance of this class.
+     * @param message
+     * @param cause
      */
-    public abstract String getName();
+    public DomainDetectorException(String message, Throwable cause) {
+        super(message, cause);
+    }
+
+    /**
+     * Creates a new instance of this class.
+     * @param message
+     */
+    public DomainDetectorException(String message) {
+        super(message);
+    }
+    
 }

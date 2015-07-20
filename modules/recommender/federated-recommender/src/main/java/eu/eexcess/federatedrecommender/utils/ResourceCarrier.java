@@ -109,8 +109,7 @@ public class ResourceCarrier {
                 fin.close();
                 ois.close();
             } catch (IOException e) {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
+                logger.log(Level.INFO, "could not close file", e);
             }
         }
         return result;
@@ -145,8 +144,7 @@ public class ResourceCarrier {
             try {
                 fout.close();
             } catch (IOException e) {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
+                logger.log(Level.INFO, "Could not close file", e);
             }
     }
 }

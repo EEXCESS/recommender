@@ -26,7 +26,7 @@ import java.util.Map;
 
 import net.sf.extjwnl.data.Synset;
 import at.knowcenter.ie.Annotation;
-import eu.eexcess.federatedrecommender.domaindetection.Domain;
+import eu.eexcess.federatedrecommender.domaindetection.probing.Domain;
 
 /**
  * 

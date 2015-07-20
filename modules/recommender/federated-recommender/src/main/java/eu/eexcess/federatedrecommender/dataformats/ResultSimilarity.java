@@ -87,7 +87,7 @@ public class ResultSimilarity extends Result implements Serializable {
             valueCount += 3.0;
         }
 
-        if (valueCount == 0.0)
+        if (valueCount.intValue()==0)
             return 0.0;
         return returnValue / valueCount;
     }

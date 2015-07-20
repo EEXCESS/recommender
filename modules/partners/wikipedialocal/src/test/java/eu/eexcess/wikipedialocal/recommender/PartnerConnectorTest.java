@@ -32,28 +32,26 @@ import eu.eexcess.partnerrecommender.api.PartnerConfigurationCache;
 
 public class PartnerConnectorTest {
 
-	@Test
-	public void queryPartnerNative_queryThreeTimes_expectOneTimeBoostrapping() {
+    @Test
+    public void queryPartnerNative_queryThreeTimes_expectOneTimeBoostrapping() {
 
-		PartnerConfiguration configuration = PartnerConfigurationCache.CONFIG.getPartnerConfiguration();
-		ContextKeyword schroedinger = new ContextKeyword("Erwin Schrödinger");
-		SecureUserProfile userProfile = new SecureUserProfile();
-		userProfile.contextKeywords.add(schroedinger);
-		PartnerConnector connector = new PartnerConnector();
+        PartnerConfiguration configuration = PartnerConfigurationCache.CONFIG.getPartnerConfiguration();
+        ContextKeyword schroedinger = new ContextKeyword("Erwin Schrödinger");
+        SecureUserProfile userProfile = new SecureUserProfile();
+        userProfile.contextKeywords.add(schroedinger);
+        PartnerConnector connector = new PartnerConnector();
 
-			String baseSearchEndpoint = configuration.searchEndpoint;
-			ResultList firstTryResults = null;
-			try {
-				firstTryResults = connector.queryPartnerNative(configuration, userProfile,null);
-			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-			System.out.println(firstTryResults);
-			assert(609==firstTryResults.totalResults);
-}
-			
-		
+        ResultList firstTryResults = null;
+        try {
+            firstTryResults = connector.queryPartnerNative(configuration, userProfile, null);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        if (firstTryResults != null) {
+            System.out.println(firstTryResults);
+            assert (609 == firstTryResults.totalResults);
 
-	
+        }
+    }
+
 }

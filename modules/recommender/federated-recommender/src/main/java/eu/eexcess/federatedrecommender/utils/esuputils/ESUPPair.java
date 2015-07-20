@@ -32,7 +32,7 @@ import java.util.List;
  * @author hziak
  *
  */
-public class ESUPPair implements Cloneable, Serializable {
+public class ESUPPair implements  Serializable {
     private static final long serialVersionUID = 6130633513641518529L;
 
     private String source;
@@ -79,7 +79,8 @@ public class ESUPPair implements Cloneable, Serializable {
         }
         return result;
     }
-
+    
+    @Override
     public String toString() {
         return source + " " + getBiggestSourceClass();
 
@@ -99,11 +100,12 @@ public class ESUPPair implements Cloneable, Serializable {
      */
     @Override
     public boolean equals(Object obj) {
-        if (obj instanceof ESUPPair) {
-            if (this.source.equals(((ESUPPair) obj).getSource()))
+        if (obj instanceof ESUPPair && this.source.equals(((ESUPPair) obj).getSource())){
                 return true;
         }
         return false;
     }
+    
+
 
 }

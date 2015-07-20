@@ -27,18 +27,17 @@ import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.logging.Logger;
 
 import org.apache.commons.lang.StringUtils;
-import org.apache.log4j.Level;
-import org.apache.log4j.Logger;
 import org.junit.Test;
 
-import eu.eexcess.opensearch.opensearchDescriptionDocument.OpensearchDescription;
-import eu.eexcess.opensearch.opensearchDescriptionDocument.documentFields.Image;
-import eu.eexcess.opensearch.opensearchDescriptionDocument.documentFields.Query;
-import eu.eexcess.opensearch.opensearchDescriptionDocument.documentFields.Url;
-import eu.eexcess.opensearch.opensearchDescriptionDocument.documentFields.Url.UrlRel;
-import eu.eexcess.opensearch.opensearchDescriptionDocument.parse.OpenSearchDocumentParser;
+import eu.eexcess.opensearch.opensearch_description_document.OpensearchDescription;
+import eu.eexcess.opensearch.opensearch_description_document.documentFields.Image;
+import eu.eexcess.opensearch.opensearch_description_document.documentFields.Query;
+import eu.eexcess.opensearch.opensearch_description_document.documentFields.Url;
+import eu.eexcess.opensearch.opensearch_description_document.documentFields.Url.UrlRel;
+import eu.eexcess.opensearch.opensearch_description_document.parse.OpenSearchDocumentParser;
 
 public class OpenSearchDocumentParserTest {
 
@@ -135,7 +134,7 @@ public class OpenSearchDocumentParserTest {
 					.toString());
 
 		} catch (IOException e) {
-			logger.log(Level.ERROR, e);
+			logger.severe(e.getMessage());
 		}
 		return document;
 	}

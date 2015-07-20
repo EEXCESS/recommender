@@ -19,7 +19,7 @@ GNU Affero General Public License for more details.
 
 You should have received a copy of the GNU Affero General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
-*/
+ */
 package eu.eexcess.federatedrecommender.interfaces;
 
 import java.util.List;
@@ -34,54 +34,53 @@ import eu.eexcess.dataformats.userprofile.SecureUserProfile;
 import eu.eexcess.federatedrecommender.dataformats.PFRChronicle;
 import eu.eexcess.federatedrecommender.dataformats.PartnersFederatedRecommendations;
 
-
 public abstract class PartnersFederatedRecommendationsPicker {
-	final private ModifiableSolrParams params =new ModifiableSolrParams();
+    final private ModifiableSolrParams params = new ModifiableSolrParams();
 
-	protected PartnersFederatedRecommendationsPicker(){
-		params.set("quantRate", (int) 0.02f);
-	    params.set("minTokenLen", 3);
-	}
-	
-	/**
-	 * Picks results out of the chronic from multiple queries
-	 * @param pFRChronicle
-	 * @param numResults
-	 * @return
-	 */
-	public abstract ResultList pickResults(PFRChronicle pFRChronicle,
-			int numResults);
+    protected PartnersFederatedRecommendationsPicker() {
+        params.set("quantRate", (int) 0.02f);
+        params.set("minTokenLen", 3);
+    }
 
-	/**
-	 * Pick results out of a single result list and aggregates the results into one list
-	 * 
-	 * @param secureUserProfile
-	 * 
-	 * @param resultList
-	 * @param partners
-	 * @param numResults
-	 */
-	public abstract ResultList pickResults(SecureUserProfile secureUserProfile,
-			PartnersFederatedRecommendations resultList,
-			List<PartnerBadge> partners, int numResults);
+    /**
+     * Picks results out of the chronic from multiple queries
+     * 
+     * @param pFRChronicle
+     * @param numResults
+     * @return
+     */
+    public abstract ResultList pickResults(PFRChronicle pFRChronicle, int numResults);
 
-	/**
-	 * calculated the fuzzy hash for the result set
-	 * @param o
-	 * @return
-	 */
-	public byte[] getFuzzyHashSignature(Result o) {
-		TextProfileSignature tPSignatur =  new TextProfileSignature();
-		
-		
-		tPSignatur.init(params );
-		if(o.description!=null)
-			tPSignatur.add(o.description);
-		else if(o.title!=null){
-			tPSignatur.add(o.title);
-			if(o.previewImage!=null)
-				tPSignatur.add(o.previewImage);
-		}
-		return tPSignatur.getSignature();
-	}
+    /**
+     * Pick results out of a single result list and aggregates the results into
+     * one list
+     * 
+     * @param secureUserProfile
+     * 
+     * @param resultList
+     * @param partners
+     * @param numResults
+     */
+    public abstract ResultList pickResults(SecureUserProfile secureUserProfile, PartnersFederatedRecommendations resultList, List<PartnerBadge> partners,
+            int numResults);
+
+    /**
+     * calculated the fuzzy hash for the result set
+     * 
+     * @param o
+     * @return
+     */
+    public byte[] getFuzzyHashSignature(Result o) {
+        TextProfileSignature tPSignatur = new TextProfileSignature();
+
+        tPSignatur.init(params);
+        if (o.description != null)
+            tPSignatur.add(o.description);
+        else if (o.title != null) {
+            tPSignatur.add(o.title);
+            if (o.previewImage != null)
+                tPSignatur.add(o.previewImage);
+        }
+        return tPSignatur.getSignature();
+    }
 }

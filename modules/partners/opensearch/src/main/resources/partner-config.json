@@ -5,7 +5,7 @@
   "partnerConnectorClass": "eu.eexcess.opensearch.recommender.PartnerConnector",
   "isTransformedNative": "true",
   "transformerClass": "eu.eexcess.opensearch.datalayer.OpensearchTransformer",
-  "searchEndpoint" : "http://en.wikipedia.org/w/opensearch_desc.php" ,
+  "searchEndpoint" : "https://en.wikipedia.org/w/opensearch_desc.php" ,
   "userName": "",
   "password": "",
   "mappingListTransformationFile":"mapperResultList.xsl",

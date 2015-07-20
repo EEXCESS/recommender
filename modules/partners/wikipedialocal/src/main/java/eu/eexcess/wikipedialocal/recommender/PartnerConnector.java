@@ -23,7 +23,7 @@ import java.io.IOException;
 import java.util.logging.Logger;
 
 import org.apache.lucene.analysis.Analyzer;
-import org.apache.lucene.analysis.en.EnglishAnalyzer;
+import org.apache.lucene.analysis.standard.ClassicAnalyzer;
 import org.apache.lucene.index.DirectoryReader;
 import org.apache.lucene.index.IndexReader;
 import org.apache.lucene.index.IndexableField;
@@ -80,7 +80,7 @@ public class PartnerConnector extends PartnerConnectorBase implements PartnerCon
 		partnerConfig = partnerConfiguration;
 		ResultList resultList = new ResultList();
 		
-		Analyzer analyzer = new EnglishAnalyzer();
+		Analyzer analyzer = new ClassicAnalyzer();
 		File directoryPath = new File(PartnerConfigurationCache.CONFIG.getPartnerConfiguration().searchEndpoint);
 		Directory directory = FSDirectory.open(directoryPath );
 		IndexReader indexReader = DirectoryReader.open(directory );

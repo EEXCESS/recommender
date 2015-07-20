@@ -68,7 +68,7 @@ public class DbPediaGraph {
 		final List<String> visitedNodes = new ArrayList<String>();
 		Map<String,Future<Void>> futures= new HashMap<String, Future<Void>>();
 		for (final ContextKeyword keyword : profileKeywords) {
-            Future<Void> future = threadPool.submit(new Callable<Void>() {
+		    Future<Void> future = threadPool.submit(new Callable<Void>() {
                 @Override
                 public Void call() throws Exception {
                 	try {
@@ -96,13 +96,18 @@ public class DbPediaGraph {
 	public  void searchKeyNodes(SimpleWeightedGraph<String, DefaultEdge> g, String keyword, List<String> keynodes,List<String> vistedNodes, int hitsLimit, int depthLimit) throws FederatedRecommenderException{
 		List<DbPediaIndexBean> results = null;
 		try {
-			results = dbPediaIndex.search(hitsLimit, "entity_en:\"" + keyword + "\" AND edge:\"http://xmlns.com/foaf/0.1/name\"");
+			
+			String query = "entity_en:\"" + keyword  + "\""; //\" AND edge:\"http://xmlns.com/foaf/0.1/name\"";
+//			logger.log(Level.INFO,"Query:_"+query);
+			results = dbPediaIndex.search(hitsLimit, query);
 		} catch (FederatedRecommenderException e) {
 			logger.log(Level.SEVERE,DBPEDIAFAILURE);
 			throw new FederatedRecommenderException(DBPEDIAFAILURE, e);
 		}
-		synchronized (this) {
-			g.addVertex(keyword);
+	
+//		logger.log(Level.INFO,"Result:" +results.toString());
+		synchronized (g) {
+		g.addVertex(keyword);
 			for (DbPediaIndexBean item : results) {
 				try {
 					g.addVertex(item.parentNode);
@@ -113,6 +118,8 @@ public class DbPediaGraph {
 					throw new FederatedRecommenderException(DBPEDIAFAILURE, e);
 				}
 			}
+		
+//			g.removeVertex(keyword);
 			keynodes.add(keyword);
 		}
 		
@@ -151,8 +158,7 @@ public class DbPediaGraph {
 
     private void addVertex(SimpleWeightedGraph<String, DefaultEdge> g, List<String> visitedNodes, int hitsLimit, int depthLimit, String object, String subject)
             throws FederatedRecommenderException {
-        if(object!=null)
-        if(!object.equals(subject)){
+        if(object!=null && !object.equals(subject)){
         	g.addVertex(object);
         	g.addVertex(subject);
         	g.addEdge(object, subject);

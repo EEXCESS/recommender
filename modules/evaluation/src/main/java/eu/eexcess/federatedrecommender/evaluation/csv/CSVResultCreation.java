@@ -27,6 +27,8 @@ import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import javax.ws.rs.core.MediaType;
 
@@ -46,79 +48,74 @@ import eu.eexcess.dataformats.evaluation.EvaluationResultList;
 import eu.eexcess.dataformats.evaluation.EvaluationResultLists;
 import eu.eexcess.dataformats.result.Result;
 import eu.eexcess.dataformats.userprofile.ContextKeyword;
+import eu.eexcess.dataformats.userprofile.Interest;
 import eu.eexcess.dataformats.userprofile.SecureUserProfileEvaluation;
 import eu.eexcess.federatedrecommender.evaluation.evaluation.EvaluationQuery;
 
 public class CSVResultCreation {
-    public final static String directoryPath = "/home/hziak/Datasets/EEXCESS/evaluationBlockRanking/";
-
+    public final static String DIRECTORYPATH = "/home/hziak/Datasets/EEXCESS/evaluationBlockRanking/";
+    private static final Logger LOGGER = Logger.getLogger(CSVResultCreation.class.getName());
+    private static final String HEADER = "QUERY,DESCRIPTION,INT1,INT2,INT3,INT4,INT5,INT6,INT7,INT8,INT9,INT10,INT11,INT12,INT13,INT14,INT15,INT16,INT17,INT18,INT19,INT20,INT21,INT22,INT23,INT24,INT25,INT26,INT27,INT28,INT29,INT30"
+            + ",FIRSTTITLE1,FIRSTDESCRIPTION1,FIRSTTITLE2,FIRSTDESCRIPTION2,FIRSTTITLE3,FIRSTDESCRIPTION3,FIRSTTITLE4,FIRSTDESCRIPTION4,FIRSTTITLE5,FIRSTDESCRIPTION5,FIRSTTITLE6,FIRSTDESCRIPTION6,FIRSTTITLE7,FIRSTDESCRIPTION7,FIRSTTITLE8,FIRSTDESCRIPTION8,FIRSTTITLE9,FIRSTDESCRIPTION9,FIRSTTITLE10,FIRSTDESCRIPTION10,"
+            + ",SECONDTITLE1,SECONDDESCRIPTION1,SECONDTITLE2,SECONDDESCRIPTION2,SECONDTITLE3,SECONDDESCRIPTION3,SECONDTITLE4,SECONDDESCRIPTION4,SECONDTITLE5,SECONDDESCRIPTION5,SECONDTITLE6,SECONDDESCRIPTION6,SECONDTITLE7,SECONDDESCRIPTION7,SECONDTITLE8,SECONDDESCRIPTION8,SECONDTITLE9,SECONDDESCRIPTION9,SECONDTITLE10,SECONDDESCRIPTION10";
     private final WebResource wRBlock;
 
-    // private final WebResource wRDefault;
     public CSVResultCreation() {
         ClientConfig clientConfig = new DefaultClientConfig();
         clientConfig.getFeatures().put(JSONConfiguration.FEATURE_POJO_MAPPING, Boolean.TRUE);
         Client client = Client.create(clientConfig);
         wRBlock = client.resource("http://eexcess-demo.know-center.tugraz.at/eexcess-federated-recommender-web-service-evaluation-1.0-SNAPSHOT/evaluation/blockEvaluation");
-        // wRDefault =
-        // client.resource("http://localhost:8099/excess-federated-recommender-web-service-evaluation-1.0-SNAPSHOT/evaluation/evaluation");
 
     }
 
-    public static void main(String args[]) {
+    public static void main(String[] args) {
         CSVResultCreation creation = new CSVResultCreation();
         EvaluationQueryList queries = creation.getEvaluationQueriesFromJson("finalSelectedQueries.json");
-
+        FileWriter ofqw = creation.openCSV();
         // creation.writeQueriesToQueryCSVFile(queries);
+        try {
+            ofqw.write(HEADER + "\n");
+        } catch (IOException e) {
+            LOGGER.log(Level.WARNING, "Could not write file", e);
+        }
+        creation.createCSVResultsFile(queries, ofqw);
 
-        creation.createCSVResultsFile(queries);
+        creation.closeCSV(ofqw);
 
     }
 
-    private void createCSVResultsFile(EvaluationQueryList queries) {
-        FileWriter ofrw = null;
-        try {
-            ofrw = new FileWriter(new File(directoryPath + "queryresult.csv"));
-        } catch (IOException e1) {
-            e1.printStackTrace();
-        }
+    private void createCSVResultsFile(EvaluationQueryList queries, FileWriter ofqw) {
 
         for (EvaluationQuery query : queries.getQueries()) {
             SecureUserProfileEvaluation secureUserProfileEvaluation = convertEvalQueryToSecUserProfile(query);
             String blockResultString = getQueryResultCSV(getwRBlock(), secureUserProfileEvaluation);
-            String defaultResultString = ""; // Todo: Get default string from
-                                             // get queyr resultCSV
+            // String defaultResultString = ""; // Todo: Get default string from
+            // // get queyr resultCSV
             // defaultResultString = getQueryResultCSV(getwRDefault(),
             // secureUserProfileEvaluation);
             String queryCSV = getQueryCSV(query);
             String finalCSVString = null;
-            if (queryCSV != null && blockResultString != null && defaultResultString != null)
-                finalCSVString = queryCSV + "," + blockResultString + "," + defaultResultString;
+            if (queryCSV != null && blockResultString != null)
+                finalCSVString = queryCSV + blockResultString;
             if (finalCSVString != null)
                 try {
-                    ofrw.write(finalCSVString);
-                    System.out.println(finalCSVString);
+                    ofqw.write(finalCSVString + "\n");
+                    LOGGER.log(Level.INFO, finalCSVString + "\n");
+                    // System.out.println(finalCSVString);
                 } catch (IOException e) {
-                    e.printStackTrace();
+                    LOGGER.log(Level.WARNING, "", e);
                 }
         }
 
-        try {
-            ofrw.flush();
-            ofrw.close();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
     }
 
     public EvaluationQueryList getEvaluationQueriesFromJson(String fileName) {
         JsonReader reader = null;
         try {
 
-            reader = new JsonReader(new FileReader(directoryPath + fileName));
+            reader = new JsonReader(new FileReader(DIRECTORYPATH + fileName));
         } catch (FileNotFoundException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+            LOGGER.log(Level.WARNING, "", e);
         }
 
         EvaluationQueryList queries = null;
@@ -128,34 +125,65 @@ public class CSVResultCreation {
         return queries;
     }
 
-    @SuppressWarnings("unused")
-    private void writeQueriesToQueryCSVFile(EvaluationQueryList queries) {
-        FileWriter ofqw = null;
-        try {
-            ofqw = new FileWriter(new File(directoryPath + "query.csv"));
-        } catch (IOException e1) {
-            e1.printStackTrace();
-        }
-        for (EvaluationQuery evalQueries : queries.getQueries()) {
+    // @SuppressWarnings("unused")
+    // private void writeQueriesToQueryCSVFile(EvaluationQueryList queries) {
+    // FileWriter ofqw = openCSV();
+    // writeCSVLine(queries, ofqw);
+    // closeCSV(ofqw);
+    // }
 
-            String result = getQueryCSV(evalQueries);
-            try {
-                ofqw.write(result);
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-
-        }
+    /**
+     * Closed the csv file
+     * 
+     * @param ofqw
+     */
+    private void closeCSV(FileWriter ofqw) {
         try {
             ofqw.flush();
             ofqw.close();
         } catch (IOException e) {
-            e.printStackTrace();
+            LOGGER.log(Level.WARNING, "", e);
         }
+    }
+
+    /**
+     * writes a new line to the csv file
+     * 
+     * @param queries
+     * @param ofqw
+     */
+    private void writeCSVLine(EvaluationQueryList queries, FileWriter ofqw) {
+        for (EvaluationQuery evalQueries : queries.getQueries()) {
+
+            String result = getQueryCSV(evalQueries);
+            try {
+
+                ofqw.write(result);
+            } catch (IOException e) {
+                LOGGER.log(Level.WARNING, "", e);
+            }
+
+        }
+    }
+
+    /**
+     * opens the CSV file
+     * 
+     * @return
+     */
+    private FileWriter openCSV() {
+        FileWriter ofqw = null;
+        try {
+            ofqw = new FileWriter(new File(DIRECTORYPATH + "query.csv"));
+        } catch (IOException e1) {
+            LOGGER.log(Level.WARNING, "", e1);
+        }
+        return ofqw;
     }
 
     private String getQueryCSV(EvaluationQuery evalQueries) {
         StringBuilder builder = new StringBuilder();
+
         builder.append("\"");
         builder.append(evalQueries.query.replaceAll(",|\"|\n|\r", ""));
         builder.append("\"");
@@ -163,6 +191,20 @@ public class CSVResultCreation {
         builder.append("\"");
         builder.append(evalQueries.description.replaceAll(",|\"|\n|\r", ""));
         builder.append("\"");
+        builder.append(",");
+        for (Interest interest : evalQueries.interests) {
+            builder.append("\"");
+            builder.append(interest.text);
+            builder.append("\"");
+            builder.append(",");
+        }
+        Integer maxInterests = 30;
+        maxInterests -= evalQueries.interests.size();
+        while (maxInterests > 0) {
+            maxInterests--;
+            builder.append(",");
+        }
+
         // builder.append(System.lineSeparator());
         return builder.toString();
     }
@@ -206,51 +248,57 @@ public class CSVResultCreation {
         // }
 
         ObjectMapper mapper = new ObjectMapper();
+        boolean isValidBlock = false;
+        boolean isValidBasic = false;
+        for (EvaluationResultList evalResultList : resp.results) {
 
-        try {
-            File file = new File(directoryPath + "results/" + secureUserProfileEvaluation.queryID + ".json");
-            mapper.defaultPrettyPrintingWriter().writeValue(file, resp);
-            System.out.println("Writing to file:" + file.getAbsolutePath());
-        } catch (IOException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+            if (evalResultList.provider.equals("Basic"))
+                if (evalResultList.results.size() == 10)
+                    isValidBasic = true;
+                else
+                    LOGGER.log(Level.INFO, "Not used: " + evalResultList.provider + " " + evalResultList.results.size());
+
+            if (evalResultList.provider.equals("BlockPicker (Basic(4),Diversity(3),Serendipity(3))"))
+                if (evalResultList.results.size() == 10)
+                    isValidBlock = true;
+                else
+                    LOGGER.log(Level.INFO, "Not used: " + evalResultList.provider + " " + evalResultList.results.size());
         }
-        // JsonWriter writer= new JsonWriter(new
-        // FileWriter(directoryPath+""+secureUserProfileEvaluation.queryID+".json"));
+        if (isValidBlock && isValidBasic) {
+            try {
+                File file = new File(DIRECTORYPATH + "results/" + secureUserProfileEvaluation.queryID + ".json");
+                mapper.defaultPrettyPrintingWriter().writeValue(file, resp);
+                // System.out.println("Writing to file:" +
+                // file.getAbsolutePath());
+            } catch (IOException e) {
+                LOGGER.log(Level.WARNING, "", e);
+            }
+        }
 
         for (EvaluationResultList resultList : resp.results) {
-            // System.out.println("RL "+resultList);
             int counter = 0;
             for (Result result : resultList.results) {
 
                 if (result.title != null) {
                     builder.append("\"");
-
                     builder.append(result.title.replaceAll(",|\"|\n|\r", ""));
                     builder.append("\",");
-                    // if (result.description != null)
-                    // if (!result.description.isEmpty()) {
-                    // builder.append(",");
-                    // builder.append("\"");
-                    // builder.append(result.description.replaceAll(
-                    // ",|\"|\n|\r", " "));
-                    // builder.append("\"");
-                    // }
-                    // builder.append(System.lineSeparator());
+                    String description = result.description.replaceAll(",|\"|\n|\r", "");
+                    if (description.length() > 500)
+                        description = description.substring(0, 500) + "...";
+                    builder.append(description);
+                    builder.append("\",");
+
                 } else if (resp.results.get(0).results.size() - (++counter) < 10)
                     return null;
             }
             builder.append(",");
         }
-        String string = builder.toString();
-        System.out.println("returned " + string);
-        return string;
+        return builder.toString();
     }
 
     public WebResource getwRBlock() {
         return wRBlock;
     }
-    // public WebResource getwRDefault() {
-    // return wRDefault;
-    // }
+
 }
