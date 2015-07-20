@@ -46,18 +46,18 @@ import eu.eexcess.federatedrecommender.interfaces.PartnersFederatedRecommendatio
  *
  */
 public class BlockPicker extends PartnersFederatedRecommendationsPicker {
-    public BlockPicker() {
-        super();
-    }
 
-    private static final Logger logger = Logger.getLogger(BlockPicker.class.getName());
+    private static final Logger LOGGER = Logger.getLogger(BlockPicker.class.getName());
     private static final String BASIC = "Basic";
     private static final String DIVERSITY = "Diversity";
     private static final String SERENDIPITY = "Serendipity";
 
+    public BlockPicker() {
+        super();
+    }
+
     @Override
     public ResultList pickResults(PFRChronicle pFRChronicle, int numResults) {
-        // TODO Auto-generated method stub
         return null;
     }
 
@@ -127,7 +127,7 @@ public class BlockPicker extends PartnersFederatedRecommendationsPicker {
         EvaluationResultList diversityList = null;
         EvaluationResultList serendipityList = null;
         if (blocks < 3)
-            logger.log(Level.INFO, "At least one block will be missing in the result list");
+            LOGGER.log(Level.INFO, "At least one block will be missing in the result list");
         int unknownCounter = 0;
         for (EvaluationResultList list : resultLists.results) {
             switch (list.provider) {
@@ -147,7 +147,7 @@ public class BlockPicker extends PartnersFederatedRecommendationsPicker {
             }
         }
         if (unknownCounter > 0) {
-            logger.log(Level.WARNING, "There was at least one unrecognized block (num:" + unknownCounter + ")");
+            LOGGER.log(Level.WARNING, "There was at least one unrecognized block (num:" + unknownCounter + ")");
             blocks -= unknownCounter;
         }
         int maxSize = 0;
