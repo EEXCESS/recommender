@@ -21,6 +21,7 @@ modules/partners/ddb/src/main/resources/partner-config.json
 modules/partners/europeana/src/main/resources/partner-config.json
 modules/partners/europeana/*-enrichment-stats.csv
 modules/partners/kimportal/target/
+modules/partners/kimportal/c:\\*
 modules/partners/kimcollect/src/main/resources/partner-config.json
 #modules/partners/mendeley/target/
 modules/partners/mendeley/src/main/resources/partner-config.json
