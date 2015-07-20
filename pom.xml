@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>eu.eexcess</groupId>
 	<artifactId>eexcess-parent</artifactId>
@@ -8,17 +9,12 @@
 	<name>EEXCESS - Parent</name>
 	<description>Parent for all EEXCESS related projects.
   </description>
-<<<<<<< .mine
+
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<sonar.language>java</sonar.language>
 	</properties>
-=======
 
-
-
-
->>>>>>> .theirs
 	<modules>
 		<module>common/</module>
 		<module>modules/reference/partner-data-layer/</module>
@@ -34,11 +30,9 @@
 		<module>modules/partners/opensearch/</module>
 		<module>modules/recommender/federated-recommender/</module>
 		<module>modules/recommender/federated-recommender-web-service/</module>
-<<<<<<< .mine
-		<!-- <module>modules/evaluation/</module>-->
-=======
-	 <module>modules/evaluation/</module> 	
->>>>>>> .theirs
+
+		<module>modules/evaluation/</module>
+
 		<module>experimental/misc/</module>
 	</modules>
 	<developers>
@@ -90,34 +84,29 @@
 	</distributionManagement>
 	<build>
 
-<!--  Addition for Sonarqube, comment out if build fails   -->
-			<pluginManagement>
-				<plugins>
-					<plugin>
+		<!-- Addition for Sonarqube, comment out if build fails -->
+		<pluginManagement>
+			<plugins>
+				<plugin>
 					<groupId>org.jacoco</groupId>
 					<artifactId>jacoco-maven-plugin</artifactId>
 					<version>0.7.4.201502262128</version>
 					<executions>
-					<execution>
-					<goals>
-					<goal>prepare-agent</goal>
-					</goals>
-					</execution>
+						<execution>
+							<goals>
+								<goal>prepare-agent</goal>
+							</goals>
+						</execution>
 					</executions>
-					</plugin>
-				</plugins>
-			</pluginManagement>
+				</plugin>
+			</plugins>
+		</pluginManagement>
 
 		<plugins>
-<<<<<<< .mine
 
-=======
-
->>>>>>> .theirs
 			<plugin>
 				<groupId>org.jacoco</groupId>
 				<artifactId>jacoco-maven-plugin</artifactId>
-				<version>0.7.5.201505241946</version>
 			</plugin>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
@@ -128,11 +117,11 @@
 				<groupId>org.mortbay.jetty</groupId>
 				<artifactId>maven-jetty-plugin</artifactId>
 			</plugin>
-	  <plugin>
-       	<groupId>org.codehaus.sonar</groupId>
-	<artifactId>sonar-maven-plugin</artifactId>
-	<version>5.1.1</version>
-      </plugin>
+			<plugin>
+				<groupId>org.codehaus.sonar</groupId>
+				<artifactId>sonar-maven-plugin</artifactId>
+				<version>5.1.1</version>
+			</plugin>
 			<plugin>
 				<groupId>org.codehaus.sonar</groupId>
 				<artifactId>sonar-maven-plugin</artifactId>
@@ -158,20 +147,9 @@
 					</execution>
 				</executions>
 			</plugin>
-<!--			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-javadoc-plugin</artifactId>
-				<executions>
-					<execution>
-						<id>attach-javadocs</id>
-						<goals>
-							<goal>jar</goal>
-						</goals>
-					</execution>
-				</executions>
-
-			</plugin>
-		-->
+			<!-- <plugin> <groupId>org.apache.maven.plugins</groupId> <artifactId>maven-javadoc-plugin</artifactId> 
+				<executions> <execution> <id>attach-javadocs</id> <goals> <goal>jar</goal> 
+				</goals> </execution> </executions> </plugin> -->
 		</plugins>
 	</build>
 </project>

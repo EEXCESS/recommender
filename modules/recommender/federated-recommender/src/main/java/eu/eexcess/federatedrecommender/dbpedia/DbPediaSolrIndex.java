@@ -55,6 +55,7 @@ import eu.eexcess.federatedrecommender.utils.FederatedRecommenderException;
 
 /**
  * Handles the connection and creation of the Solr DBPedia Index
+ * 
  * @author hziak
  *
  */
@@ -178,7 +179,7 @@ public class DbPediaSolrIndex {
             try {
                 queryResponse = server.query(solrParams);
             } catch (SolrServerException e) {
-                 logger.log(Level.INFO,"",e);
+                logger.log(Level.INFO, "", e);
 
             }
             if (queryResponse == null)
@@ -196,8 +197,8 @@ public class DbPediaSolrIndex {
                 try {
                     server.addBeans(dbPediaIndexBeans);
                 } catch (SolrServerException | IOException e) {
-                   logger.log(Level.SEVERE,"Some exception happened while adding the solr beans",e);
-                   throw new FederatedRecommenderException("Some exception happened while adding the solr beans",e);
+                    logger.log(Level.SEVERE, "Some exception happened while adding the solr beans", e);
+                    throw new FederatedRecommenderException("Some exception happened while adding the solr beans", e);
                 }
                 return null;
             }
@@ -205,8 +206,10 @@ public class DbPediaSolrIndex {
         return null;
 
     }
+
     /**
      * generates the solr query for the new node
+     * 
      * @param doc
      * @return
      */
@@ -233,13 +236,11 @@ public class DbPediaSolrIndex {
      */
     private boolean getIndexableObject(Node object, SolrInputDocument doc) {
         try {
-
             try {
                 String dataTypeUri = object.toString();
                 if (dataTypeUri.contains("resource")) {
                     doc.addField(CHILD_NODE, object.toString());
                     return true;
-
                 } else if (dataTypeUri.contains("XMLSchema")) {
                     return false;
                 }
@@ -247,12 +248,12 @@ public class DbPediaSolrIndex {
                 logger.log(Level.INFO, "Could not parse node correctly", e);
                 return false;
             }
-
             doc.addField("entity_" + object.getLiteralLanguage(), object.getLiteralLexicalForm()); // t.getObject().getLiteralLanguage()
             return true;
         } catch (Exception e) {
             logger.log(Level.INFO, "Could not parse literal node correctly", e);
             return false;
+
         }
 
     }
@@ -366,7 +367,7 @@ public class DbPediaSolrIndex {
                 }
                 dbPediaIndexBean.referringParent = 0;
                 if (parentResponse != null && parentResponse.getResults() != null)
-                        dbPediaIndexBean.referringParent = parentResponse.getResults().getNumFound();
+                    dbPediaIndexBean.referringParent = parentResponse.getResults().getNumFound();
 
                 ModifiableSolrParams childParam = new ModifiableSolrParams();
                 String childQuery = "parentNode:\"" + dbPediaIndexBean.childNode + "\"";
@@ -380,7 +381,7 @@ public class DbPediaSolrIndex {
                 }
                 dbPediaIndexBean.referringChild = 0;
                 if (childResponse != null && childResponse.getResults() != null)
-                        dbPediaIndexBean.referringChild = childResponse.getResults().getNumFound();
+                    dbPediaIndexBean.referringChild = childResponse.getResults().getNumFound();
 
                 processedDocs.add(dbPediaIndexBean);
                 commitBeans(processedDocs);

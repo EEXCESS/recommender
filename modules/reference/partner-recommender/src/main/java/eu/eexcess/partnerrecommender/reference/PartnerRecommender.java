@@ -84,7 +84,9 @@ public class PartnerRecommender implements PartnerRecommenderApi {
 
     @Override
     public void initialize() throws IOException {
-
+        /**
+         * Nothing to do here
+         */
     }
 
     /**
@@ -104,13 +106,12 @@ public class PartnerRecommender implements PartnerRecommenderApi {
             long startCallPartnerApi = System.currentTimeMillis();
             // use native untransformed result primarily
             PartnerConfiguration currentPartnerConfiguration = (PartnerConfiguration) SerializationUtils.clone(partnerConfiguration);
-            if (userProfile.partnerList != null)
-                if (!userProfile.partnerList.isEmpty())
-                    for (PartnerBadge pC : userProfile.partnerList) {
-                        if (pC.systemId.equals(partnerConfiguration.systemId)) {
-                            currentPartnerConfiguration.queryGeneratorClass = pC.queryGeneratorClass;
-                        }
+            if (userProfile.partnerList != null && !userProfile.partnerList.isEmpty())
+                for (PartnerBadge pC : userProfile.partnerList) {
+                    if (pC.systemId.equals(partnerConfiguration.systemId)) {
+                        currentPartnerConfiguration.queryGeneratorClass = pC.queryGeneratorClass;
                     }
+                }
 
             ResultList nativeResult = partnerConnector.queryPartnerNative(currentPartnerConfiguration, userProfile, partnerdataLogger);
             String finalFormulatedQuery = PartnerConfigurationCache.CONFIG.getQueryGenerator(currentPartnerConfiguration.queryGeneratorClass).toQuery(userProfile);
@@ -458,7 +459,7 @@ public class PartnerRecommender implements PartnerRecommenderApi {
 
     private String transformRDFXMLToResponseDetailJSONLD(String rdfXML) {
         try {
-            System.out.println(XML.toJSONObject(rdfXML).toString());
+            LOGGER.log(Level.INFO, XML.toJSONObject(rdfXML).toString());
             // Open a valid json(-ld) input file
             // InputStream inputStream = new FileInputStream("d:\\input.json");
             // Read the file into an Object (The type of this object will be a
@@ -479,9 +480,7 @@ public class PartnerRecommender implements PartnerRecommenderApi {
             Object compact;
             compact = JsonLdProcessor.fromRDF(rdfXML, options);
             // Print out the result (or don't, it's your call!)
-            String json = JsonUtils.toPrettyString(compact);
-
-            return json;
+            return JsonUtils.toPrettyString(compact);
         } catch (JsonLdError e) {
             LOGGER.log(Level.INFO, "", e);
         } catch (JsonGenerationException e) {
@@ -507,9 +506,8 @@ public class PartnerRecommender implements PartnerRecommenderApi {
             Object compact = JsonLdProcessor.compact(jsonLD, context, options);
             // Print out the result (or don't, it's your call!)
             LOGGER.log(Level.INFO, JsonUtils.toPrettyString(compact));
-            String json = JsonUtils.toPrettyString(compact);
 
-            return json;
+            return JsonUtils.toPrettyString(compact);
         } catch (JsonLdError e) {
             LOGGER.log(Level.INFO, "", e);
         } catch (JsonGenerationException e) {
