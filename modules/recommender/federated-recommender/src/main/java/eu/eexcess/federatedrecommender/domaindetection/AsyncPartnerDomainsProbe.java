@@ -145,11 +145,11 @@ public class AsyncPartnerDomainsProbe {
                         callback.onProbeDoneCallback(partnerConfig.getSystemId(), domains);
                     }
                 }
-            } catch (Throwable e) {
+            } catch (Exception e) {
                 for (ProbeDoneCallback callback : callbacks) {
                     try {
                         callback.onProbeFailedCallback(partnerConfig.getSystemId());
-                    } catch (Throwable e1) {
+                    } catch (Exception e1) {
                         LOGGER.log(Level.SEVERE, "failed to call back client [" + callback + "] on \"probe failed\"", e1);
                     }
                 }
