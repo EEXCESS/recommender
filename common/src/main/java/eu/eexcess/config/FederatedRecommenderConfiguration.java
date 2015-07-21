@@ -36,8 +36,8 @@ public class FederatedRecommenderConfiguration {
     private String statsLogDatabase;
     private String defaultPickerName;
     private String[] sourceSelectors;
-    private String wordnetPath;
-    private String wordnetDomainFilePath;
+    public String wordnetPath;
+    public String wordnetDomainFilePath;
 
     public String getSolrServerUri() {
         return solrServerUri;

@@ -221,7 +221,7 @@ public class MainCategoryRelevanceEstimator {
 					}
 				}
 
-				if (fetchedCategories.size() <= 0) {
+				if (fetchedCategories.isEmpty()) {
 					break;
 				}
 
