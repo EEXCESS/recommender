@@ -87,6 +87,7 @@ import eu.eexcess.sqlite.DatabaseQueryStats;
  */
 public class FederatedRecommenderCore implements ProbeResultChanged {
 
+    private static final int PARTNERPROBINGTIMEOUT = (int) Math.round(0.8 * 2000000);
     private static final Logger LOGGER = Logger.getLogger(FederatedRecommenderCore.class.getName());
     private static volatile FederatedRecommenderCore instance;
     private final FederatedRecommenderConfiguration federatedRecConfiguration;
@@ -113,7 +114,7 @@ public class FederatedRecommenderCore implements ProbeResultChanged {
         if (sourceSelectors != null && Arrays.asList(sourceSelectors).contains(domainSelectorName)) {
             LOGGER.info("activating partner domaindetection since [" + domainSelectorName + "] is requested to be applied");
             partnersDomainsDetectors = new AsyncPartnerDomainsProbeMonitor(new File(this.federatedRecConfiguration.getWordnetPath()), new File(
-                    this.federatedRecConfiguration.getWordnetDomainFilePath()), 50, 10, new Double(0.8 * 2000000).intValue());
+                    this.federatedRecConfiguration.getWordnetDomainFilePath()), 50, 10, PARTNERPROBINGTIMEOUT);
 
             partnersDomainsDetectors.setCallback(this);
         } else {
@@ -182,7 +183,7 @@ public class FederatedRecommenderCore implements ProbeResultChanged {
 
                 Future<ResultList> future = threadPool.submit(new Callable<ResultList>() {
                     @Override
-                    public ResultList call() throws UniformInterfaceException, ClientHandlerException {
+                    public ResultList call() {
                         long startTime = System.currentTimeMillis();
                         ResultList resultList = new ResultList();
                         if (tmpClient != null) {
@@ -302,8 +303,7 @@ public class FederatedRecommenderCore implements ProbeResultChanged {
                 /**
                  * trys to recieve the results from the partners
                  */
-                private DocumentBadgeList getDocsResult(PartnerBadge partner, Client client, DocumentBadgeList currentDocs) throws UniformInterfaceException,
-                        ClientHandlerException {
+                private DocumentBadgeList getDocsResult(PartnerBadge partner, Client client, DocumentBadgeList currentDocs) {
                     DocumentBadgeList docList = getPartnerDetailsResult(partner, client, currentDocs);
                     client.destroy();
                     return docList;
@@ -495,6 +495,22 @@ public class FederatedRecommenderCore implements ProbeResultChanged {
         if (badge.getPartnerKey() != null && !badge.getPartnerKey().isEmpty() && badge.getPartnerKey().length() < 20)
             return "Partner Key is too short (<20)";
 
+        getPartnerStatsFromDB(badge);
+
+        this.addPartner(badge);
+
+        // if recommender has domain detectors instanced but partner does not
+        // provide any domain information
+        if (null != partnersDomainsDetectors && (null == badge.getDomainContent() || badge.getDomainContent().isEmpty()) && !restoreDomainsFromDatabase(badge)) {
+            // if no domain informations can be retrieved from database
+            // start domain detectors
+            partnersDomainsDetectors.probe(badge, getPartnerRegister().getClient(badge.getSystemId()));
+        }
+        return "Partner Added";
+
+    }
+
+    private void getPartnerStatsFromDB(PartnerBadge badge) {
         Database<DatabaseQueryStats> db = new Database<DatabaseQueryStats>(this.federatedRecConfiguration.getStatsLogDatabase(), DatabaseQueryStats.values());
         PreparedStatement getS = db.getPreparedSelectStatement(DatabaseQueryStats.REQUESTLOG);
         // Database Entry Style
@@ -520,21 +536,6 @@ public class FederatedRecommenderCore implements ProbeResultChanged {
             }
         } else
             LOGGER.log(Level.WARNING, "Could read from Statistics Database");
-
-        this.addPartner(badge);
-
-        // if recommender has domain detectors instanced but partner does not
-        // provide any domain information
-        if (null != partnersDomainsDetectors && (null == badge.getDomainContent() || badge.getDomainContent().isEmpty())) {
-
-            if (false == restoreDomainsFromDatabase(badge)) {
-                // if no domain informations can be retrieved from database
-                // start domain detectors
-                partnersDomainsDetectors.probe(badge, getPartnerRegister().getClient(badge.getSystemId()));
-            }
-        }
-        return "Partner Added";
-
     }
 
     /**
@@ -555,7 +556,7 @@ public class FederatedRecommenderCore implements ProbeResultChanged {
 
             try {
                 selectStatement.setString(1, partnerConfig.getSystemId());
-                if (true == selectStatement.execute()) {
+                if (selectStatement.execute()) {
                     ResultSet results = selectStatement.getResultSet();
 
                     if (partnerConfig.getDomainContent() == null) {
@@ -575,8 +576,7 @@ public class FederatedRecommenderCore implements ProbeResultChanged {
                 }
             } catch (SQLException sqe) {
                 LOGGER.log(Level.SEVERE, "failed to retrieve partner's domain information from database [" + PartnersDomainsTableQuery.PARTNER_DOMAINS_TABLE_QUERY.getInternName()
-                        + "]");
-                sqe.printStackTrace();
+                        + "]", sqe);
             } finally {
                 try {
                     db.close();
@@ -789,7 +789,7 @@ public class FederatedRecommenderCore implements ProbeResultChanged {
         }
     }
 
-    private DocumentBadgeList getPartnerDetailsResult(PartnerBadge partner, Client client, DocumentBadgeList currentDocs) throws UniformInterfaceException, ClientHandlerException {
+    private DocumentBadgeList getPartnerDetailsResult(PartnerBadge partner, Client client, DocumentBadgeList currentDocs) {
         DocumentBadgeList docList = new DocumentBadgeList();
         if (client != null) {
             try {
@@ -804,8 +804,7 @@ public class FederatedRecommenderCore implements ProbeResultChanged {
         return docList;
     }
 
-    private ResultList getPartnerRecommendationResult(PartnerBadge partner, Client client, SecureUserProfile secureUserProfile) throws UniformInterfaceException,
-            ClientHandlerException {
+    private ResultList getPartnerRecommendationResult(PartnerBadge partner, Client client, SecureUserProfile secureUserProfile) {
         ResultList resultList = new ResultList();
         try {
             WebResource resource = client.resource(partner.getPartnerConnectorEndpoint() + "recommend");
