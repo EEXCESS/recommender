@@ -143,11 +143,17 @@ public class FederatedRecommenderService {
     public Response registerPartner(PartnerBadge badge) throws IOException {
         logger.log(Level.INFO, "Registering Partner: " + badge.getSystemId());
         String returnString = fRC.registerPartner(badge);
-        if (returnString.contains("Key is too Short"))
+        if (returnString.equals("Partner Key is too short (<20)"))
             return Response.notModified(returnString).build();
         return Response.ok().build();
     }
 
+    /**
+     * method to unregister a previously registered partner
+     * 
+     * @param badge
+     * @throws IOException
+     */
     @POST
     @Path("/unregister")
     @Consumes({ MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON })
@@ -157,6 +163,13 @@ public class FederatedRecommenderService {
         fRC.unregisterPartner(badge);
     }
 
+    /**
+     * returns the result list for the given query
+     * 
+     * @param userProfile
+     * @return
+     * @throws IOException
+     */
     @POST
     @Path("/recommend")
     @Consumes({ MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON })

@@ -70,7 +70,7 @@ public class DBPediaIndexCreator {
             return;
         }
         FederatedRecommenderConfiguration configuration = new FederatedRecommenderConfiguration();
-        configuration.solrServerUri = solrServerUri;
+        configuration.setSolrServerUri(solrServerUri);
         List<String> dbPediaFileList = null;
         if (dbPediaBaseFilesIndex >= 0 && dbPediaBaseFilesIndex + 1 < args.length) {
             if (dbPediaBaseFilesIndex < solrServerUriIndex)

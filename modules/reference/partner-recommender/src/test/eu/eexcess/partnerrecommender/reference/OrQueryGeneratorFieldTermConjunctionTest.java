@@ -1,4 +1,4 @@
-package eu.eexcess.partnerrecommender.test;
+package eu.eexcess.partnerrecommender.reference;
 
 import static org.junit.Assert.assertTrue;
 

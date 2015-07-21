@@ -13,10 +13,10 @@ public class FederatedRecommenderConfigCreator {
 
 	public static void main(String[] args) {
 		FederatedRecommenderConfiguration fConfiguration = new FederatedRecommenderConfiguration();
-		fConfiguration.solrServerUri ="http://localhost:8983/solr/";
-    	fConfiguration.graphHitsLimitPerQuery=10;
-    	fConfiguration.graphMaxPathLength=5;
-    	fConfiguration.graphQueryDepthLimit=4;
+		fConfiguration.setSolrServerUri("http://localhost:8983/solr/");
+    	fConfiguration.setGraphHitsLimitPerQuery(10);
+    	fConfiguration.setGraphMaxPathLength(5);
+    	fConfiguration.setGraphQueryDepthLimit(4);
     	ObjectMapper mapper = new ObjectMapper(); 
     	  
     	

@@ -101,19 +101,19 @@ public class FederatedRecommenderCore implements ProbeResultChanged {
     private Map<String, Object> statelessClassInstances = new HashMap<>();
 
     private FederatedRecommenderCore(FederatedRecommenderConfiguration federatedRecConfiguration) {
-        threadPool = Executors.newFixedThreadPool(federatedRecConfiguration.numRecommenderThreads);
+        threadPool = Executors.newFixedThreadPool(federatedRecConfiguration.getNumRecommenderThreads());
         this.federatedRecConfiguration = federatedRecConfiguration;
         this.recommenderStats = new RecommenderStats();
         instanciateSourceSelectors(this.federatedRecConfiguration);
 
         // activate partner probing only if the respective source selector is
         // requested to be applied
-        String[] sourceSelectors = this.federatedRecConfiguration.sourceSelectors;
+        String[] sourceSelectors = this.federatedRecConfiguration.getSourceSelectors();
         String domainSelectorName = WndomainSourceSelector.class.getCanonicalName();
         if (sourceSelectors != null && Arrays.asList(sourceSelectors).contains(domainSelectorName)) {
             LOGGER.info("activating partner domaindetection since [" + domainSelectorName + "] is requested to be applied");
-            partnersDomainsDetectors = new AsyncPartnerDomainsProbeMonitor(new File(this.federatedRecConfiguration.wordnetPath), new File(
-                    this.federatedRecConfiguration.wordnetDomainFilePath), 50, 10, new Double(0.8 * 2000000).intValue());
+            partnersDomainsDetectors = new AsyncPartnerDomainsProbeMonitor(new File(this.federatedRecConfiguration.getWordnetPath()), new File(
+                    this.federatedRecConfiguration.getWordnetDomainFilePath()), 50, 10, new Double(0.8 * 2000000).intValue());
 
             partnersDomainsDetectors.setCallback(this);
         } else {
@@ -201,7 +201,7 @@ public class FederatedRecommenderCore implements ProbeResultChanged {
             }
         }
 
-        long timeout = federatedRecConfiguration.partnersTimeout; // ms
+        long timeout = federatedRecConfiguration.getPartnersTimeout(); // ms
         for (Entry<PartnerBadge, Future<ResultList>> entry : futures.entrySet()) {
             long startT = System.currentTimeMillis();
             try {
@@ -228,7 +228,7 @@ public class FederatedRecommenderCore implements ProbeResultChanged {
 
                 timeout -= System.currentTimeMillis() - startT;
                 String msg = "Waited too long for partner system '" + entry.getKey().systemId + "' to respond "
-                        + (federatedRecConfiguration.partnersTimeout - timeout) + " ms ";
+                        + (federatedRecConfiguration.getPartnersTimeout() - timeout) + " ms ";
                 ResultList rL = new ResultList();
                 PartnerResponseState responseState = new PartnerResponseState();
                 responseState.errorMessage = msg;
@@ -269,13 +269,13 @@ public class FederatedRecommenderCore implements ProbeResultChanged {
     public ResultList generateFederatedRecommendation(SecureUserProfile secureUserProfile) throws FileNotFoundException {
         ResultList resultList = null;
         SecureUserProfile secureUserProfileTmp = secureUserProfile;
-        if (federatedRecConfiguration.sourceSelectors != null) {
+        if (federatedRecConfiguration.getSourceSelectors() != null) {
             List<String> sourceSelectors = new ArrayList<String>();
-            Collections.addAll(sourceSelectors, federatedRecConfiguration.sourceSelectors);
+            Collections.addAll(sourceSelectors, federatedRecConfiguration.getSourceSelectors());
             secureUserProfileTmp = sourceSelection(secureUserProfileTmp, sourceSelectors);
         }
         try {
-            resultList = getAndAggregateResults(secureUserProfileTmp, this.federatedRecConfiguration.defaultPickerName);
+            resultList = getAndAggregateResults(secureUserProfileTmp, this.federatedRecConfiguration.getDefaultPickerName());
         } catch (FederatedRecommenderException e) {
             LOGGER.log(Level.SEVERE, "Some error retrieving or aggregation results occured.", e);
         }
@@ -313,7 +313,7 @@ public class FederatedRecommenderCore implements ProbeResultChanged {
             futures.put(partner, future);
         }
         DocumentBadgeList resultDocs = new DocumentBadgeList();
-        long timeout = federatedRecConfiguration.partnersTimeout;
+        long timeout = federatedRecConfiguration.getPartnersTimeout();
         for (PartnerBadge partner : futures.keySet()) {
             try {
                 resultDocs.documentBadges.addAll(futures.get(partner).get(timeout, TimeUnit.MILLISECONDS).documentBadges);
@@ -405,7 +405,7 @@ public class FederatedRecommenderCore implements ProbeResultChanged {
     public void writeStatsToDB() {
 
         LOGGER.log(Level.INFO, "Writing statistics into Database");
-        Database<DatabaseQueryStats> db = new Database<DatabaseQueryStats>(this.federatedRecConfiguration.statsLogDatabase, DatabaseQueryStats.values());
+        Database<DatabaseQueryStats> db = new Database<DatabaseQueryStats>(this.federatedRecConfiguration.getStatsLogDatabase(), DatabaseQueryStats.values());
         for (PartnerBadge partner : this.partnerRegister.getPartners()) {
             if (partner != null) {
                 PartnerBadgeStats longStats = partner.longTimeStats;
@@ -497,7 +497,7 @@ public class FederatedRecommenderCore implements ProbeResultChanged {
         if (badge.partnerKey != null && !badge.partnerKey.isEmpty() && badge.partnerKey.length() < 20)
             return "Partner Key is too short (<20)";
 
-        Database<DatabaseQueryStats> db = new Database<DatabaseQueryStats>(this.federatedRecConfiguration.statsLogDatabase, DatabaseQueryStats.values());
+        Database<DatabaseQueryStats> db = new Database<DatabaseQueryStats>(this.federatedRecConfiguration.getStatsLogDatabase(), DatabaseQueryStats.values());
         PreparedStatement getS = db.getPreparedSelectStatement(DatabaseQueryStats.REQUESTLOG);
         // Database Entry Style
         // ('SYSTEM_ID','REQUESTCOUNT','FAILEDREQUESTCOUNT','FAILEDREQUESTTIMEOUTCOUNT')
@@ -552,7 +552,7 @@ public class FederatedRecommenderCore implements ProbeResultChanged {
     private boolean restoreDomainsFromDatabase(PartnerBadge partnerConfig) {
         synchronized (partnerRegister) {
             boolean hasDomainsRestored = false;
-            Database<PartnersDomainsTableQuery> db = new Database<PartnersDomainsTableQuery>(federatedRecConfiguration.statsLogDatabase,
+            Database<PartnersDomainsTableQuery> db = new Database<PartnersDomainsTableQuery>(federatedRecConfiguration.getStatsLogDatabase(),
                     PartnersDomainsTableQuery.values());
             PreparedStatement selectStatement = db.getPreparedSelectStatement(PartnersDomainsTableQuery.PARTNER_DOMAINS_TABLE_QUERY);
 
@@ -696,12 +696,12 @@ public class FederatedRecommenderCore implements ProbeResultChanged {
 
         List<String> selectorsClassNames = new ArrayList<String>();
 
-        if (null == recommenderConfig.sourceSelectors) {
+        if (null == recommenderConfig.getSourceSelectors()) {
             LOGGER.info("failed to instanciate source selectors");
             return;
         }
 
-        Collections.addAll(selectorsClassNames, recommenderConfig.sourceSelectors);
+        Collections.addAll(selectorsClassNames, recommenderConfig.getSourceSelectors());
 
         for (String sourceSelectorClassName : selectorsClassNames) {
             try {
@@ -729,7 +729,7 @@ public class FederatedRecommenderCore implements ProbeResultChanged {
     @Override
     public void onProbeResultsChanged(Map<String, Set<PartnerDomain>> updatedProbes) {
         synchronized (partnerRegister) {
-            Database<PartnersDomainsTableQuery> db = new Database<PartnersDomainsTableQuery>(federatedRecConfiguration.statsLogDatabase,
+            Database<PartnersDomainsTableQuery> db = new Database<PartnersDomainsTableQuery>(federatedRecConfiguration.getStatsLogDatabase(),
                     PartnersDomainsTableQuery.values());
             PreparedStatement deleteStatement = db.getPreparedDeleStatement(PartnersDomainsTableQuery.PARTNER_DOMAINS_TABLE_QUERY);
             PreparedStatement insertStatement = db.getPreparedInsertStatement(PartnersDomainsTableQuery.PARTNER_DOMAINS_TABLE_QUERY);

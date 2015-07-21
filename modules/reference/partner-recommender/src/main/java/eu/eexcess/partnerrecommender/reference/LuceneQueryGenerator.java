@@ -65,7 +65,8 @@ public class LuceneQueryGenerator implements QueryGeneratorApi {
         return result.toString();
     }
 
-    private boolean addQueryTerm(StringBuilder result, boolean expansion, String keyword) {
+    private boolean addQueryTerm(StringBuilder result, boolean exp, String keyword) {
+        boolean expansion = exp;
         if (expansion) {
             result.append(") OR " + keyword + "");
             expansion = false;
@@ -76,7 +77,8 @@ public class LuceneQueryGenerator implements QueryGeneratorApi {
         return expansion;
     }
 
-    private boolean addExpansionTerm(StringBuilder result, boolean expansion, ContextKeyword key, String keyword) {
+    private boolean addExpansionTerm(StringBuilder result, boolean exp, ContextKeyword key, String keyword) {
+        boolean expansion = exp;
         if (!expansion) {
             expansion = true;
             if (result.length() > 0) {

@@ -36,10 +36,10 @@ public class FederatedRecommenderConfigurationTest {
 		mapper.configure(JsonParser.Feature.ALLOW_COMMENTS, true);
 		try {
 			FederatedRecommenderConfiguration config = mapper.readValue(json, FederatedRecommenderConfiguration.class);
-			assertEquals(3, config.sourceSelectors.length);
-			assertEquals("value1", config.sourceSelectors[0]);
-			assertEquals("value2", config.sourceSelectors[1]);
-			assertEquals("value3", config.sourceSelectors[2]);
+			assertEquals(3, config.getSourceSelectors().length);
+			assertEquals("value1", config.getSourceSelectors()[0]);
+			assertEquals("value2", config.getSourceSelectors()[1]);
+			assertEquals("value3", config.getSourceSelectors()[2]);
 		} catch (Exception e) {
 			assertTrue(false);
 		}

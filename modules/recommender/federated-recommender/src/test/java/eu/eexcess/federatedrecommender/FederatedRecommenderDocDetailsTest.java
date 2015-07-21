@@ -18,9 +18,9 @@ public class FederatedRecommenderDocDetailsTest {
 	@Test
 	public void test() {
 		FederatedRecommenderConfiguration federatedRecommenderConfiguration = new FederatedRecommenderConfiguration();
-		federatedRecommenderConfiguration.numRecommenderThreads=20;
-		federatedRecommenderConfiguration.partnersTimeout=1000;
-		federatedRecommenderConfiguration.solrServerUri="";
+		federatedRecommenderConfiguration.setNumRecommenderThreads(20);
+		federatedRecommenderConfiguration.setPartnersTimeout(1000);
+		federatedRecommenderConfiguration.setSolrServerUri("");
 		FederatedRecommenderCore fRC = null;
 		try {
 			fRC = FederatedRecommenderCore.getInstance(federatedRecommenderConfiguration );

@@ -238,7 +238,7 @@ public class QueryExpansionEvaluation {
 		try {
 			sUPDecomposer = new PseudoRelevanceWikipediaDecomposer();
 			FederatedRecommenderConfiguration fedRecConfig = new FederatedRecommenderConfiguration();
-			fedRecConfig.wikipediaIndexDir = 	Settings.RelevanceEvaluation.IOFiles.inLuceneIndexParentDirectory.getAbsolutePath();
+			fedRecConfig.setWikipediaIndexDir(Settings.RelevanceEvaluation.IOFiles.inLuceneIndexParentDirectory.getAbsolutePath());
 			sUPDecomposer.setConfiguration(fedRecConfig );
 		} catch (IOException | FederatedRecommenderException e) {
 			logger.log(Level.SEVERE, "Wikipedia index directory could be wrong or not readable: "

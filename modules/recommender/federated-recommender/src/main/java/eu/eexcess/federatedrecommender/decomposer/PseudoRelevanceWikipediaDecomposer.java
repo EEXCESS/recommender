@@ -138,7 +138,7 @@ public class PseudoRelevanceWikipediaDecomposer implements SecureUserProfileDeco
 		for (String localeName : SUPPORTED_LOCALES) {
 			Locale locale = LocaleUtils.toLocale(localeName);
 			try {
-				localeToQueryExpansion.put(localeName, new WikipediaQueryExpansion(new File(fedRecConfig.wikipediaIndexDir, locale+"wiki"), locale));
+				localeToQueryExpansion.put(localeName, new WikipediaQueryExpansion(new File(fedRecConfig.getWikipediaIndexDir(), locale+"wiki"), locale));
 			} catch (IOException e) {
 				throw new FederatedRecommenderException("Could not intialize WikipediaQueryExpansion",e);
 			}

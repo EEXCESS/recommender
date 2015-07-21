@@ -131,7 +131,7 @@ public class WndomainSourceSelector implements PartnerSelector {
      */
     public WndomainSourceSelector(FederatedRecommenderConfiguration configuration) {
         try {
-            domainDetector = new WordnetDomainsDetector(new File(configuration.wordnetPath), new File(configuration.wordnetDomainFilePath), true);
+            domainDetector = new WordnetDomainsDetector(new File(configuration.getWordnetPath()), new File(configuration.getWordnetDomainFilePath()), true);
         } catch (DomainDetectorException e) {
             logger.severe("unable to instanciate [" + WordnetDomainsDetector.class.getSimpleName() + "]: " + e.getMessage());
         }

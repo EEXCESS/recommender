@@ -70,7 +70,7 @@ public class DbPediaSolrIndex {
     private final SolrServer server;
 
     public DbPediaSolrIndex(FederatedRecommenderConfiguration federatedRecommenderConfiguration) {
-        this.solrServer = federatedRecommenderConfiguration.solrServerUri;
+        this.solrServer = federatedRecommenderConfiguration.getSolrServerUri();
         this.server = new HttpSolrServer(solrServer);
 
     }

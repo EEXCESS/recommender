@@ -171,10 +171,10 @@ public class DBPediaDecomposer implements SecureUserProfileDecomposer<SecureUser
 
     @Override
     public void setConfiguration(FederatedRecommenderConfiguration fedRecConfig) throws FederatedRecommenderException {
-        this.hitsLimit = fedRecConfig.graphHitsLimitPerQuery;
-        this.depthLimit = fedRecConfig.graphMaxPathLength;
+        this.hitsLimit = fedRecConfig.getGraphHitsLimitPerQuery();
+        this.depthLimit = fedRecConfig.getGraphMaxPathLength();
         this.dbPediaSolrIndex = new DbPediaSolrIndex(fedRecConfig);
-        this.semanticDistanceThreshold = fedRecConfig.graphQueryDepthLimit;
+        this.semanticDistanceThreshold = fedRecConfig.getGraphQueryDepthLimit();
 
     }
 

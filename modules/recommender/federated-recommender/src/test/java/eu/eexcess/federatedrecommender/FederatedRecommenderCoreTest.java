@@ -96,11 +96,11 @@ public class FederatedRecommenderCoreTest {
     @Test
     public void sourceSelection_givenSet_expectCorrectInvocationOrder() throws FederatedRecommenderException {
         FederatedRecommenderConfiguration frcc = new FederatedRecommenderConfiguration();
-        frcc.numRecommenderThreads = 20;
-        frcc.partnersTimeout = 1000;
-        frcc.solrServerUri = "";
-        frcc.sourceSelectors = new String[] { "eu.eexcess.federatedrecommender.FederatedRecommenderCoreTest$TestableSourceSelectorA",
-                "eu.eexcess.federatedrecommender.FederatedRecommenderCoreTest$TestableSourceSelectorB" };
+        frcc.setNumRecommenderThreads(20);
+        frcc.setPartnersTimeout(1000);
+        frcc.setSolrServerUri("");
+        frcc.setSourceSelectors(new String[] { "eu.eexcess.federatedrecommender.FederatedRecommenderCoreTest$TestableSourceSelectorA",
+                "eu.eexcess.federatedrecommender.FederatedRecommenderCoreTest$TestableSourceSelectorB" });
         FederatedRecommenderCore frc = FederatedRecommenderCore.getInstance(frcc);
 
         ArrayList<String> selectorsClassNames = new ArrayList<>(3);
@@ -126,11 +126,11 @@ public class FederatedRecommenderCoreTest {
     public void sourceSelection_givenSetWithDuplicates_expectSingleInstantiation() throws FederatedRecommenderException {
 
         FederatedRecommenderConfiguration frcc = new FederatedRecommenderConfiguration();
-        frcc.numRecommenderThreads = 20;
-        frcc.partnersTimeout = 1000;
-        frcc.solrServerUri = "";
-        frcc.sourceSelectors = new String[] { "eu.eexcess.federatedrecommender.FederatedRecommenderCoreTest$TestableSourceSelectorA",
-                "eu.eexcess.federatedrecommender.FederatedRecommenderCoreTest$TestableSourceSelectorB" };
+        frcc.setNumRecommenderThreads(20);
+        frcc.setPartnersTimeout(1000);
+        frcc.setSolrServerUri("");
+        frcc.setSourceSelectors(new String[] { "eu.eexcess.federatedrecommender.FederatedRecommenderCoreTest$TestableSourceSelectorA",
+                "eu.eexcess.federatedrecommender.FederatedRecommenderCoreTest$TestableSourceSelectorB" });
         FederatedRecommenderCore frc = FederatedRecommenderCore.getInstance(frcc);
 
         ArrayList<String> selectorsClassNames = new ArrayList<>(3);

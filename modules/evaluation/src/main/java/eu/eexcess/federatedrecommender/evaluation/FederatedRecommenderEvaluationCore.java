@@ -77,7 +77,7 @@ public class FederatedRecommenderEvaluationCore {
             throw e1;
         }
 
-        this.evalManager = new EvaluationManager(federatedRecConfiguration.evaluationQueriesFile);
+        this.evalManager = new EvaluationManager(federatedRecConfiguration.getEvaluationQueriesFile());
 
         threadPool = Executors.newFixedThreadPool(30);
     }
@@ -434,8 +434,8 @@ public class FederatedRecommenderEvaluationCore {
 
         DbPediaGraph dbPediaGraph = new DbPediaGraph(new DbPediaSolrIndex(federatedRecommenderConfiguration));
         List<String> keynodes = new ArrayList<String>();
-        int hitsLimit = federatedRecommenderConfiguration.graphHitsLimitPerQuery;
-        int depthLimit = federatedRecommenderConfiguration.graphQueryDepthLimit;
+        int hitsLimit = federatedRecommenderConfiguration.getGraphHitsLimitPerQuery();
+        int depthLimit = federatedRecommenderConfiguration.getGraphQueryDepthLimit();
         SimpleWeightedGraph<String, DefaultEdge> graph = null;
         
         try {
