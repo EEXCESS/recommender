@@ -60,7 +60,7 @@ public class PartnerRegister {
             partners.add(badge);
             DefaultClientConfig config = new DefaultClientConfig();
             Client client = Client.create(config); // new Client(null, config);
-            partnerToClient.put(badge.systemId, client);
+            partnerToClient.put(badge.getSystemId(), client);
         }
     }
 

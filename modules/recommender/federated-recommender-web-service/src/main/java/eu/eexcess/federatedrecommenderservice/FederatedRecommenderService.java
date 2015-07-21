@@ -324,7 +324,7 @@ public class FederatedRecommenderService {
         List<PartnerBadge> protectedPartnerList = new ArrayList<PartnerBadge>();
         PartnerBadge badge = new PartnerBadge();
         badge.setSystemId("Wissenmedia");
-        badge.partnerKey = "dsajln22sadjkl!";
+        badge.setPartnerKey("dsajln22sadjkl!");
         protectedPartnerList.add(badge);
 
         List<UserCredentials> userCredentials = new ArrayList<UserCredentials>();

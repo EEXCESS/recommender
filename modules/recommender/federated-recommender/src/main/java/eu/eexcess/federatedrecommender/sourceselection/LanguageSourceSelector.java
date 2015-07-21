@@ -40,88 +40,86 @@ import eu.eexcess.federatedrecommender.interfaces.PartnerSelector;
  */
 public class LanguageSourceSelector implements PartnerSelector {
 
-	private Logger logger = Logger.getLogger(LanguageSourceSelector.class.getName());
-	private Map<PartnerBadge, List<String>> selectedPartners = new HashMap<>();
+    private Logger logger = Logger.getLogger(LanguageSourceSelector.class.getName());
+    private Map<PartnerBadge, List<String>> selectedPartners = new HashMap<>();
 
-	public LanguageSourceSelector(FederatedRecommenderConfiguration configuration) {
-	}
-	
-	/**
-	 * Selects partners according to language matches.
-	 * 
-	 * @return the same userProfile with eventually added sources if
-	 *         (userProfile.partnerList.size() <= 0)
-	 */
-	@Override
-	public SecureUserProfile sourceSelect(SecureUserProfile userProfile, List<PartnerBadge> partners) {
-		selectedPartners.clear();
-		// don't touch if already selected
-		if (userProfile.partnerList.size() <= 0) {
-			// query language(s) are specified in user profile
-			if (userProfile.languages.size() > 0) {
-				// match partners and user profile languages
-				for (Language userLangDetails : userProfile.languages) {
-					String userLanguage = userLangDetails.iso2;
-					collectPartnersOnLanguageMatch(userLanguage, partners, userProfile.partnerList);
-				}
-			} else {
-				logger.info("refusing to select partners due to no specified languages");
-				return userProfile;
-			}
-		} else {
-			logger.info("refusing to select partners due to [" + userProfile.partnerList.size()
-							+ "] prevoiously selected partners");
-			return userProfile;
-		}
+    public LanguageSourceSelector(FederatedRecommenderConfiguration configuration) {
+    }
 
-		if (selectedPartners.size() > 0) {
-			logger.info("language-based source selection:");
-			for (Map.Entry<PartnerBadge, List<String>> entry : selectedPartners.entrySet()) {
-				StringBuilder info = new StringBuilder();
-				info.append("partner [" + entry.getKey().systemId + "] matching language(s):");
-				for (String language : entry.getValue()) {
-					info.append(" [" + language + "]");
-				}
-				logger.info(info.toString());
-			}
-		} else {
-			logger.info("unsuccessfull partner selection");
-		}
+    /**
+     * Selects partners according to language matches.
+     * 
+     * @return the same userProfile with eventually added sources if
+     *         (userProfile.partnerList.size() <= 0)
+     */
+    @Override
+    public SecureUserProfile sourceSelect(SecureUserProfile userProfile, List<PartnerBadge> partners) {
+        selectedPartners.clear();
+        // don't touch if already selected
+        if (userProfile.partnerList.size() <= 0) {
+            // query language(s) are specified in user profile
+            if (userProfile.languages.size() > 0) {
+                // match partners and user profile languages
+                for (Language userLangDetails : userProfile.languages) {
+                    String userLanguage = userLangDetails.getIso2();
+                    collectPartnersOnLanguageMatch(userLanguage, partners, userProfile.partnerList);
+                }
+            } else {
+                logger.info("refusing to select partners due to no specified languages");
+                return userProfile;
+            }
+        } else {
+            logger.info("refusing to select partners due to [" + userProfile.partnerList.size() + "] prevoiously selected partners");
+            return userProfile;
+        }
 
-		return userProfile;
-	}
+        if (selectedPartners.size() > 0) {
+            logger.info("language-based source selection:");
+            for (Map.Entry<PartnerBadge, List<String>> entry : selectedPartners.entrySet()) {
+                StringBuilder info = new StringBuilder();
+                info.append("partner [" + entry.getKey().getSystemId() + "] matching language(s):");
+                for (String language : entry.getValue()) {
+                    info.append(" [" + language + "]");
+                }
+                logger.info(info.toString());
+            }
+        } else {
+            logger.info("unsuccessfull partner selection");
+        }
 
-	/**
-	 * Store(s) partner(s) to userProfile if it supports the given language.
-	 * 
-	 * @param language
-	 *            the given language
-	 * @param partners
-	 *            list of partners to consider
-	 * @param partnerConnectorList
-	 *            where to store the partner reference if it supports the given
-	 *            language
-	 */
-	private void collectPartnersOnLanguageMatch(String language, List<PartnerBadge> partners,
-					List<PartnerBadge> partnerConnectorList) {
-		if (null == language) {
-			return;
-		}
-		for (PartnerBadge partner : partners) {
-			for (String partnerLanguage : partner.getLanguageContent()) {
-				if (partnerLanguage.compareTo(language) == 0) {
-					if (false == partnerConnectorList.contains(partner)) {
-						partnerConnectorList.add(partner);
-					}
-					if (false == selectedPartners.containsKey(partner)) {
-						ArrayList<String> newList = new ArrayList<String>();
-						newList.add(language);
-						selectedPartners.put(partner, newList);
-					} else {
-						selectedPartners.get(partner).add(language);
-					}
-				}
-			}
-		}
-	}
+        return userProfile;
+    }
+
+    /**
+     * Store(s) partner(s) to userProfile if it supports the given language.
+     * 
+     * @param language
+     *            the given language
+     * @param partners
+     *            list of partners to consider
+     * @param partnerConnectorList
+     *            where to store the partner reference if it supports the given
+     *            language
+     */
+    private void collectPartnersOnLanguageMatch(String language, List<PartnerBadge> partners, List<PartnerBadge> partnerConnectorList) {
+        if (null == language) {
+            return;
+        }
+        for (PartnerBadge partner : partners) {
+            for (String partnerLanguage : partner.getLanguageContent()) {
+                if (partnerLanguage.compareTo(language) == 0) {
+                    if (false == partnerConnectorList.contains(partner)) {
+                        partnerConnectorList.add(partner);
+                    }
+                    if (false == selectedPartners.containsKey(partner)) {
+                        ArrayList<String> newList = new ArrayList<String>();
+                        newList.add(language);
+                        selectedPartners.put(partner, newList);
+                    } else {
+                        selectedPartners.get(partner).add(language);
+                    }
+                }
+            }
+        }
+    }
 }

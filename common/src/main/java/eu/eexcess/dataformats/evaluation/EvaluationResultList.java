@@ -19,7 +19,7 @@ GNU Affero General Public License for more details.
 
 You should have received a copy of the GNU Affero General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
-*/
+ */
 package eu.eexcess.dataformats.evaluation;
 
 import java.io.Serializable;
@@ -29,28 +29,66 @@ import javax.xml.bind.annotation.XmlAttribute;
 import org.codehaus.jackson.annotate.JsonIgnoreProperties;
 
 import eu.eexcess.dataformats.result.ResultList;
+
 /**
  * 
  * @author hziak
  *
  */
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class EvaluationResultList extends ResultList implements Serializable{
-	private static final long serialVersionUID = 2401989277808424955L;
-		@SuppressWarnings("unused")
-		private EvaluationResultList(){};
-		public EvaluationResultList(ResultList parent) {
-			this.provider = parent.provider;
-			this.results = parent.results;
-			this.partnerResponseState = parent.partnerResponseState;
-			this.totalResults= parent.totalResults;
-		}
-	  	@XmlAttribute
-	    public String numSelect;
-		@Override
-		public String toString() {
-			return "EvaluationResultList [numSelect=" + numSelect + "]";
-		}
-	  	
+public class EvaluationResultList extends ResultList implements Serializable {
+    private static final long serialVersionUID = 2401989277808424955L;
+
+    @SuppressWarnings("unused")
+    private EvaluationResultList() {
+    };
+
+    public EvaluationResultList(ResultList parent) {
+        this.provider = parent.provider;
+        this.results = parent.results;
+        this.partnerResponseState = parent.partnerResponseState;
+        this.totalResults = parent.totalResults;
+    }
+
+    @XmlAttribute
+    private String numSelect;
+
+    @Override
+    public String toString() {
+        return "EvaluationResultList [numSelect=" + getNumSelect() + "]";
+    }
+
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = super.hashCode();
+        result = prime * result + ((getNumSelect() == null) ? 0 : getNumSelect().hashCode());
+        return result;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj)
+            return true;
+        if (!super.equals(obj))
+            return false;
+        if (getClass() != obj.getClass())
+            return false;
+        EvaluationResultList other = (EvaluationResultList) obj;
+        if (getNumSelect() == null) {
+            if (other.getNumSelect() != null)
+                return false;
+        } else if (!getNumSelect().equals(other.getNumSelect()))
+            return false;
+        return true;
+    }
+
+    public String getNumSelect() {
+        return numSelect;
+    }
+
+    public void setNumSelect(String numSelect) {
+        this.numSelect = numSelect;
+    }
 
 }

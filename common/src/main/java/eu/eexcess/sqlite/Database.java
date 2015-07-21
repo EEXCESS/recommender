@@ -1,4 +1,4 @@
-/* Copyright (C) 2014 
+/* Copyright (C) 2014
 "Kompetenzzentrum fuer wissensbasierte Anwendungen Forschungs- und EntwicklungsgmbH" 
 (Know-Center), Graz, Austria, office@know-center.at.
 
@@ -185,6 +185,7 @@ public class Database<T extends DatabasePreparedQuery> implements Closeable {
      * 
      * @throws SQLException
      */
+    @Override
     public void close() throws IOException {
         try {
             this.con.close();

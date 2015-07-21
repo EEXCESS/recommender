@@ -216,19 +216,19 @@ public class CSVResultCreation {
         // if (!queryPart.trim().isEmpty())
         // profile.contextKeywords.add(new ContextKeyword(queryPart, 0.5));
         // }
-        profile.decomposer = "eu.eexcess.partnerrecommender.reference.OrQueryGeneratorFieldTermConjunction";
+        profile.setDecomposer("eu.eexcess.partnerrecommender.reference.OrQueryGeneratorFieldTermConjunction");
         profile.queryID = "query" + profile.hashCode();
         profile.interestList.addAll(query.interests);
         PartnerBadge mendeley = new PartnerBadge();
-        mendeley.systemId = "Mendeley";
+        mendeley.setSystemId("Mendeley");
         PartnerBadge europeana = new PartnerBadge();
-        europeana.systemId = "Europeana";
+        europeana.setSystemId("Europeana");
         PartnerBadge wikipedia = new PartnerBadge();
-        wikipedia.systemId = "Wikipedia-Local";
+        wikipedia.setSystemId("Wikipedia-Local");
         profile.partnerList.add(wikipedia);
         // profile.partnerList.add(mendeley);
         // profile.partnerList.add(europeana);
-        profile.picker = "FiFoPicker";
+        profile.setPicker("FiFoPicker");
         profile.numResults = 10;
         return profile;
     }

@@ -1,4 +1,4 @@
-/* Copyright (C) 2014 
+/* Copyright (C) 2014
 "Kompetenzzentrum fuer wissensbasierte Anwendungen Forschungs- und EntwicklungsgmbH" 
 (Know-Center), Graz, Austria, office@know-center.at.
 
@@ -19,17 +19,18 @@ GNU Affero General Public License for more details.
 
 You should have received a copy of the GNU Affero General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
-*/
+ */
 package eu.eexcess.dataformats.evaluation;
 
 import javax.xml.bind.annotation.XmlAttribute;
 
 public class EvaluationResponse {
 
-	@XmlAttribute
-	public boolean evaluationDone;
-	public EvaluationResponse() {
-		this.evaluationDone=false;
-	}
-  	
+    @XmlAttribute
+    public boolean evaluationDone;
+
+    public EvaluationResponse() {
+        this.evaluationDone = false;
+    }
+
 }

@@ -19,102 +19,105 @@ package eu.eexcess.dataformats.userprofile;
 import java.io.Serializable;
 
 import javax.xml.bind.annotation.XmlElement;
+
 /**
  * Keywords out of the context
+ * 
  * @author hziak
  *
  */
 
-public class ContextKeyword implements Serializable{
-	
-	private static final long serialVersionUID = -4047662119669146571L;
-	//Is used for query expansion
-	@XmlElement(name="expansion",required=false)
-	public ExpansionType expansion;
-	@XmlElement(name="reason")
-	public String reason;	
-	@XmlElement(name="text")
-	public String text;
-	@XmlElement(name="weight")
-	public Double weight;
-	public ContextKeyword() {
+public class ContextKeyword implements Serializable {
 
-	}
+    private static final long serialVersionUID = -4047662119669146571L;
+    // Is used for query expansion
+    @XmlElement(name = "expansion", required = false)
+    public ExpansionType expansion;
+    @XmlElement(name = "reason")
+    public String reason;
+    @XmlElement(name = "text")
+    public String text;
+    @XmlElement(name = "weight")
+    public Double weight;
 
-	public ContextKeyword(String reason, String text, Double weight) {
-		super();
-		this.text = text;
-		this.weight = weight;
-		this.expansion=ExpansionType.NONE;
-	}
+    public ContextKeyword() {
 
-	public ContextKeyword(String text) {
-		this.text = text;
-	}
-	public ContextKeyword(String text,Double weight) {
-		this.text = text;
-		this.weight=weight;
-	}
-	public ContextKeyword(String text, ExpansionType expansion) {
-		this.text = text;
-		this.expansion=expansion;
-	}
-	public ContextKeyword(String text, Double weight, ExpansionType expansion) {
-		this.text = text;
-		this.weight = weight;
-		this.expansion = expansion;
-		
-	}
-	@Override
-	public String toString() {
-		return "ContextKeyword [expansion=" + expansion + ", reason=" + reason
-				+ ", text=" + text + ", weight=" + weight + "]";
-	}
-	@Override
-	public int hashCode() {
-		final int prime = 31;
-		int result = 1;
-		result = prime * result
-				+ ((expansion == null) ? 0 : expansion.hashCode());
-		result = prime * result + ((reason == null) ? 0 : reason.hashCode());
-		result = prime * result + ((text == null) ? 0 : text.hashCode());
-		result = prime * result + ((weight == null) ? 0 : weight.hashCode());
-		return result;
-	}
-	@Override
-	public boolean equals(Object obj) {
-		if (this == obj)
-			return true;
-		if (obj == null)
-			return false;
-		if (getClass() != obj.getClass())
-			return false;
-		ContextKeyword other = (ContextKeyword) obj;
-		if (expansion == null) {
-			if (other.expansion != null)
-				return false;
-		} else if (!expansion.equals(other.expansion))
-			return false;
-		if (reason == null) {
-			if (other.reason != null)
-				return false;
-		} else if (!reason.equals(other.reason))
-			return false;
-		if (text == null) {
-			if (other.text != null)
-				return false;
-		} else if (!text.equals(other.text))
-			return false;
-		if (weight == null) {
-			if (other.weight != null)
-				return false;
-		} else if (!weight.equals(other.weight))
-			return false;
-		return true;
-	}
-	
-	
-	
-	
-	
+    }
+
+    // public ContextKeyword(String reason, String text, Double weight) {
+    // super();
+    // this.text = text;
+    // this.weight = weight;
+    // this.expansion=ExpansionType.NONE;
+    // }
+
+    public ContextKeyword(String text) {
+        this.text = text;
+    }
+
+    public ContextKeyword(String text, Double weight) {
+        this.text = text;
+        this.weight = weight;
+    }
+
+    public ContextKeyword(String text, ExpansionType expansion) {
+        this.text = text;
+        this.expansion = expansion;
+    }
+
+    public ContextKeyword(String text, Double weight, ExpansionType expansion) {
+        this.text = text;
+        this.weight = weight;
+        this.expansion = expansion;
+
+    }
+
+    @Override
+    public String toString() {
+        return "ContextKeyword [expansion=" + expansion + ", reason=" + reason + ", text=" + text + ", weight=" + weight + "]";
+    }
+
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + ((expansion == null) ? 0 : expansion.hashCode());
+        result = prime * result + ((reason == null) ? 0 : reason.hashCode());
+        result = prime * result + ((text == null) ? 0 : text.hashCode());
+        result = prime * result + ((weight == null) ? 0 : weight.hashCode());
+        return result;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj)
+            return true;
+        if (obj == null)
+            return false;
+        if (getClass() != obj.getClass())
+            return false;
+        ContextKeyword other = (ContextKeyword) obj;
+        if (expansion == null) {
+            if (other.expansion != null)
+                return false;
+        } else if (!expansion.equals(other.expansion))
+            return false;
+        if (reason == null) {
+            if (other.reason != null)
+                return false;
+        } else if (!reason.equals(other.reason))
+            return false;
+        if (text == null) {
+            if (other.text != null)
+                return false;
+        } else if (!text.equals(other.text))
+            return false;
+        if (weight == null) {
+            if (other.weight != null)
+                return false;
+        } else if (!weight.equals(other.weight))
+            return false;
+        return true;
+    }
+
 }

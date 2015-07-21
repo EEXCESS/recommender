@@ -92,7 +92,7 @@ public class PseudoRelevanceWikipediaDecomposer implements SecureUserProfileDeco
 		// first, pick up the language specified by the user
 		if (inputSecureUserProfile.languages != null && !inputSecureUserProfile.languages.isEmpty()) {
 			Language firstLanguage = inputSecureUserProfile.languages.iterator().next();
-			localeName = firstLanguage.iso2;
+			localeName = firstLanguage.getIso2();
 		} else {
 			// then try to detect the language from the query
 			String guessedLanguage = LanguageGuesser.getInstance().guessLanguage(query);

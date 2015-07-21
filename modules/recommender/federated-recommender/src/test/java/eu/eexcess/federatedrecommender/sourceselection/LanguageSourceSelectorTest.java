@@ -35,7 +35,6 @@ import eu.eexcess.dataformats.PartnerBadge;
 import eu.eexcess.dataformats.userprofile.Language;
 import eu.eexcess.dataformats.userprofile.SecureUserProfile;
 import eu.eexcess.federatedrecommender.interfaces.PartnerSelector;
-import eu.eexcess.federatedrecommender.sourceselection.LanguageSourceSelector;
 
 public class LanguageSourceSelectorTest {
 
@@ -49,7 +48,7 @@ public class LanguageSourceSelectorTest {
         List<PartnerBadge> partners = new ArrayList<>();
         PartnerBadge pb = new PartnerBadge();
         pb.setLanguageContent(Arrays.asList(new String[] { "de", "en", "fr" }));
-        pb.systemId = StringUtils.join(pb.getLanguageContent().toArray());
+        pb.setSystemId(StringUtils.join(pb.getLanguageContent().toArray()));
         partners.add(pb);
 
         SecureUserProfile refinedUserProfile = selector.sourceSelect(userProfile, partners);
@@ -69,42 +68,42 @@ public class LanguageSourceSelectorTest {
         List<PartnerBadge> partners = new ArrayList<>();
         PartnerBadge pb_deenfr = new PartnerBadge();
         pb_deenfr.setLanguageContent(Arrays.asList(new String[] { "de", "en", "fr" }));
-        pb_deenfr.systemId = StringUtils.join(pb_deenfr.getLanguageContent().toArray());
+        pb_deenfr.setSystemId(StringUtils.join(pb_deenfr.getLanguageContent().toArray()));
         partners.add(pb_deenfr);
 
         PartnerBadge pb_en = new PartnerBadge();
         pb_en.setLanguageContent(Arrays.asList(new String[] { "en" }));
-        pb_en.systemId = StringUtils.join(pb_en.getLanguageContent().toArray());
+        pb_en.setSystemId(StringUtils.join(pb_en.getLanguageContent().toArray()));
         partners.add(pb_en);
 
         PartnerBadge pb = new PartnerBadge();
         pb.setLanguageContent(Arrays.asList(new String[] { "fr" }));
-        pb.systemId = StringUtils.join(pb.getLanguageContent().toArray());
+        pb.setSystemId(StringUtils.join(pb.getLanguageContent().toArray()));
         partners.add(pb);
 
         PartnerBadge pb_de = new PartnerBadge();
         pb_de.setLanguageContent(Arrays.asList(new String[] { "de" }));
-        pb_de.systemId = StringUtils.join(pb_de.getLanguageContent().toArray());
+        pb_de.setSystemId(StringUtils.join(pb_de.getLanguageContent().toArray()));
         partners.add(pb_de);
 
         pb = new PartnerBadge();
         pb.setLanguageContent(Arrays.asList(new String[] { "tr" }));
-        pb.systemId = StringUtils.join(pb.getLanguageContent().toArray());
+        pb.setSystemId(StringUtils.join(pb.getLanguageContent().toArray()));
         partners.add(pb);
 
         pb = new PartnerBadge();
         pb.setLanguageContent(Arrays.asList(new String[] { "ro" }));
-        pb.systemId = StringUtils.join(pb.getLanguageContent().toArray());
+        pb.setSystemId(StringUtils.join(pb.getLanguageContent().toArray()));
         partners.add(pb);
 
         pb = new PartnerBadge();
         pb.setLanguageContent(Arrays.asList(new String[] { "it" }));
-        pb.systemId = StringUtils.join(pb.getLanguageContent().toArray());
+        pb.setSystemId(StringUtils.join(pb.getLanguageContent().toArray()));
         partners.add(pb);
 
         pb = new PartnerBadge();
         pb.setLanguageContent(Arrays.asList(new String[] { "gr" }));
-        pb.systemId = StringUtils.join(pb.getLanguageContent().toArray());
+        pb.setSystemId(StringUtils.join(pb.getLanguageContent().toArray()));
         partners.add(pb);
 
         SecureUserProfile refinedUserProfile = selector.sourceSelect(userProfile, partners);
@@ -127,12 +126,12 @@ public class LanguageSourceSelectorTest {
         List<PartnerBadge> partners = new ArrayList<>();
         PartnerBadge pb = new PartnerBadge();
         pb.setLanguageContent(Arrays.asList(new String[] { "de", "en", "fr" }));
-        pb.systemId = StringUtils.join(pb.getLanguageContent().toArray());
+        pb.setSystemId(StringUtils.join(pb.getLanguageContent().toArray()));
         partners.add(pb);
 
         PartnerBadge pb2 = new PartnerBadge();
         pb2.setLanguageContent(Arrays.asList(new String[] { "ak", "am", "ar" }));
-        pb2.systemId = StringUtils.join(pb2.getLanguageContent().toArray());
+        pb2.setSystemId(StringUtils.join(pb2.getLanguageContent().toArray()));
         partners.add(pb2);
 
         assertEquals(2, partners.size());
@@ -153,14 +152,14 @@ public class LanguageSourceSelectorTest {
         List<PartnerBadge> partners = new ArrayList<>();
         PartnerBadge pb = new PartnerBadge();
         pb.setLanguageContent(Arrays.asList(new String[] { "de", "en", "fr" }));
-        pb.systemId = StringUtils.join(pb.getLanguageContent().toArray());
+        pb.setSystemId(StringUtils.join(pb.getLanguageContent().toArray()));
 
         userProfile.partnerList.add(pb);
         assertEquals(1, userProfile.partnerList.size());
 
         PartnerBadge pb2 = new PartnerBadge();
         pb2.setLanguageContent(Arrays.asList(new String[] { "de", "am", "ar" }));
-        pb2.systemId = StringUtils.join(pb2.getLanguageContent().toArray());
+        pb2.setSystemId(StringUtils.join(pb2.getLanguageContent().toArray()));
         partners.add(pb2);
 
         assertEquals(1, partners.size());

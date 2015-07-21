@@ -80,7 +80,7 @@ public class PartnerConnector extends PartnerConnectorBase implements PartnerCon
 	public Document queryPartner(PartnerConfiguration partnerConfiguration, SecureUserProfile userProfile, PartnerdataLogger logger) throws IOException {
 
 //	       final String url = "https://api.deutsche-digitale-bibliothek.de/items/OAXO2AGT7YH35YYHN3YKBXJMEI77W3FF/view";
-	        final String key = PartnerConfigurationCache.CONFIG.getPartnerConfiguration().apiKey;
+	        final String key = PartnerConfigurationCache.CONFIG.getPartnerConfiguration().getApiKey();
 	         
 	        // get XML data via HTTP request header authentication
 	         /*
@@ -113,7 +113,7 @@ public class PartnerConnector extends PartnerConnectorBase implements PartnerCon
 //        config.getClasses().add(JacksonJsonProvider.class);
 //        
         //final Client client = new Client(PartnerConfigurationEnum.CONFIG.getClientJacksonJson());
-        queryGenerator = PartnerConfigurationCache.CONFIG.getQueryGenerator(partnerConfiguration.queryGeneratorClass);
+        queryGenerator = PartnerConfigurationCache.CONFIG.getQueryGenerator(partnerConfiguration.getQueryGeneratorClass());
 		String query = getQueryGenerator().toQuery(userProfile);
         long start = System.currentTimeMillis();
 		
@@ -123,7 +123,7 @@ public class PartnerConnector extends PartnerConnectorBase implements PartnerCon
         if (userProfile.numResults!=null && userProfile.numResults != 0)
         	numResultsRequest  = userProfile.numResults;
         valuesMap.put("numResults", numResultsRequest+"");
-        String searchRequest = StrSubstitutor.replace(partnerConfiguration.searchEndpoint, valuesMap);
+        String searchRequest = StrSubstitutor.replace(partnerConfiguration.getSearchEndpoint(), valuesMap);
         String httpJSONResult = callDDBAPI(key, searchRequest, "application/json"); // print results
         //ObjectMapper mapper = new ObjectMapper();
         //DDBResponse ddbResponse = mapper.readValue(httpJSONResult, DDBResponse.class);
@@ -293,16 +293,16 @@ public class PartnerConnector extends PartnerConnectorBase implements PartnerCon
 			throws IOException {
 		// Configure
 		try {	
-	    	String key= PartnerConfigurationCache.CONFIG.getPartnerConfiguration().apiKey;
+	    	String key= PartnerConfigurationCache.CONFIG.getPartnerConfiguration().getApiKey();
 
-	        queryGenerator = PartnerConfigurationCache.CONFIG.getQueryGenerator(partnerConfiguration.queryGeneratorClass);;
+	        queryGenerator = PartnerConfigurationCache.CONFIG.getQueryGenerator(partnerConfiguration.getQueryGeneratorClass());;
 			
 	        String detailQuery = getQueryGenerator().toDetailQuery(document);
 	        
 	        Map<String, String> valuesMap = new HashMap<String, String>();
 	        valuesMap.put("detailQuery", detailQuery);
 	        
-	        String searchRequest = StrSubstitutor.replace(partnerConfiguration.detailEndpoint, valuesMap);
+	        String searchRequest = StrSubstitutor.replace(partnerConfiguration.getDetailEndpoint(), valuesMap);
 	        
 	        String httpXMLResult = callDDBAPI(key, searchRequest, "application/xml"); // print results
 	       

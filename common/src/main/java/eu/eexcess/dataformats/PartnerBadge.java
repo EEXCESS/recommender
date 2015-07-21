@@ -38,49 +38,49 @@ import eu.eexcess.dataformats.result.ResultStats;
 @JsonSerialize(include = JsonSerialize.Inclusion.NON_NULL)
 public class PartnerBadge implements Serializable {
 
-    private static final long   serialVersionUID = -6411801334911587483L;
+    private static final long serialVersionUID = -6411801334911587483L;
 
     @XmlElement(name = "description")
-    private String              description;
+    private String description;
     @XmlElement(name = "favIconURI")
-    private String              favIconURI;
+    private String favIconURI;
     @XmlElement(name = "partnerConnectorEndpoint")
-    private String              partnerConnectorEndpoint;
+    private String partnerConnectorEndpoint;
 
     @XmlElement(name = "tag")
     @XmlElementWrapper(name = "tags")
-    private List<String>        tags;
+    private List<String> tags;
 
     @XmlElement(name = "domainContent")
-    private List<PartnerDomain> domainContent    = new ArrayList<PartnerDomain>();
+    private List<PartnerDomain> domainContent = new ArrayList<PartnerDomain>();
     @XmlElement(name = "languageContent")
-    private List<String>        languageContent  = new ArrayList<String>();
+    private List<String> languageContent = new ArrayList<String>();
 
     @XmlElement(name = "systemId")
-    public String               systemId;
+    private String systemId;
 
     @XmlElement(name = "queryGeneratorClass")
-    public String               queryGeneratorClass;
+    private String queryGeneratorClass;
 
     @XmlElement(name = "partnerKey")
     // has to be the same value than in SecureUserProfile
-    public String               partnerKey;
+    private String partnerKey;
 
     @XmlElement(name = "shortTimeStats", required = false)
-    public PartnerBadgeStats    shortTimeStats   = new PartnerBadgeStats();
+    private PartnerBadgeStats shortTimeStats = new PartnerBadgeStats();
 
     // TODO: Statistics should be moved somewere else! (Specially the logic for
     // it)
 
     @XmlElement(name = "longTimeStats", required = false)
-    public PartnerBadgeStats    longTimeStats    = new PartnerBadgeStats();
+    public PartnerBadgeStats longTimeStats = new PartnerBadgeStats();
 
     public Long getShortTimeResponseTime() {
-        return shortTimeStats.shortTimeResponseTime;
+        return getShortTimeStats().shortTimeResponseTime;
     }
 
     public void setShortTimeResponseTime(Long shortTimeResponseTime) {
-        this.shortTimeStats.shortTimeResponseTime = shortTimeResponseTime;
+        this.getShortTimeStats().shortTimeResponseTime = shortTimeResponseTime;
     }
 
     public List<PartnerDomain> getDomainContent() {
@@ -132,13 +132,13 @@ public class PartnerBadge implements Serializable {
     }
 
     public Deque<Long> getLastResponseTimes() {
-        return this.shortTimeStats.lastResponseTimes;
+        return this.getShortTimeStats().lastResponseTimes;
     }
 
     public void pushLastResponseTimes(Long lastResponseTime) {
-        while (this.shortTimeStats.lastResponseTimes.size() > 50)
-            this.shortTimeStats.lastResponseTimes.pop();
-        this.shortTimeStats.lastResponseTimes.push(lastResponseTime);
+        while (this.getShortTimeStats().lastResponseTimes.size() > 50)
+            this.getShortTimeStats().lastResponseTimes.pop();
+        this.getShortTimeStats().lastResponseTimes.push(lastResponseTime);
     }
 
     /**
@@ -173,13 +173,13 @@ public class PartnerBadge implements Serializable {
     }
 
     public List<ResultStats> getLastQueries() {
-        return this.shortTimeStats.lastQueries;
+        return this.getShortTimeStats().lastQueries;
     }
 
     public void addLastQueries(ResultStats lastQuerie) {
-        this.shortTimeStats.lastQueries.addLast(lastQuerie);
-        if (this.shortTimeStats.lastQueries.size() > 50)
-            this.shortTimeStats.lastQueries.removeFirst();
+        this.getShortTimeStats().lastQueries.addLast(lastQuerie);
+        if (this.getShortTimeStats().lastQueries.size() > 50)
+            this.getShortTimeStats().lastQueries.removeFirst();
     }
 
     public String getFavIconURI() {
@@ -217,9 +217,33 @@ public class PartnerBadge implements Serializable {
 
     @Override
     public String toString() {
-        return "PartnerBadge [description=" + description + ", favIconURI=" + favIconURI + ", partnerConnectorEndpoint=" + partnerConnectorEndpoint + ", tags="
-                + tags + ", domainContent=" + domainContent + ", languageContent=" + languageContent + ", systemId=" + systemId + ", queryGeneratorClass="
-                + queryGeneratorClass + ", partnerKey=" + partnerKey + ", shortTimeStats=" + shortTimeStats + ", longTimeStats=" + longTimeStats + "]";
+        return "PartnerBadge [description=" + description + ", favIconURI=" + favIconURI + ", partnerConnectorEndpoint=" + partnerConnectorEndpoint + ", tags=" + tags
+                + ", domainContent=" + domainContent + ", languageContent=" + languageContent + ", systemId=" + systemId + ", queryGeneratorClass=" + getQueryGeneratorClass()
+                + ", partnerKey=" + getPartnerKey() + ", shortTimeStats=" + getShortTimeStats() + ", longTimeStats=" + longTimeStats + "]";
+    }
+
+    public String getPartnerKey() {
+        return partnerKey;
+    }
+
+    public void setPartnerKey(String partnerKey) {
+        this.partnerKey = partnerKey;
+    }
+
+    public PartnerBadgeStats getShortTimeStats() {
+        return shortTimeStats;
+    }
+
+    public void setShortTimeStats(PartnerBadgeStats shortTimeStats) {
+        this.shortTimeStats = shortTimeStats;
+    }
+
+    public String getQueryGeneratorClass() {
+        return queryGeneratorClass;
+    }
+
+    public void setQueryGeneratorClass(String queryGeneratorClass) {
+        this.queryGeneratorClass = queryGeneratorClass;
     }
 
 }

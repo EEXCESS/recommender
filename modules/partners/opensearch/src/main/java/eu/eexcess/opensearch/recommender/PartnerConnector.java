@@ -76,11 +76,11 @@ public class PartnerConnector extends PartnerConnectorBase implements PartnerCon
     public ResultList queryPartnerNative(PartnerConfiguration partnerConfiguration, SecureUserProfile userProfile, PartnerdataLogger logger) throws IOException {
 
         if (PartnerConfigurationCache.CONFIG.getIntializedFlag() == false) {
-            descriptionDocument = readOpensearchDescriptionDocument(partnerConfiguration.searchEndpoint);
+            descriptionDocument = readOpensearchDescriptionDocument(partnerConfiguration.getSearchEndpoint());
             PartnerConfigurationCache.CONFIG.setIntializedFlag(bootstrapSearchEndpoint(descriptionDocument));
         }
 
-        String query = PartnerConfigurationCache.CONFIG.getQueryGenerator(partnerConfiguration.queryGeneratorClass).toQuery(userProfile);
+        String query = PartnerConfigurationCache.CONFIG.getQueryGenerator(partnerConfiguration.getQueryGeneratorClass()).toQuery(userProfile);
         return fetchSearchResults(query, descriptionDocument);
     }
 
@@ -106,15 +106,15 @@ public class PartnerConnector extends PartnerConnectorBase implements PartnerCon
         List<Url> selection = linkSelector.select(descriptionDocument.searchLinks, linkFilter);
 
         if (selection.size() <= 0) {
-            logger.log(Level.WARNING, "no search link found in [" + PartnerConfigurationCache.CONFIG.getPartnerConfiguration().searchEndpoint + "]");
+            logger.log(Level.WARNING, "no search link found in [" + PartnerConfigurationCache.CONFIG.getPartnerConfiguration().getSearchEndpoint() + "]");
             return false;
         } else if (selection.size() > 1) {
-            logger.log(Level.WARNING, "ambiguous search links found in [" + PartnerConfigurationCache.CONFIG.getPartnerConfiguration().searchEndpoint
+            logger.log(Level.WARNING, "ambiguous search links found in [" + PartnerConfigurationCache.CONFIG.getPartnerConfiguration().getSearchEndpoint()
                     + "] - take [" + selection.get(0).template + "]");
             return false;
         }
 
-        PartnerConfigurationCache.CONFIG.getPartnerConfiguration().searchEndpoint = selection.get(0).template;
+        PartnerConfigurationCache.CONFIG.getPartnerConfiguration().setSearchEndpoint(selection.get(0).template);
         return true;
     }
 
@@ -130,7 +130,7 @@ public class PartnerConnector extends PartnerConnectorBase implements PartnerCon
     private ResultList fetchSearchResults(String query, OpensearchDescription descriptionDocument) {
 
         Client client = new Client(PartnerConfigurationCache.CONFIG.getClientJacksonJson());
-        String searchRequestUrl = injectSearchQuery(PartnerConfigurationCache.CONFIG.getPartnerConfiguration().searchEndpoint, query);
+        String searchRequestUrl = injectSearchQuery(PartnerConfigurationCache.CONFIG.getPartnerConfiguration().getSearchEndpoint(), query);
 
         WebResource documentResource = client.resource(searchRequestUrl);
 
@@ -164,7 +164,7 @@ public class PartnerConnector extends PartnerConnectorBase implements PartnerCon
             Map<String, String> valuesMap = new HashMap<String, String>();
             valuesMap.put(searchTermsVariableName, searchQuery);
             StrSubstitutor substitutor = new StrSubstitutor(valuesMap, substitutorPrefix, substitutorSuffix);
-            return substitutor.replace(PartnerConfigurationCache.CONFIG.getPartnerConfiguration().searchEndpoint);
+            return substitutor.replace(PartnerConfigurationCache.CONFIG.getPartnerConfiguration().getSearchEndpoint());
         } catch (Exception e) {
         }
 

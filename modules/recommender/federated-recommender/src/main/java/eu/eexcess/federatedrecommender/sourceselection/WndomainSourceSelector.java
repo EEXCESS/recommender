@@ -164,7 +164,7 @@ public class WndomainSourceSelector implements PartnerSelector {
         if (userProfile.partnerList.size() > 0) {
             StringBuilder info = new StringBuilder("partners: ");
             for (PartnerBadge entry : userProfile.partnerList) {
-                info.append("[" + entry.systemId + "] ");
+                info.append("[" + entry.getSystemId() + "] ");
             }
             logger.info("WordnetDomain-based source selection selected: " + info.toString());
         } else {

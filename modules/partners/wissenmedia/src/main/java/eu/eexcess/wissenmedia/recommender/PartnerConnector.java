@@ -74,9 +74,9 @@ public class PartnerConnector implements PartnerConnectorApi {
 //        ClientConfig config = new DefaultClientConfig();
         Client client = new Client(PartnerConfigurationCache.CONFIG.getClientDefault());
 
-        client.addFilter(new HTTPBasicAuthFilter(partnerConfiguration.userName, partnerConfiguration.password));
+        client.addFilter(new HTTPBasicAuthFilter(partnerConfiguration.getUserName(), partnerConfiguration.getPassword()));
 
-        queryGenerator = PartnerConfigurationCache.CONFIG.getQueryGenerator(partnerConfiguration.queryGeneratorClass);
+        queryGenerator = PartnerConfigurationCache.CONFIG.getQueryGenerator(partnerConfiguration.getQueryGeneratorClass());
 		
         String query = getQueryGenerator().toQuery(userProfile);
         
@@ -87,7 +87,7 @@ public class PartnerConnector implements PartnerConnectorApi {
         	numResults  = userProfile.numResults;
         valuesMap.put("numResults", numResults+"");
 
-        String searchRequest = StrSubstitutor.replace(partnerConfiguration.searchEndpoint, valuesMap);
+        String searchRequest = StrSubstitutor.replace(partnerConfiguration.getSearchEndpoint(), valuesMap);
         
         WebResource service = client.resource(searchRequest);
         Builder builder = service.accept(MediaType.APPLICATION_XML);
@@ -108,16 +108,16 @@ public class PartnerConnector implements PartnerConnectorApi {
 		try {	
 	        Client client = new Client(PartnerConfigurationCache.CONFIG.getClientDefault());
 	
-	        client.addFilter(new HTTPBasicAuthFilter(partnerConfiguration.userName, partnerConfiguration.password));
+	        client.addFilter(new HTTPBasicAuthFilter(partnerConfiguration.getUserName(), partnerConfiguration.getPassword()));
 
-	        queryGenerator = PartnerConfigurationCache.CONFIG.getQueryGenerator(partnerConfiguration.queryGeneratorClass);;
+	        queryGenerator = PartnerConfigurationCache.CONFIG.getQueryGenerator(partnerConfiguration.getQueryGeneratorClass());;
 			
 	        String detailQuery = getQueryGenerator().toDetailQuery(document);
 	        
 	        Map<String, String> valuesMap = new HashMap<String, String>();
 	        valuesMap.put("detailQuery", detailQuery);
 	        
-	        String searchRequest = StrSubstitutor.replace(partnerConfiguration.detailEndpoint, valuesMap);
+	        String searchRequest = StrSubstitutor.replace(partnerConfiguration.getDetailEndpoint(), valuesMap);
 	        
 	        WebResource service = client.resource(searchRequest);
 	       

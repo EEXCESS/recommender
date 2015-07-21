@@ -122,11 +122,11 @@ public class PartnerConnector extends PartnerConnectorBase implements PartnerCon
 
 	protected MendeleyResponse fetchSearchResults(Client client, SecureUserProfile userProfile, AccessTokenResponse accessTokenResponse,
 			PartnerConfiguration partnerConfiguration) throws InstantiationException, IllegalAccessException, ClassNotFoundException {
-		logger.log(Level.INFO,"Query Generator fetch Partner: "+partnerConfiguration.queryGeneratorClass);
-		String query = PartnerConfigurationCache.CONFIG.getQueryGenerator(partnerConfiguration.queryGeneratorClass).toQuery(userProfile);
+		logger.log(Level.INFO,"Query Generator fetch Partner: "+partnerConfiguration.getQueryGeneratorClass());
+		String query = PartnerConfigurationCache.CONFIG.getQueryGenerator(partnerConfiguration.getQueryGeneratorClass()).toQuery(userProfile);
 		Map<String, String> valuesMap = new HashMap<String, String>();
 		valuesMap.put("query", URLParamEncoder.encode(query));       
-		String searchRequest = StrSubstitutor.replace(partnerConfiguration.searchEndpoint, valuesMap);
+		String searchRequest = StrSubstitutor.replace(partnerConfiguration.getSearchEndpoint(), valuesMap);
 		MendeleyResponse jsonResponse = getJSONResponse(client, accessTokenResponse, searchRequest);
 
 		if(jsonResponse==null || jsonResponse.getDocuments()==null )
@@ -163,11 +163,11 @@ public class PartnerConnector extends PartnerConnectorBase implements PartnerCon
 
 	protected AccessTokenResponse getAccessToken(Client client, PartnerConfiguration partnerConfiguration) throws UnsupportedEncodingException {
 		String tokenParams = String.format("grant_type=client_credentials&scope=all&client_id=%s&client_secret=%s", 
-				partnerConfiguration.userName, partnerConfiguration.password);
+				partnerConfiguration.getUserName(), partnerConfiguration.getPassword());
 		
 		ClientResponse postResponse = client.resource(TOKEN_URL)
 				.entity(tokenParams, MediaType.APPLICATION_FORM_URLENCODED_TYPE)
-				.header("Authorization", basic(partnerConfiguration.userName, partnerConfiguration.password))
+				.header("Authorization", basic(partnerConfiguration.getUserName(), partnerConfiguration.getPassword()))
 				.post(ClientResponse.class);
 		
 		String json = postResponse.getEntity(String.class);		
@@ -210,14 +210,14 @@ public class PartnerConnector extends PartnerConnectorBase implements PartnerCon
 		try {	
 	        Client client = new Client(PartnerConfigurationCache.CONFIG.getClientDefault());
 	
-	        QueryGeneratorApi queryGenerator = PartnerConfigurationCache.CONFIG.getQueryGenerator(partnerConfiguration.queryGeneratorClass);
+	        QueryGeneratorApi queryGenerator = PartnerConfigurationCache.CONFIG.getQueryGenerator(partnerConfiguration.getQueryGeneratorClass());
 			
 	        String detailQuery = queryGenerator.toDetailQuery(document);
 	        
 	        Map<String, String> valuesMap = new HashMap<String, String>();
 	        valuesMap.put("detailQuery", detailQuery);
 
-	        String searchRequest = StrSubstitutor.replace(partnerConfiguration.detailEndpoint, valuesMap);
+	        String searchRequest = StrSubstitutor.replace(partnerConfiguration.getDetailEndpoint(), valuesMap);
 			AccessTokenResponse accessTokenResponse = getAccessToken(client, partnerConfiguration);
 
 /*

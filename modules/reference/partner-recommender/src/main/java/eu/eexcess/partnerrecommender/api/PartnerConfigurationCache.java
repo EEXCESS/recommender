@@ -35,218 +35,200 @@ import eu.eexcess.partnerrecommender.reference.PartnerRegistrationThread;
  *
  */
 public enum PartnerConfigurationCache {
-	CONFIG;
-	private final Logger logger;
-	private boolean intializedFlag;
-	private PartnerConfiguration partnerConfiguration;
-	private PartnerConnectorApi partnerConnector;
-	private ITransformer transformer;
-	private Enrichment enricher;
-	private Client clientJacksonJson;
-	private Client clientJAXBContext;
-	private Client clientDefault;
-	private ObjectMapper objectMapper;
-	private Map<String,QueryGeneratorApi> queryGeneratorMapping = new HashMap<String, QueryGeneratorApi>();
-	private QueryGeneratorApi defaultQueryGen;
-	private Thread regThread;
-	
+    CONFIG;
+    private final Logger logger;
+    private boolean intializedFlag;
+    private PartnerConfiguration partnerConfiguration;
+    private PartnerConnectorApi partnerConnector;
+    private ITransformer transformer;
+    private Enrichment enricher;
+    private Client clientJacksonJson;
+    private Client clientJAXBContext;
+    private Client clientDefault;
+    private ObjectMapper objectMapper;
+    private Map<String, QueryGeneratorApi> queryGeneratorMapping = new HashMap<String, QueryGeneratorApi>();
+    private QueryGeneratorApi defaultQueryGen;
+    private Thread regThread;
 
-	private PartnerConfigurationCache() {
+    private PartnerConfigurationCache() {
 
-		this.logger = Logger.getLogger(PartnerConfigurationCache.class.getName());
-		this.objectMapper = new ObjectMapper();
-		ClientConfig configDefault = new DefaultClientConfig();
-		ClientConfig configJacksonJson = new DefaultClientConfig();
-		ClientConfig configJAXBContext = new DefaultClientConfig();
-		configJacksonJson.getClasses().add(JacksonJsonProvider.class);
-		configJAXBContext.getClasses().add(JAXBContext.class);
-		clientJacksonJson = Client.create(configJacksonJson);
-		clientJAXBContext = Client.create(configJAXBContext);
-		clientDefault = Client.create(configDefault);
+        this.logger = Logger.getLogger(PartnerConfigurationCache.class.getName());
+        this.objectMapper = new ObjectMapper();
+        ClientConfig configDefault = new DefaultClientConfig();
+        ClientConfig configJacksonJson = new DefaultClientConfig();
+        ClientConfig configJAXBContext = new DefaultClientConfig();
+        configJacksonJson.getClasses().add(JacksonJsonProvider.class);
+        configJAXBContext.getClasses().add(JAXBContext.class);
+        clientJacksonJson = Client.create(configJacksonJson);
+        clientJAXBContext = Client.create(configJAXBContext);
+        clientDefault = Client.create(configDefault);
 
-		ObjectMapper mapper = new ObjectMapper();
-		try {
-			
-			/*
-			 * Read partner configuration file
-			 */
-			
-			URL resource = getClass().getResource("/partner-config.json");
-			mapper.configure(JsonParser.Feature.ALLOW_COMMENTS, true);
-			partnerConfiguration = mapper.readValue(
-					new File(resource.getFile()), PartnerConfiguration.class);
-			/*
-			 * Read global partner key file
-			 */
-			String eexcessPartnerKeyFile =System.getenv("EEXCESS_PARTNER_KEY_FILE");
-			logger.log(Level.INFO,"Reading Api Keys from: " + eexcessPartnerKeyFile);
-			PartnerApiKeys partnerKeys = null;
-			if(eexcessPartnerKeyFile==null){
-			logger.log(Level.INFO,"Environment variable \"EEXCESS_PARTNER_KEY_FILE\" for "+partnerConfiguration.systemId+" has to be set");
-			}else{
-				partnerKeys= mapper.readValue(new File(eexcessPartnerKeyFile), PartnerApiKeys.class);
-			}
-		
-			if(partnerKeys!=null)
-			for (PartnerConfiguration badge : partnerKeys.getPartners()) {
-					if(partnerConfiguration.systemId.equals(badge.systemId)){
-						if(badge.apiKey!=null){
-							partnerConfiguration.apiKey=badge.apiKey;
-						}
-						if(badge.userName!=null){
-							partnerConfiguration.userName=badge.userName;
-						}if(badge.password!=null){
-							partnerConfiguration.password=badge.password;
-						}
-					}
-			}
-			
-			/*
-			 * Configure the partner connector
-			 */
+        ObjectMapper mapper = new ObjectMapper();
+        try {
 
-			partnerConnector = (PartnerConnectorApi) Class.forName(
-					partnerConfiguration.partnerConnectorClass).newInstance();
+            /*
+             * Read partner configuration file
+             */
 
-			/*
-			 * Configure data transformer
-			 */
-			if (!partnerConfiguration.isTransformedNative) {
-				transformer = (ITransformer) Class.forName(
-						partnerConfiguration.transformerClass).newInstance();
-				transformer.init(partnerConfiguration);
+            URL resource = getClass().getResource("/partner-config.json");
+            mapper.configure(JsonParser.Feature.ALLOW_COMMENTS, true);
+            partnerConfiguration = mapper.readValue(new File(resource.getFile()), PartnerConfiguration.class);
+            /*
+             * Read global partner key file
+             */
+            String eexcessPartnerKeyFile = System.getenv("EEXCESS_PARTNER_KEY_FILE");
+            logger.log(Level.INFO, "Reading Api Keys from: " + eexcessPartnerKeyFile);
+            PartnerApiKeys partnerKeys = null;
+            if (eexcessPartnerKeyFile == null) {
+                logger.log(Level.INFO, "Environment variable \"EEXCESS_PARTNER_KEY_FILE\" for " + partnerConfiguration.getSystemId() + " has to be set");
+            } else {
+                partnerKeys = mapper.readValue(new File(eexcessPartnerKeyFile), PartnerApiKeys.class);
+            }
 
-				/*
-				 * Configure data enricher
-				 */
+            if (partnerKeys != null)
+                for (PartnerConfiguration badge : partnerKeys.getPartners()) {
+                    if (partnerConfiguration.getSystemId().equals(badge.getSystemId())) {
+                        if (badge.getApiKey() != null) {
+                            partnerConfiguration.setApiKey(badge.getApiKey());
+                        }
+                        if (badge.getUserName() != null) {
+                            partnerConfiguration.setUserName(badge.getUserName());
+                        }
+                        if (badge.getPassword() != null) {
+                            partnerConfiguration.setPassword(badge.getPassword());
+                        }
+                    }
+                }
 
-				enricher = new Enrichment();
-				enricher.init(partnerConfiguration);
-			}
+            /*
+             * Configure the partner connector
+             */
 
-		} catch (Exception e) {
-			logger.log(Level.WARNING, "Cannot initialize enrichment service for "+partnerConfiguration.systemId+" recommender", e);
+            partnerConnector = (PartnerConnectorApi) Class.forName(partnerConfiguration.getPartnerConnectorClass()).newInstance();
 
-		}
-		try {
-			QueryGeneratorApi queryGen =(QueryGeneratorApi) Class.forName(
-					partnerConfiguration.queryGeneratorClass).newInstance();
-			this.defaultQueryGen = queryGen;
-			queryGeneratorMapping.put(partnerConfiguration.queryGeneratorClass,queryGen);
-		} catch (InstantiationException | IllegalAccessException
-				| ClassNotFoundException e1) {
-			logger.log(Level.SEVERE, "Cannot initialize query generator for "+partnerConfiguration.systemId+" recommender",
-					e1);
-		}
-	}
+            /*
+             * Configure data transformer
+             */
+            if (!partnerConfiguration.isTransformedNative()) {
+                transformer = (ITransformer) Class.forName(partnerConfiguration.getTransformerClass()).newInstance();
+                transformer.init(partnerConfiguration);
 
-	public void registerPartnerAtServer() {
-		logger.log(
-				Level.INFO,
-				"Starting Partner Helper Thread:"
-						+ PartnerConfigurationCache.CONFIG
-								.getPartnerConfiguration().systemId);
-		this.regThread = new Thread(new PartnerRegistrationThread(
-				partnerConfiguration));
-		regThread.setName(PartnerConfigurationCache.CONFIG.partnerConfiguration.systemId+" Registration Thread");
-		regThread.start();
-	}
+                /*
+                 * Configure data enricher
+                 */
 
-	public void unregisterPartnerAtServer() {
-		regThread.interrupt();
-		PartnerBadge badge = PartnerConfigurationCache.CONFIG.getBadge();
-		DefaultClientConfig jClientconfig = new DefaultClientConfig();
-		jClientconfig.getClasses().add(JacksonJsonProvider.class);
-		Client client = new Client(new URLConnectionClientHandler(),
-				jClientconfig);
-		WebResource service = client
-				.resource(partnerConfiguration.federatedRecommenderURI
-						+ "unregister");
-		logger.log(Level.INFO, "Unregistering Partner: " + badge.getSystemId()
-				+ " at " + partnerConfiguration.federatedRecommenderURI);
-		Builder builder = service.accept(MediaType.APPLICATION_JSON);
-		builder.type(MediaType.APPLICATION_JSON)
-				.post(PartnerBadge.class, badge);
-	}
+                enricher = new Enrichment();
+                enricher.init(partnerConfiguration);
+            }
 
-	public PartnerConfiguration getPartnerConfiguration() {
-		return partnerConfiguration;
-	}
+        } catch (Exception e) {
+            logger.log(Level.WARNING, "Cannot initialize enrichment service for " + partnerConfiguration.getSystemId() + " recommender", e);
 
-	public PartnerConnectorApi getPartnerConnector() {
-		return partnerConnector;
-	}
+        }
+        try {
+            QueryGeneratorApi queryGen = (QueryGeneratorApi) Class.forName(partnerConfiguration.getQueryGeneratorClass()).newInstance();
+            this.defaultQueryGen = queryGen;
+            queryGeneratorMapping.put(partnerConfiguration.getQueryGeneratorClass(), queryGen);
+        } catch (InstantiationException | IllegalAccessException | ClassNotFoundException e1) {
+            logger.log(Level.SEVERE, "Cannot initialize query generator for " + partnerConfiguration.getSystemId() + " recommender", e1);
+        }
+    }
 
-	public ITransformer getTransformer() {
-		return transformer;
-	}
+    public void registerPartnerAtServer() {
+        logger.log(Level.INFO, "Starting Partner Helper Thread:" + PartnerConfigurationCache.CONFIG.getPartnerConfiguration().getSystemId());
+        this.regThread = new Thread(new PartnerRegistrationThread(partnerConfiguration));
+        regThread.setName(PartnerConfigurationCache.CONFIG.partnerConfiguration.getSystemId() + " Registration Thread");
+        regThread.start();
+    }
 
-	public Enrichment getEnricher() {
-		return enricher;
-	}
+    public void unregisterPartnerAtServer() {
+        regThread.interrupt();
+        PartnerBadge badge = PartnerConfigurationCache.CONFIG.getBadge();
+        DefaultClientConfig jClientconfig = new DefaultClientConfig();
+        jClientconfig.getClasses().add(JacksonJsonProvider.class);
+        Client client = new Client(new URLConnectionClientHandler(), jClientconfig);
+        WebResource service = client.resource(partnerConfiguration.getFederatedRecommenderURI() + "unregister");
+        logger.log(Level.INFO, "Unregistering Partner: " + badge.getSystemId() + " at " + partnerConfiguration.getFederatedRecommenderURI());
+        Builder builder = service.accept(MediaType.APPLICATION_JSON);
+        builder.type(MediaType.APPLICATION_JSON).post(PartnerBadge.class, badge);
+    }
 
-	public void setEnricher(Enrichment enricher) {
-		this.enricher = enricher;
-	}
+    public PartnerConfiguration getPartnerConfiguration() {
+        return partnerConfiguration;
+    }
 
-	// TODO: hziak + rrubien: check for optimization, client could be configured
-	// here aswell
-	public Client getClientJacksonJson() {
-		return clientJacksonJson;
-	}
+    public PartnerConnectorApi getPartnerConnector() {
+        return partnerConnector;
+    }
 
-	// TODO: hziak + rrubien: check for optimization, client could be configured
-	// here aswell
-	public Client getClientJAXBContext() {
-		return clientJAXBContext;
-	}
+    public ITransformer getTransformer() {
+        return transformer;
+    }
 
-	// TODO: hziak + rrubien: check for optimization, client could be configured
-	// here aswell
-	public Client getClientDefault() {
-		return clientDefault;
-	}
+    public Enrichment getEnricher() {
+        return enricher;
+    }
 
-	public ObjectMapper getObjectMapper() {
-		return objectMapper;
-	}
-	/**
-	 * returns the query generator, if none is given it returns the default
-	 * @param queryGen
-	 * @return
-	 */
-	public QueryGeneratorApi getQueryGenerator(String queryGen) {
-		if(queryGen==null){
-			return this.defaultQueryGen;
-		}
-		QueryGeneratorApi returnGen = queryGeneratorMapping.get(queryGen);
-		if(returnGen==null){
-			try {
-				QueryGeneratorApi queryGenerator =(QueryGeneratorApi) Class.forName(
-						queryGen).newInstance();
-				queryGeneratorMapping.put(queryGen,queryGenerator);
-				return queryGenerator;
-			} catch (InstantiationException | IllegalAccessException
-					| ClassNotFoundException e1) {
-				logger.log(Level.SEVERE, "Cannot load query generation class: "+queryGen + " for partner "+partnerConfiguration.systemId,
-						e1);
-			}
-			return this.defaultQueryGen;
-		}
-		else
-			return returnGen;
-	}
+    public void setEnricher(Enrichment enricher) {
+        this.enricher = enricher;
+    }
 
-	public PartnerBadge getBadge() {
-		return partnerConfiguration;
-	}
+    // TODO: hziak + rrubien: check for optimization, client could be configured
+    // here aswell
+    public Client getClientJacksonJson() {
+        return clientJacksonJson;
+    }
 
-	public boolean getIntializedFlag() {
-		return intializedFlag;
-	}
+    // TODO: hziak + rrubien: check for optimization, client could be configured
+    // here aswell
+    public Client getClientJAXBContext() {
+        return clientJAXBContext;
+    }
 
-	public void setIntializedFlag(boolean intializedFlag) {
-		this.intializedFlag = intializedFlag;
-	}
+    // TODO: hziak + rrubien: check for optimization, client could be configured
+    // here aswell
+    public Client getClientDefault() {
+        return clientDefault;
+    }
+
+    public ObjectMapper getObjectMapper() {
+        return objectMapper;
+    }
+
+    /**
+     * returns the query generator, if none is given it returns the default
+     * 
+     * @param queryGen
+     * @return
+     */
+    public QueryGeneratorApi getQueryGenerator(String queryGen) {
+        if (queryGen == null) {
+            return this.defaultQueryGen;
+        }
+        QueryGeneratorApi returnGen = queryGeneratorMapping.get(queryGen);
+        if (returnGen == null) {
+            try {
+                QueryGeneratorApi queryGenerator = (QueryGeneratorApi) Class.forName(queryGen).newInstance();
+                queryGeneratorMapping.put(queryGen, queryGenerator);
+                return queryGenerator;
+            } catch (InstantiationException | IllegalAccessException | ClassNotFoundException e1) {
+                logger.log(Level.SEVERE, "Cannot load query generation class: " + queryGen + " for partner " + partnerConfiguration.getSystemId(), e1);
+            }
+            return this.defaultQueryGen;
+        } else
+            return returnGen;
+    }
+
+    public PartnerBadge getBadge() {
+        return partnerConfiguration;
+    }
+
+    public boolean getIntializedFlag() {
+        return intializedFlag;
+    }
+
+    public void setIntializedFlag(boolean intializedFlag) {
+        this.intializedFlag = intializedFlag;
+    }
 
 }

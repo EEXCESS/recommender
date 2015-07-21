@@ -147,7 +147,7 @@ public class PartnerConnectorBase implements PartnerConnectorApi{
 		try {	
 	        Client client = new Client(PartnerConfigurationCache.CONFIG.getClientDefault());
 	
-	        queryGenerator = PartnerConfigurationCache.CONFIG.getQueryGenerator(partnerConfiguration.queryGeneratorClass);
+	        queryGenerator = PartnerConfigurationCache.CONFIG.getQueryGenerator(partnerConfiguration.getQueryGeneratorClass());
 			
 	        String query = getQueryGenerator().toQuery(userProfile);
 	        
@@ -158,7 +158,7 @@ public class PartnerConnectorBase implements PartnerConnectorApi{
 	        	numResults  = userProfile.numResults;
 	        valuesMap.put("numResults", numResults+"");
 	        
-	        String searchRequest = StrSubstitutor.replace(partnerConfiguration.searchEndpoint, valuesMap);
+	        String searchRequest = StrSubstitutor.replace(partnerConfiguration.getSearchEndpoint(), valuesMap);
 	        
 	        WebResource service = client.resource(searchRequest);
 	       
@@ -180,14 +180,14 @@ public class PartnerConnectorBase implements PartnerConnectorApi{
 		try {	
 	        Client client = new Client(PartnerConfigurationCache.CONFIG.getClientDefault());
 	
-	        queryGenerator = PartnerConfigurationCache.CONFIG.getQueryGenerator(partnerConfiguration.queryGeneratorClass);
+	        queryGenerator = PartnerConfigurationCache.CONFIG.getQueryGenerator(partnerConfiguration.getQueryGeneratorClass());
 			
 	        String detailQuery = getQueryGenerator().toDetailQuery(document);
 	        
 	        Map<String, String> valuesMap = new HashMap<String, String>();
 	        valuesMap.put("detailQuery", detailQuery);
 	        
-	        String searchRequest = StrSubstitutor.replace(partnerConfiguration.detailEndpoint, valuesMap);
+	        String searchRequest = StrSubstitutor.replace(partnerConfiguration.getDetailEndpoint(), valuesMap);
 	        
 	        WebResource service = client.resource(searchRequest);
 	       

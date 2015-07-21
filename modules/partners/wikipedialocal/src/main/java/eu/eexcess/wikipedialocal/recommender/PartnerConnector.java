@@ -56,90 +56,74 @@ import eu.eexcess.partnerrecommender.reference.PartnerConnectorBase;
  */
 public class PartnerConnector extends PartnerConnectorBase implements PartnerConnectorApi {
 
-	@SuppressWarnings("unused")
-	private static final Logger logger = Logger.getLogger(PartnerConnector.class.getName());
+    @SuppressWarnings("unused")
+    private static final Logger logger = Logger.getLogger(PartnerConnector.class.getName());
 
+    private static final String[] FIELD_CONTENTS = { "sectionText", "sectionTitle", "title" };
 
-	private static final String[] FIELD_CONTENTS = {"sectionText","sectionTitle","title"};
+    @SuppressWarnings("unused")
+    private PartnerConfiguration partnerConfig = null;
 
-	
-	@SuppressWarnings("unused")
-	private PartnerConfiguration partnerConfig = null;
+    public PartnerConnector() {
 
+    }
 
-	
-	
-	public PartnerConnector() {
-		
-		
-	}
+    @Override
+    public ResultList queryPartnerNative(PartnerConfiguration partnerConfiguration, SecureUserProfile userProfile, PartnerdataLogger dataLogger) throws IOException {
+        partnerConfig = partnerConfiguration;
+        ResultList resultList = new ResultList();
 
-	@Override
-	public ResultList queryPartnerNative(PartnerConfiguration partnerConfiguration, SecureUserProfile userProfile, PartnerdataLogger dataLogger)
-					throws IOException {
-		partnerConfig = partnerConfiguration;
-		ResultList resultList = new ResultList();
-		
-		Analyzer analyzer = new ClassicAnalyzer();
-		File directoryPath = new File(PartnerConfigurationCache.CONFIG.getPartnerConfiguration().searchEndpoint);
-		Directory directory = FSDirectory.open(directoryPath );
-		IndexReader indexReader = DirectoryReader.open(directory );
-		IndexSearcher indexSearcher = new IndexSearcher(indexReader);
-		QueryParser queryParser = new MultiFieldQueryParser(FIELD_CONTENTS,analyzer);
-		queryParser.setDefaultOperator(Operator.AND);
-		String queryString = PartnerConfigurationCache.CONFIG.getQueryGenerator(partnerConfiguration.queryGeneratorClass).toQuery(userProfile);
-		Query query = null;
-		try {
-			query = queryParser.parse(queryString);
-		} catch (ParseException e) {
-			
-			//logger.log(Level.SEVERE, "could not parse input query", e);
-		}
-		if(userProfile.numResults==null)
-			userProfile.numResults=10;
-		TopDocs topDocs = indexSearcher.search(query, userProfile.numResults);
-		for (ScoreDoc sDocs : topDocs.scoreDocs) {
-			Result result = new Result();
-			result.documentBadge=new DocumentBadge("", "", PartnerConfigurationCache.CONFIG.getBadge().systemId);
-			org.apache.lucene.document.Document  doc=indexSearcher.doc(sDocs.doc);
-			if(doc!=null){
-				IndexableField title = doc.getField("title");
-				IndexableField sectionTitle = doc.getField("sectionTitle");
-				IndexableField category = doc.getField("category");
-				IndexableField sectionText = doc.getField("sectionText");
-				if(sectionText!=null)
-					result.description= sectionText.stringValue();
-				if(category!=null){
-				}
-				if(title!=null && sectionTitle!=null)				
-					result.title = title.stringValue() +" - " + sectionTitle.stringValue();
-				resultList.results.add(result );
-			}
-		}
-		
-		
-		resultList.totalResults=topDocs.totalHits;
-		return resultList;
-	}
+        Analyzer analyzer = new ClassicAnalyzer();
+        File directoryPath = new File(PartnerConfigurationCache.CONFIG.getPartnerConfiguration().getSearchEndpoint());
+        Directory directory = FSDirectory.open(directoryPath);
+        IndexReader indexReader = DirectoryReader.open(directory);
+        IndexSearcher indexSearcher = new IndexSearcher(indexReader);
+        QueryParser queryParser = new MultiFieldQueryParser(FIELD_CONTENTS, analyzer);
+        queryParser.setDefaultOperator(Operator.AND);
+        String queryString = PartnerConfigurationCache.CONFIG.getQueryGenerator(partnerConfiguration.getQueryGeneratorClass()).toQuery(userProfile);
+        Query query = null;
+        try {
+            query = queryParser.parse(queryString);
+        } catch (ParseException e) {
 
-	@Override
-	public Document queryPartner(PartnerConfiguration partnerConfiguration, SecureUserProfile userProfile, PartnerdataLogger logger)
-					throws IOException {
+            // logger.log(Level.SEVERE, "could not parse input query", e);
+        }
+        if (userProfile.numResults == null)
+            userProfile.numResults = 10;
+        TopDocs topDocs = indexSearcher.search(query, userProfile.numResults);
+        for (ScoreDoc sDocs : topDocs.scoreDocs) {
+            Result result = new Result();
+            result.documentBadge = new DocumentBadge("", "", PartnerConfigurationCache.CONFIG.getBadge().getSystemId());
+            org.apache.lucene.document.Document doc = indexSearcher.doc(sDocs.doc);
+            if (doc != null) {
+                IndexableField title = doc.getField("title");
+                IndexableField sectionTitle = doc.getField("sectionTitle");
+                IndexableField category = doc.getField("category");
+                IndexableField sectionText = doc.getField("sectionText");
+                if (sectionText != null)
+                    result.description = sectionText.stringValue();
+                if (category != null) {
+                }
+                if (title != null && sectionTitle != null)
+                    result.title = title.stringValue() + " - " + sectionTitle.stringValue();
+                resultList.results.add(result);
+            }
+        }
 
-		return null;
-	}
+        resultList.totalResults = topDocs.totalHits;
+        return resultList;
+    }
 
-	@Override
-	public Document queryPartnerDetails(
-			PartnerConfiguration partnerConfiguration,
-			DocumentBadge document, PartnerdataLogger logger)
-			throws IOException {
-		// TODO Auto-generated method stub
-		return null;
-	}
+    @Override
+    public Document queryPartner(PartnerConfiguration partnerConfiguration, SecureUserProfile userProfile, PartnerdataLogger logger) throws IOException {
 
-	
+        return null;
+    }
 
-	
+    @Override
+    public Document queryPartnerDetails(PartnerConfiguration partnerConfiguration, DocumentBadge document, PartnerdataLogger logger) throws IOException {
+        // TODO Auto-generated method stub
+        return null;
+    }
 
 }

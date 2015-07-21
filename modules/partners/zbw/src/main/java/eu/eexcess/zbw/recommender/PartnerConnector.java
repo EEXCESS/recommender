@@ -90,7 +90,7 @@ public class PartnerConnector implements PartnerConnectorApi {
 		// Configure
 		try {	
 			Client client = new Client(PartnerConfigurationCache.CONFIG.getClientJAXBContext());
-	        queryGenerator = PartnerConfigurationCache.CONFIG.getQueryGenerator(partnerConfiguration.queryGeneratorClass);
+	        queryGenerator = PartnerConfigurationCache.CONFIG.getQueryGenerator(partnerConfiguration.getQueryGeneratorClass());
 			
 	        String query = getQueryGenerator().toQuery(userProfile);
 	        query=query.replaceAll("\"", "");
@@ -103,7 +103,7 @@ public class PartnerConnector implements PartnerConnectorApi {
 	        	valuesMap.put("size", userProfile.numResults.toString());
 	        else
 	        	valuesMap.put("size", "10");
-	        String searchRequest = StrSubstitutor.replace(partnerConfiguration.searchEndpoint, valuesMap);
+	        String searchRequest = StrSubstitutor.replace(partnerConfiguration.getSearchEndpoint(), valuesMap);
 	        
 	        WebResource service = client.resource(searchRequest);
 	        log.log(Level.INFO,"SearchRequest: "+searchRequest);
@@ -198,14 +198,14 @@ public class PartnerConnector implements PartnerConnectorApi {
 		try {	
 	        Client client = new Client(PartnerConfigurationCache.CONFIG.getClientDefault());
 	
-	        queryGenerator = PartnerConfigurationCache.CONFIG.getQueryGenerator(partnerConfiguration.queryGeneratorClass);
+	        queryGenerator = PartnerConfigurationCache.CONFIG.getQueryGenerator(partnerConfiguration.getQueryGeneratorClass());
 			
 	        String detailQuery = getQueryGenerator().toDetailQuery(document);
 	        
 	        Map<String, String> valuesMap = new HashMap<String, String>();
 	        valuesMap.put("detailQuery", detailQuery);
 	        
-	        String searchRequest = StrSubstitutor.replace(partnerConfiguration.detailEndpoint, valuesMap);
+	        String searchRequest = StrSubstitutor.replace(partnerConfiguration.getDetailEndpoint(), valuesMap);
 	        
 	        WebResource service = client.resource(searchRequest);
 	       

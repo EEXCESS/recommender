@@ -1,4 +1,4 @@
-/* Copyright (C) 2014 
+/* Copyright (C) 2014
 "Kompetenzzentrum fuer wissensbasierte Anwendungen Forschungs- und EntwicklungsgmbH" 
 (Know-Center), Graz, Austria, office@know-center.at.
 
@@ -19,7 +19,7 @@ GNU Affero General Public License for more details.
 
 You should have received a copy of the GNU Affero General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
-*/
+ */
 package eu.eexcess.dataformats.evaluation;
 
 import java.io.Serializable;
@@ -29,30 +29,30 @@ import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlElement;
 
 import org.codehaus.jackson.annotate.JsonIgnoreProperties;
+
 /**
  * 
  * @author hziak
  *
  */
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class EvaluationResultLists implements Serializable{
-	
-  	private static final long serialVersionUID = -5906473777311334010L;
-	@XmlAttribute
+public class EvaluationResultLists implements Serializable {
+
+    private static final long serialVersionUID = -5906473777311334010L;
+    @XmlAttribute
     public String userID;
-  	@XmlAttribute
+    @XmlAttribute
     public String query;
-  	@XmlAttribute
+    @XmlAttribute
     public String queryDescription;
-  	@XmlAttribute
+    @XmlAttribute
     public String queryID;
-    @XmlElement(name="results")
+    @XmlElement(name = "results")
     public LinkedList<EvaluationResultList> results = new LinkedList<EvaluationResultList>();
-	@Override
-	public String toString() {
-		return "EvaluationResultLists [userID=" + userID + ", query=" + query
-				+ ", queryDescription=" + queryDescription + ", queryID="
-				+ queryID + ", results=" + results + "]";
-	}
-    
+
+    @Override
+    public String toString() {
+        return "EvaluationResultLists [userID=" + userID + ", query=" + query + ", queryDescription=" + queryDescription + ", queryID=" + queryID + ", results=" + results + "]";
+    }
+
 }

@@ -94,9 +94,9 @@ public class FederatedRecommenderEvaluationCore {
         SecureUserProfileEvaluation userProfileEvaluation = null;
         String[] sourceSelectionModel = { "Model" };// TODO: should not be
                                                     // "model"
-        if (userProfile.sourceSelect != null)
+        if (userProfile.getSourceSelect() != null)
 
-            switch (userProfile.sourceSelect) {
+            switch (userProfile.getSourceSelect()) {
             case "langModel":
                 userProfileEvaluation = (SecureUserProfileEvaluation) fRCore.sourceSelection(userProfile, new ArrayList<String>(Arrays.asList(sourceSelectionModel)));
                 break;
@@ -116,8 +116,8 @@ public class FederatedRecommenderEvaluationCore {
 
         }
 
-        if (userProfile.decomposer != null)
-            switch (userProfile.decomposer) {
+        if (userProfile.getDecomposer() != null)
+            switch (userProfile.getDecomposer()) {
             case "wikipedia":
                 userProfileEvaluation = (SecureUserProfileEvaluation) fRCore.addQueryExpansionTerms(userProfileEvaluation,
                         "eu.eexcess.federatedrecommender.decomposer.PseudoRelevanceWikipediaDecomposer");
@@ -156,10 +156,10 @@ public class FederatedRecommenderEvaluationCore {
         // logger.log(Level.SEVERE, "Picker class not found", new Exception());
         // return null;
         // }
-        if (userProfile.picker == null)
-            userProfile.picker = "occurenceprobability";
+        if (userProfile.getPicker() == null)
+            userProfile.setPicker("occurenceprobability");
         try {
-            switch (userProfile.picker) {
+            switch (userProfile.getPicker()) {
 
             case "simdiversification":
 
@@ -176,7 +176,7 @@ public class FederatedRecommenderEvaluationCore {
         } catch (FederatedRecommenderException e) {
             logger.log(Level.SEVERE, "Could get or aggregate results!", e);
         }
-        resultList.provider = userProfile.decomposer + " partners:" + userProfile.picker + " expansion source partners:" + userProfile.queryExpansionSourcePartner;
+        resultList.provider = userProfile.getDecomposer() + " partners:" + userProfile.getPicker() + " expansion source partners:" + userProfile.getQueryExpansionSourcePartner();
         return resultList;
     }
 
@@ -270,8 +270,8 @@ public class FederatedRecommenderEvaluationCore {
         // //END Partner Selection
 
         results.query = evalProfil.getContextKeywordConcatenation();
-        results.queryDescription = evalProfil.description;
-        evalProfil.picker = "FiFoPicker";
+        results.queryDescription = evalProfil.getDescription();
+        evalProfil.setPicker("FiFoPicker");
 
         final SecureUserProfileEvaluation diversityProfile = (SecureUserProfileEvaluation) SerializationUtils.clone(evalProfil);
 
@@ -281,7 +281,7 @@ public class FederatedRecommenderEvaluationCore {
             @Override
             public Void call() throws Exception {
 
-                diversityProfile.decomposer = "wikipedia";
+                diversityProfile.setDecomposer("wikipedia");
                 EvaluationResultList evaluationResults = (EvaluationResultList) getEvaluationResults(diversityProfile);
                 evaluationResults.provider = "Diversity";
                 blockTmpResults.results.add(evaluationResults);
@@ -294,7 +294,7 @@ public class FederatedRecommenderEvaluationCore {
             @Override
             public Void call() throws Exception {
 
-                unmodifiedProfile.decomposer = "none";
+                unmodifiedProfile.setDecomposer("none");
                 EvaluationResultList eRL = (EvaluationResultList) getEvaluationResults(unmodifiedProfile);
                 eRL.provider = "Basic";
                 blockTmpResults.results.add(eRL);
@@ -310,7 +310,7 @@ public class FederatedRecommenderEvaluationCore {
         Future<Void> serendipityFutur = threadPool.submit(new Callable<Void>() {
             @Override
             public Void call() throws Exception {
-                serendipityProfile.decomposer = "serendipity";
+                serendipityProfile.setDecomposer("serendipity");
                 EvaluationResultList evaluationResults = (EvaluationResultList) getEvaluationResults(serendipityProfile);
                 evaluationResults.provider = "Serendipity";
                 blockTmpResults.results.add(evaluationResults);
@@ -347,25 +347,25 @@ public class FederatedRecommenderEvaluationCore {
 
         ArrayList<PartnerBadge> sourceExpansionPartners = new ArrayList<PartnerBadge>();
         for (PartnerBadge partner : fRCore.getPartnerRegister().getPartners()) {
-            if (partner.systemId.contains("ZBW"))
+            if (partner.getSystemId().contains("ZBW"))
                 sourceExpansionPartners.add(partner);
         }
         ArrayList<PartnerBadge> queryPartner = new ArrayList<PartnerBadge>();
         for (PartnerBadge partner : fRCore.getPartnerRegister().getPartners()) {
-            if (partner.systemId.contains("Mendeley"))
+            if (partner.getSystemId().contains("Mendeley"))
                 queryPartner.add(partner);
         }
 
         results.query = evalProfil.getContextKeywordConcatenation(); // TODO!
-        results.queryDescription = evalProfil.description;
-        evalProfil.picker = "FiFoPicker";
+        results.queryDescription = evalProfil.getDescription();
+        evalProfil.setPicker("FiFoPicker");
 
         final SecureUserProfileEvaluation wikipediaProfile = (SecureUserProfileEvaluation) SerializationUtils.clone(evalProfil);
         wikipediaProfile.partnerList = queryPartner;
         Future<Void> wikipedia = threadPool.submit(new Callable<Void>() {
             @Override
             public Void call() throws Exception {
-                wikipediaProfile.decomposer = "wikipedia";
+                wikipediaProfile.setDecomposer("wikipedia");
                 results.results.add((EvaluationResultList) getEvaluationResults(wikipediaProfile));
                 return null;
             }
@@ -375,7 +375,7 @@ public class FederatedRecommenderEvaluationCore {
         Future<Void> none = threadPool.submit(new Callable<Void>() {
             @Override
             public Void call() throws Exception {
-                noneProfile.decomposer = "";
+                noneProfile.setDecomposer("");
                 results.results.add((EvaluationResultList) getEvaluationResults(noneProfile));
                 return null;
             }
@@ -386,18 +386,18 @@ public class FederatedRecommenderEvaluationCore {
         Future<Void> source = threadPool.submit(new Callable<Void>() {
             @Override
             public Void call() throws Exception {
-                sourceProfile.decomposer = "source";
+                sourceProfile.setDecomposer("source");
                 results.results.add((EvaluationResultList) getEvaluationResults(sourceProfile));
                 return null;
             }
         });
         final SecureUserProfileEvaluation sourceProfile2 = (SecureUserProfileEvaluation) SerializationUtils.clone(evalProfil);
         sourceProfile2.partnerList = queryPartner;
-        sourceProfile2.queryExpansionSourcePartner = sourceExpansionPartners;
+        sourceProfile2.setQueryExpansionSourcePartner(sourceExpansionPartners);
         Future<Void> source2 = threadPool.submit(new Callable<Void>() {
             @Override
             public Void call() throws Exception {
-                sourceProfile2.decomposer = "source";
+                sourceProfile2.setDecomposer("source");
                 results.results.add((EvaluationResultList) getEvaluationResults(sourceProfile2));
                 return null;
             }
@@ -437,10 +437,10 @@ public class FederatedRecommenderEvaluationCore {
         int hitsLimit = federatedRecommenderConfiguration.getGraphHitsLimitPerQuery();
         int depthLimit = federatedRecommenderConfiguration.getGraphQueryDepthLimit();
         SimpleWeightedGraph<String, DefaultEdge> graph = null;
-        
+
         try {
             graph = dbPediaGraph.getFromKeywords(userProfile.contextKeywords, keynodes, hitsLimit, depthLimit);
-         
+
         } catch (Exception e) {
             logger.log(Level.SEVERE, "There was an error while building the graph", e);
             throw new FederatedRecommenderException("There was an error while building the graph", e);

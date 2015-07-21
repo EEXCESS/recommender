@@ -35,102 +35,99 @@ import eu.eexcess.utils.LanguageGuesser;
 
 public class LanguageGuessingSourceSelector implements PartnerSelector {
 
-	private Logger logger = Logger.getLogger(LanguageGuessingSourceSelector.class.getName());
-	private Map<PartnerBadge, List<String>> selectedPartners = new HashMap<>();
+    private Logger logger = Logger.getLogger(LanguageGuessingSourceSelector.class.getName());
+    private Map<PartnerBadge, List<String>> selectedPartners = new HashMap<>();
 
-	public LanguageGuessingSourceSelector(FederatedRecommenderConfiguration configuration) {
-	}
+    public LanguageGuessingSourceSelector(FederatedRecommenderConfiguration configuration) {
+    }
 
-	/**
-	 * Selects partners according to language matches. Languages may be
-	 * specified in the user profile. If no language is specified it will be
-	 * guessed from the context keywords.
-	 * 
-	 * @return the same userProfile with eventually added sources if
-	 *         (userProfile.partnerList.size() <= 0)
-	 */
-	@Override
-	public SecureUserProfile sourceSelect(SecureUserProfile userProfile, List<PartnerBadge> partners) {
+    /**
+     * Selects partners according to language matches. Languages may be
+     * specified in the user profile. If no language is specified it will be
+     * guessed from the context keywords.
+     * 
+     * @return the same userProfile with eventually added sources if
+     *         (userProfile.partnerList.size() <= 0)
+     */
+    @Override
+    public SecureUserProfile sourceSelect(SecureUserProfile userProfile, List<PartnerBadge> partners) {
 
-		selectedPartners.clear();
+        selectedPartners.clear();
 
-		// don't touch if already selected
-		if (userProfile.partnerList.size() <= 0) {
-			// no query language(s) are specified; try to guess
-			if (userProfile.languages.size() <= 0) {
-				String textFragment = joinContextKeywords(userProfile.contextKeywords);
-				String userLanguage = LanguageGuesser.getInstance().guessLanguage(textFragment);
-				collectPartnersOnLanguageMatch(userLanguage, partners, userProfile.partnerList);
-			} else {
-				logger.info("refusing to guess languages due to [" + userProfile.languages.size()
-								+ "] already specified languages");
-				return userProfile;
-			}
-		} else {
-			logger.info("refusing to select partners due to [" + userProfile.partnerList.size()
-							+ "] prevoiously selected partners");
-			return userProfile;
-		}
+        // don't touch if already selected
+        if (userProfile.partnerList.size() <= 0) {
+            // no query language(s) are specified; try to guess
+            if (userProfile.languages.size() <= 0) {
+                String textFragment = joinContextKeywords(userProfile.contextKeywords);
+                String userLanguage = LanguageGuesser.getInstance().guessLanguage(textFragment);
+                collectPartnersOnLanguageMatch(userLanguage, partners, userProfile.partnerList);
+            } else {
+                logger.info("refusing to guess languages due to [" + userProfile.languages.size() + "] already specified languages");
+                return userProfile;
+            }
+        } else {
+            logger.info("refusing to select partners due to [" + userProfile.partnerList.size() + "] prevoiously selected partners");
+            return userProfile;
+        }
 
-		if (selectedPartners.size() > 0) {
-			logger.info("context-keywords-based source selection:");
-			for (Map.Entry<PartnerBadge, List<String>> entry : selectedPartners.entrySet()) {
-				StringBuilder info = new StringBuilder();
-				info.append("partner [" + entry.getKey().systemId + "] matching language:");
-				for (String language : entry.getValue()) {
-					info.append(" [" + language + "]");
-				}
-				logger.info(info.toString());
-			}
-		} else {
-			logger.info("unsuccessfull partner selection");
-		}
+        if (selectedPartners.size() > 0) {
+            logger.info("context-keywords-based source selection:");
+            for (Map.Entry<PartnerBadge, List<String>> entry : selectedPartners.entrySet()) {
+                StringBuilder info = new StringBuilder();
+                info.append("partner [" + entry.getKey().getSystemId() + "] matching language:");
+                for (String language : entry.getValue()) {
+                    info.append(" [" + language + "]");
+                }
+                logger.info(info.toString());
+            }
+        } else {
+            logger.info("unsuccessfull partner selection");
+        }
 
-		return userProfile;
-	}
+        return userProfile;
+    }
 
-	private String joinContextKeywords(List<ContextKeyword> contextKeywords) {
-		StringBuilder builder = new StringBuilder();
+    private String joinContextKeywords(List<ContextKeyword> contextKeywords) {
+        StringBuilder builder = new StringBuilder();
 
-		for (ContextKeyword keyword : contextKeywords) {
-			builder.append(keyword.text + " ");
-		}
+        for (ContextKeyword keyword : contextKeywords) {
+            builder.append(keyword.text + " ");
+        }
 
-		return builder.toString().trim();
-	}
+        return builder.toString().trim();
+    }
 
-	/**
-	 * Store(s) partner(s) to userProfile if it supports the given language.
-	 * 
-	 * @param language
-	 *            the given language
-	 * @param partners
-	 *            list of partners to consider
-	 * @param partnerConnectorList
-	 *            where to store the partner reference if it supports the given
-	 *            language
-	 */
-	private void collectPartnersOnLanguageMatch(String language, List<PartnerBadge> partners,
-					List<PartnerBadge> partnerConnectorList) {
+    /**
+     * Store(s) partner(s) to userProfile if it supports the given language.
+     * 
+     * @param language
+     *            the given language
+     * @param partners
+     *            list of partners to consider
+     * @param partnerConnectorList
+     *            where to store the partner reference if it supports the given
+     *            language
+     */
+    private void collectPartnersOnLanguageMatch(String language, List<PartnerBadge> partners, List<PartnerBadge> partnerConnectorList) {
 
-		if (null == language) {
-			return;
-		}
-		for (PartnerBadge partner : partners) {
-			for (String partnerLanguage : partner.getLanguageContent()) {
-				if (partnerLanguage.compareTo(language) == 0  && false == partnerConnectorList.contains(partner)) {
-						partnerConnectorList.add(partner);
+        if (null == language) {
+            return;
+        }
+        for (PartnerBadge partner : partners) {
+            for (String partnerLanguage : partner.getLanguageContent()) {
+                if (partnerLanguage.compareTo(language) == 0 && false == partnerConnectorList.contains(partner)) {
+                    partnerConnectorList.add(partner);
 
-						if (false == selectedPartners.containsKey(partner)) {
-							List<String> newList = new ArrayList<String>();
-							newList.add(language);
-							selectedPartners.put(partner, newList);
-						} else {
-							selectedPartners.get(partner).add(language);
-						}
-					}
-				}
-			}
-		}
-	
+                    if (false == selectedPartners.containsKey(partner)) {
+                        List<String> newList = new ArrayList<String>();
+                        newList.add(language);
+                        selectedPartners.put(partner, newList);
+                    } else {
+                        selectedPartners.get(partner).add(language);
+                    }
+                }
+            }
+        }
+    }
+
 }

@@ -118,7 +118,7 @@ public class FederatedRecommenderEvaluationService extends FederatedRecommenderS
         List<PartnerBadge> protectedPartnerList = new ArrayList<PartnerBadge>();
         PartnerBadge badge = new PartnerBadge();
         badge.setSystemId("Wissenmedia");
-        badge.partnerKey = "dsajln22sadjkl!";
+        badge.setPartnerKey("dsajln22sadjkl!");
         protectedPartnerList.add(badge);
 
         secureUserProfile.protectedPartnerList = protectedPartnerList;
@@ -130,7 +130,7 @@ public class FederatedRecommenderEvaluationService extends FederatedRecommenderS
         cred.systemId = "Wissenmedia";
         UserCredentials.add(cred);
         secureUserProfile.userCredentials = UserCredentials;
-        secureUserProfile.queryExpansionSourcePartner = (ArrayList<PartnerBadge>) secureUserProfile.partnerList;
+        secureUserProfile.setQueryExpansionSourcePartner((ArrayList<PartnerBadge>) secureUserProfile.partnerList);
         return secureUserProfile;
     }
 

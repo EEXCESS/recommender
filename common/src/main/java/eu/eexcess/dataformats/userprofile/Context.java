@@ -1,4 +1,4 @@
-/* Copyright (C) 2014 
+/* Copyright (C) 2014
 "Kompetenzzentrum fuer wissensbasierte Anwendungen Forschungs- und EntwicklungsgmbH" 
 (Know-Center), Graz, Austria, office@know-center.at.
 
@@ -19,60 +19,64 @@ GNU Affero General Public License for more details.
 
 You should have received a copy of the GNU Affero General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
-*/
+ */
 package eu.eexcess.dataformats.userprofile;
 
 import java.io.Serializable;
 
 import javax.xml.bind.annotation.XmlElement;
+
 /**
  * Context Class of the Secure User Profil
+ * 
  * @author hziak
  *
  */
-public class Context  implements Serializable {
+public class Context implements Serializable {
 
     /**
 	 * 
 	 */
-	private static final long serialVersionUID = 7196796361889005448L;
-	@XmlElement(name="reason")
+    private static final long serialVersionUID = 7196796361889005448L;
+    @XmlElement(name = "reason")
     public String reason;
-    @XmlElement(name="value")
+    @XmlElement(name = "value")
     public String value;
-	@Override
-	public String toString() {
-		return "Context [reason=" + reason + ", value=" + value + "]";
-	}
-	@Override
-	public int hashCode() {
-		final int prime = 31;
-		int result = 1;
-		result = prime * result + ((reason == null) ? 0 : reason.hashCode());
-		result = prime * result + ((value == null) ? 0 : value.hashCode());
-		return result;
-	}
-	@Override
-	public boolean equals(Object obj) {
-		if (this == obj)
-			return true;
-		if (obj == null)
-			return false;
-		if (getClass() != obj.getClass())
-			return false;
-		Context other = (Context) obj;
-		if (reason == null) {
-			if (other.reason != null)
-				return false;
-		} else if (!reason.equals(other.reason))
-			return false;
-		if (value == null) {
-			if (other.value != null)
-				return false;
-		} else if (!value.equals(other.value))
-			return false;
-		return true;
-	}
-    
-    
+
+    @Override
+    public String toString() {
+        return "Context [reason=" + reason + ", value=" + value + "]";
+    }
+
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + ((reason == null) ? 0 : reason.hashCode());
+        result = prime * result + ((value == null) ? 0 : value.hashCode());
+        return result;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj)
+            return true;
+        if (obj == null)
+            return false;
+        if (getClass() != obj.getClass())
+            return false;
+        Context other = (Context) obj;
+        if (reason == null) {
+            if (other.reason != null)
+                return false;
+        } else if (!reason.equals(other.reason))
+            return false;
+        if (value == null) {
+            if (other.value != null)
+                return false;
+        } else if (!value.equals(other.value))
+            return false;
+        return true;
+    }
+
 }

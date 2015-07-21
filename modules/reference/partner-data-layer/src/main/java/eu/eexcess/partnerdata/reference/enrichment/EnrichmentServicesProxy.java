@@ -37,7 +37,7 @@ public class EnrichmentServicesProxy {
 
 	
 	public Set<EnrichmentResult> enrich(String text, PartnerdataLogger logger){
-		if (this.partnerConfig.partnerDataRequestsTrace) System.out.println("------------------------------------------------------------");
+		if (this.partnerConfig.getPartnerDataRequestsTrace()) System.out.println("------------------------------------------------------------");
 		Set<EnrichmentResult> enrichmentResults = new HashSet<EnrichmentResult>();
 		
 		
@@ -119,8 +119,8 @@ public class EnrichmentServicesProxy {
 			}
 		}
 */
-		if (this.partnerConfig.partnerDataRequestsTrace) System.out.println("enriching: input:" + text +"\n\n\n" + enrichmentResults.toString());
-		if (this.partnerConfig.partnerDataRequestsTrace) System.out.println("------------------------------------------------------------");
+		if (this.partnerConfig.getPartnerDataRequestsTrace()) System.out.println("enriching: input:" + text +"\n\n\n" + enrichmentResults.toString());
+		if (this.partnerConfig.getPartnerDataRequestsTrace()) System.out.println("------------------------------------------------------------");
 
 		return enrichmentResults;
 	}

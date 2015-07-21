@@ -64,7 +64,7 @@ public class DBPediaDecomposerTest {
 		inputSecureUserProfile.contextKeywords.add(new ContextKeyword(GIBRALTAR));
 		
 		SecureUserProfileEvaluation eval =dbPediaDecomposer.decompose(inputSecureUserProfile);
-		for (ArrayList<ContextKeyword> iterable_element : eval.contextKeywordsGroups) {
+		for (ArrayList<ContextKeyword> iterable_element : eval.getContextKeywordsGroups()) {
 			
 			logger.log(Level.INFO,iterable_element.toArray().toString());
 		}

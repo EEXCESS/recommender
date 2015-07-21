@@ -59,8 +59,8 @@ public class WndomainSourceSelectorTest {
     @Before
     public void initSelector() {
         FederatedRecommenderConfiguration recommenderConfig = new FederatedRecommenderConfiguration();
-        recommenderConfig.wordnetPath = "/opt/data/wordnet/WordNet-2.0/dict/";
-        recommenderConfig.wordnetDomainFilePath = "/opt/data/wordnet-domains/wn-domains-3.2/wn-domains-3.2-20070223";
+        recommenderConfig.setWordnetPath("/opt/data/wordnet/WordNet-2.0/dict/");
+        recommenderConfig.setWordnetDomainFilePath("/opt/data/wordnet-domains/wn-domains-3.2/wn-domains-3.2-20070223");
         selector = new TestableWndomainsSourceSelector(recommenderConfig);
         selector.enableKeywordGroupingStrategy(true);
     }

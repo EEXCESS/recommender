@@ -57,7 +57,7 @@ public class PartnerConnector extends PartnerConnectorBase implements PartnerCon
 
 //        client.addFilter(new HTTPBasicAuthFilter(partnerConfiguration.userName, partnerConfiguration.password));
 
-        queryGenerator = PartnerConfigurationCache.CONFIG.getQueryGenerator(partnerConfiguration.queryGeneratorClass);
+        queryGenerator = PartnerConfigurationCache.CONFIG.getQueryGenerator(partnerConfiguration.getQueryGeneratorClass());
 		
         String query = getQueryGenerator().toQuery(userProfile);
         
@@ -68,7 +68,7 @@ public class PartnerConnector extends PartnerConnectorBase implements PartnerCon
         	numResults  = userProfile.numResults;
         valuesMap.put("numResults", numResults+"");
         
-        String searchRequest = StrSubstitutor.replace(partnerConfiguration.searchEndpoint, valuesMap);
+        String searchRequest = StrSubstitutor.replace(partnerConfiguration.getSearchEndpoint(), valuesMap);
         
         WebResource service = client.resource(searchRequest);
        

@@ -53,7 +53,7 @@ public class Enrichment implements IEnrichment{
 	}
 	
 	public Document enrichResultList(Document input, PartnerdataLogger logger){
-		if (!this.partnerConfig.enableEnriching) return input;
+		if (!this.partnerConfig.getEnableEnriching()) return input;
 		PartnerdataTracer.dumpFile(this.getClass(), this.partnerConfig, input, "before-enrichment", logger);
 		OntModel model = XMLTools.createModel(input);
 
@@ -61,7 +61,7 @@ public class Enrichment implements IEnrichment{
 
 		String queryContent = createSPARQLqueryForToEnrichment();
 
-		if (this.partnerConfig.partnerDataRequestsTrace){// for debugging:
+		if (this.partnerConfig.getPartnerDataRequestsTrace()){// for debugging:
 			PartnerdataTracer.debugTrace(this.partnerConfig, queryContent);
 			Query queryDebug = QueryFactory.create(queryContent);	
 			QueryExecution qeDebug = QueryExecutionFactory.create(queryDebug, model);

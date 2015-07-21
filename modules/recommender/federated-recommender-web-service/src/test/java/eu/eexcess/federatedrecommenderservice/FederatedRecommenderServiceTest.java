@@ -62,7 +62,7 @@ public class FederatedRecommenderServiceTest {
             LOGGER.log(Level.WARNING, "Service could not be initiated", e);
         }
         PartnerBadge badge = new PartnerBadge();
-        badge.systemId = "TEST 1234fksaldsan";
+        badge.setSystemId("TEST 1234fksaldsan");
         Response resp = null;
         try {
             resp = service.registerPartner(badge);
@@ -81,8 +81,8 @@ public class FederatedRecommenderServiceTest {
             LOGGER.log(Level.WARNING, "Service could not be initiated", e);
         }
         PartnerBadge badge = new PartnerBadge();
-        badge.systemId = "TEST 1234fksaldsan";
-        badge.partnerKey = "asjkjasdjaslkdjaskldjlaskjdaslkdj";
+        badge.setSystemId("TEST 1234fksaldsan");
+        badge.setPartnerKey("asjkjasdjaslkdjaskldjlaskjdaslkdj");
         Response resp = null;
         try {
             resp = service.registerPartner(badge);
@@ -101,8 +101,8 @@ public class FederatedRecommenderServiceTest {
             LOGGER.log(Level.WARNING, "Service could not be initiated", e);
         }
         PartnerBadge badge = new PartnerBadge();
-        badge.systemId = "TEST 1234fksaldsan123";
-        badge.partnerKey = "asjkjasdj";
+        badge.setSystemId("TEST 1234fksaldsan123");
+        badge.setPartnerKey("asjkjasdj");
         Response resp = null;
         try {
             resp = service.registerPartner(badge);
@@ -121,7 +121,7 @@ public class FederatedRecommenderServiceTest {
             LOGGER.log(Level.WARNING, "Service could not be initiated", e);
         }
         PartnerBadge badge = new PartnerBadge();
-        badge.systemId = "TEST 1234fksaldsan123";
+        badge.setSystemId("TEST 1234fksaldsan123");
         Response resp = null;
         try {
             resp = service.registerPartner(badge);

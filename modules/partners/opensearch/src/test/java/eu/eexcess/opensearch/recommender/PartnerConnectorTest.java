@@ -49,15 +49,15 @@ public class PartnerConnectorTest {
 
 		try {
 
-			String baseSearchEndpoint = configuration.searchEndpoint;
+			String baseSearchEndpoint = configuration.getSearchEndpoint();
 			ResultList firstTryResults = connector.queryPartnerNative(configuration, userProfile,null);
-			String firstTryBootstrappedSearchendpoint = configuration.searchEndpoint;
+			String firstTryBootstrappedSearchendpoint = configuration.getSearchEndpoint();
 
 			ResultList secondTryResults = connector.queryPartnerNative(configuration, userProfile,null);
-			String secondTryBootstrappedSearchEndpoint = configuration.searchEndpoint;
+			String secondTryBootstrappedSearchEndpoint = configuration.getSearchEndpoint();
 
 			ResultList thridTryResults = connector.queryPartnerNative(configuration, userProfile,null);
-			String thirdTrybootstrappedSearchendpoint = configuration.searchEndpoint;
+			String thirdTrybootstrappedSearchendpoint = configuration.getSearchEndpoint();
 
 			assertNotEquals(baseSearchEndpoint, firstTryBootstrappedSearchendpoint);
 			assertTrue(firstTryBootstrappedSearchendpoint.equals(secondTryBootstrappedSearchEndpoint));

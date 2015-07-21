@@ -97,7 +97,7 @@ public class PseudoRelevanceSourcesDecomposer implements SecureUserProfileDecomp
         for (PartnerBadge partnerBadge : inputSecureUserProfile.partnerList) {
             tmpPartnerList.add(partnerBadge);
         }
-        inputSecureUserProfile.partnerList = inputSecureUserProfile.queryExpansionSourcePartner;
+        inputSecureUserProfile.partnerList = inputSecureUserProfile.getQueryExpansionSourcePartner();
         PartnersFederatedRecommendations pFR = fCore.getPartnersRecommendations(inputSecureUserProfile);
         inputSecureUserProfile.partnerList = tmpPartnerList;
 
@@ -141,7 +141,7 @@ public class PseudoRelevanceSourcesDecomposer implements SecureUserProfileDecomp
             logger.log(Level.SEVERE, "There was and error writing/reading the Index", e);
         }
 
-        logger.log(Level.INFO, "Source   Expansion: " + keywords.toString() + " Partners: " + inputSecureUserProfile.queryExpansionSourcePartner);
+        logger.log(Level.INFO, "Source   Expansion: " + keywords.toString() + " Partners: " + inputSecureUserProfile.getQueryExpansionSourcePartner());
         return inputSecureUserProfile;
     }
 

@@ -108,13 +108,13 @@ public class PartnerRecommender implements PartnerRecommenderApi {
             PartnerConfiguration currentPartnerConfiguration = (PartnerConfiguration) SerializationUtils.clone(partnerConfiguration);
             if (userProfile.partnerList != null && !userProfile.partnerList.isEmpty())
                 for (PartnerBadge pC : userProfile.partnerList) {
-                    if (pC.systemId.equals(partnerConfiguration.systemId)) {
-                        currentPartnerConfiguration.queryGeneratorClass = pC.queryGeneratorClass;
+                    if (pC.getSystemId().equals(partnerConfiguration.getSystemId())) {
+                        currentPartnerConfiguration.setQueryGeneratorClass(pC.getQueryGeneratorClass());
                     }
                 }
 
             ResultList nativeResult = partnerConnector.queryPartnerNative(currentPartnerConfiguration, userProfile, partnerdataLogger);
-            String finalFormulatedQuery = PartnerConfigurationCache.CONFIG.getQueryGenerator(currentPartnerConfiguration.queryGeneratorClass).toQuery(userProfile);
+            String finalFormulatedQuery = PartnerConfigurationCache.CONFIG.getQueryGenerator(currentPartnerConfiguration.getQueryGeneratorClass()).toQuery(userProfile);
             if (nativeResult != null) {
                 long endCallPartnerApi = System.currentTimeMillis();
                 nativeResult.setResultStats(new ResultStats(finalFormulatedQuery, endCallPartnerApi - startCallPartnerApi, 0, 0, 0, nativeResult.totalResults));

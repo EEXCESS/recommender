@@ -80,19 +80,19 @@ public class PartnerConnector extends PartnerConnectorBase implements PartnerCon
 //        config.getClasses().add(JacksonJsonProvider.class);
 //        
         final Client client = new Client(PartnerConfigurationCache.CONFIG.getClientJacksonJson());
-        queryGenerator = PartnerConfigurationCache.CONFIG.getQueryGenerator(partnerConfiguration.queryGeneratorClass);
+        queryGenerator = PartnerConfigurationCache.CONFIG.getQueryGenerator(partnerConfiguration.getQueryGeneratorClass());
         String query = getQueryGenerator().toQuery(userProfile);
         long start = System.currentTimeMillis();
 		
         Map<String, String> valuesMap = new HashMap<String, String>();
         valuesMap.put("query", URLParamEncoder.encode(query));
-        valuesMap.put("apiKey", partnerConfiguration.apiKey);		// add API key
+        valuesMap.put("apiKey", partnerConfiguration.getApiKey());		// add API key
         // searchEndpoint: "http://www.europeana.eu/api/v2/search.json?wskey=${apiKey}&query=${query}"
         int numResultsRequest = 10;
         if (userProfile.numResults!=null && userProfile.numResults != 0)
         	numResultsRequest  = userProfile.numResults;
         valuesMap.put("numResults", numResultsRequest+"");
-        String searchRequest = StrSubstitutor.replace(partnerConfiguration.searchEndpoint, valuesMap);
+        String searchRequest = StrSubstitutor.replace(partnerConfiguration.getSearchEndpoint(), valuesMap);
         
         WebResource service = client.resource(searchRequest);
         ObjectMapper mapper = new ObjectMapper();
@@ -172,7 +172,7 @@ public class PartnerConnector extends PartnerConnectorBase implements PartnerCon
 			Client client = new Client(PartnerConfigurationCache.CONFIG.getClientJacksonJson());
 	        Map<String, String> valuesMap = new HashMap<String, String>();
 	        valuesMap.put("objectId", objectId);
-	        valuesMap.put("apiKey", partnerConfiguration.apiKey);		
+	        valuesMap.put("apiKey", partnerConfiguration.getApiKey());		
 	        String detailEndpoint = "http://europeana.eu/api/v2/record/${objectId}.json?wskey=${apiKey}";
 	        String detailRequest = StrSubstitutor.replace(detailEndpoint, valuesMap);
 		    WebResource service = client.resource(detailRequest);
@@ -197,15 +197,15 @@ public class PartnerConnector extends PartnerConnectorBase implements PartnerCon
 		try {	
 	        Client client = new Client(PartnerConfigurationCache.CONFIG.getClientDefault());
 	
-	        queryGenerator = PartnerConfigurationCache.CONFIG.getQueryGenerator(partnerConfiguration.queryGeneratorClass);
+	        queryGenerator = PartnerConfigurationCache.CONFIG.getQueryGenerator(partnerConfiguration.getQueryGeneratorClass());
 			
 	        String detailQuery = getQueryGenerator().toDetailQuery(document);
 	        
 	        Map<String, String> valuesMap = new HashMap<String, String>();
 	        valuesMap.put("detailQuery", detailQuery);
-	        valuesMap.put("apiKey", partnerConfiguration.apiKey);		// add API key
+	        valuesMap.put("apiKey", partnerConfiguration.getApiKey());		// add API key
 
-	        String searchRequest = StrSubstitutor.replace(partnerConfiguration.detailEndpoint, valuesMap);
+	        String searchRequest = StrSubstitutor.replace(partnerConfiguration.getDetailEndpoint(), valuesMap);
 	        
 	        WebResource service = client.resource(searchRequest);
 	       

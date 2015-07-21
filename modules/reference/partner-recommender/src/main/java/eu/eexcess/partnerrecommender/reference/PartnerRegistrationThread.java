@@ -34,19 +34,19 @@ public class PartnerRegistrationThread implements Runnable {
         jClientconfig.getClasses().add(JacksonJsonProvider.class);
 
         Client client = new Client(new URLConnectionClientHandler(), jClientconfig);
-        WebResource service = client.resource(config.federatedRecommenderURI + "register");
+        WebResource service = client.resource(config.getFederatedRecommenderURI() + "register");
         Builder builder = service.accept(MediaType.WILDCARD);
 
         while (true) {
             try {
                 logger.log(Level.INFO,
-                        "Registering Partner: " + badge.getSystemId() + " at " + config.federatedRecommenderURI + "register with endpoint " + badge.getPartnerConnectorEndpoint()
+                        "Registering Partner: " + badge.getSystemId() + " at " + config.getFederatedRecommenderURI() + "register with endpoint " + badge.getPartnerConnectorEndpoint()
                                 + " thread name:" + Thread.currentThread().getName());
 
                 builder.type(MediaType.APPLICATION_JSON).post(badge);
             } catch (com.sun.jersey.api.client.UniformInterfaceException | com.sun.jersey.api.client.ClientHandlerException e) {
                 logger.log(Level.SEVERE, "Could not register client " + badge.getSystemId() + " at "
-                        + PartnerConfigurationCache.CONFIG.getPartnerConfiguration().federatedRecommenderURI + " retrying in " + TIMEOUT + "ms", e);
+                        + PartnerConfigurationCache.CONFIG.getPartnerConfiguration().getFederatedRecommenderURI() + " retrying in " + TIMEOUT + "ms", e);
             }
             try {
                 Thread.sleep(TIMEOUT);
