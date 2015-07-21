@@ -86,7 +86,7 @@ public class QueryCategoryKShortestPathsEvaluation {
 		public int numCategoriesToCalculateBundled = 1;
 	}
 
-	private static Logger logger = PianoLogger.getLogger(QueryCategoryKShortestPathsEvaluation.class);
+	private static final Logger LOGGER = PianoLogger.getLogger(QueryCategoryKShortestPathsEvaluation.class);
 	static Grph grph;
 	// CategoryRelevanceDetails queriesRelevances = new
 	// CategoryRelevanceDetails();
@@ -142,8 +142,8 @@ public class QueryCategoryKShortestPathsEvaluation {
 			int chunkCount = 0;
 			ArrayList<Integer> chunk = nextChunk(categoryIds);
 			while (chunk.size() > 0) {
-				logger.info("chunk count [" + chunkCount++ + "] " + chunk);
-				logger.info(chunk.toString());
+				LOGGER.info("chunk count [" + chunkCount++ + "] " + chunk);
+				LOGGER.info(chunk.toString());
 
 				evaluateKSortestPaths(chunk, Settings.RelevanceEvaluation.EstimationArguments.kShortestPaths,
 								Settings.RelevanceEvaluation.EstimationArguments.isDistributionStartedAtSiblings);
@@ -156,10 +156,10 @@ public class QueryCategoryKShortestPathsEvaluation {
 			closeOutIndex();
 			trySaveCache();
 
-			logger.info("total duration: [" + (System.currentTimeMillis() - startTimestamp) + "]ms");
+			LOGGER.info("total duration: [" + (System.currentTimeMillis() - startTimestamp) + "]ms");
 
 		} catch (IOException | ParseException e) {
-			logger.severe("ERROR: " + e.getMessage());
+			LOGGER.severe("ERROR: " + e.getMessage());
 		}
 	}
 
@@ -170,7 +170,7 @@ public class QueryCategoryKShortestPathsEvaluation {
 											+ System.currentTimeMillis()));
 			estimator.writeCachedNodes(Settings.RelevanceEvaluation.IOFiles.outCachedNodes);
 		} catch (Exception e) {
-			logger.severe("failed to store node cache");
+			LOGGER.severe("failed to store node cache");
 		}
 
 		try {
@@ -179,7 +179,7 @@ public class QueryCategoryKShortestPathsEvaluation {
 											+ System.currentTimeMillis()));
 			estimator.writeCachedPaths(Settings.RelevanceEvaluation.IOFiles.outCachedPaths);
 		} catch (Exception e) {
-			logger.severe("failed to store paths cache");
+			LOGGER.severe("failed to store paths cache");
 		}
 
 		try {
@@ -190,12 +190,12 @@ public class QueryCategoryKShortestPathsEvaluation {
 				oos.writeObject(categoryIdToName);
 				oos.close();
 				fos.close();
-				logger.info("stored category-id-to-name [" + categoryIdToName.size() + "] to ["
+				LOGGER.info("stored category-id-to-name [" + categoryIdToName.size() + "] to ["
 								+ Settings.RelevanceEvaluation.IOFiles.outCategoryIdToName.getAbsolutePath() + "]");
 
 			}
 		} catch (Exception e) {
-			logger.severe("failed to store category-id-to-name");
+			LOGGER.severe("failed to store category-id-to-name");
 		}
 
 		try {
@@ -206,12 +206,12 @@ public class QueryCategoryKShortestPathsEvaluation {
 				oos.writeObject(categoryNameToId);
 				oos.close();
 				fos.close();
-				logger.info("stored category-name-to-id [" + categoryNameToId.size() + "] to ["
+				LOGGER.info("stored category-name-to-id [" + categoryNameToId.size() + "] to ["
 								+ Settings.RelevanceEvaluation.IOFiles.outCategoryNameToId.getAbsolutePath() + "]");
 
 			}
 		} catch (Exception e) {
-			logger.severe("failed to store category-name-to-id");
+			LOGGER.severe("failed to store category-name-to-id");
 		}
 
 		try {
@@ -222,12 +222,12 @@ public class QueryCategoryKShortestPathsEvaluation {
 				oos.writeObject(estimatedRelevances);
 				oos.close();
 				fos.close();
-				logger.info("stored estimated relevances [" + estimatedRelevances.size() + "] to ["
+				LOGGER.info("stored estimated relevances [" + estimatedRelevances.size() + "] to ["
 								+ Settings.RelevanceEvaluation.IOFiles.outRelevances.getAbsolutePath() + "]");
 
 			}
 		} catch (Exception e) {
-			logger.severe("failed to store estimated relevances");
+			LOGGER.severe("failed to store estimated relevances");
 		}
 	}
 
@@ -250,14 +250,14 @@ public class QueryCategoryKShortestPathsEvaluation {
 		try {
 			estimator.readCachedNodes(Settings.RelevanceEvaluation.IOFiles.outCachedNodes);
 		} catch (ClassNotFoundException | IOException e) {
-			logger.severe("failed to restore nodes cache " + e.getMessage());
+			LOGGER.severe("failed to restore nodes cache " + e.getMessage());
 			throw e;
 		}
 
 		try {
 			estimator.readCachedPaths(Settings.RelevanceEvaluation.IOFiles.outCachedPaths);
 		} catch (ClassNotFoundException | IOException e) {
-			logger.severe("failed to restore paths cache " + e.getMessage());
+			LOGGER.severe("failed to restore paths cache " + e.getMessage());
 			throw e;
 		}
 	}
@@ -358,9 +358,9 @@ public class QueryCategoryKShortestPathsEvaluation {
 		try {
 			indexReader.close();
 		} catch (IOException e) {
-			logger.log(Level.SEVERE, "index reader closed erroneous", e);
+			LOGGER.log(Level.SEVERE, "index reader closed erroneous", e);
 		} catch (NullPointerException npe) {
-			logger.log(Level.SEVERE, "index reader already closed");
+			LOGGER.log(Level.SEVERE, "index reader already closed");
 		}
 		indexReader = null;
 
@@ -375,7 +375,7 @@ public class QueryCategoryKShortestPathsEvaluation {
 			// writerConfig.setRAMBufferSizeMB(ramBufferSizeMB);
 			indexWriter = new IndexWriter(indexDirectory, writerConfig);
 		} catch (IOException e) {
-			logger.log(Level.SEVERE, "unable to open/create index at ["
+			LOGGER.log(Level.SEVERE, "unable to open/create index at ["
 							+ Settings.RelevanceEvaluation.IOFiles.outLuceneIndexDirectory + "]", e);
 			throw e;
 		}
@@ -385,9 +385,9 @@ public class QueryCategoryKShortestPathsEvaluation {
 		try {
 			indexWriter.close();
 		} catch (IOException e) {
-			logger.log(Level.SEVERE, "index writer closed erroneous", e);
+			LOGGER.log(Level.SEVERE, "index writer closed erroneous", e);
 		} catch (NullPointerException npe) {
-			logger.log(Level.SEVERE, "index writer already closed");
+			LOGGER.log(Level.SEVERE, "index writer already closed");
 		}
 		indexWriter = null;
 	}
@@ -401,7 +401,7 @@ public class QueryCategoryKShortestPathsEvaluation {
 		Set<Integer> externalDefined = getExternallyDefinedCategories();
 		for (Integer id : externalDefined) {
 			if (id == null) {
-				logger.severe("ignoring category with id=NULL while processing externally defined catgories");
+				LOGGER.severe("ignoring category with id=NULL while processing externally defined catgories");
 			} else {
 
 				if (!categoryCollector.contains(id)) {
@@ -411,7 +411,7 @@ public class QueryCategoryKShortestPathsEvaluation {
 			}
 		}
 
-		logger.info("added [" + numAdded + "] out of [" + externalDefined.size() + "] new external defined categories");
+		LOGGER.info("added [" + numAdded + "] out of [" + externalDefined.size() + "] new external defined categories");
 	}
 
 	/**
@@ -431,7 +431,7 @@ public class QueryCategoryKShortestPathsEvaluation {
 			reader.close();
 			return new LinkedHashSet<>(inQueries.values());
 		} catch (Exception e) {
-			logger.severe("failed reading additional defined categories from ["
+			LOGGER.severe("failed reading additional defined categories from ["
 							+ Settings.RelevanceEvaluation.IOFiles.additionalDefinedCategoryIDs.getAbsolutePath() + "]");
 		}
 		return new LinkedHashSet<>();
@@ -484,7 +484,7 @@ public class QueryCategoryKShortestPathsEvaluation {
 					}
 				}
 			}
-			logger.info("found [" + foundCategories + "] missed [" + missedCategories
+			LOGGER.info("found [" + foundCategories + "] missed [" + missedCategories
 							+ "] categories duplicate collisions [" + duplicateCollisions + "] out of ["
 							+ (foundCategories + missedCategories + duplicateCollisions) + "] categories for query ["
 							+ queryString + "] ");
@@ -492,7 +492,7 @@ public class QueryCategoryKShortestPathsEvaluation {
 			totalFoundCategories += foundCategories;
 			totalDuplicateCollisions += duplicateCollisions;
 		}
-		logger.info("totals: found [" + totalFoundCategories + "] missed [" + totalMissedCategories
+		LOGGER.info("totals: found [" + totalFoundCategories + "] missed [" + totalMissedCategories
 						+ "] categories duplicate collisions [" + totalDuplicateCollisions + "] out of ["
 						+ (totalFoundCategories + totalMissedCategories + totalDuplicateCollisions)
 						+ "] categories for [" + queryStrings.size() + "] queries");
@@ -505,15 +505,15 @@ public class QueryCategoryKShortestPathsEvaluation {
 
 	static void init() throws IOException {
 		// build graph from rdf file
-		logger.info("inflating tree from ["
+		LOGGER.info("inflating tree from ["
 						+ eu.eexcess.diversityasurement.wikipedia.config.Settings.RDFCategories.PATH + "]");
 		GrphTupleCollector collector = new GrphTupleCollector(350000);
 		RDFCategoryExtractor extractor = new RDFCategoryExtractor(new File(
 						eu.eexcess.diversityasurement.wikipedia.config.Settings.RDFCategories.PATH), collector);
 		extractor.extract();
 		grph = collector.getGraph();
-		logger.info(extractor.getStatistics().toString());
-		logger.info(collector.getStatistics().toString());
+		LOGGER.info(extractor.getStatistics().toString());
+		LOGGER.info(collector.getStatistics().toString());
 
 		// get category id's of top categories
 		categoryNameToId = collector.getCategoryMap();
@@ -539,7 +539,7 @@ public class QueryCategoryKShortestPathsEvaluation {
 		for (String topCategoryLabel : topCategoryLabels) {
 			Integer id = categoryNameToId.get(topCategoryLabel);
 			if (null == id) {
-				logger.severe("category [" + topCategoryLabel + "] not found!");
+				LOGGER.severe("category [" + topCategoryLabel + "] not found!");
 				continue;
 			}
 			topCategoryIds.put(topCategoryLabel, id);
@@ -584,7 +584,7 @@ public class QueryCategoryKShortestPathsEvaluation {
 			Map<Integer, Double> relevances = entry.getValue();
 
 			if (estimatedRelevances.containsKey(startCategoryId)) {
-				logger.severe("failed to enrich relevances: found result for duplicate category id [id="
+				LOGGER.severe("failed to enrich relevances: found result for duplicate category id [id="
 								+ startCategoryId + " n=" + getCategoryName(startCategoryId) + "]");
 			} else {
 				estimatedRelevances.put(startCategoryId, relevances);
@@ -619,7 +619,7 @@ public class QueryCategoryKShortestPathsEvaluation {
 				// + "] results to index");
 				writeToIndex(category);
 			} catch (IOException e) {
-				logger.severe("failed to write to index");
+				LOGGER.severe("failed to write to index");
 			}
 		}
 	}
