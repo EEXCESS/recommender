@@ -103,7 +103,7 @@ public class QueryCategoryKShortestPathsEvaluation {
 	static IndexReader indexReader;
 	private static IndexWriter indexWriter;
 
-	private static HashMap<Integer, HashMap<Integer, Double>> estimatedRelevances;
+	private static Map<Integer, Map<Integer, Double>> estimatedRelevances;
 	private static int chunkStartIdx = 0;
 
 	/**
@@ -576,12 +576,12 @@ public class QueryCategoryKShortestPathsEvaluation {
 		MainCategoryRelevanceEstimator
 						.setNumCategoriesToCalculateBundled(concurrentSettings.numCategoriesToCalculateBundled);
 		// single node calculation of relevance
-		for (Map.Entry<Integer, HashMap<Integer, Double>> entry : estimator.estimateRelevancesConcurrent(
+		for (Map.Entry<Integer, Map<Integer, Double>> entry : estimator.estimateRelevancesConcurrent(
 						startCategoryIds, kShortestPaths, concurrentSettings.totalThreads,
 						distributeOverSiblingCategories).entrySet()) {
 
 			Integer startCategoryId = entry.getKey();
-			HashMap<Integer, Double> relevances = entry.getValue();
+			Map<Integer, Double> relevances = entry.getValue();
 
 			if (estimatedRelevances.containsKey(startCategoryId)) {
 				logger.severe("failed to enrich relevances: found result for duplicate category id [id="

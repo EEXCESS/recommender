@@ -312,7 +312,7 @@ public class MainCategoryRelevanceEstimator {
      * @param distributeOverSiblingCategories
      *            {@code #disperseProbabilityOverPathes(int, List, boolean)}
      */
-    public Map<Integer, Map<Integer, Double>> estimateRelevances(ArrayList<Integer> startCategories, int topKShortestPathes,
+    public Map<Integer, Map<Integer, Double>> estimateRelevances(List<Integer> startCategories, int topKShortestPathes,
             boolean distributeOverSiblingCategories) {
 
         List<List<List<ArrayListPath>>> sourcesToTargetsPathes = yenTopKShortestPaths(startCategories, topKShortestPathes);
@@ -340,7 +340,7 @@ public class MainCategoryRelevanceEstimator {
      *            {@code #calculateProbabilites(int[], List, boolean)}
      * @return
      */
-    public Map<Integer, Map<Integer, Double>> estimateRelevancesConcurrent(ArrayList<Integer> startCategories, int topKShortestPathes, int numTotalThreads,
+    public Map<Integer, Map<Integer, Double>> estimateRelevancesConcurrent(List<Integer> startCategories, int topKShortestPathes, int numTotalThreads,
             boolean distributeOverSiblingCategories) {
 
         if (numTotalThreads <= 1) {
@@ -353,7 +353,7 @@ public class MainCategoryRelevanceEstimator {
         // p[1.0] path [v21 v24 v101] <-- p[0.5] would be correct
         // p[0.5] @id[21]
         // p[0.25] @id[24]
-        ArrayList<Integer> toBeConsumed = new ArrayList<Integer>();
+        List<Integer> toBeConsumed = new ArrayList<Integer>();
         for (int startCategory : startCategories) {
             toBeConsumed.add(startCategory);
         }
@@ -581,7 +581,7 @@ public class MainCategoryRelevanceEstimator {
      * @return for each source a list of k-paths to each top category; the list
      *         is in same order as @param sources
      */
-    List<List<List<ArrayListPath>>> yenTopKShortestPaths(ArrayList<Integer> sources, int topKShortestPathes) {
+    List<List<List<ArrayListPath>>> yenTopKShortestPaths(List<Integer> sources, int topKShortestPathes) {
 
         List<List<List<ArrayListPath>>> sourcesTotargetsPaths = new ArrayList<List<List<ArrayListPath>>>();
 
