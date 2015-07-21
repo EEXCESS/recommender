@@ -22,6 +22,7 @@ package eu.eexcess.federatedrecommender.domaindetection;
 
 import java.util.HashSet;
 import java.util.Set;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import no.uib.cipr.matrix.GivensRotation;
@@ -30,7 +31,6 @@ import com.sun.jersey.api.client.Client;
 
 import eu.eexcess.dataformats.PartnerBadge;
 import eu.eexcess.dataformats.PartnerDomain;
-import eu.eexcess.federatedrecommender.domaindetection.probing.DomainDetectorException;
 import eu.eexcess.federatedrecommender.domaindetection.probing.PartnerDomainsProbe;
 import eu.eexcess.federatedrecommender.domaindetection.probing.PartnerDomainsProbe.CancelProbeCondition;
 
@@ -145,9 +145,13 @@ public class AsyncPartnerDomainsProbe {
                         callback.onProbeDoneCallback(partnerConfig.getSystemId(), domains);
                     }
                 }
-            } catch (DomainDetectorException e) {
+            } catch (Throwable e) {
                 for (ProbeDoneCallback callback : callbacks) {
-                    callback.onProbeFailedCallback(partnerConfig.getSystemId());
+                    try {
+                        callback.onProbeFailedCallback(partnerConfig.getSystemId());
+                    } catch (Throwable e1) {
+                        LOGGER.log(Level.SEVERE, "failed to call back client [" + callback + "] on \"probe failed\"", e1);
+                    }
                 }
             }
         }
