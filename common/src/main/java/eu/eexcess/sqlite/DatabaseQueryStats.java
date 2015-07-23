@@ -12,13 +12,14 @@ public enum DatabaseQueryStats implements DatabasePreparedQuery {
     REQUESTLOG(
             "CREATE TABLE IF NOT EXISTS PARTNERREQUESTCOUNT(SYSTEM_ID CHAR(255) PRIMARY KEY     NOT NULL, REQUESTCOUNT INT NOT NULL, FAILEDREQUESTCOUNT  INT     NOT NULL,  FAILEDREQUESTTIMEOUTCOUNT  INT  NOT NULL )",
             "INSERT OR REPLACE INTO PARTNERREQUESTCOUNT('SYSTEM_ID','REQUESTCOUNT','FAILEDREQUESTCOUNT','FAILEDREQUESTTIMEOUTCOUNT') VALUES (?,?,?,?)",
-            "SELECT * FROM PARTNERREQUESTCOUNT WHERE SYSTEM_ID = ?"),
-    QUERYLOG(
+            "SELECT * FROM PARTNERREQUESTCOUNT WHERE SYSTEM_ID = ?"), QUERYLOG(
             "CREATE TABLE IF NOT EXISTS PARTNERQUERYLOG (SYSTEM_ID CHAR(255) NOT NULL,QUERY TEXT  NOT NULL, CALLTIME   INT     NULL,  FIRSTTRANSFORMATIONTIME            INT      NULL, SECONDTRANSFORMATIONTIME      INT      NULL , ENRICHMENTTIME      INT      NULL , RESULTCOUNT      INT      NULL )",
             "INSERT OR REPLACE INTO PARTNERQUERYLOG('SYSTEM_ID','QUERY','CALLTIME','FIRSTTRANSFORMATIONTIME','SECONDTRANSFORMATIONTIME','ENRICHMENTTIME','RESULTCOUNT') VALUES (?,?,?,?,?,?,?)",
             "SELECT * FROM PARTNERQUERYLOG WHERE SYSTEM_ID = ?");
 
-    private final static Logger LOGGER = Logger.getLogger(DatabaseQueryStats.class.getName());
+    private static final String SELECT_1_UNION_SELECT_42 = "select 1 union select 42";
+    private static final String REQUESTED_NOT_IMPLEMENTED = "requested not implemented SQL query";
+    private static final Logger LOGGER = Logger.getLogger(DatabaseQueryStats.class.getName());
     private String createQuery;
     private String updateQuery;
     private String getQuery;
@@ -46,8 +47,8 @@ public enum DatabaseQueryStats implements DatabasePreparedQuery {
 
     @Override
     public String getDropQuery() {
-        LOGGER.warning("requested not implemented SQL query");
-        return "select 1 union select 42";
+        LOGGER.warning(REQUESTED_NOT_IMPLEMENTED);
+        return SELECT_1_UNION_SELECT_42;
     }
 
     @Override
@@ -57,14 +58,14 @@ public enum DatabaseQueryStats implements DatabasePreparedQuery {
 
     @Override
     public String getInsertQuery() {
-        LOGGER.warning("requested not implemented SQL query");
-        return "select 1 union select 42";
+        LOGGER.warning(REQUESTED_NOT_IMPLEMENTED);
+        return SELECT_1_UNION_SELECT_42;
     }
 
     @Override
     public String getDeleteQuery() {
-        LOGGER.warning("requested not implemented SQL query");
-        return "select 1 union select 42";
+        LOGGER.warning(REQUESTED_NOT_IMPLEMENTED);
+        return SELECT_1_UNION_SELECT_42;
     }
 
     @Override

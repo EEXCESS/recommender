@@ -38,46 +38,46 @@ import eu.eexcess.partnerrecommender.api.QueryGeneratorApi;
  */
 public class OpensearchQueryGenerator implements QueryGeneratorApi {
 
-	private static final Logger mLogger = Logger.getLogger(PartnerConnector.class.getName());
+    private final static Logger LOGGER = Logger.getLogger(PartnerConnector.class.getName());
 
-	private static final String mDefaultUrlEncoding = CharEncoding.UTF_8;;
+    private final static String MDEFAULT_URL_ENCONDING = CharEncoding.UTF_8;;
 
-	/**
-	 * Concatenate space separated keywords and search result limit if @param
-	 * userProfile.numResults > 0
-	 */
-	@Override
-	public String toQuery(SecureUserProfile userProfile) {
+    /**
+     * Concatenate space separated keywords and search result limit if @param
+     * userProfile.numResults > 0
+     */
+    @Override
+    public String toQuery(SecureUserProfile userProfile) {
 
-		StringBuilder stringBuilder = new StringBuilder();
+        StringBuilder stringBuilder = new StringBuilder();
 
-		for (ContextKeyword keyword : userProfile.contextKeywords) {
-			stringBuilder.append(keyword.text + " ");
-		}
+        for (ContextKeyword keyword : userProfile.contextKeywords) {
+            stringBuilder.append(keyword.text + " ");
+        }
 
-		if (stringBuilder.length() > 0) {
-			stringBuilder.deleteCharAt(stringBuilder.length() - 1);
-		}
+        if (stringBuilder.length() > 0) {
+            stringBuilder.deleteCharAt(stringBuilder.length() - 1);
+        }
 
-		String urlEncodedKeywords = null;
-		try {
-			urlEncodedKeywords = URLEncoder.encode(stringBuilder.toString(), mDefaultUrlEncoding);
+        String urlEncodedKeywords = null;
+        try {
+            urlEncodedKeywords = URLEncoder.encode(stringBuilder.toString(), MDEFAULT_URL_ENCONDING);
 
-			if (userProfile.numResults != null && userProfile.numResults > 0) {
-				return urlEncodedKeywords + "&limit=" + userProfile.numResults;
-			}
-			
-		} catch (UnsupportedEncodingException e) {
-			mLogger.log(Level.WARNING, "failed encoding keywords");
-		}
+            if (userProfile.numResults != null && userProfile.numResults > 0) {
+                return urlEncodedKeywords + "&limit=" + userProfile.numResults;
+            }
 
-		return urlEncodedKeywords;
-	}
+        } catch (UnsupportedEncodingException e) {
+            LOGGER.log(Level.WARNING, "failed encoding keywords", e);
+        }
 
-	@Override
-	public String toDetailQuery(DocumentBadge document) {
-		// TODO Auto-generated method stub
-		return null;
-	}
+        return urlEncodedKeywords;
+    }
+
+    @Override
+    public String toDetailQuery(DocumentBadge document) {
+        // TODO Auto-generated method stub
+        return null;
+    }
 
 }

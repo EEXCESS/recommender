@@ -19,7 +19,7 @@ GNU Affero General Public License for more details.
 
 You should have received a copy of the GNU Affero General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
-*/
+ */
 package eu.eexcess.utils;
 
 import java.io.IOException;
@@ -35,47 +35,46 @@ import at.knowcenter.ie.languagedetection.LanguageDetector;
  * @author rkern
  */
 public class LanguageGuesser {
-	private final static Logger logger = Logger.getLogger(LanguageGuesser.class.getName());
-	
-	private final static Language[] languages = new Language[] {
-			Language.English, Language.French, Language.German, Language.Italian, Language.Spanish
-	};
+    private final static Logger LOGGER = Logger.getLogger(LanguageGuesser.class.getName());
 
-	private static final int MAX_LENGTH = 256;
-	
-	private static LanguageGuesser instance;
-	
-	private LanguageDetector languageDetector;
-	
-	static {
-		instance = new LanguageGuesser();
-	}
-	
-	public LanguageGuesser() {
-		try {
-			languageDetector = new LanguageDetector(languages);
-		} catch (IOException e) {
-			logger.log(Level.SEVERE, "Cannot intialise the language guesser", e);
-		}
-	}
+    private static final int MAX_LENGTH = 256;
+    private static LanguageGuesser instance;
+    private LanguageDetector languageDetector;
 
-	/**
-	 * Returns the singleton instance.
-	 * @return the instance
-	 */
-	public static LanguageGuesser getInstance() {
-		return instance;
-	}
-	
-	/**
-	 * Tries to detect the language of the text fragment and returns its ISO code, or null if unknown.
-	 * 
-	 * @param textFragment the text, must not be null
-	 * @return the ISO 639-1 code, or null if the language is unknown
-	 */
-	public String guessLanguage(String textFragment) {
-		String text = textFragment.length() > MAX_LENGTH ? textFragment.substring(0, MAX_LENGTH) : textFragment;
-		Language language = languageDetector.detect(text);
-		return language == Language.Undefined ? null :  language.asTwoChars();
-	}
+    private final static Language[] languages = new Language[] { Language.English, Language.French, Language.German, Language.Italian, Language.Spanish };
+
+    static {
+        instance = new LanguageGuesser();
+    }
+
+    public LanguageGuesser() {
+        try {
+            languageDetector = new LanguageDetector(languages);
+        } catch (IOException e) {
+            LOGGER.log(Level.SEVERE, "Cannot intialise the language guesser", e);
+        }
+    }
+
+    /**
+     * Returns the singleton instance.
+     * 
+     * @return the instance
+     */
+    public static LanguageGuesser getInstance() {
+        return instance;
+    }
+
+    /**
+     * Tries to detect the language of the text fragment and returns its ISO
+     * code, or null if unknown.
+     * 
+     * @param textFragment
+     *            the text, must not be null
+     * @return the ISO 639-1 code, or null if the language is unknown
+     */
+    public String guessLanguage(String textFragment) {
+        String text = textFragment.length() > MAX_LENGTH ? textFragment.substring(0, MAX_LENGTH) : textFragment;
+        Language language = languageDetector.detect(text);
+        return language == Language.Undefined ? null : language.asTwoChars();
+    }
 }

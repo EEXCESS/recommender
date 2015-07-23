@@ -20,6 +20,7 @@ package eu.eexcess.wikipedialocal.recommender;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.apache.lucene.analysis.Analyzer;
@@ -56,13 +57,9 @@ import eu.eexcess.partnerrecommender.reference.PartnerConnectorBase;
  */
 public class PartnerConnector extends PartnerConnectorBase implements PartnerConnectorApi {
 
-    @SuppressWarnings("unused")
-    private static final Logger logger = Logger.getLogger(PartnerConnector.class.getName());
+    private static final Logger LOGGER = Logger.getLogger(PartnerConnector.class.getName());
 
     private static final String[] FIELD_CONTENTS = { "sectionText", "sectionTitle", "title" };
-
-    @SuppressWarnings("unused")
-    private PartnerConfiguration partnerConfig = null;
 
     public PartnerConnector() {
 
@@ -70,9 +67,7 @@ public class PartnerConnector extends PartnerConnectorBase implements PartnerCon
 
     @Override
     public ResultList queryPartnerNative(PartnerConfiguration partnerConfiguration, SecureUserProfile userProfile, PartnerdataLogger dataLogger) throws IOException {
-        partnerConfig = partnerConfiguration;
         ResultList resultList = new ResultList();
-
         Analyzer analyzer = new ClassicAnalyzer();
         File directoryPath = new File(PartnerConfigurationCache.CONFIG.getPartnerConfiguration().getSearchEndpoint());
         Directory directory = FSDirectory.open(directoryPath);
@@ -85,8 +80,7 @@ public class PartnerConnector extends PartnerConnectorBase implements PartnerCon
         try {
             query = queryParser.parse(queryString);
         } catch (ParseException e) {
-
-            // logger.log(Level.SEVERE, "could not parse input query", e);
+            LOGGER.log(Level.SEVERE, "could not parse input query", e);
         }
         if (userProfile.numResults == null)
             userProfile.numResults = 10;
@@ -98,18 +92,15 @@ public class PartnerConnector extends PartnerConnectorBase implements PartnerCon
             if (doc != null) {
                 IndexableField title = doc.getField("title");
                 IndexableField sectionTitle = doc.getField("sectionTitle");
-                IndexableField category = doc.getField("category");
                 IndexableField sectionText = doc.getField("sectionText");
                 if (sectionText != null)
                     result.description = sectionText.stringValue();
-                if (category != null) {
-                }
+
                 if (title != null && sectionTitle != null)
                     result.title = title.stringValue() + " - " + sectionTitle.stringValue();
                 resultList.results.add(result);
             }
         }
-
         resultList.totalResults = topDocs.totalHits;
         return resultList;
     }
@@ -122,7 +113,7 @@ public class PartnerConnector extends PartnerConnectorBase implements PartnerCon
 
     @Override
     public Document queryPartnerDetails(PartnerConfiguration partnerConfiguration, DocumentBadge document, PartnerdataLogger logger) throws IOException {
-        // TODO Auto-generated method stub
+        // TODO The details call should be implemented here
         return null;
     }
 

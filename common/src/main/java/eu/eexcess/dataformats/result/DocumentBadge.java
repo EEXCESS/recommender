@@ -13,6 +13,15 @@ import javax.xml.bind.annotation.XmlElement;
 public class DocumentBadge implements Serializable {
 
     private static final long serialVersionUID = -8449927031599693461L;
+    @XmlElement(name = "id")
+    public String id;
+    @XmlElement(name = "uri")
+    public String uri;
+    @XmlElement(name = "provider")
+    public String provider;
+
+    @XmlElement(name = "detail")
+    public String details = null;
 
     public DocumentBadge() {
     }
@@ -26,16 +35,6 @@ public class DocumentBadge implements Serializable {
         this.uri = uri;
         this.provider = provider;
     }
-
-    @XmlElement(name = "id")
-    public String id;
-    @XmlElement(name = "uri")
-    public String uri;
-    @XmlElement(name = "provider")
-    public String provider;
-
-    @XmlElement(name = "detail")
-    public String details = null;
 
     @Override
     public String toString() {

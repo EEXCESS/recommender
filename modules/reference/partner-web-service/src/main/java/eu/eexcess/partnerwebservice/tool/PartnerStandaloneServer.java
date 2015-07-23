@@ -43,13 +43,13 @@ import eu.eexcess.partnerwebservice.PartnerContextListener;
  */
 public class PartnerStandaloneServer {
     private static Server server;
-    private static final Logger logger = Logger.getLogger(PartnerStandaloneServer.class.getName());
+    private static final Logger LOGGER = Logger.getLogger(PartnerStandaloneServer.class.getName());
 
     private PartnerStandaloneServer() {
 
     }
 
-    public static synchronized void start(int port) throws Exception {
+    public static synchronized void start(int port) throws IllegalStateException {
         if (server != null) {
             throw new IllegalStateException("Server is already running");
         }
@@ -61,22 +61,29 @@ public class PartnerStandaloneServer {
         initMap.put("com.sun.jersey.config.property.packages", "eu.eexcess.partnerwebservice");
         context.addServlet(new ServletHolder(new ServletContainer(new PackagesResourceConfig(initMap))), "/*");
         context.addEventListener(new PartnerContextListener());
-        // EnrichmentServer.configProvider = configProvider;
         server = new Server(port);
         server.setHandler(context);
-        server.start();
+        try {
+            server.start();
+        } catch (Exception e) {
+            LOGGER.log(Level.SEVERE, "Server could not be Started", e);
+        }
     }
 
-    public static synchronized void stop() throws Exception {
+    public static synchronized void stop() throws IllegalStateException {
         if (server == null) {
             throw new IllegalStateException("Server not running");
         }
-        server.stop();
+        try {
+            server.stop();
+        } catch (Exception e) {
+            LOGGER.log(Level.WARNING, "Server Could not be stoped", e);
+        }
     }
 
     public static void main(String[] args) throws Exception {
         if (args.length != 1) {
-            logger.log(Level.INFO, "USAGE: PartnerStandaloneServer <port-number>");
+            LOGGER.log(Level.INFO, "USAGE: PartnerStandaloneServer <port-number>");
             System.exit(-1);
         }
 

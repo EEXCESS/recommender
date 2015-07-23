@@ -39,6 +39,9 @@ import eu.eexcess.dataformats.result.ResultList;
 public class EvaluationResultList extends ResultList implements Serializable {
     private static final long serialVersionUID = 2401989277808424955L;
 
+    @XmlAttribute
+    private String numSelect;
+
     @SuppressWarnings("unused")
     private EvaluationResultList() {
     };
@@ -49,9 +52,6 @@ public class EvaluationResultList extends ResultList implements Serializable {
         this.partnerResponseState = parent.partnerResponseState;
         this.totalResults = parent.totalResults;
     }
-
-    @XmlAttribute
-    private String numSelect;
 
     @Override
     public String toString() {
