@@ -51,8 +51,8 @@ import eu.eexcess.utils.URLParamEncoder;
  */
 
 public class PartnerConnector extends PartnerConnectorBase implements PartnerConnectorApi {
+
     private final Logger log = Logger.getLogger(PartnerConnector.class.getName());
-    private QueryGeneratorApi queryGenerator;
 
     // private boolean makeDetailRequests = false;
 

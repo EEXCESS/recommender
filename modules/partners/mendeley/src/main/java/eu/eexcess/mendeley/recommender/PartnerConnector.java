@@ -81,12 +81,6 @@ public class PartnerConnector extends PartnerConnectorBase implements PartnerCon
     public PartnerConnector(){}
     
 	@Override
-	public ResultList queryPartnerNative(PartnerConfiguration partnerConfiguration, SecureUserProfile userProfile, PartnerdataLogger log)
-					throws IOException {
-		return null;
-	}
-	
-	@Override
 	public Document queryPartner(PartnerConfiguration partnerConfiguration, SecureUserProfile userProfile, PartnerdataLogger log) throws IOException {
         ClientConfig clientConfig = new DefaultClientConfig();
         clientConfig.getFeatures().put(JSONConfiguration.FEATURE_POJO_MAPPING, Boolean.TRUE);

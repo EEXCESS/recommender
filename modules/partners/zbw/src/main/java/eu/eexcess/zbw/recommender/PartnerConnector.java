@@ -53,6 +53,7 @@ import eu.eexcess.partnerdata.reference.PartnerdataTracer;
 import eu.eexcess.partnerrecommender.api.PartnerConfigurationCache;
 import eu.eexcess.partnerrecommender.api.PartnerConnectorApi;
 import eu.eexcess.partnerrecommender.api.QueryGeneratorApi;
+import eu.eexcess.partnerrecommender.reference.PartnerConnectorBase;
 import eu.eexcess.zbw.recommender.dataformat.ZBWDocument;
 import eu.eexcess.zbw.recommender.dataformat.ZBWDocumentHit;
 
@@ -62,26 +63,11 @@ import eu.eexcess.zbw.recommender.dataformat.ZBWDocumentHit;
  * @author thomas.orgel@joanneum.at
  */
 
-public class PartnerConnector implements PartnerConnectorApi {
+public class PartnerConnector extends PartnerConnectorBase implements PartnerConnectorApi {
 	private static final Logger log = Logger.getLogger(PartnerConnector.class.getName());
-    private QueryGeneratorApi queryGenerator;
-
 	
     public PartnerConnector(){
     
-    }
-    /**
-     * Returns the query generator for the partner search engine.
-     * @return the query generator
-     */
-    protected QueryGeneratorApi getQueryGenerator() {
-        return queryGenerator;
-    }
-    
-    @Override
-    public ResultList queryPartnerNative(PartnerConfiguration partnerConfiguration, SecureUserProfile userProfile, PartnerdataLogger logger)
-    				throws IOException {
-    	return null;
     }
     
 	@Override
