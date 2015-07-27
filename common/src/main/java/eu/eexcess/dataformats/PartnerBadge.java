@@ -45,6 +45,9 @@ public class PartnerBadge implements Serializable {
     @XmlElement(name = "partnerConnectorEndpoint")
     private String partnerConnectorEndpoint;
 
+    @XmlElement(name = "lowerAgeLimit")
+    private Integer lowerAgeLimit;
+
     @XmlElement(name = "tag")
     @XmlElementWrapper(name = "tags")
     private List<String> tags;
@@ -242,6 +245,14 @@ public class PartnerBadge implements Serializable {
 
     public void setQueryGeneratorClass(String queryGeneratorClass) {
         this.queryGeneratorClass = queryGeneratorClass;
+    }
+
+    public Integer getLowerAgeLimit() {
+        return lowerAgeLimit;
+    }
+
+    public void setLowerAgeLimit(Integer lowerAgeLimit) {
+        this.lowerAgeLimit = lowerAgeLimit;
     }
 
 }

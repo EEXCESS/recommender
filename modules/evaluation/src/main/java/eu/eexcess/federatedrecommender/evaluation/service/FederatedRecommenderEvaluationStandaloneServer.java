@@ -19,12 +19,11 @@ GNU Affero General Public License for more details.
 
 You should have received a copy of the GNU Affero General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
-*/
+ */
 package eu.eexcess.federatedrecommender.evaluation.service;
 
 import java.util.HashMap;
 import java.util.Map;
-
 
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.handler.HandlerList;
@@ -36,54 +35,56 @@ import com.sun.jersey.api.core.PackagesResourceConfig;
 import com.sun.jersey.spi.container.servlet.ServletContainer;
 
 public class FederatedRecommenderEvaluationStandaloneServer {
-	private static Server server;
+    private static Server server;
 
-	public static synchronized void start(int port) throws Exception {
-		if (server != null) {
-			throw new IllegalStateException("Server is already running");
-		}
+    private FederatedRecommenderEvaluationStandaloneServer() {
+    }
 
-		ServletContextHandler context = new ServletContextHandler();
-		context.setContextPath("/eexcess-federated-recommender-web-service-evaluation-1.0-SNAPSHOT");
-		Map<String, Object> initMap = new HashMap<String, Object>();
-		initMap.put("com.sun.jersey.api.json.POJOMappingFeature", "true");
-		initMap.put("com.sun.jersey.config.property.packages", " eu.eexcess.federatedrecommender.evaluation.service");
+    public static synchronized void start(int port) throws Exception {
+        if (server != null) {
+            throw new IllegalStateException("Server is already running");
+        }
 
-		context.addServlet(new ServletHolder(new ServletContainer(new PackagesResourceConfig(initMap))), "/*");
-		
+        ServletContextHandler context = new ServletContextHandler();
+        context.setContextPath("/eexcess-federated-recommender-web-service-evaluation-1.0-SNAPSHOT");
+        Map<String, Object> initMap = new HashMap<String, Object>();
+        initMap.put("com.sun.jersey.api.json.POJOMappingFeature", "true");
+        initMap.put("com.sun.jersey.config.property.packages", " eu.eexcess.federatedrecommender.evaluation.service");
 
-		ResourceHandler resourcehandler = new ResourceHandler();
-		resourcehandler.setDirectoriesListed(true);
-		resourcehandler.setWelcomeFiles(new String[] { "index.html" });
+        context.addServlet(new ServletHolder(new ServletContainer(new PackagesResourceConfig(initMap))), "/*");
 
-		resourcehandler.setResourceBase(".");
+        ResourceHandler resourcehandler = new ResourceHandler();
+        resourcehandler.setDirectoriesListed(true);
+        resourcehandler.setWelcomeFiles(new String[] { "index.html" });
 
-		// EnrichmentServer.configProvider = configProvider;
+        resourcehandler.setResourceBase(".");
 
-		HandlerList handlers = new HandlerList();
-		handlers.addHandler(resourcehandler);
-		handlers.addHandler(context);
-		server = new Server(port);
-		// server.setHandler(resourcehandler);
+        // EnrichmentServer.configProvider = configProvider;
 
-		server.setHandler(handlers);
+        HandlerList handlers = new HandlerList();
+        handlers.addHandler(resourcehandler);
+        handlers.addHandler(context);
+        server = new Server(port);
+        // server.setHandler(resourcehandler);
 
-		server.start();
-	}
+        server.setHandler(handlers);
 
-	public static synchronized void stop() throws Exception {
-		if (server == null) {
-			throw new IllegalStateException("Server not running");
-		}
-		server.stop();
-	}
+        server.start();
+    }
 
-	public static void main(String[] args) throws Exception {
-		if (args.length != 1) {
-			System.out.println("FederatedRecommenderStandaloneServer <port-number>");
-			System.exit(-1);
-		}
+    public static synchronized void stop() throws Exception {
+        if (server == null) {
+            throw new IllegalStateException("Server not running");
+        }
+        server.stop();
+    }
 
-		start(Integer.parseInt(args[0]));
-	}
+    public static void main(String[] args) throws Exception {
+        if (args.length != 1) {
+            System.out.println("FederatedRecommenderStandaloneServer <port-number>");
+            System.exit(-1);
+        }
+
+        start(Integer.parseInt(args[0]));
+    }
 }

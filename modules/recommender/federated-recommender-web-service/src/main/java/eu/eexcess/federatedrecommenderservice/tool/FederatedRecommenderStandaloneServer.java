@@ -43,7 +43,7 @@ import com.sun.jersey.spi.container.servlet.ServletContainer;
  */
 public class FederatedRecommenderStandaloneServer {
     private static Server server;
-    private static final Logger logger = Logger.getLogger(FederatedRecommenderStandaloneServer.class.getName());
+    private static final Logger LOGGER = Logger.getLogger(FederatedRecommenderStandaloneServer.class.getName());
 
     private FederatedRecommenderStandaloneServer() {
 
@@ -77,7 +77,7 @@ public class FederatedRecommenderStandaloneServer {
         try {
             server.start();
         } catch (Exception e) {
-            logger.log(Level.SEVERE, "Could not start server", e);
+            LOGGER.log(Level.SEVERE, "Could not start server", e);
         }
 
     }
@@ -89,13 +89,13 @@ public class FederatedRecommenderStandaloneServer {
         try {
             server.stop();
         } catch (Exception e) {
-            logger.log(Level.SEVERE, "Could not stop server", e);
+            LOGGER.log(Level.SEVERE, "Could not stop server", e);
         }
     }
 
     public static void main(String[] args) throws Exception {
         if (args.length != 1) {
-            logger.log(Level.SEVERE, "USAGE: FederatedRecommenderStandaloneServer <port-number>");
+            LOGGER.log(Level.SEVERE, "USAGE: FederatedRecommenderStandaloneServer <port-number>");
             System.exit(-1);
         }
 

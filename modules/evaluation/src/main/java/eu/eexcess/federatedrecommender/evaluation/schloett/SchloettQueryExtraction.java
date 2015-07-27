@@ -88,8 +88,8 @@ import eu.eexcess.federatedrecommender.evaluation.schloett.dataformats.SchloettQ
  *
  */
 public class SchloettQueryExtraction {
-    final static Logger logger = Logger.getLogger(SchloettQuerySelection.class.getName());
-    final static MaxentTagger tagger = new MaxentTagger("edu/stanford/nlp/models/pos-tagger/english-left3words/english-left3words-distsim.tagger");
+    private static final Logger LOGGER = Logger.getLogger(SchloettQuerySelection.class.getName());
+    private static final MaxentTagger TAGGER = new MaxentTagger("edu/stanford/nlp/models/pos-tagger/english-left3words/english-left3words-distsim.tagger");
     static String[] blackListTerms = { "site", "item", "view", "use", "text", "talk", "use", "polish", "part", "dpa", "page", "type", "mode", "list", "help", "view", "talk",
             "shop", "page", "menu", "log", "link", "jump", "interaction", "file", "year", "ways", "way", "unit", "t", "der", "website", "von", "pdf", "zu", "yd", "w", "ul", "u2",
             "t", "sum", "son", "pm", "pg", "nl", "ne", "n", "mi", "m", "km", "im", "ich", "ft", "fdj", "economy", "dpa", "dm", "which", "using", "about", "where", "under",
@@ -97,13 +97,12 @@ public class SchloettQueryExtraction {
             "wikidata", "views", "version", "variants", "upload", "trademark", "tools", "terms", "references", "privacy", "portal", "people", "pages", "organization", "order",
             "oldid", "norsk", "nederlands", "navigation", "namespaces", "names", "image", "subject", "online", "media", "source", "internet", "years", "support", "project",
             "years", "support", "description", "images", "events", "email", "context", "comments", "comment", "collection", "belief", "português", "polski", "cm", "bar", "web",
-            "svenska", "suomi", "srpskohrvatski", "srpski", "nynorsk", "magyar", "indonesia", "hrvatski", "galego", "euskara", "esperanto", "encyclopedia", "eesti", "deutsch",
-            "dansk", "commons", "bosanski", "articles", "zazaki", "time", "themes", "deutsch", "spanisch", "sie", "russisch", "portugiesisch", "polnisch", "leo", "italienisch",
-            "englisch", "ein", "chinesisch", "zusatzinformationen", "zur", "zune", "zuerst", "wort", "um", "trainer", "suchanfragen", "sehen", "neueste", "letzten", "klicken",
-            "ipod", "iphone", "ipad", "installieren", "impressumwebseite", "italiano", "wikibooks", "svenska", "suomi", "srpskohrvatski", "srpski", "nynorsk", "melayu", "x6",
-            "x4", "x2", "x18", "svenska", "suomi", "subjects", "share", "ru", "s", "svenska", "russisch", "portugiesisch", "polnisch", "letzten", "italienisch", "klicken",
-            "impressumwebsei", "russisch", "portugiesisch", "polnisch", "italienisch", "suchanfragen", "magyar", "languages", "italiano", "indonesia", "hrvatski", "galego",
-            "euskara", "esperanto", "encyclopedia", "eesti", "deutsch", "dansk", "commons", "bosanski", "twitter", "term", "publisher", "websites", };
+            "srpskohrvatski", "srpski", "nynorsk", "magyar", "indonesia", "hrvatski", "galego", "euskara", "esperanto", "encyclopedia", "eesti", "dansk", "commons", "bosanski",
+            "articles", "zazaki", "time", "themes", "deutsch", "spanisch", "sie", "leo", "englisch", "ein", "chinesisch", "zusatzinformationen", "zur", "zune", "zuerst", "wort",
+            "um", "trainer", "suchanfragen", "sehen", "neueste", "letzten", "klicken", "ipod", "iphone", "ipad", "installieren", "impressumwebseite", "italiano", "wikibooks",
+            "srpskohrvatski", "srpski", "nynorsk", "melayu", "x6", "x4", "x2", "x18", "svenska", "suomi", "subjects", "share", "ru", "s", "polnisch", "letzten", "italienisch",
+            "klicken", "impressumwebsei", "russisch", "portugiesisch", "suchanfragen", "magyar", "languages", "italiano", "indonesia", "hrvatski", "galego", "euskara",
+            "esperanto", "encyclopedia", "eesti", "dansk", "commons", "bosanski", "twitter", "term", "publisher", "websites", };
     static List<String> blackList;
 
     public SchloettQueryExtraction() {
@@ -122,19 +121,19 @@ public class SchloettQueryExtraction {
             querys = extraction.parseQueryiesFile(files);
 
         } catch (JsonSyntaxException | IOException e) {
-            logger.log(Level.WARNING, "", e);
+            LOGGER.log(Level.WARNING, "", e);
         }
         EvaluationQueryList evalQueries = new EvaluationQueryList();
         for (LogPair logPair : querys) {
             if (logPair.getQuery().getMap() == null)
-                logger.log(Level.WARNING, "is null");
+                LOGGER.log(Level.WARNING, "is null");
 
             else
                 for (Entry<String, LinkedHashMap<String, Object>> schloettQueryFormat1 : logPair.getQuery().getMap().entrySet()) {
 
                     if (schloettQueryFormat1.getValue().get("task_name").toString().endsWith(".en")) {
 
-                        logger.log(Level.WARNING, "query: " + schloettQueryFormat1.getValue().get("query").toString());
+                        LOGGER.log(Level.WARNING, "query: " + schloettQueryFormat1.getValue().get("query").toString());
                         List<Interest> keyword = getKeyWordsFromHistoryLinks(logPair.history.getMap(), schloettQueryFormat1.getValue().get("task_id"));
 
                         evalQueries.getQueries().add(new EvaluationQuery(schloettQueryFormat1.getValue().get("query").toString(), "TODO: decription", keyword));
@@ -149,9 +148,9 @@ public class SchloettQueryExtraction {
         try {
             File file = new File(folder.getCanonicalFile() + "/queriesEn-final.json");
             mapper.defaultPrettyPrintingWriter().writeValue(file, evalQueries);
-            logger.log(Level.INFO, "Writing to file:" + file.getAbsolutePath());
+            LOGGER.log(Level.INFO, "Writing to file:" + file.getAbsolutePath());
         } catch (IOException e) {
-            logger.log(Level.WARNING, "", e);
+            LOGGER.log(Level.WARNING, "", e);
         }
 
     }
@@ -177,7 +176,7 @@ public class SchloettQueryExtraction {
                                 try {
                                     reader = DirectoryReader.open(dir);
                                 } catch (IOException e4) {
-                                    logger.log(Level.WARNING, "", e4);
+                                    LOGGER.log(Level.WARNING, "", e4);
                                 }
                                 IndexSearcher searcher = null;
                                 if (reader != null)
@@ -188,23 +187,23 @@ public class SchloettQueryExtraction {
                                     try {
                                         docs = searcher.search(new TermQuery(new Term("url", urlObject.toString())), 1);
                                     } catch (IOException e4) {
-                                        logger.log(Level.WARNING, "", e4);
+                                        LOGGER.log(Level.WARNING, "", e4);
                                     }
                                 }
                                 if (docs != null && docs.totalHits > 0) {
-
+                                    LOGGER.log(Level.INFO, "docs where null or docs.totalHits zero");
                                 } else {
 
                                     try {
                                         url = new URL(urlObject.toString());
                                     } catch (MalformedURLException e3) {
-                                        logger.log(Level.WARNING, "", e3);
+                                        LOGGER.log(Level.WARNING, "", e3);
                                     }
 
                                     try {
                                         reader.close();
                                     } catch (Exception e3) {
-                                        logger.log(Level.WARNING, "", e3);
+                                        LOGGER.log(Level.WARNING, "", e3);
                                     }
                                     InputStream input = null;
                                     if (url != null) {
@@ -212,7 +211,7 @@ public class SchloettQueryExtraction {
 
                                             input = url.openStream();
                                         } catch (IOException e2) {
-                                            logger.log(Level.WARNING, "", e2);
+                                            LOGGER.log(Level.WARNING, "", e2);
                                         }
                                         if (input != null) {
                                             LinkContentHandler linkHandler = new LinkContentHandler();
@@ -227,13 +226,13 @@ public class SchloettQueryExtraction {
                                                 parser.parse(input, teeHandler, metadata, parseContext);
                                             } catch (IOException | SAXException | TikaException e1) {
 
-                                                logger.log(Level.WARNING, urlObject.toString(), e1);
+                                                LOGGER.log(Level.WARNING, urlObject.toString(), e1);
 
                                             }
                                             String string = textHandler.toString();
                                             String docString = " ";
 
-                                            String tagged = tagger.tagString(string.toLowerCase());
+                                            String tagged = TAGGER.tagString(string.toLowerCase());
                                             Pattern pattern = Pattern.compile("\\s\\w+(_NN|_NNS)");
                                             Matcher matcher = pattern.matcher(tagged);
                                             while (matcher.find()) {
@@ -262,7 +261,7 @@ public class SchloettQueryExtraction {
                                                 writer.close();
                                                 input.close();
                                             } catch (IOException e) {
-                                                logger.log(Level.WARNING, "", e);
+                                                LOGGER.log(Level.WARNING, "", e);
                                             }
 
                                         }
@@ -277,29 +276,30 @@ public class SchloettQueryExtraction {
         try {
             reader = DirectoryReader.open(dir);
         } catch (Exception e1) {
-            logger.log(Level.WARNING, "", e1);
+            LOGGER.log(Level.WARNING, "", e1);
         }
         TermStats[] tStats = null;
         if (reader != null)
             try {
                 tStats = HighFreqTerms.getHighFreqTerms(reader, 30, "content", new DocFreqComparator());
             } catch (Exception e) {
-                logger.log(Level.WARNING, "", e);
+                LOGGER.log(Level.WARNING, "", e);
             } finally {
                 try {
                     reader.close();
                 } catch (IOException e) {
-                    logger.log(Level.WARNING, "", e);
+                    LOGGER.log(Level.WARNING, "", e);
                 }
             }
         List<Interest> keywordList = new ArrayList<Interest>();
-        System.out.println("Extraction: ");
+        LOGGER.log(Level.INFO, "Extraction: ");
+
         if (tStats != null) {
             for (TermStats termStats : tStats) {
                 String utf8String = termStats.termtext.utf8ToString();
                 if (!blackList.contains(utf8String.toLowerCase())) {
 
-                    logger.log(Level.INFO, "\"" + utf8String.toLowerCase() + "\",");
+                    LOGGER.log(Level.INFO, "\"" + utf8String.toLowerCase() + "\",");
 
                     keywordList.add(new Interest(utf8String.toLowerCase()));
                     // System.out.println(utf8String.toLowerCase() + " docFreq "
@@ -314,7 +314,7 @@ public class SchloettQueryExtraction {
     }
 
     @SuppressWarnings("unchecked")
-    private List<LogPair> parseQueryiesFile(List<File> files) throws JsonSyntaxException, IOException {
+    private List<LogPair> parseQueryiesFile(List<File> files) throws IOException {
         FileReader freader;
         List<LogPair> queries = new ArrayList<LogPair>();
 
@@ -334,7 +334,7 @@ public class SchloettQueryExtraction {
                 freader.close();
 
             } catch (Exception e) {
-                logger.log(Level.WARNING, "", e);
+                LOGGER.log(Level.WARNING, "", e);
             }
 
         }

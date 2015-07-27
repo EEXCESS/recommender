@@ -53,11 +53,12 @@ import eu.eexcess.dataformats.userprofile.SecureUserProfileEvaluation;
 import eu.eexcess.federatedrecommender.evaluation.evaluation.EvaluationQuery;
 
 public class CSVResultCreation {
-    public final static String DIRECTORYPATH = "/home/hziak/Datasets/EEXCESS/evaluationBlockRanking/";
+    public static final String DIRECTORYPATH = "/home/hziak/Datasets/EEXCESS/evaluationBlockRanking/";
     private static final Logger LOGGER = Logger.getLogger(CSVResultCreation.class.getName());
     private static final String HEADER = "QUERY,DESCRIPTION,INT1,INT2,INT3,INT4,INT5,INT6,INT7,INT8,INT9,INT10,INT11,INT12,INT13,INT14,INT15,INT16,INT17,INT18,INT19,INT20,INT21,INT22,INT23,INT24,INT25,INT26,INT27,INT28,INT29,INT30"
             + ",FIRSTTITLE1,FIRSTDESCRIPTION1,FIRSTTITLE2,FIRSTDESCRIPTION2,FIRSTTITLE3,FIRSTDESCRIPTION3,FIRSTTITLE4,FIRSTDESCRIPTION4,FIRSTTITLE5,FIRSTDESCRIPTION5,FIRSTTITLE6,FIRSTDESCRIPTION6,FIRSTTITLE7,FIRSTDESCRIPTION7,FIRSTTITLE8,FIRSTDESCRIPTION8,FIRSTTITLE9,FIRSTDESCRIPTION9,FIRSTTITLE10,FIRSTDESCRIPTION10,"
             + ",SECONDTITLE1,SECONDDESCRIPTION1,SECONDTITLE2,SECONDDESCRIPTION2,SECONDTITLE3,SECONDDESCRIPTION3,SECONDTITLE4,SECONDDESCRIPTION4,SECONDTITLE5,SECONDDESCRIPTION5,SECONDTITLE6,SECONDDESCRIPTION6,SECONDTITLE7,SECONDDESCRIPTION7,SECONDTITLE8,SECONDDESCRIPTION8,SECONDTITLE9,SECONDDESCRIPTION9,SECONDTITLE10,SECONDDESCRIPTION10";
+    private static final String REGEXPREPLACE = ",|\"|\n|\r";
     private final WebResource wRBlock;
 
     public CSVResultCreation() {
@@ -146,25 +147,25 @@ public class CSVResultCreation {
         }
     }
 
-    /**
-     * writes a new line to the csv file
-     * 
-     * @param queries
-     * @param ofqw
-     */
-    private void writeCSVLine(EvaluationQueryList queries, FileWriter ofqw) {
-        for (EvaluationQuery evalQueries : queries.getQueries()) {
-
-            String result = getQueryCSV(evalQueries);
-            try {
-
-                ofqw.write(result);
-            } catch (IOException e) {
-                LOGGER.log(Level.WARNING, "", e);
-            }
-
-        }
-    }
+    // /**
+    // * writes a new line to the csv file
+    // *
+    // * @param queries
+    // * @param ofqw
+    // */
+    // private void writeCSVLine(EvaluationQueryList queries, FileWriter ofqw) {
+    // for (EvaluationQuery evalQueries : queries.getQueries()) {
+    //
+    // String result = getQueryCSV(evalQueries);
+    // try {
+    //
+    // ofqw.write(result);
+    // } catch (IOException e) {
+    // LOGGER.log(Level.WARNING, "", e);
+    // }
+    //
+    // }
+    // }
 
     /**
      * opens the CSV file
@@ -252,13 +253,13 @@ public class CSVResultCreation {
         boolean isValidBasic = false;
         for (EvaluationResultList evalResultList : resp.results) {
 
-            if (evalResultList.provider.equals("Basic"))
+            if ("Basic".equals(evalResultList.provider))
                 if (evalResultList.results.size() == 10)
                     isValidBasic = true;
                 else
                     LOGGER.log(Level.INFO, "Not used: " + evalResultList.provider + " " + evalResultList.results.size());
 
-            if (evalResultList.provider.equals("BlockPicker (Basic(4),Diversity(3),Serendipity(3))"))
+            if ("BlockPicker (Basic(4),Diversity(3),Serendipity(3))".equals(evalResultList.provider))
                 if (evalResultList.results.size() == 10)
                     isValidBlock = true;
                 else
@@ -281,9 +282,9 @@ public class CSVResultCreation {
 
                 if (result.title != null) {
                     builder.append("\"");
-                    builder.append(result.title.replaceAll(",|\"|\n|\r", ""));
+                    builder.append(result.title.replaceAll(REGEXPREPLACE, ""));
                     builder.append("\",");
-                    String description = result.description.replaceAll(",|\"|\n|\r", "");
+                    String description = result.description.replaceAll(REGEXPREPLACE, "");
                     if (description.length() > 500)
                         description = description.substring(0, 500) + "...";
                     builder.append(description);
