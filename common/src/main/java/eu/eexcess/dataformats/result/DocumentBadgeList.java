@@ -28,44 +28,40 @@ import javax.xml.bind.annotation.XmlRootElement;
  * @author thomas.orgel@joanneum.at
  */
 @XmlRootElement(name = "eexcess-document-badges-list")
-
 public class DocumentBadgeList implements Serializable {
-	
-    /**
-	 * 
-	 */
-	private static final long serialVersionUID = 5326398793008341024L;
-	@XmlElement(name="documentBadge")
+
+    private static final long serialVersionUID = 5326398793008341024L;
+    @XmlElement(name = "documentBadge")
     public LinkedList<DocumentBadge> documentBadges = new LinkedList<DocumentBadge>();
-    
+
     @Override
-	public String toString() {
-		return "DocumentBadgeList [documentBadges=" + documentBadges + "]";
-	}
+    public String toString() {
+        return "DocumentBadgeList [documentBadges=" + documentBadges + "]";
+    }
 
-	@Override
-	public int hashCode() {
-		final int prime = 31;
-		int result = 1;
-		result = prime * result + ((documentBadges == null) ? 0 : documentBadges.hashCode());
-		return result;
-	}
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + ((documentBadges == null) ? 0 : documentBadges.hashCode());
+        return result;
+    }
 
-	@Override
-	public boolean equals(Object obj) {
-		if (this == obj)
-			return true;
-		if (obj == null)
-			return false;
-		if (getClass() != obj.getClass())
-			return false;
-		DocumentBadgeList other = (DocumentBadgeList) obj;
-		if (documentBadges == null) {
-			if (other.documentBadges != null)
-				return false;
-		} else if (!documentBadges.equals(other.documentBadges))
-			return false;
-		return true;
-	}
-    
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj)
+            return true;
+        if (obj == null)
+            return false;
+        if (getClass() != obj.getClass())
+            return false;
+        DocumentBadgeList other = (DocumentBadgeList) obj;
+        if (documentBadges == null) {
+            if (other.documentBadges != null)
+                return false;
+        } else if (!documentBadges.equals(other.documentBadges))
+            return false;
+        return true;
+    }
+
 }

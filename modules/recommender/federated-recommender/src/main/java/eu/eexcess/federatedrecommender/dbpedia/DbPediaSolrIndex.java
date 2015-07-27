@@ -60,12 +60,13 @@ import eu.eexcess.federatedrecommender.utils.FederatedRecommenderException;
  *
  */
 public class DbPediaSolrIndex {
+    private static final String COULD_COT_COMMIT_TO_DB_PEDIA_INDEX = "Could cot commit to DBPedia Index";
     private static final String PARENT_NODE = "parentNode";
     private static final String EDGE = "edge";
     private static final String ENITY_DE = "enity_de";
     private static final String ENITY_EN = "enity_en";
     private static final String CHILD_NODE = "childNode";
-    private static final Logger logger = Logger.getLogger(DbPediaSolrIndex.class.getName());
+    private static final Logger LOGGER = Logger.getLogger(DbPediaSolrIndex.class.getName());
     private final String solrServer;
     private final SolrServer server;
 
@@ -89,10 +90,10 @@ public class DbPediaSolrIndex {
                 server.deleteByQuery("*:*");
                 server.commit();
             } catch (SolrServerException e1) {
-                logger.log(Level.SEVERE, "Tried to wipe the index, could not commit", e1);
+                LOGGER.log(Level.SEVERE, "Tried to wipe the index, could not commit", e1);
                 throw new FederatedRecommenderException("Tried to wipe the index, could not commit");
             } catch (IOException e1) {
-                logger.log(Level.SEVERE, "Tried to wipe the index, could not commit", e1);
+                LOGGER.log(Level.SEVERE, "Tried to wipe the index, could not commit", e1);
                 throw new FederatedRecommenderException("Tried to wipe the index, could not commit");
             }
         }
@@ -101,7 +102,7 @@ public class DbPediaSolrIndex {
         try {
             lntriples = RiotReader.createParserNTriples(new FileInputStream(dbPediaFile), null);
         } catch (FileNotFoundException e) {
-            logger.log(Level.SEVERE, "DBPedia Triples File name \"" + dbPediaFile + "\" could not be found in current directory", e);
+            LOGGER.log(Level.SEVERE, "DBPedia Triples File name \"" + dbPediaFile + "\" could not be found in current directory", e);
             throw new FederatedRecommenderException("DBPedia Triples File name \"" + dbPediaFile + "\" could not be found in current directory", e);
         }
         int counter = startCounter;
@@ -116,11 +117,16 @@ public class DbPediaSolrIndex {
                 }
                 addAndCommitDocs(docs);
             } catch (Exception e) {
-                logger.log(Level.WARNING, "error ", e);
+                LOGGER.log(Level.WARNING, "error ", e);
             }
 
         }
 
+        addAndCommitToSolr(docs);
+
+    }
+
+    private void addAndCommitToSolr(Collection<SolrInputDocument> docs) throws FederatedRecommenderException {
         try {
             if (!docs.isEmpty()) {
                 server.add(docs);
@@ -128,29 +134,17 @@ public class DbPediaSolrIndex {
             }
 
         } catch (SolrServerException e) {
-            logger.log(Level.SEVERE, "Could not commit to index", e);
+            LOGGER.log(Level.SEVERE, "Could not commit to index", e);
             throw new FederatedRecommenderException("Could not commit to DBPediaSolrIndex: " + solrServer, e);
         } catch (IOException e) {
-            logger.log(Level.SEVERE, "Could not commit to index", e);
+            LOGGER.log(Level.SEVERE, "Could not commit to index", e);
             throw new FederatedRecommenderException("Could not commit to DBPediaSolrIndex: " + solrServer, e);
         }
-
     }
 
     private void addAndCommitDocs(Collection<SolrInputDocument> docs) throws FederatedRecommenderException {
         if (docs.size() % 1000 == 0) {
-            try {
-                if (!docs.isEmpty()) {
-                    server.add(docs);
-                    server.commit();
-                }
-            } catch (SolrServerException e) {
-                logger.log(Level.SEVERE, "Could not commit to index", e);
-                throw new FederatedRecommenderException("Could not commit to DBPediaSolrIndex: " + solrServer, e);
-            } catch (IOException e) {
-                logger.log(Level.SEVERE, "Could not commit to index", e);
-                throw new FederatedRecommenderException("Could not commit to DBPediaSolrIndex: " + solrServer, e);
-            }
+            addAndCommitToSolr(docs);
             docs.clear();
         }
     }
@@ -179,7 +173,7 @@ public class DbPediaSolrIndex {
             try {
                 queryResponse = server.query(solrParams);
             } catch (SolrServerException e) {
-                logger.log(Level.INFO, "", e);
+                LOGGER.log(Level.INFO, "", e);
 
             }
             if (queryResponse == null)
@@ -197,7 +191,7 @@ public class DbPediaSolrIndex {
                 try {
                     server.addBeans(dbPediaIndexBeans);
                 } catch (SolrServerException | IOException e) {
-                    logger.log(Level.SEVERE, "Some exception happened while adding the solr beans", e);
+                    LOGGER.log(Level.SEVERE, "Some exception happened while adding the solr beans", e);
                     throw new FederatedRecommenderException("Some exception happened while adding the solr beans", e);
                 }
                 return null;
@@ -245,13 +239,13 @@ public class DbPediaSolrIndex {
                     return false;
                 }
             } catch (Exception e) {
-                logger.log(Level.INFO, "Could not parse node correctly", e);
+                LOGGER.log(Level.INFO, "Could not parse node correctly", e);
                 return false;
             }
             doc.addField("entity_" + object.getLiteralLanguage(), object.getLiteralLexicalForm()); // t.getObject().getLiteralLanguage()
             return true;
         } catch (Exception e) {
-            logger.log(Level.INFO, "Could not parse literal node correctly", e);
+            LOGGER.log(Level.INFO, "Could not parse literal node correctly", e);
             return false;
 
         }
@@ -278,7 +272,7 @@ public class DbPediaSolrIndex {
         try {
             queryResponse = server.query(solrParams);
         } catch (SolrServerException e) {
-            logger.log(Level.SEVERE, "Query " + query + " was not found in DBPediaIndex", e);
+            LOGGER.log(Level.SEVERE, "Query " + query + " was not found in DBPediaIndex", e);
             throw new FederatedRecommenderException("Query " + query + " was not foung in DBPediaIndex, server is perhabs not running", e);
         }
         return queryResponse.getBeans(DbPediaIndexBean.class);
@@ -299,7 +293,7 @@ public class DbPediaSolrIndex {
         try {
             parentResponse = server.query(solrParams);
         } catch (SolrServerException e) {
-            logger.log(Level.INFO, "No Results in the index for query *:* with all docs", e);
+            LOGGER.log(Level.INFO, "No Results in the index for query *:* with all docs", e);
         }
         long docCount = 0;
         if (parentResponse != null)
@@ -327,7 +321,7 @@ public class DbPediaSolrIndex {
                 entry.getValue().get();
 
             } catch (Exception e) {
-                logger.log(Level.SEVERE, "Failed to retrieve results from a parter system '" + entry.getKey() + "'", e);
+                LOGGER.log(Level.SEVERE, "Failed to retrieve results from a parter system '" + entry.getKey() + "'", e);
             }
         }
 
@@ -345,7 +339,7 @@ public class DbPediaSolrIndex {
         try {
             queryResponse = server.query(solrParams);
         } catch (SolrServerException e) {
-            logger.log(Level.INFO, "Query *:* could not be processed", e);
+            LOGGER.log(Level.INFO, "Query *:* could not be processed", e);
         }
         List<DbPediaIndexBean> allDocs = null;
         if (queryResponse != null)
@@ -363,7 +357,7 @@ public class DbPediaSolrIndex {
                 try {
                     parentResponse = server.query(parentParam);
                 } catch (SolrServerException e) {
-                    logger.log(Level.INFO, "No Results in the index for query " + parentQuery, e);
+                    LOGGER.log(Level.INFO, "No Results in the index for query " + parentQuery, e);
                 }
                 dbPediaIndexBean.referringParent = 0;
                 if (parentResponse != null && parentResponse.getResults() != null)
@@ -377,7 +371,7 @@ public class DbPediaSolrIndex {
                 try {
                     childResponse = server.query(childParam);
                 } catch (SolrServerException e) {
-                    logger.log(Level.INFO, "No Results in the index for query " + childQuery, e);
+                    LOGGER.log(Level.INFO, "No Results in the index for query " + childQuery, e);
                 }
                 dbPediaIndexBean.referringChild = 0;
                 if (childResponse != null && childResponse.getResults() != null)
@@ -390,11 +384,11 @@ public class DbPediaSolrIndex {
             server.addBeans(processedDocs);
             server.commit();
         } catch (SolrServerException e) {
-            logger.log(Level.SEVERE, "Could cot commit to DBPedia Index", e);
-            throw new FederatedRecommenderException("Could cot commit to DBPedia Index", e);
+            LOGGER.log(Level.SEVERE, COULD_COT_COMMIT_TO_DB_PEDIA_INDEX, e);
+            throw new FederatedRecommenderException(COULD_COT_COMMIT_TO_DB_PEDIA_INDEX, e);
         } catch (IOException e) {
-            logger.log(Level.SEVERE, "Could cot commit to DBPedia Index", e);
-            throw new FederatedRecommenderException("Could cot commit to DBPedia Index", e);
+            LOGGER.log(Level.SEVERE, COULD_COT_COMMIT_TO_DB_PEDIA_INDEX, e);
+            throw new FederatedRecommenderException(COULD_COT_COMMIT_TO_DB_PEDIA_INDEX, e);
         }
     }
 
@@ -404,11 +398,11 @@ public class DbPediaSolrIndex {
                 server.addBeans(processedDocs);
                 server.commit();
             } catch (SolrServerException e) {
-                logger.log(Level.SEVERE, "Could cot commit to DBPedia Index", e);
-                throw new FederatedRecommenderException("Could cot commit to DBPedia Index", e);
+                LOGGER.log(Level.SEVERE, COULD_COT_COMMIT_TO_DB_PEDIA_INDEX, e);
+                throw new FederatedRecommenderException(COULD_COT_COMMIT_TO_DB_PEDIA_INDEX, e);
             } catch (IOException e) {
-                logger.log(Level.SEVERE, "Could cot commit to DBPedia Index", e);
-                throw new FederatedRecommenderException("Could cot commit to DBPedia Index", e);
+                LOGGER.log(Level.SEVERE, COULD_COT_COMMIT_TO_DB_PEDIA_INDEX, e);
+                throw new FederatedRecommenderException(COULD_COT_COMMIT_TO_DB_PEDIA_INDEX, e);
             }
             processedDocs.clear();
         }
