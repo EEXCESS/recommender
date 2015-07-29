@@ -38,9 +38,9 @@ import eu.eexcess.partnerrecommender.api.QueryGeneratorApi;
  */
 public class OpensearchQueryGenerator implements QueryGeneratorApi {
 
-    private final static Logger LOGGER = Logger.getLogger(PartnerConnector.class.getName());
+    private static final Logger LOGGER = Logger.getLogger(PartnerConnector.class.getName());
 
-    private final static String MDEFAULT_URL_ENCONDING = CharEncoding.UTF_8;;
+    private static final String MDEFAULT_URL_ENCONDING = CharEncoding.UTF_8;;
 
     /**
      * Concatenate space separated keywords and search result limit if @param

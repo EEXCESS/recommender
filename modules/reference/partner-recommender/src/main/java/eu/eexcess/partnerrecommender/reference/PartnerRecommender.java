@@ -146,7 +146,6 @@ public class PartnerRecommender implements PartnerRecommenderApi {
          * Transform Document in partner format to EEXCESS RDF format
          */
         long startTransform1 = System.currentTimeMillis();
-        // TODO rrubien: begin impl of PartnerRecommender
         Document searchResultsEexcess = transformer.transform(searchResultsNative, partnerdataLogger);
         long endTransform1 = System.currentTimeMillis();
         /*

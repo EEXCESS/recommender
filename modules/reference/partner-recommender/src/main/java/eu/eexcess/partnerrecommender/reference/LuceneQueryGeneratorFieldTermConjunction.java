@@ -7,6 +7,7 @@ import eu.eexcess.dataformats.result.DocumentBadge;
 import eu.eexcess.dataformats.userprofile.ContextKeyword;
 import eu.eexcess.dataformats.userprofile.ExpansionType;
 import eu.eexcess.dataformats.userprofile.SecureUserProfile;
+import eu.eexcess.partnerrecommender.api.PartnerConfigurationCache;
 import eu.eexcess.partnerrecommender.api.QueryGeneratorApi;
 
 /**
@@ -33,7 +34,9 @@ public class LuceneQueryGeneratorFieldTermConjunction implements QueryGeneratorA
             keyword = matcher2.replaceAll(" AND ");
 
             if (key.expansion != null && (key.expansion == ExpansionType.PSEUDORELEVANCEWP || key.expansion == ExpansionType.SERENDIPITY)) {
-                expansion = addExpansionTerm(result, expansion, key, keyword);
+                if (PartnerConfigurationCache.CONFIG.getPartnerConfiguration().isQueryExpansionEnabled()) {
+                    expansion = addExpansionTerm(result, expansion, key, keyword);
+                }
             } else {
                 expansion = addQueryTerm(result, expansion, keyword);
             }
