@@ -153,7 +153,6 @@ public class FederatedRecommenderEvaluationService extends FederatedRecommenderS
     @Consumes({ MediaType.APPLICATION_XML, MediaType.WILDCARD })
     @Produces({ MediaType.APPLICATION_XML, MediaType.WILDCARD })
     public EvaluationResultLists blockEvaluation(SecureUserProfileEvaluation userProfile) {
-
         EvaluationResultLists resultList = fREC.getblockResult(userProfile);
         resultList.queryID = userProfile.queryID;
         return resultList;

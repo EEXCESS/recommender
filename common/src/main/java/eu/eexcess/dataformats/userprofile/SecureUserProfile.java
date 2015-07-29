@@ -27,6 +27,7 @@ import javax.xml.bind.annotation.XmlElementWrapper;
 import javax.xml.bind.annotation.XmlRootElement;
 
 import eu.eexcess.dataformats.PartnerBadge;
+
 /**
  * Basic information about an EEXCESS secure user profile.
  * 
@@ -223,5 +224,4 @@ public class SecureUserProfile implements Serializable {
             return false;
         return true;
     }
-
 }
