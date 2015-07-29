@@ -48,7 +48,7 @@ import eu.eexcess.logger.PianoLogger;
  */
 public class BinaryIndexResource implements Closeable {
 
-	private Logger logger = PianoLogger.getLogger(BinaryIndexResource.class.getCanonicalName());
+	private Logger LOGGER = PianoLogger.getLogger(BinaryIndexResource.class.getCanonicalName());
 	protected String inIndexPath = null;
 	protected String outIndexPath = null;
 	protected Version luceneVersion = null;
@@ -105,7 +105,7 @@ public class BinaryIndexResource implements Closeable {
 			outIndexWriter = new IndexWriter(indexDirectory, writerConfig);
 
 		} catch (IOException e) {
-			logger.log(Level.SEVERE, "unable to open/create index at [" + outIndexPath + "]", e);
+			LOGGER.log(Level.SEVERE, "unable to open/create index at [" + outIndexPath + "]", e);
 			throw e;
 		}
 	}
@@ -121,7 +121,7 @@ public class BinaryIndexResource implements Closeable {
 		try {
 			inIndexReader = DirectoryReader.open(FSDirectory.open(new File(inIndexPath)));
 		} catch (IOException e) {
-			logger.log(Level.SEVERE, "unable to open index at [" + inIndexPath + "]", e);
+			LOGGER.log(Level.SEVERE, "unable to open index at [" + inIndexPath + "]", e);
 			throw e;
 		}
 	}
@@ -130,9 +130,9 @@ public class BinaryIndexResource implements Closeable {
 		try {
 			inIndexReader.close();
 		} catch (IOException e) {
-			logger.log(Level.SEVERE, "index reader closed erroneous", e);
+			LOGGER.log(Level.SEVERE, "index reader closed erroneous", e);
 		} catch (NullPointerException npe) {
-			logger.log(Level.SEVERE, "index reader already closed");
+			LOGGER.log(Level.SEVERE, "index reader already closed");
 		}
 		inIndexReader = null;
 	}
@@ -144,9 +144,9 @@ public class BinaryIndexResource implements Closeable {
 				outIndexWriter.commit();
 				outIndexWriter.close();
 			} catch (IOException e) {
-				logger.log(Level.SEVERE, "index closed erroneous", e);
+				LOGGER.log(Level.SEVERE, "index closed erroneous", e);
 			} catch (NullPointerException npe) {
-				logger.log(Level.SEVERE, "index reader already closed");
+				LOGGER.log(Level.SEVERE, "index reader already closed");
 			}
 			outIndexWriter = null;
 		}
