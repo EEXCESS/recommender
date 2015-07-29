@@ -122,8 +122,8 @@ public enum PartnerConfigurationCache {
             }
 
         } catch (Exception e) {
-            logger.log(Level.WARNING, "Cannot initialize enrichment service for " + partnerConfiguration.getSystemId() + " recommender", e);
-
+            if (partnerConfiguration != null)
+                logger.log(Level.WARNING, "Cannot initialize enrichment service for " + partnerConfiguration.getSystemId() + " recommender", e);
         }
         try {
             QueryGeneratorApi queryGen = (QueryGeneratorApi) Class.forName(partnerConfiguration.getQueryGeneratorClass()).newInstance();

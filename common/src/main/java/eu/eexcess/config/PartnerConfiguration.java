@@ -35,9 +35,7 @@ public class PartnerConfiguration extends PartnerBadge {
     // public String systemId;
     private String searchEndpoint; // e.g."http://localhost:8080/search/${query}";
     private String detailEndpoint;
-
     private String partnerConnectorClass;
-
     /**
      * Data mappings and transformations
      */
@@ -55,15 +53,12 @@ public class PartnerConfiguration extends PartnerBadge {
     private String userName;
     private String password;
     private String apiKey;
-
+    private Boolean isQueryExpansionEnabled;
     private Boolean partnerDataRequestsTrace;
-
     private Boolean enableEnriching;
-
     private String partnerDataLogDir;
     private String partnerDataDataDir;
     private Boolean makeCleanupBeforeTransformation;
-
     private String federatedRecommenderURI;
 
     public String getSearchEndpoint() {
@@ -314,6 +309,14 @@ public class PartnerConfiguration extends PartnerBadge {
                 + ", partnerDataRequestsTrace=" + partnerDataRequestsTrace + ", enableEnriching=" + enableEnriching + ", partnerDataLogDir=" + partnerDataLogDir
                 + ", partnerDataDataDir=" + partnerDataDataDir + ", makeCleanupBeforeTransformation=" + makeCleanupBeforeTransformation + ", federatedRecommenderURI="
                 + federatedRecommenderURI + "]";
+    }
+
+    public Boolean isQueryExpansionEnabled() {
+        return isQueryExpansionEnabled;
+    }
+
+    public void setIsQueryExpansionEnabled(Boolean isQueryExpansionEnabled) {
+        this.isQueryExpansionEnabled = isQueryExpansionEnabled;
     }
 
 }

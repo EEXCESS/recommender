@@ -27,7 +27,9 @@ import java.util.regex.Pattern;
 
 import eu.eexcess.dataformats.result.DocumentBadge;
 import eu.eexcess.dataformats.userprofile.ContextKeyword;
+import eu.eexcess.dataformats.userprofile.ExpansionType;
 import eu.eexcess.dataformats.userprofile.SecureUserProfile;
+import eu.eexcess.partnerrecommender.api.PartnerConfigurationCache;
 import eu.eexcess.partnerrecommender.api.QueryGeneratorApi;
 
 /**
@@ -46,14 +48,28 @@ public class OrQueryGenerator implements QueryGeneratorApi {
         Pattern replace = Pattern.compile(REGEXP);
 
         for (ContextKeyword context : userProfile.contextKeywords) {
-            String keyword = context.text;
-            Matcher matcher2 = replace.matcher(keyword);
-            keyword = matcher2.replaceAll(" OR ");
+            if (context.expansion != null && (context.expansion == ExpansionType.PSEUDORELEVANCEWP || context.expansion == ExpansionType.SERENDIPITY)) {
+                if (PartnerConfigurationCache.CONFIG.getPartnerConfiguration().isQueryExpansionEnabled()) {
+                    String keyword = context.text;
+                    Matcher matcher2 = replace.matcher(keyword);
+                    keyword = matcher2.replaceAll(" OR ");
 
-            if (builder.length() > 0) {
-                builder.append(" OR ");
+                    if (builder.length() > 0) {
+                        builder.append(" OR ");
+                    }
+                    builder.append(keyword);
+                }
+            } else {
+                String keyword = context.text;
+                Matcher matcher2 = replace.matcher(keyword);
+                keyword = matcher2.replaceAll(" OR ");
+
+                if (builder.length() > 0) {
+                    builder.append(" OR ");
+                }
+                builder.append(keyword);
             }
-            builder.append(keyword);
+
         }
         return builder.toString();
     }
