@@ -87,7 +87,6 @@ public class WikipediaSchoolsDumpIndexer extends IndexWriterRessource {
 
     private static final long serialVersionUID = 4856619691781902215L;
 
-    
     private static final Logger LOGGER = PianoLogger.getLogger(WikipediaSchoolsDumpIndexer.class.getName());
 
     /**
@@ -202,19 +201,23 @@ public class WikipediaSchoolsDumpIndexer extends IndexWriterRessource {
         try {
             tempFile = File.createTempFile("wikipedia-schools-index-" + WikipediaSchoolsDumpIndexer.class.getSimpleName(), "");
             if (tempFile.delete() && tempFile.mkdir()) {
-                try (WikipediaSchoolsDumpIndexer indexer = new WikipediaSchoolsDumpIndexer(tempFile.getCanonicalPath(), Version.LATEST)) {
-                    long timestamp = System.currentTimeMillis();
-                    indexer.run(args);
-                    LOGGER.info("total duration [" + (System.currentTimeMillis() - timestamp) + "]ms");
-                } catch (IOException e) {
-                    LOGGER.log(Level.SEVERE, "error during indexing", e);
-                    return;
-                }
+                buildndex(tempFile, args);
             } else {
                 LOGGER.severe("failed to perform indexing: unable to crate folder [" + tempFile.getCanonicalPath() + "]");
             }
         } catch (IOException e) {
             LOGGER.log(Level.SEVERE, "failed to perform indexing: unable to crate folder", e);
+        }
+    }
+
+    private static void buildndex(File tempFile, String[] args) {
+        try (WikipediaSchoolsDumpIndexer indexer = new WikipediaSchoolsDumpIndexer(tempFile.getCanonicalPath(), Version.LATEST)) {
+            long timestamp = System.currentTimeMillis();
+            indexer.run(args);
+            LOGGER.info("total duration [" + (System.currentTimeMillis() - timestamp) + "]ms");
+        } catch (IOException e) {
+            LOGGER.log(Level.SEVERE, "error during indexing", e);
+            return;
         }
     }
 
@@ -229,7 +232,8 @@ public class WikipediaSchoolsDumpIndexer extends IndexWriterRessource {
 
                 List<String> files = new ArrayList<String>();
 
-                collectPathFiles(FileSystems.getDefault().getPath(args[0] + RELATIVE_WIKI_SITES_CONTENT_PATH), fileExtensionWhiteList, dirsBlackListlackList, files);
+                collectPathFiles(FileSystems.getDefault().getPath(args[0] + RELATIVE_WIKI_SITES_CONTENT_PATH), fileExtensionWhiteList, dirsBlackListlackList,
+                        files);
                 String filePathAbsolutePrefix = args[0];
 
                 for (String file : files) {
@@ -319,7 +323,8 @@ public class WikipediaSchoolsDumpIndexer extends IndexWriterRessource {
      *            Usually
      * @throws IOException
      */
-    private void indexDocumentParagraphs(String relativeFilePath, String siteTitle, Set<String> siteSubjects, List<DocumentParagraph> paragraphs) throws IOException {
+    private void indexDocumentParagraphs(String relativeFilePath, String siteTitle, Set<String> siteSubjects, List<DocumentParagraph> paragraphs)
+            throws IOException {
         LOGGER.info("indexing [" + relativeFilePath + "]");
         int paragraphPositionCounter = 0;
         for (DocumentParagraph paragraph : paragraphs) {
@@ -392,7 +397,7 @@ public class WikipediaSchoolsDumpIndexer extends IndexWriterRessource {
                 }
             }
         } catch (DirectoryIteratorException ex) {
-            throw ex.getCause();
+            throw new IOException(ex);
         }
     }
 
