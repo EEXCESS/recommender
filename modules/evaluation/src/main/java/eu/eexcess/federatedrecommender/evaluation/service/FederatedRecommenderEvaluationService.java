@@ -134,6 +134,9 @@ public class FederatedRecommenderEvaluationService extends FederatedRecommenderS
         return secureUserProfile;
     }
 
+    /**
+     * @deprecated (function not used anymore)
+     */
     @POST
     @Path("/evaluation")
     @Consumes({ MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON })
@@ -188,7 +191,7 @@ public class FederatedRecommenderEvaluationService extends FederatedRecommenderS
 
         LOGGER.log(Level.INFO, "Result from user " + id + " retrieved ");
         return Response.ok(eR).build();
-    };
+    }
 
     /**
      * 
