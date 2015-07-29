@@ -17,7 +17,7 @@ import eu.eexcess.partnerrecommender.api.PartnerConfigurationCache;
  *
  */
 public class PartnerContextListener implements ServletContextAttributeListener, ServletContextListener {
-    private static final Logger logger = Logger.getLogger(PartnerContextListener.class.getName());
+    private static final Logger LOGGER = Logger.getLogger(PartnerContextListener.class.getName());
 
     @Override
     public void contextDestroyed(ServletContextEvent arg0) {
@@ -26,20 +26,25 @@ public class PartnerContextListener implements ServletContextAttributeListener, 
 
     @Override
     public void contextInitialized(ServletContextEvent arg0) {
-        logger.log(Level.INFO, "Starting Partner Helper Thread:" + PartnerConfigurationCache.CONFIG.getPartnerConfiguration().getSystemId());
+        LOGGER.log(Level.INFO, "Starting Partner Helper Thread:" + PartnerConfigurationCache.CONFIG.getPartnerConfiguration().getSystemId());
         PartnerConfigurationCache.CONFIG.registerPartnerAtServer();
     }
 
     @Override
     public void attributeAdded(ServletContextAttributeEvent arg0) {
+        // no attributes to add, class just used for the initialization thread
     }
 
     @Override
     public void attributeRemoved(ServletContextAttributeEvent arg0) {
+        // no attributes to remove, class just used for the initialization
+        // thread
     }
 
     @Override
     public void attributeReplaced(ServletContextAttributeEvent arg0) {
+        // no attributes to replace, class just used for the initialization
+        // thread
     }
 
 }

@@ -67,138 +67,121 @@ import eu.eexcess.partnerrecommender.api.QueryGeneratorApi;
  * 
  * @author thomas.orgel@joanneum.at
  */
-public class PartnerConnectorBase implements PartnerConnectorApi{
-	
-	
+public class PartnerConnectorBase implements PartnerConnectorApi {
+
     protected QueryGeneratorApi queryGenerator;
 
     /**
      * Returns the query generator for the partner search engine.
+     * 
      * @return the query generator
      */
     protected QueryGeneratorApi getQueryGenerator() {
         return queryGenerator;
     }
-    
-    
-    public ResultList queryPartnerNative(PartnerConfiguration partnerConfiguration, SecureUserProfile userProfile, PartnerdataLogger logger)
-    				throws IOException {
-    	return null;
+
+    public ResultList queryPartnerNative(PartnerConfiguration partnerConfiguration, SecureUserProfile userProfile, PartnerdataLogger logger) throws IOException {
+        return null;
     }
 
-	protected Document transformJSON2XML(String jsonData) throws EEXCESSDataTransformationException{
-		XMLSerializer serializer = new XMLSerializer(); 
-	    JSON json = JSONSerializer.toJSON( jsonData ); 
-	    serializer.setTypeHintsEnabled(false);
-	    
-	    String xmlString = serializer.write( json );  
-	    try  
-	    {  
-			SAXReader reader = new SAXReader();
-			org.dom4j.Document dom4jDoc = reader.read(new StringReader(xmlString));
-			
-			DOMWriter writer = new DOMWriter();
-			org.w3c.dom.Document w3cDoc = writer.write(dom4jDoc);
+    protected Document transformJSON2XML(String jsonData) throws EEXCESSDataTransformationException {
+        XMLSerializer serializer = new XMLSerializer();
+        JSON json = JSONSerializer.toJSON(jsonData);
+        serializer.setTypeHintsEnabled(false);
 
-	        return w3cDoc;
-	    } catch (Exception e) {  
-	        e.printStackTrace();  
-		    throw new EEXCESSDataTransformationException(e);
-	    } 
-	} 
-	
-	protected void dumpFile(String input, String postfix) {
-		DateFormat df = new SimpleDateFormat("yyyy.MM.dd.HH.mm.ss");
+        String xmlString = serializer.write(json);
+        try {
+            SAXReader reader = new SAXReader();
+            org.dom4j.Document dom4jDoc = reader.read(new StringReader(xmlString));
 
-		// Get the date today using Calendar object.
-		Date today = Calendar.getInstance().getTime();        
-		// Using DateFormat format method we can create a string 
-		// representation of a date with the defined format.
-		String reportDate = df.format(today);
-		  try {
-				File myTempFile = new File("c:\\eexcess-temp\\" + reportDate +"-"+postfix+".xml");
-		 
-				Writer out = new BufferedWriter(new OutputStreamWriter(
-					new FileOutputStream(myTempFile), "UTF-8"));
-		 
-				out.append(input);
-		 
-				out.flush();
-				out.close();
-		 
-			    } 
-			   catch (UnsupportedEncodingException e) 
-			   {
-				System.out.println(e.getMessage());
-			   } 
-			   catch (IOException e) 
-			   {
-				System.out.println(e.getMessage());
-			    }
-			   catch (Exception e)
-			   {
-				System.out.println(e.getMessage());
-			   }
-	}
+            DOMWriter writer = new DOMWriter();
+            org.w3c.dom.Document w3cDoc = writer.write(dom4jDoc);
 
-	
-	public Document queryPartner(PartnerConfiguration partnerConfiguration, SecureUserProfile userProfile, PartnerdataLogger logger) throws IOException {
-		// Configure
-		try {	
-	        Client client = new Client(PartnerConfigurationCache.CONFIG.getClientDefault());
-	
-	        queryGenerator = PartnerConfigurationCache.CONFIG.getQueryGenerator(partnerConfiguration.getQueryGeneratorClass());
-			
-	        String query = getQueryGenerator().toQuery(userProfile);
-	        
-	        Map<String, String> valuesMap = new HashMap<String, String>();
-	        valuesMap.put("query", query);
-	        int numResults = 10;
-	        if (userProfile.numResults!=null && userProfile.numResults != 0)
-	        	numResults  = userProfile.numResults;
-	        valuesMap.put("numResults", numResults+"");
-	        
-	        String searchRequest = StrSubstitutor.replace(partnerConfiguration.getSearchEndpoint(), valuesMap);
-	        
-	        WebResource service = client.resource(searchRequest);
-	       
-	        Builder builder = service.accept(MediaType.APPLICATION_XML);
-	        client.destroy();
-	        return builder.get(Document.class);
-		}
-		catch (Exception e) {
-				throw new IOException("Cannot query partner REST API!", e);
-		}
-        
-	}
+            return w3cDoc;
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw new EEXCESSDataTransformationException(e);
+        }
+    }
 
-	
-	public Document queryPartnerDetails(PartnerConfiguration partnerConfiguration,
-			DocumentBadge document, PartnerdataLogger logger)
-			throws IOException {
-		// Configure
-		try {	
-	        Client client = new Client(PartnerConfigurationCache.CONFIG.getClientDefault());
-	
-	        queryGenerator = PartnerConfigurationCache.CONFIG.getQueryGenerator(partnerConfiguration.getQueryGeneratorClass());
-			
-	        String detailQuery = getQueryGenerator().toDetailQuery(document);
-	        
-	        Map<String, String> valuesMap = new HashMap<String, String>();
-	        valuesMap.put("detailQuery", detailQuery);
-	        
-	        String searchRequest = StrSubstitutor.replace(partnerConfiguration.getDetailEndpoint(), valuesMap);
-	        
-	        WebResource service = client.resource(searchRequest);
-	       
-	        Builder builder = service.accept(MediaType.APPLICATION_XML);
-	        client.destroy();
-	        return builder.get(Document.class);
-		}
-		catch (Exception e) {
-				throw new IOException("Cannot query partner REST API!", e);
-		}
-	}
+    protected void dumpFile(String input, String postfix) {
+        DateFormat df = new SimpleDateFormat("yyyy.MM.dd.HH.mm.ss");
 
-	
+        // Get the date today using Calendar object.
+        Date today = Calendar.getInstance().getTime();
+        // Using DateFormat format method we can create a string
+        // representation of a date with the defined format.
+        String reportDate = df.format(today);
+        try {
+            File myTempFile = new File("c:\\eexcess-temp\\" + reportDate + "-" + postfix + ".xml");
+
+            Writer out = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(myTempFile), "UTF-8"));
+
+            out.append(input);
+
+            out.flush();
+            out.close();
+
+        } catch (UnsupportedEncodingException e) {
+            System.out.println(e.getMessage());
+        } catch (IOException e) {
+            System.out.println(e.getMessage());
+        } catch (Exception e) {
+            System.out.println(e.getMessage());
+        }
+    }
+
+    public Document queryPartner(PartnerConfiguration partnerConfiguration, SecureUserProfile userProfile, PartnerdataLogger logger) throws IOException {
+        // Configure
+        try {
+            Client client = new Client(PartnerConfigurationCache.CONFIG.getClientDefault());
+
+            queryGenerator = PartnerConfigurationCache.CONFIG.getQueryGenerator(partnerConfiguration.getQueryGeneratorClass());
+
+            String query = getQueryGenerator().toQuery(userProfile);
+
+            Map<String, String> valuesMap = new HashMap<String, String>();
+            valuesMap.put("query", query);
+            int numResults = 10;
+            if (userProfile.numResults != null && userProfile.numResults != 0)
+                numResults = userProfile.numResults;
+            valuesMap.put("numResults", numResults + "");
+
+            String searchRequest = StrSubstitutor.replace(partnerConfiguration.getSearchEndpoint(), valuesMap);
+
+            WebResource service = client.resource(searchRequest);
+
+            Builder builder = service.accept(MediaType.APPLICATION_XML);
+            client.destroy();
+            return builder.get(Document.class);
+        } catch (Exception e) {
+            throw new IOException("Cannot query partner REST API!", e);
+        }
+
+    }
+
+    public Document queryPartnerDetails(PartnerConfiguration partnerConfiguration, DocumentBadge document, PartnerdataLogger logger) throws IOException {
+        // Configure
+        try {
+            Client client = new Client(PartnerConfigurationCache.CONFIG.getClientDefault());
+
+            queryGenerator = PartnerConfigurationCache.CONFIG.getQueryGenerator(partnerConfiguration.getQueryGeneratorClass());
+
+            String detailQuery = getQueryGenerator().toDetailQuery(document);
+
+            Map<String, String> valuesMap = new HashMap<String, String>();
+            valuesMap.put("detailQuery", detailQuery);
+
+            String searchRequest = StrSubstitutor.replace(partnerConfiguration.getDetailEndpoint(), valuesMap);
+
+            WebResource service = client.resource(searchRequest);
+
+            Builder builder = service.accept(MediaType.APPLICATION_XML);
+            client.destroy();
+            return builder.get(Document.class);
+        } catch (Exception e) {
+            throw new IOException("Cannot query partner REST API!", e);
+        }
+    }
+
 }

@@ -59,13 +59,13 @@ import eu.eexcess.partnerrecommender.reference.PartnerConnectorBase;
  */
 public class PartnerConnector extends PartnerConnectorBase implements PartnerConnectorApi {
 
-    private static final Logger logger = Logger.getLogger(PartnerConnector.class.getName());
+    private static final Logger LOGGER = Logger.getLogger(PartnerConnector.class.getName());
 
-    private static final String searchTermsVariableName = "searchTerms";
-    private static final String substitutorPrefix = "{";
-    private static final String substitutorSuffix = "}";
+    private static final String SEARCHTERMVARIABLENAME = "searchTerms";
+    private static final String SUBSTITUTORPREFIX = "{";
+    private static final String SUBSTITUTORSUFFIX = "}";
 
-    private static final String searchLinkType = "application/x-suggestions+json";
+    private static final String SEARCHLINKTYPE = "application/x-suggestions+json";
 
     private OpensearchDescription descriptionDocument = null;
 
@@ -75,7 +75,7 @@ public class PartnerConnector extends PartnerConnectorBase implements PartnerCon
     @Override
     public ResultList queryPartnerNative(PartnerConfiguration partnerConfiguration, SecureUserProfile userProfile, PartnerdataLogger logger) throws IOException {
 
-        if (PartnerConfigurationCache.CONFIG.getIntializedFlag() == false) {
+        if (!PartnerConfigurationCache.CONFIG.getIntializedFlag()) {
             descriptionDocument = readOpensearchDescriptionDocument(partnerConfiguration.getSearchEndpoint());
             PartnerConfigurationCache.CONFIG.setIntializedFlag(bootstrapSearchEndpoint(descriptionDocument));
         }
@@ -101,16 +101,16 @@ public class PartnerConnector extends PartnerConnectorBase implements PartnerCon
     private boolean bootstrapSearchEndpoint(OpensearchDescription descriptionDocument) {
 
         SearchLinkFilter linkFilter = new SearchLinkFilter();
-        linkFilter.setType(searchLinkType);
+        linkFilter.setType(SEARCHLINKTYPE);
         SearchLinkSelector linkSelector = new SearchLinkSelector();
         List<Url> selection = linkSelector.select(descriptionDocument.searchLinks, linkFilter);
 
-        if (selection.size() <= 0) {
-            logger.log(Level.WARNING, "no search link found in [" + PartnerConfigurationCache.CONFIG.getPartnerConfiguration().getSearchEndpoint() + "]");
+        if (selection.isEmpty()) {
+            LOGGER.log(Level.WARNING, "no search link found in [" + PartnerConfigurationCache.CONFIG.getPartnerConfiguration().getSearchEndpoint() + "]");
             return false;
         } else if (selection.size() > 1) {
-            logger.log(Level.WARNING, "ambiguous search links found in [" + PartnerConfigurationCache.CONFIG.getPartnerConfiguration().getSearchEndpoint()
-                    + "] - take [" + selection.get(0).template + "]");
+            LOGGER.log(Level.WARNING, "ambiguous search links found in [" + PartnerConfigurationCache.CONFIG.getPartnerConfiguration().getSearchEndpoint() + "] - take ["
+                    + selection.get(0).template + "]");
             return false;
         }
 
@@ -137,7 +137,7 @@ public class PartnerConnector extends PartnerConnectorBase implements PartnerCon
         ClientResponse searchResult = documentResource.accept(MediaType.APPLICATION_JSON).get(ClientResponse.class);
 
         if (searchResult.getStatus() != 200) {
-            logger.log(Level.WARNING, "failed receiving search result for [" + query + "]");
+            LOGGER.log(Level.WARNING, "failed receiving search result for [" + query + "]");
             return null;
         }
 
@@ -162,13 +162,14 @@ public class PartnerConnector extends PartnerConnectorBase implements PartnerCon
 
         try {
             Map<String, String> valuesMap = new HashMap<String, String>();
-            valuesMap.put(searchTermsVariableName, searchQuery);
-            StrSubstitutor substitutor = new StrSubstitutor(valuesMap, substitutorPrefix, substitutorSuffix);
+            valuesMap.put(SEARCHTERMVARIABLENAME, searchQuery);
+            StrSubstitutor substitutor = new StrSubstitutor(valuesMap, SUBSTITUTORPREFIX, SUBSTITUTORSUFFIX);
             return substitutor.replace(PartnerConfigurationCache.CONFIG.getPartnerConfiguration().getSearchEndpoint());
         } catch (Exception e) {
+            LOGGER.log(Level.SEVERE, "Coult not inject search query", e);
         }
 
-        logger.log(Level.WARNING, "failed to prepare search request url [" + searchEndpointTemplate + "] with query [" + searchQuery + "]");
+        LOGGER.log(Level.WARNING, "failed to prepare search request url [" + searchEndpointTemplate + "] with query [" + searchQuery + "]");
         return null;
     }
 
@@ -189,7 +190,7 @@ public class PartnerConnector extends PartnerConnectorBase implements PartnerCon
 
             if (response.getStatus() != 200) {
 
-                logger.log(Level.WARNING, "failed receiving document [" + searchEndpoint + "]");
+                LOGGER.log(Level.WARNING, "failed receiving document [" + searchEndpoint + "]");
                 return null;
             }
             String xmlResponse = response.getEntity(String.class);
@@ -197,15 +198,15 @@ public class PartnerConnector extends PartnerConnectorBase implements PartnerCon
             OpenSearchDocumentParser osParser = new OpenSearchDocumentParser();
             document = osParser.toDescriptionDocument(xmlResponse);
             if (null == document) {
-                logger.log(Level.WARNING, "failed parsing document from xml");
+                LOGGER.log(Level.WARNING, "failed parsing document from xml");
             }
 
         } catch (Exception e) {
-            logger.log(Level.WARNING, "failed reading description document [" + searchEndpoint + "]", e);
+            LOGGER.log(Level.WARNING, "failed reading description document [" + searchEndpoint + "]", e);
         }
 
         if (document == null) {
-            logger.log(Level.WARNING, "failed creating description document [=NULL]");
+            LOGGER.log(Level.WARNING, "failed creating description document [=NULL]");
             return null;
         }
         return document;

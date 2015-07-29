@@ -66,14 +66,14 @@ public class FederatedRecommenderEvaluationCore {
     private final FederatedRecommenderCore fRCore;
     private final ExecutorService threadPool;
 
-    private static final Logger logger = Logger.getLogger(FederatedRecommenderEvaluationCore.class.getName());
+    private static final Logger LOGGER = Logger.getLogger(FederatedRecommenderEvaluationCore.class.getName());
 
     public FederatedRecommenderEvaluationCore(FederatedRecommenderConfiguration federatedRecConfiguration) throws FederatedRecommenderException, FileNotFoundException {
         this.federatedRecommenderConfiguration = federatedRecConfiguration;
         try {
             this.fRCore = FederatedRecommenderCore.getInstance(federatedRecommenderConfiguration);
         } catch (FederatedRecommenderException e1) {
-            logger.log(Level.SEVERE, "Could not get FederatedRecommenderCore");
+            LOGGER.log(Level.SEVERE, "Could not get FederatedRecommenderCore");
             throw e1;
         }
 
@@ -107,7 +107,7 @@ public class FederatedRecommenderEvaluationCore {
                 userProfileEvaluation = (SecureUserProfileEvaluation) fRCore.sourceSelection(userProfile, new ArrayList<String>(Arrays.asList(sourceSelectionModel)));
                 break;
             default:
-                logger.log(Level.WARNING, "Source selection unknown or not defined, not using any source selection at all");
+                LOGGER.log(Level.WARNING, "Source selection unknown or not defined, not using any source selection at all");
                 userProfileEvaluation = userProfile;
                 break;
             }
@@ -136,7 +136,7 @@ public class FederatedRecommenderEvaluationCore {
                         "eu.eexcess.federatedrecommender.decomposer.SerendiptiyDecomposer");
                 break;
             default:
-                logger.log(Level.WARNING, "Decomposer unknown or not defined, not using any decomposer at all");
+                LOGGER.log(Level.WARNING, "Decomposer unknown or not defined, not using any decomposer at all");
                 userProfileEvaluation = userProfile;
                 break;
             }
@@ -174,7 +174,7 @@ public class FederatedRecommenderEvaluationCore {
                 resultList = new EvaluationResultList(fRCore.getAndAggregateResults(userProfileEvaluation, "eu.eexcess.federatedrecommender.picker.OccurrenceProbabilityPicker"));
             }
         } catch (FederatedRecommenderException e) {
-            logger.log(Level.SEVERE, "Could get or aggregate results!", e);
+            LOGGER.log(Level.SEVERE, "Could get or aggregate results!", e);
         }
         resultList.provider = userProfile.getDecomposer() + " partners:" + userProfile.getPicker() + " expansion source partners:" + userProfile.getQueryExpansionSourcePartner();
         return resultList;
@@ -205,7 +205,7 @@ public class FederatedRecommenderEvaluationCore {
     public EvaluationResultLists getExpansionEvaluation(Integer uID) throws IOException {
         if (!evalManager.isCacheWarmed()) {
             for (SecureUserProfileEvaluation query : evalManager.getAllQueries()) {
-                logger.log(Level.INFO, "Warming evalualtion query cache");
+                LOGGER.log(Level.INFO, "Warming evalualtion query cache");
                 evalManager.addResultToQueryCache(query, getExpansionEvaluationResult(-1));
             }
         }
@@ -225,7 +225,7 @@ public class FederatedRecommenderEvaluationCore {
     public EvaluationResultLists getBlockEvaluation(Integer uID) throws IOException {
         if (!evalManager.isCacheWarmed()) {
             for (SecureUserProfileEvaluation query : evalManager.getAllQueries()) {
-                logger.log(Level.INFO, "Warming evalualtion query cache");
+                LOGGER.log(Level.INFO, "Warming evalualtion query cache");
                 evalManager.addResultToQueryCache(query, getBlockEvaluationResultFromQManager(-1));
             }
         }
@@ -243,9 +243,7 @@ public class FederatedRecommenderEvaluationCore {
     private EvaluationResultLists getBlockEvaluationResultFromQManager(Integer id) {
 
         final SecureUserProfileEvaluation evalProfil = evalManager.getNextQuery(id);
-        final EvaluationResultLists results = getblockResult(evalProfil);
-
-        return results;
+        return getblockResult(evalProfil);
     }
 
     public EvaluationResultLists getblockResult(final SecureUserProfileEvaluation evalProfil) {
@@ -282,7 +280,7 @@ public class FederatedRecommenderEvaluationCore {
             public Void call() throws Exception {
 
                 diversityProfile.setDecomposer("wikipedia");
-                EvaluationResultList evaluationResults = (EvaluationResultList) getEvaluationResults(diversityProfile);
+                EvaluationResultList evaluationResults = getEvaluationResults(diversityProfile);
                 evaluationResults.provider = "Diversity";
                 blockTmpResults.results.add(evaluationResults);
                 return null;
@@ -295,7 +293,7 @@ public class FederatedRecommenderEvaluationCore {
             public Void call() throws Exception {
 
                 unmodifiedProfile.setDecomposer("none");
-                EvaluationResultList eRL = (EvaluationResultList) getEvaluationResults(unmodifiedProfile);
+                EvaluationResultList eRL = getEvaluationResults(unmodifiedProfile);
                 eRL.provider = "Basic";
                 blockTmpResults.results.add(eRL);
                 results.results.add(eRL); // ADDING IT ALLREADY IN THE FINAL
@@ -311,7 +309,7 @@ public class FederatedRecommenderEvaluationCore {
             @Override
             public Void call() throws Exception {
                 serendipityProfile.setDecomposer("serendipity");
-                EvaluationResultList evaluationResults = (EvaluationResultList) getEvaluationResults(serendipityProfile);
+                EvaluationResultList evaluationResults = getEvaluationResults(serendipityProfile);
                 evaluationResults.provider = "Serendipity";
                 blockTmpResults.results.add(evaluationResults);
                 return null;
@@ -322,14 +320,14 @@ public class FederatedRecommenderEvaluationCore {
             diversityFuture.get();
             serendipityFutur.get();
         } catch (InterruptedException | ExecutionException e) {
-            logger.log(Level.WARNING, "Some thread had an error ", e);
+            LOGGER.log(Level.WARNING, "Some thread had an error ", e);
         }
 
         BlockPicker bP = new BlockPicker();
         try {
             results.results.add(bP.pickBlockResults(blockTmpResults, evalProfil.numResults));
         } catch (Exception e) {
-            logger.log(Level.WARNING, "", e);
+            LOGGER.log(Level.WARNING, "", e);
         }
 
         return results;
@@ -410,7 +408,7 @@ public class FederatedRecommenderEvaluationCore {
             none.get();
             wikipedia.get();
         } catch (InterruptedException | ExecutionException e) {
-            logger.log(Level.WARNING, "", e);
+            LOGGER.log(Level.WARNING, "", e);
         }
         return results;
     }
@@ -442,7 +440,7 @@ public class FederatedRecommenderEvaluationCore {
             graph = dbPediaGraph.getFromKeywords(userProfile.contextKeywords, keynodes, hitsLimit, depthLimit);
 
         } catch (Exception e) {
-            logger.log(Level.SEVERE, "There was an error while building the graph", e);
+            LOGGER.log(Level.SEVERE, "There was an error while building the graph", e);
             throw new FederatedRecommenderException("There was an error while building the graph", e);
         }
         D3GraphDocument d3GraphDocument = new D3GraphDocument(graph);

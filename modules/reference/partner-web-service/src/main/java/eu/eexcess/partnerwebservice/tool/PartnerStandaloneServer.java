@@ -49,7 +49,7 @@ public class PartnerStandaloneServer {
 
     }
 
-    public static synchronized void start(int port) throws IllegalStateException {
+    public static synchronized void start(int port) {
         if (server != null) {
             throw new IllegalStateException("Server is already running");
         }
@@ -70,7 +70,7 @@ public class PartnerStandaloneServer {
         }
     }
 
-    public static synchronized void stop() throws IllegalStateException {
+    public static synchronized void stop() {
         if (server == null) {
             throw new IllegalStateException("Server not running");
         }

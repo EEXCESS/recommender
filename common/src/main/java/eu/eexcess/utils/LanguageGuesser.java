@@ -35,13 +35,13 @@ import at.knowcenter.ie.languagedetection.LanguageDetector;
  * @author rkern
  */
 public class LanguageGuesser {
-    private final static Logger LOGGER = Logger.getLogger(LanguageGuesser.class.getName());
+    private static final Logger LOGGER = Logger.getLogger(LanguageGuesser.class.getName());
 
     private static final int MAX_LENGTH = 256;
     private static LanguageGuesser instance;
     private LanguageDetector languageDetector;
 
-    private final static Language[] languages = new Language[] { Language.English, Language.French, Language.German, Language.Italian, Language.Spanish };
+    private static final Language[] languages = new Language[] { Language.English, Language.French, Language.German, Language.Italian, Language.Spanish };
 
     static {
         instance = new LanguageGuesser();

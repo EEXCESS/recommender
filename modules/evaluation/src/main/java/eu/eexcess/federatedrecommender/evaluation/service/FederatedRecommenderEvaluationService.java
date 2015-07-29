@@ -67,7 +67,7 @@ import eu.eexcess.federatedrecommenderservice.FederatedRecommenderService;
 @Path("/evaluation")
 @Singleton
 public class FederatedRecommenderEvaluationService extends FederatedRecommenderService {
-    private static final Logger logger = Logger.getLogger(FederatedRecommenderService.class.getName());
+    private static final Logger LOGGER = Logger.getLogger(FederatedRecommenderService.class.getName());
     private FederatedRecommenderEvaluationCore fREC;
     private final FederatedRecommenderConfiguration federatedRecommenderConfiguration;
 
@@ -79,19 +79,19 @@ public class FederatedRecommenderEvaluationService extends FederatedRecommenderS
         try {
             federatedRecommenderConfiguration = mapper.readValue(new File(resource.getFile()), FederatedRecommenderConfiguration.class);
         } catch (JsonParseException e) {
-            logger.log(Level.SEVERE, "There was an error parsing the FederationRecommenderConfig File", e);
+            LOGGER.log(Level.SEVERE, "There was an error parsing the FederationRecommenderConfig File", e);
             throw new FederatedRecommenderException("There was an error parsing the FederationRecommenderConfig File in FederatedRecommenderCore Module", e);
         } catch (JsonMappingException e) {
-            logger.log(Level.SEVERE, "There was an error parsing the FederationRecommenderConfig File", e);
+            LOGGER.log(Level.SEVERE, "There was an error parsing the FederationRecommenderConfig File", e);
             throw new FederatedRecommenderException("There was an error parsing the FederationRecommenderConfig File in FederatedRecommenderCore Module", e);
         } catch (IOException e) {
-            logger.log(Level.SEVERE, "There was an error reading the FederationRecommenderConfig File", e);
+            LOGGER.log(Level.SEVERE, "There was an error reading the FederationRecommenderConfig File", e);
             throw new FederatedRecommenderException("There was an error reading the FederationRecommenderConfig File in FederatedRecommenderCore Module", e);
         }
         try {
             fREC = new FederatedRecommenderEvaluationCore(federatedRecommenderConfiguration);
         } catch (FileNotFoundException e) {
-            logger.log(Level.SEVERE, "FederatedRecommenderEvaluationCore not working", e);
+            LOGGER.log(Level.SEVERE, "FederatedRecommenderEvaluationCore not working", e);
         }
     }
 
@@ -123,17 +123,20 @@ public class FederatedRecommenderEvaluationService extends FederatedRecommenderS
 
         secureUserProfile.protectedPartnerList = protectedPartnerList;
 
-        List<UserCredentials> UserCredentials = new ArrayList<UserCredentials>();
+        List<UserCredentials> userCredentials = new ArrayList<UserCredentials>();
         eu.eexcess.dataformats.userprofile.UserCredentials cred = new UserCredentials();
         cred.login = "me@partner.x";
         cred.securityToken = "sdjalkej21!#";
         cred.systemId = "Wissenmedia";
-        UserCredentials.add(cred);
-        secureUserProfile.userCredentials = UserCredentials;
+        userCredentials.add(cred);
+        secureUserProfile.userCredentials = userCredentials;
         secureUserProfile.setQueryExpansionSourcePartner((ArrayList<PartnerBadge>) secureUserProfile.partnerList);
         return secureUserProfile;
     }
 
+    /**
+     * @deprecated (function not used anymore)
+     */
     @POST
     @Path("/evaluation")
     @Consumes({ MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON })
@@ -160,13 +163,12 @@ public class FederatedRecommenderEvaluationService extends FederatedRecommenderS
     @Path("/getPartnersFromFedRec")
     @Produces({ MediaType.APPLICATION_XML, MediaType.WILDCARD })
     public Response getPartnersFromFedRec() {
-        logger.log(Level.WARNING, "getPartnersFromFedRec");
-        System.out.println("getPartnersFromFedRec");
+        LOGGER.log(Level.INFO, "getPartnersFromFedRec");
         WebResource webResource = new Client().resource("http://localhost/eexcess-federated-recommender-web-service-1.0-SNAPSHOT/recommender/getRegisteredPartners");
         PartnerBadgeList partnerList = webResource.get(PartnerBadgeList.class);
-        System.out.println(webResource.get(String.class));
+        LOGGER.log(Level.INFO, webResource.get(String.class));
         fREC.setPartners(partnerList);
-        logger.log(Level.WARNING, partnerList.toString());
+        LOGGER.log(Level.WARNING, partnerList.toString());
         return Response.ok().build();
     }
 
@@ -187,9 +189,9 @@ public class FederatedRecommenderEvaluationService extends FederatedRecommenderS
 
         eR.evaluationDone = fREC.logEvaluationResult(id, result);
 
-        logger.log(Level.INFO, "Result from user " + id + " retrieved ");
+        LOGGER.log(Level.INFO, "Result from user " + id + " retrieved ");
         return Response.ok(eR).build();
-    };
+    }
 
     /**
      * 
@@ -255,7 +257,7 @@ public class FederatedRecommenderEvaluationService extends FederatedRecommenderS
         try {
             d3GraphDocument = fREC.getGraph(userProfile);
         } catch (FederatedRecommenderException e) {
-            logger.log(Level.WARNING, "", e);
+            LOGGER.log(Level.WARNING, "", e);
             return Response.serverError().build();
         }
 

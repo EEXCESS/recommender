@@ -34,9 +34,6 @@ import javax.xml.bind.annotation.XmlElement;
  */
 public class Context implements Serializable {
 
-    /**
-	 * 
-	 */
     private static final long serialVersionUID = 7196796361889005448L;
     @XmlElement(name = "reason")
     public String reason;

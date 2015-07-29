@@ -70,7 +70,9 @@ public class BlockPicker extends PartnersFederatedRecommendationsPicker {
      * @param totalResults
      */
     void getTopResults(ResultList resultsToAdd, int numResultsToAdd, ResultList finalResultList, Integer totalResults) {
-        for (int i = 0; i < numResultsToAdd && i < resultsToAdd.results.size() && finalResultList.results.size() < totalResults; i++) {
+        int tmpNumResultsToAdd = numResultsToAdd;
+        int tmpTotalResults = totalResults;
+        for (int i = 0; i < tmpNumResultsToAdd && i < resultsToAdd.results.size() && finalResultList.results.size() < tmpTotalResults; i++) {
             boolean found = false;
             Result o = resultsToAdd.results.get(i);
             byte[] signNewResult = getFuzzyHashSignature(o);
@@ -83,8 +85,9 @@ public class BlockPicker extends PartnersFederatedRecommendationsPicker {
             if (!found)
                 finalResultList.results.add(o);
             else {
-                numResultsToAdd++; // leaving one out -> increasing num results
-                totalResults++;
+                tmpNumResultsToAdd++; // leaving one out -> increasing num
+                                      // results
+                tmpTotalResults++;
             }
         }
     }
@@ -120,8 +123,8 @@ public class BlockPicker extends PartnersFederatedRecommendationsPicker {
      * @throws Exception
      *             in case of too small result lists
      */
-    public EvaluationResultList pickBlockResults(EvaluationResultLists resultLists, Integer numResults) throws Exception {
-
+    public EvaluationResultList pickBlockResults(EvaluationResultLists resultLists, Integer numResults) {
+        Integer tmpNumResults = numResults;
         Integer blocks = resultLists.results.size();
         EvaluationResultList basicList = null;
         EvaluationResultList diversityList = null;
@@ -157,15 +160,13 @@ public class BlockPicker extends PartnersFederatedRecommendationsPicker {
             maxSize += diversityList.results.size();
         if (basicList != null)
             maxSize += basicList.results.size();
-        if (maxSize < numResults)
-            numResults = maxSize;
-        EvaluationResultList resultList = new EvaluationResultList(splitAndGetResultsFromBlockLists(resultLists, numResults, blocks, basicList, diversityList, serendipityList));
-
-        return resultList;
+        if (maxSize < tmpNumResults)
+            tmpNumResults = maxSize;
+        return new EvaluationResultList(splitAndGetResultsFromBlockLists(tmpNumResults, blocks, basicList, diversityList, serendipityList));
     }
 
-    private ResultList splitAndGetResultsFromBlockLists(EvaluationResultLists resultLists, Integer numResults, Integer numBlocks, EvaluationResultList basicList,
-            EvaluationResultList diversityList, EvaluationResultList serendipityList) {
+    private ResultList splitAndGetResultsFromBlockLists(Integer numResults, Integer numBlocks, EvaluationResultList basicList, EvaluationResultList diversityList,
+            EvaluationResultList serendipityList) {
         int basicCount = 0;
         int diversityCount = 0;
         int serendipityCount = 0;
@@ -229,10 +230,11 @@ public class BlockPicker extends PartnersFederatedRecommendationsPicker {
      */
     private ResultList assignAndGetTopResults(Integer blockCount, ResultList basicList, ResultList diversityList, ResultList serendipityList, ResultList resultList,
             int basicCount, int diversityCount, int serendipityCount, Integer numResults) {
+        int tmpBlockCount = blockCount;
         resultList.provider = "BlockPicker (";
         int counter = 0;
         int numListResultsToAdd = 0;
-        while (counter < blockCount) {
+        while (counter < tmpBlockCount) {
 
             ResultList resultListToAdd = null;
             switch (counter) {
@@ -243,7 +245,7 @@ public class BlockPicker extends PartnersFederatedRecommendationsPicker {
                     break;
                 } else {
                     counter++;
-                    blockCount++;
+                    tmpBlockCount++;
                 }
             case 1:
                 if (diversityList != null && !diversityList.results.isEmpty()) {
@@ -252,7 +254,7 @@ public class BlockPicker extends PartnersFederatedRecommendationsPicker {
                     break;
                 } else {
                     counter++;
-                    blockCount++;
+                    tmpBlockCount++;
                 }
             case 2:
                 if (serendipityList != null) {
@@ -273,7 +275,7 @@ public class BlockPicker extends PartnersFederatedRecommendationsPicker {
                 getTopResults(resultListToAdd, numListResultsToAdd, resultList, numResults);
 
             } else
-                blockCount++;
+                tmpBlockCount++;
         }
         resultList.provider += ")";
         return resultList;

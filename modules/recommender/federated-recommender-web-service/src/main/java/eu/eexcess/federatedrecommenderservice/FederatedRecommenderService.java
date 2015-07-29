@@ -72,7 +72,7 @@ import eu.eexcess.federatedrecommender.utils.FederatedRecommenderException;
 @Path("/recommender")
 @Singleton
 public class FederatedRecommenderService {
-    private static final Logger logger = Logger.getLogger(FederatedRecommenderService.class.getName());
+    private static final Logger LOGGER = Logger.getLogger(FederatedRecommenderService.class.getName());
 
     private final FederatedRecommenderCore fRC;
 
@@ -89,27 +89,27 @@ public class FederatedRecommenderService {
         String eexcessPartnerKeyFile = System.getenv("EEXCESS_FEDERATED_RECOMMENDER_CONFIG_FILE");
         URL resource = null;
         if (eexcessPartnerKeyFile == null) {
-            logger.log(Level.INFO, "Config file was not defined in environment EEXCESS_FEDERATED_RECOMMENDER_CONFIG_FILE. Reading file from package resource.");
+            LOGGER.log(Level.INFO, "Config file was not defined in environment EEXCESS_FEDERATED_RECOMMENDER_CONFIG_FILE. Reading file from package resource.");
             resource = getClass().getResource("/federatedRecommenderConfig.json");
         } else {
-            logger.log(Level.INFO, "Reading Config file from:" + eexcessPartnerKeyFile);
+            LOGGER.log(Level.INFO, "Reading Config file from:" + eexcessPartnerKeyFile);
             try {
                 resource = new File(eexcessPartnerKeyFile).toURI().toURL();
             } catch (MalformedURLException e) {
-                logger.log(Level.SEVERE, "Environment Variable was malformated:" + eexcessPartnerKeyFile, e);
+                LOGGER.log(Level.SEVERE, "Environment Variable was malformated:" + eexcessPartnerKeyFile, e);
             }
         }
 
         try {
             federatedRecommenderConfiguration = mapper.readValue(new File(resource.getFile()), FederatedRecommenderConfiguration.class);
         } catch (IOException e) {
-            logger.log(Level.SEVERE, "There was an error parsing the FederationRecommenderConfig File", e);
+            LOGGER.log(Level.SEVERE, "There was an error parsing the FederationRecommenderConfig File", e);
             throw new FederatedRecommenderException("There was an error parsing the FederationRecommenderConfig File in FederatedRecommenderCore Module", e);
         }
         try {
             fRC = FederatedRecommenderCore.getInstance(federatedRecommenderConfiguration);
         } catch (FederatedRecommenderException e) {
-            logger.log(Level.SEVERE, "", e);
+            LOGGER.log(Level.SEVERE, "", e);
             throw new FederatedRecommenderException("Could not get an instance of FederatedRecommenderCore", e);
         }
 
@@ -117,7 +117,7 @@ public class FederatedRecommenderService {
 
     @PostConstruct
     public void initialize() throws FederatedRecommenderException {
-        logger.log(Level.INFO, "Initialize");
+        LOGGER.log(Level.INFO, "Initialize");
     }
 
     // Begin Services
@@ -141,9 +141,9 @@ public class FederatedRecommenderService {
     @Consumes({ MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON })
     @Produces({ MediaType.WILDCARD })
     public Response registerPartner(PartnerBadge badge) throws IOException {
-        logger.log(Level.INFO, "Registering Partner: " + badge.getSystemId());
+        LOGGER.log(Level.INFO, "Registering Partner: " + badge.getSystemId());
         String returnString = fRC.registerPartner(badge);
-        if (returnString.equals("Partner Key is too short (<20)"))
+        if ("Partner Key is too short (<20)".equals(returnString))
             return Response.notModified(returnString).build();
         return Response.ok().build();
     }
@@ -159,7 +159,7 @@ public class FederatedRecommenderService {
     @Consumes({ MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON })
     public void unregisterPartner(PartnerBadge badge) throws IOException {
-        logger.log(Level.INFO, "Unregistering Partner: " + badge.getSystemId());
+        LOGGER.log(Level.INFO, "Unregistering Partner: " + badge.getSystemId());
         fRC.unregisterPartner(badge);
     }
 
@@ -220,7 +220,7 @@ public class FederatedRecommenderService {
     @Path("/getPreviewImage")
     @Produces("image/png")
     public Response getPreviewImage(@QueryParam("type") String type) throws IOException {
-        logger.log(Level.INFO, type);
+        LOGGER.log(Level.INFO, type);
         if (type == null)
             return Response.serverError().build();
         InputStream resourceAsStream = null;
