@@ -25,8 +25,6 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.StringWriter;
-import java.io.Writer;
 import java.nio.file.DirectoryIteratorException;
 import java.nio.file.DirectoryStream;
 import java.nio.file.FileSystems;
@@ -44,16 +42,9 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.apache.commons.lang.StringEscapeUtils;
-import org.apache.lucene.analysis.Analyzer;
-import org.apache.lucene.analysis.en.EnglishAnalyzer;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.document.Field;
 import org.apache.lucene.document.TextField;
-import org.apache.lucene.index.IndexWriter;
-import org.apache.lucene.index.IndexWriterConfig;
-import org.apache.lucene.index.IndexWriterConfig.OpenMode;
-import org.apache.lucene.store.Directory;
-import org.apache.lucene.store.FSDirectory;
 import org.apache.lucene.util.Version;
 import org.apache.tika.exception.TikaException;
 import org.apache.tika.metadata.Metadata;
@@ -69,10 +60,8 @@ import org.htmlcleaner.ContentNode;
 import org.htmlcleaner.HtmlCleaner;
 import org.htmlcleaner.TagNode;
 import org.htmlcleaner.conditional.ITagNodeCondition;
-import org.xml.sax.Attributes;
 import org.xml.sax.ContentHandler;
 import org.xml.sax.SAXException;
-import org.xml.sax.helpers.DefaultHandler;
 
 import eu.eexcess.logger.PianoLogger;
 
@@ -95,59 +84,23 @@ import eu.eexcess.logger.PianoLogger;
  * paragraph-text: text of the paragraph<br>
  * paragraph-title: heading of the paragraph<br>
  */
-public class WikipediaSchoolsDumpIndexer implements Closeable {
+public class WikipediaSchoolsDumpIndexer extends IndexWriterRessource implements Closeable {
 
     private static final long serialVersionUID = 4856619691781902215L;
 
-    private static class Paragraph {
-        private String title;
-        private String level;
-        private String paragraph;
-        private boolean isSosParagraph;
-
-        public Paragraph(String title, String level, String paragraph) {
-            this.title = title;
-            this.level = level;
-            this.paragraph = paragraph;
-            this.isSosParagraph = false;
-        }
-
-        public String getTitle() {
-            return title;
-        }
-
-        public String getLevel() {
-            return level;
-        }
-
-        public String getParagraph() {
-            return paragraph;
-        }
-
-        public boolean isSosParagraph() {
-            return isSosParagraph;
-        }
-
-        public void isSosParagraph(boolean isSosParagraph) {
-            this.isSosParagraph = isSosParagraph;
-        }
-    }
-
+    
     private static final Logger LOGGER = PianoLogger.getLogger(WikipediaSchoolsDumpIndexer.class.getName());
 
     /**
      * XPath to 1st h1-heading text
      */
-    private static final String xpathFirstHeading = "/xhtml:html/xhtml:body/xhtml:h1/text()";
-    private IndexWriter outIndexWriter;
-    private String outIndexPath;
-    private Version luceneVersion;
-    private Double ramBufferSizeMB = 512.0;
+    private static final String XPATH_FIRST_HEADING = "/xhtml:html/xhtml:body/xhtml:h1/text()";
+
     /**
      * directory of content sites relative to wikipedia for Schools dump root
      * directory
      */
-    private String relativeWikiSitesContentPath = "wp";
+    private static final String RELATIVE_WIKI_SITES_CONTENT_PATH = "wp";
     /**
      * html tags that match one of these attributes will be ignored
      */
@@ -158,19 +111,19 @@ public class WikipediaSchoolsDumpIndexer implements Closeable {
      */
     private Set<String> documentTitleFilter = new HashSet<String>();
     /**
-     * html tags enumerated in {@link #anchors} are taken as separators for
-     * paragraphs
+     * html tags enumerated in {@link #anchorTagTypes} are taken as separators
+     * for paragraphs
      */
-    private final Set<String> anchors = new HashSet<String>();
+    private final Set<String> anchorTagTypes = new HashSet<String>();
     private CleanerProperties cleanerProperties = new CleanerProperties();
 
     private static final String NO_SUBJECT_FOUND_STRING = "no-subject-found";
 
     public WikipediaSchoolsDumpIndexer(String outIndexPath, Version luceneVersion) throws IOException {
-        this.outIndexPath = outIndexPath;
-        this.luceneVersion = luceneVersion;
+        setOutIndexPath(outIndexPath);
+        setLuceneVersion(luceneVersion);
         try {
-            openIndex();
+            open();
         } catch (IOException e) {
             LOGGER.log(Level.SEVERE, "failed to open index: trying to close", e);
             close();
@@ -227,8 +180,8 @@ public class WikipediaSchoolsDumpIndexer implements Closeable {
         documentTitleFilter.add("join team sos children");
         documentTitleFilter.add("partnership with sos chilren");
 
-        anchors.add("h1");
-        anchors.add("h2");
+        anchorTagTypes.add("h1");
+        anchorTagTypes.add("h2");
 
         cleanerProperties.setTranslateSpecialEntities(true);
         cleanerProperties.setTransResCharsToNCR(true);
@@ -255,6 +208,7 @@ public class WikipediaSchoolsDumpIndexer implements Closeable {
                     indexer.run(args);
                     LOGGER.info("total duration [" + (System.currentTimeMillis() - timestamp) + "]ms");
                 } catch (IOException e) {
+                    LOGGER.log(Level.SEVERE, "error during indexing", e);
                     return;
                 }
             } else {
@@ -263,6 +217,14 @@ public class WikipediaSchoolsDumpIndexer implements Closeable {
         } catch (IOException e) {
             LOGGER.log(Level.SEVERE, "failed to perform indexing: unable to crate folder", e);
         }
+    }
+
+    /**
+     * Closes the Lucene resource if possible . Does not throw exceptions.
+     */
+    @Override
+    public void close() {
+        super.close();
     }
 
     private void run(String[] args) {
@@ -276,15 +238,15 @@ public class WikipediaSchoolsDumpIndexer implements Closeable {
 
                 List<String> files = new ArrayList<String>();
 
-                collectPathFiles(FileSystems.getDefault().getPath(args[0] + relativeWikiSitesContentPath), fileExtensionWhiteList, dirsBlackListlackList, files);
+                collectPathFiles(FileSystems.getDefault().getPath(args[0] + RELATIVE_WIKI_SITES_CONTENT_PATH), fileExtensionWhiteList, dirsBlackListlackList, files);
                 String filePathAbsolutePrefix = args[0];
 
                 for (String file : files) {
                     Set<String> documentSubjects = parseDocumentSubjects(file);
                     TagNode document = cleanDocument(file);
-                    List<? extends TagNode> anchors = markAnchorsDistinct(document);
-                    String documentTitle = StringEscapeUtils.unescapeHtml(removeWhitespaces(parseXpathPartFromHTML(file, xpathFirstHeading)));
-                    List<Paragraph> paragraphs = getParagraphsOfDocument(document, documentTitle, anchors);
+                    List<? extends TagNode> documentAnchors = markAnchorsDistinct(document);
+                    String documentTitle = StringEscapeUtils.unescapeHtml(removeWhitespaces(parseXpathPartFromHTML(file, XPATH_FIRST_HEADING)));
+                    List<DocumentParagraph> paragraphs = getParagraphsOfDocument(document, documentTitle, documentAnchors);
                     indexDocumentParagraphs(file.replaceFirst(filePathAbsolutePrefix, ""), documentTitle, documentSubjects, paragraphs);
                 }
             } catch (IOException e) {
@@ -310,9 +272,9 @@ public class WikipediaSchoolsDumpIndexer implements Closeable {
      *            usually headings i.e. h1, h2, ... hn
      * @return the resulting slices: a list of paragraphs
      */
-    private List<Paragraph> getParagraphsOfDocument(TagNode document, String documentTitle, List<? extends TagNode> anchors) {
+    private List<DocumentParagraph> getParagraphsOfDocument(TagNode document, String documentTitle, List<? extends TagNode> anchors) {
 
-        List<Paragraph> result = new ArrayList<Paragraph>();
+        List<DocumentParagraph> result = new ArrayList<DocumentParagraph>();
 
         StringBuilder asPlaintext = new StringBuilder(removeWhitespaces(document.getText().toString()));
 
@@ -324,13 +286,8 @@ public class WikipediaSchoolsDumpIndexer implements Closeable {
 
             int paragraphStart = asPlaintext.lastIndexOf(paragraphTitle);
             String paragraphText = asPlaintext.substring(paragraphStart + paragraphTitle.length());
-            try {
-                asPlaintext.delete(paragraphStart, asPlaintext.length());
-            } catch (StringIndexOutOfBoundsException e) {
-                e.printStackTrace();
-            }
-
-            Paragraph paragraph = new Paragraph(StringEscapeUtils.unescapeHtml(
+            asPlaintext.delete(paragraphStart, asPlaintext.length());
+            DocumentParagraph paragraph = new DocumentParagraph(StringEscapeUtils.unescapeHtml(
                     paragraphTitle.replace(Long.toString(WikipediaSchoolsDumpIndexer.serialVersionUID), "")).trim(), paragraphLevel,
                     StringEscapeUtils.unescapeHtml(paragraphText.trim()));
 
@@ -345,7 +302,7 @@ public class WikipediaSchoolsDumpIndexer implements Closeable {
      * Inspect paragraph to decide whether it is an SOS Children's Village
      * advertisement or not.
      * 
-     * @param paragraph
+     * @param paragraphText
      * @return true if the paragraph is detected to be an SOS Children's Village
      *         advertisement
      */
@@ -371,10 +328,10 @@ public class WikipediaSchoolsDumpIndexer implements Closeable {
      *            Usually
      * @throws IOException
      */
-    private void indexDocumentParagraphs(String relativeFilePath, String siteTitle, Set<String> siteSubjects, List<Paragraph> paragraphs) throws IOException {
+    private void indexDocumentParagraphs(String relativeFilePath, String siteTitle, Set<String> siteSubjects, List<DocumentParagraph> paragraphs) throws IOException {
         LOGGER.info("indexing [" + relativeFilePath + "]");
         int paragraphPositionCounter = 0;
-        for (Paragraph paragraph : paragraphs) {
+        for (DocumentParagraph paragraph : paragraphs) {
 
             Document document = new Document();
 
@@ -386,7 +343,7 @@ public class WikipediaSchoolsDumpIndexer implements Closeable {
 
             document.add(new TextField("document-relative-path", relativeFilePath, Field.Store.YES));
 
-            if (siteSubjects.size() <= 0 && !paragraph.isSosParagraph()) {
+            if (siteSubjects.isEmpty() && !paragraph.isSosParagraph()) {
                 document.add(new TextField("document-subject", NO_SUBJECT_FOUND_STRING, Field.Store.YES));
             } else {
                 for (String subject : siteSubjects) {
@@ -406,47 +363,6 @@ public class WikipediaSchoolsDumpIndexer implements Closeable {
 
             outIndexWriter.addDocument(document);
         }
-    }
-
-    /**
-     * creates/overwrites existing one
-     * 
-     * @param ramBufferSizeMB
-     *            determines the amount of RAM that may be used for buffering
-     * @throws IOException
-     *             if unable to open/create index
-     */
-    private void openIndex() throws IOException {
-
-        try {
-            Directory indexDirectory = FSDirectory.open(new File(outIndexPath));
-            Analyzer analyzer = new EnglishAnalyzer();
-            IndexWriterConfig writerConfig = new IndexWriterConfig(luceneVersion, analyzer);
-            writerConfig.setOpenMode(OpenMode.CREATE);
-            writerConfig.setRAMBufferSizeMB(ramBufferSizeMB);
-            outIndexWriter = new IndexWriter(indexDirectory, writerConfig);
-            LOGGER.info("created new index at [" + outIndexPath + "]");
-        } catch (IOException e) {
-            LOGGER.log(Level.SEVERE, "unable to open/create index at [" + outIndexPath + "]", e);
-            throw e;
-        }
-    }
-
-    /**
-     * Closes the Lucene resource if possible . Does not throw exceptions.
-     */
-    @Override
-    public void close() {
-        try {
-            outIndexWriter.commit();
-            outIndexWriter.close();
-            LOGGER.info("index closed [" + outIndexPath + "]");
-        } catch (IOException e) {
-            LOGGER.log(Level.SEVERE, "index closed erroneous", e);
-        } catch (NullPointerException npe) {
-            LOGGER.log(Level.SEVERE, "index reader already closed");
-        }
-        outIndexWriter = null;
     }
 
     /**
@@ -498,45 +414,14 @@ public class WikipediaSchoolsDumpIndexer implements Closeable {
      */
     private Set<String> parseDocumentSubjects(String absoluteFilePath) throws IOException {
 
-        Set<String> siteSubjects = new HashSet<String>();
         try {
-            SAXParserImpl.newInstance(null).parse(new FileInputStream(absoluteFilePath), new DefaultHandler() {
-                private boolean isMatchingElement = false;
-                private StringBuilder characters = new StringBuilder();
-                private String tokenToRemove = "related subjects:";
-
-                public void startElement(String uri, String localName, String name, Attributes a) {
-                    if (name != null && name.equalsIgnoreCase("div") && a != null && a.getValue("id") != null && a.getValue("id").compareTo("siteSub") == 0) {
-                        isMatchingElement = true;
-                    }
-                }
-
-                @Override
-                public void characters(char[] ch, int start, int length) throws SAXException {
-                    if (isMatchingElement) {
-                        super.characters(ch, start, length);
-                        characters.append(ch, start, start + length);
-                    }
-                }
-
-                @Override
-                public void endElement(String uri, String localName, String qName) throws SAXException {
-                    super.endElement(uri, localName, qName);
-                    if (isMatchingElement && qName != null && qName.compareTo("div") == 0) {
-                        isMatchingElement = false;
-
-                        for (String subject : characters.substring(characters.toString().toLowerCase().lastIndexOf(tokenToRemove) + tokenToRemove.length(),
-                                characters.length()).split(";")) {
-                            siteSubjects.add(subject.toLowerCase().trim());
-                        }
-                        characters = new StringBuilder();
-                    }
-                }
-            });
+            WikipediaSchoolsDocumentSubjectSaxHandler siteSubjectsHandler = new WikipediaSchoolsDocumentSubjectSaxHandler();
+            SAXParserImpl.newInstance(null).parse(new FileInputStream(absoluteFilePath), siteSubjectsHandler);
+            return siteSubjectsHandler.getSubjects();
         } catch (SAXException e) {
             throw new IOException(e);
         }
-        return siteSubjects;
+
     }
 
     /**
@@ -577,7 +462,7 @@ public class WikipediaSchoolsDumpIndexer implements Closeable {
      * @return the cleaned document
      */
     private TagNode cleanDocument(String absoluteFilePath) {
-        try (Writer writer = new StringWriter(); InputStream fileStream = new FileInputStream(absoluteFilePath)) {
+        try (InputStream fileStream = new FileInputStream(absoluteFilePath)) {
             TagNode tagNode = new HtmlCleaner(cleanerProperties).clean(fileStream);
 
             for (Map.Entry<String, String> entry : tagAttributeValueToNameFilter.entrySet()) {
@@ -596,9 +481,9 @@ public class WikipediaSchoolsDumpIndexer implements Closeable {
 
     /**
      * Returns a {@link TagNode} list of headings as enumerated in
-     * {@link #anchors} in same order as they appear in the html document. The
-     * content of these headings is permanently changed in the TagNode argument:
-     * {@value #serialVersionUID} is prepended.
+     * {@link #anchorTagTypes} in same order as they appear in the html
+     * document. The content of these headings is permanently changed in the
+     * TagNode argument: {@value #serialVersionUID} is prepended.
      * 
      * @param tagNode
      *            the root node
@@ -608,7 +493,7 @@ public class WikipediaSchoolsDumpIndexer implements Closeable {
         ITagNodeCondition textAnchorCondition = new ITagNodeCondition() {
             @Override
             public boolean satisfy(TagNode tagNode) {
-                for (String anchor : anchors) {
+                for (String anchor : anchorTagTypes) {
                     if (tagNode.getName().equals(anchor)) {
                         return true;
                     }
