@@ -20,7 +20,6 @@
 
 package eu.eexcess.domaindetection.wikipedia.schools;
 
-import java.io.Closeable;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -84,7 +83,7 @@ import eu.eexcess.logger.PianoLogger;
  * paragraph-text: text of the paragraph<br>
  * paragraph-title: heading of the paragraph<br>
  */
-public class WikipediaSchoolsDumpIndexer extends IndexWriterRessource implements Closeable {
+public class WikipediaSchoolsDumpIndexer extends IndexWriterRessource {
 
     private static final long serialVersionUID = 4856619691781902215L;
 
@@ -217,14 +216,6 @@ public class WikipediaSchoolsDumpIndexer extends IndexWriterRessource implements
         } catch (IOException e) {
             LOGGER.log(Level.SEVERE, "failed to perform indexing: unable to crate folder", e);
         }
-    }
-
-    /**
-     * Closes the Lucene resource if possible . Does not throw exceptions.
-     */
-    @Override
-    public void close() {
-        super.close();
     }
 
     private void run(String[] args) {

@@ -20,7 +20,6 @@
 
 package eu.eexcess.domaindetection.wikipedia.schools;
 
-import java.io.Closeable;
 import java.io.File;
 import java.io.IOException;
 import java.util.logging.Level;
@@ -28,7 +27,7 @@ import java.util.logging.Logger;
 
 import eu.eexcess.logger.PianoLogger;
 
-public class WikipediaSchoolsDomainTreeParser extends IndexWriterRessource implements Closeable {
+public class WikipediaSchoolsDomainTreeParser extends IndexWriterRessource {
 
     private static final Logger LOGGER = PianoLogger.getLogger(WikipediaSchoolsDomainTreeParser.class);
     private static final String DOMAIN_TREE_ENTRYPOINT = "wp/index/subject.htm";
@@ -56,11 +55,6 @@ public class WikipediaSchoolsDomainTreeParser extends IndexWriterRessource imple
         } else {
             LOGGER.warning("no valid Wikipedia for Schools root specified");
         }
-    }
-
-    @Override
-    public void close() {
-        super.close();
     }
 
     private void run() {
