@@ -20,7 +20,6 @@
 
 package eu.eexcess.domaindetection.wikipedia.schools;
 
-import java.io.Closeable;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -84,11 +83,10 @@ import eu.eexcess.logger.PianoLogger;
  * paragraph-text: text of the paragraph<br>
  * paragraph-title: heading of the paragraph<br>
  */
-public class WikipediaSchoolsDumpIndexer extends IndexWriterRessource implements Closeable {
+public class WikipediaSchoolsDumpIndexer extends IndexWriterRessource {
 
     private static final long serialVersionUID = 4856619691781902215L;
 
-    
     private static final Logger LOGGER = PianoLogger.getLogger(WikipediaSchoolsDumpIndexer.class.getName());
 
     /**
@@ -203,14 +201,7 @@ public class WikipediaSchoolsDumpIndexer extends IndexWriterRessource implements
         try {
             tempFile = File.createTempFile("wikipedia-schools-index-" + WikipediaSchoolsDumpIndexer.class.getSimpleName(), "");
             if (tempFile.delete() && tempFile.mkdir()) {
-                try (WikipediaSchoolsDumpIndexer indexer = new WikipediaSchoolsDumpIndexer(tempFile.getCanonicalPath(), Version.LATEST)) {
-                    long timestamp = System.currentTimeMillis();
-                    indexer.run(args);
-                    LOGGER.info("total duration [" + (System.currentTimeMillis() - timestamp) + "]ms");
-                } catch (IOException e) {
-                    LOGGER.log(Level.SEVERE, "error during indexing", e);
-                    return;
-                }
+                buildndex(tempFile, args);
             } else {
                 LOGGER.severe("failed to perform indexing: unable to crate folder [" + tempFile.getCanonicalPath() + "]");
             }
@@ -219,12 +210,15 @@ public class WikipediaSchoolsDumpIndexer extends IndexWriterRessource implements
         }
     }
 
-    /**
-     * Closes the Lucene resource if possible . Does not throw exceptions.
-     */
-    @Override
-    public void close() {
-        super.close();
+    private static void buildndex(File tempFile, String[] args) {
+        try (WikipediaSchoolsDumpIndexer indexer = new WikipediaSchoolsDumpIndexer(tempFile.getCanonicalPath(), Version.LATEST)) {
+            long timestamp = System.currentTimeMillis();
+            indexer.run(args);
+            LOGGER.info("total duration [" + (System.currentTimeMillis() - timestamp) + "]ms");
+        } catch (IOException e) {
+            LOGGER.log(Level.SEVERE, "error during indexing", e);
+            return;
+        }
     }
 
     private void run(String[] args) {
@@ -238,7 +232,8 @@ public class WikipediaSchoolsDumpIndexer extends IndexWriterRessource implements
 
                 List<String> files = new ArrayList<String>();
 
-                collectPathFiles(FileSystems.getDefault().getPath(args[0] + RELATIVE_WIKI_SITES_CONTENT_PATH), fileExtensionWhiteList, dirsBlackListlackList, files);
+                collectPathFiles(FileSystems.getDefault().getPath(args[0] + RELATIVE_WIKI_SITES_CONTENT_PATH), fileExtensionWhiteList, dirsBlackListlackList,
+                        files);
                 String filePathAbsolutePrefix = args[0];
 
                 for (String file : files) {
@@ -328,7 +323,8 @@ public class WikipediaSchoolsDumpIndexer extends IndexWriterRessource implements
      *            Usually
      * @throws IOException
      */
-    private void indexDocumentParagraphs(String relativeFilePath, String siteTitle, Set<String> siteSubjects, List<DocumentParagraph> paragraphs) throws IOException {
+    private void indexDocumentParagraphs(String relativeFilePath, String siteTitle, Set<String> siteSubjects, List<DocumentParagraph> paragraphs)
+            throws IOException {
         LOGGER.info("indexing [" + relativeFilePath + "]");
         int paragraphPositionCounter = 0;
         for (DocumentParagraph paragraph : paragraphs) {
@@ -401,7 +397,7 @@ public class WikipediaSchoolsDumpIndexer extends IndexWriterRessource implements
                 }
             }
         } catch (DirectoryIteratorException ex) {
-            throw ex.getCause();
+            throw new IOException(ex);
         }
     }
 
