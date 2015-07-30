@@ -63,6 +63,12 @@ public class PartnerBadge implements Serializable {
     @XmlElement(name = "queryGeneratorClass")
     private String queryGeneratorClass;
 
+    @XmlElement(name = "isQueryExpansionEnabled")
+    private Boolean isQueryExpansionEnabled;
+
+    @XmlElement(name = "isQuerySplitingEnabled")
+    private Boolean isQuerySplittingEnabled;
+
     @XmlElement(name = "partnerKey")
     // has to be the same value than in SecureUserProfile
     private String partnerKey;
@@ -253,6 +259,22 @@ public class PartnerBadge implements Serializable {
 
     public void setLowerAgeLimit(Integer lowerAgeLimit) {
         this.lowerAgeLimit = lowerAgeLimit;
+    }
+
+    public Boolean isQueryExpansionEnabled() {
+        return isQueryExpansionEnabled;
+    }
+
+    public void setIsQueryExpansionEnabled(Boolean isQueryExpansionEnabled) {
+        this.isQueryExpansionEnabled = isQueryExpansionEnabled;
+    }
+
+    public Boolean isQuerySplittingEnabled() {
+        return isQuerySplittingEnabled;
+    }
+
+    public void setIsQuerySplittingEnabled(Boolean isQuerySplittingEnabled) {
+        this.isQuerySplittingEnabled = isQuerySplittingEnabled;
     }
 
 }

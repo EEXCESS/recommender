@@ -53,7 +53,7 @@ public class PartnerConfiguration extends PartnerBadge {
     private String userName;
     private String password;
     private String apiKey;
-    private Boolean isQueryExpansionEnabled;
+
     private Boolean partnerDataRequestsTrace;
     private Boolean enableEnriching;
     private String partnerDataLogDir;
@@ -309,14 +309,6 @@ public class PartnerConfiguration extends PartnerBadge {
                 + ", partnerDataRequestsTrace=" + partnerDataRequestsTrace + ", enableEnriching=" + enableEnriching + ", partnerDataLogDir=" + partnerDataLogDir
                 + ", partnerDataDataDir=" + partnerDataDataDir + ", makeCleanupBeforeTransformation=" + makeCleanupBeforeTransformation + ", federatedRecommenderURI="
                 + federatedRecommenderURI + "]";
-    }
-
-    public Boolean isQueryExpansionEnabled() {
-        return isQueryExpansionEnabled;
-    }
-
-    public void setIsQueryExpansionEnabled(Boolean isQueryExpansionEnabled) {
-        this.isQueryExpansionEnabled = isQueryExpansionEnabled;
     }
 
 }
