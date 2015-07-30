@@ -48,7 +48,11 @@ public class IndexWriterRessource implements Closeable {
     protected IndexWriter outIndexWriter;
     private Version luceneVersion = Version.LATEST;
     private Double ramBufferSizeMB = 512.0;
-    private String outIndexPath;
+    private File outIndexPath;
+
+    public IndexWriterRessource(File outIndexPath) {
+        this.outIndexPath = outIndexPath;
+    }
 
     public Version getLuceneVersion() {
         return luceneVersion;
@@ -66,12 +70,8 @@ public class IndexWriterRessource implements Closeable {
         this.ramBufferSizeMB = ramBufferSizeMB;
     }
 
-    public String getOutIndexPath() {
+    public File getOutIndexPath() {
         return outIndexPath;
-    }
-
-    public void setOutIndexPath(String outIndexPath) {
-        this.outIndexPath = outIndexPath;
     }
 
     /**
@@ -86,7 +86,7 @@ public class IndexWriterRessource implements Closeable {
     public void open() throws IOException {
 
         try {
-            Directory indexDirectory = FSDirectory.open(new File(outIndexPath));
+            Directory indexDirectory = FSDirectory.open(outIndexPath);
             Analyzer analyzer = new EnglishAnalyzer();
             IndexWriterConfig writerConfig = new IndexWriterConfig(luceneVersion, analyzer);
             writerConfig.setOpenMode(OpenMode.CREATE);
@@ -101,14 +101,16 @@ public class IndexWriterRessource implements Closeable {
 
     @Override
     public void close() {
-        try {
-            outIndexWriter.commit();
-            outIndexWriter.close();
-            LOGGER.info("index closed [" + outIndexPath + "]");
-        } catch (IOException e) {
-            LOGGER.log(Level.SEVERE, "index closed erroneous", e);
-        } catch (NullPointerException npe) {
-            LOGGER.log(Level.SEVERE, "index reader already closed", npe);
+        if (outIndexWriter != null) {
+            try {
+                outIndexWriter.commit();
+                outIndexWriter.close();
+                LOGGER.info("index closed [" + outIndexPath + "]");
+            } catch (IOException e) {
+                LOGGER.log(Level.SEVERE, "index closed erroneous", e);
+            }
+        } else {
+            LOGGER.log(Level.SEVERE, "no resource to close found");
         }
         outIndexWriter = null;
     }

@@ -117,8 +117,8 @@ public class WikipediaSchoolsDumpIndexer extends IndexWriterRessource {
 
     private static final String NO_SUBJECT_FOUND_STRING = "no-subject-found";
 
-    public WikipediaSchoolsDumpIndexer(String outIndexPath, Version luceneVersion) throws IOException {
-        setOutIndexPath(outIndexPath);
+    public WikipediaSchoolsDumpIndexer(File outIndexPath, Version luceneVersion) throws IOException {
+        super(outIndexPath);
         setLuceneVersion(luceneVersion);
         try {
             open();
@@ -197,21 +197,62 @@ public class WikipediaSchoolsDumpIndexer extends IndexWriterRessource {
      *            args[0]='/home/hugo/.../wikipedia-schools-3.0.2/'
      */
     public static void main(String[] args) {
-        File tempFile;
+        File tempDir;
         try {
-            tempFile = File.createTempFile("wikipedia-schools-index-" + WikipediaSchoolsDumpIndexer.class.getSimpleName(), "");
-            if (tempFile.delete() && tempFile.mkdir()) {
-                buildndex(tempFile, args);
+            tempDir = File.createTempFile("wikipedia-schools-index-" + WikipediaSchoolsDumpIndexer.class.getSimpleName(), "");
+            if (tempDir.delete() && tempDir.mkdir()) {
+                buildIndex(tempDir, args);
             } else {
-                LOGGER.severe("failed to perform indexing: unable to crate folder [" + tempFile.getCanonicalPath() + "]");
+                LOGGER.severe("failed to perform indexing: unable to crate folder [" + tempDir.getCanonicalPath() + "]");
             }
         } catch (IOException e) {
             LOGGER.log(Level.SEVERE, "failed to perform indexing: unable to crate folder", e);
         }
     }
 
-    private static void buildndex(File tempFile, String[] args) {
-        try (WikipediaSchoolsDumpIndexer indexer = new WikipediaSchoolsDumpIndexer(tempFile.getCanonicalPath(), Version.LATEST)) {
+    /**
+     * Collects recursively all files (absolute paths) starting from a root
+     * folder considering file extensions as white-list and directories as
+     * blacklist.
+     * 
+     * @param rootDir
+     *            where to start recursive traversal from
+     * @param fileExtensionWhiteList
+     *            files ending with a string enumerated in the list will be
+     *            considered
+     * @param dirsBlackList
+     *            directories (ending) with a string enumerated in that list
+     *            will be ignored
+     * @param matchedFiles
+     *            all matching files
+     * @throws IOException
+     */
+    public static void collectPathFiles(Path rootDir, Set<String> fileExtensionWhiteList, Set<String> dirsBlackList, List<Path> matchedFiles)
+            throws IOException {
+        try (DirectoryStream<Path> stream = Files.newDirectoryStream(rootDir)) {
+            for (Path entry : stream) {
+                if (entry != null && !Files.isDirectory(entry, LinkOption.NOFOLLOW_LINKS)) {
+                    for (String whiteToken : fileExtensionWhiteList) {
+                        Path entryFileName = entry.getFileName();
+                        if (entryFileName != null && entryFileName.toString().endsWith(whiteToken)) {
+                            matchedFiles.add(entry);
+                        }
+                    }
+                } else {
+                    for (String blackToken : dirsBlackList) {
+                        if (!entry.endsWith(blackToken)) {
+                            collectPathFiles(entry, fileExtensionWhiteList, dirsBlackList, matchedFiles);
+                        }
+                    }
+                }
+            }
+        } catch (DirectoryIteratorException ex) {
+            throw new IOException(ex);
+        }
+    }
+
+    private static void buildIndex(File tempFile, String[] args) {
+        try (WikipediaSchoolsDumpIndexer indexer = new WikipediaSchoolsDumpIndexer(tempFile, Version.LATEST)) {
             long timestamp = System.currentTimeMillis();
             indexer.run(args);
             LOGGER.info("total duration [" + (System.currentTimeMillis() - timestamp) + "]ms");
@@ -221,7 +262,7 @@ public class WikipediaSchoolsDumpIndexer extends IndexWriterRessource {
         }
     }
 
-    private void run(String[] args) {
+    private void run(String[] args) throws IOException {
         if (args.length > 0) {
             try {
                 Set<String> dirsBlackListlackList = new HashSet<String>();
@@ -230,19 +271,20 @@ public class WikipediaSchoolsDumpIndexer extends IndexWriterRessource {
                 fileExtensionWhiteList.add(".html");
                 fileExtensionWhiteList.add(".htm");
 
-                List<String> files = new ArrayList<String>();
+                List<Path> files = new ArrayList<Path>();
 
                 collectPathFiles(FileSystems.getDefault().getPath(args[0] + RELATIVE_WIKI_SITES_CONTENT_PATH), fileExtensionWhiteList, dirsBlackListlackList,
                         files);
                 String filePathAbsolutePrefix = args[0];
 
-                for (String file : files) {
-                    Set<String> documentSubjects = parseDocumentSubjects(file);
-                    TagNode document = cleanDocument(file);
+                for (Path file : files) {
+                    String filePathString = file.toString();
+                    Set<String> documentSubjects = parseDocumentSubjects(filePathString);
+                    TagNode document = cleanDocument(filePathString);
                     List<? extends TagNode> documentAnchors = markAnchorsDistinct(document);
-                    String documentTitle = StringEscapeUtils.unescapeHtml(removeWhitespaces(parseXpathPartFromHTML(file, XPATH_FIRST_HEADING)));
+                    String documentTitle = StringEscapeUtils.unescapeHtml(removeWhitespaces(parseXpathPartFromHTML(filePathString, XPATH_FIRST_HEADING)));
                     List<DocumentParagraph> paragraphs = getParagraphsOfDocument(document, documentTitle, documentAnchors);
-                    indexDocumentParagraphs(file.replaceFirst(filePathAbsolutePrefix, ""), documentTitle, documentSubjects, paragraphs);
+                    indexDocumentParagraphs(filePathString.replaceFirst(filePathAbsolutePrefix, ""), documentTitle, documentSubjects, paragraphs);
                 }
             } catch (IOException e) {
                 StringBuilder message = new StringBuilder("failed to open wikipedia for schools dump directory");
@@ -251,6 +293,8 @@ public class WikipediaSchoolsDumpIndexer extends IndexWriterRessource {
                 }
                 LOGGER.log(Level.SEVERE, message.toString(), e);
             }
+        } else {
+            throw new IOException("no source path given");
         }
     }
 
@@ -358,46 +402,6 @@ public class WikipediaSchoolsDumpIndexer extends IndexWriterRessource {
             document.add(new TextField("paragraph-position-in-document", paragraphPosition + "/" + paragraphs.size(), Field.Store.YES));
 
             outIndexWriter.addDocument(document);
-        }
-    }
-
-    /**
-     * Collects recursively all files (absolute paths) starting from a root
-     * folder considering file extensions as white-list and directories as
-     * blacklist.
-     * 
-     * @param rootDir
-     *            where to start recursive traversal from
-     * @param fileExtensionWhiteList
-     *            files ending with a string enumerated in the list will be
-     *            considered
-     * @param dirsBlackList
-     *            directories (ending) with a string enumerated in that list
-     *            will be ignored
-     * @param matchedFiles
-     *            all matching files
-     * @throws IOException
-     */
-    private void collectPathFiles(Path rootDir, Set<String> fileExtensionWhiteList, Set<String> dirsBlackList, List<String> matchedFiles) throws IOException {
-        try (DirectoryStream<Path> stream = Files.newDirectoryStream(rootDir)) {
-            for (Path entry : stream) {
-                if (entry != null && !Files.isDirectory(entry, LinkOption.NOFOLLOW_LINKS)) {
-                    for (String whiteToken : fileExtensionWhiteList) {
-                        Path entryFileName = entry.getFileName();
-                        if (entryFileName != null && entryFileName.toString().endsWith(whiteToken)) {
-                            matchedFiles.add(entry.toString());
-                        }
-                    }
-                } else {
-                    for (String blackToken : dirsBlackList) {
-                        if (!entry.endsWith(blackToken)) {
-                            collectPathFiles(entry, fileExtensionWhiteList, dirsBlackList, matchedFiles);
-                        }
-                    }
-                }
-            }
-        } catch (DirectoryIteratorException ex) {
-            throw new IOException(ex);
         }
     }
 

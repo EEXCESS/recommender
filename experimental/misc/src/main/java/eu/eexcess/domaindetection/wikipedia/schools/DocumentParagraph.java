@@ -59,4 +59,45 @@ public class DocumentParagraph {
     public void isSosParagraph(boolean isSosParagraph) {
         this.isSosParagraph = isSosParagraph;
     }
+
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + (isSosParagraph ? 1231 : 1237);
+        result = prime * result + ((level == null) ? 0 : level.hashCode());
+        result = prime * result + ((paragraphText == null) ? 0 : paragraphText.hashCode());
+        result = prime * result + ((title == null) ? 0 : title.hashCode());
+        return result;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj)
+            return true;
+        if (obj == null)
+            return false;
+        if (getClass() != obj.getClass())
+            return false;
+        DocumentParagraph other = (DocumentParagraph) obj;
+        if (isSosParagraph != other.isSosParagraph)
+            return false;
+        if (level == null) {
+            if (other.level != null)
+                return false;
+        } else if (!level.equals(other.level))
+            return false;
+        if (paragraphText == null) {
+            if (other.paragraphText != null)
+                return false;
+        } else if (!paragraphText.equals(other.paragraphText))
+            return false;
+        if (title == null) {
+            if (other.title != null)
+                return false;
+        } else if (!title.equals(other.title))
+            return false;
+        return true;
+    }
+    
 }
