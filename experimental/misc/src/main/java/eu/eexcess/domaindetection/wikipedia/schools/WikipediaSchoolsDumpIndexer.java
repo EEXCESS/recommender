@@ -31,14 +31,22 @@ import java.nio.file.Files;
 import java.nio.file.LinkOption;
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.ListIterator;
 import java.util.Map;
+import java.util.NoSuchElementException;
 import java.util.Set;
+import java.util.TreeMap;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.regex.Pattern;
 
 import org.apache.commons.lang.StringEscapeUtils;
 import org.apache.lucene.document.Document;
@@ -53,7 +61,6 @@ import org.apache.tika.sax.XHTMLContentHandler;
 import org.apache.tika.sax.xpath.Matcher;
 import org.apache.tika.sax.xpath.MatchingContentHandler;
 import org.apache.tika.sax.xpath.XPathParser;
-import org.ccil.cowan.tagsoup.jaxp.SAXParserImpl;
 import org.htmlcleaner.CleanerProperties;
 import org.htmlcleaner.ContentNode;
 import org.htmlcleaner.HtmlCleaner;
@@ -85,6 +92,22 @@ import eu.eexcess.logger.PianoLogger;
  */
 public class WikipediaSchoolsDumpIndexer extends IndexWriterRessource {
 
+    private static class AtomicIntegerValueComparator implements Comparator<String> {
+
+        Map<? extends Object, AtomicInteger> map;
+
+        public AtomicIntegerValueComparator(Map<? extends Object, AtomicInteger> map) {
+            this.map = map;
+        }
+
+        @Override
+        public int compare(String keyA, String keyB) {
+            Integer valueA = new Integer(map.get(keyA).intValue());
+            Integer valueB = new Integer(map.get(keyB).intValue());
+            return valueB.compareTo(valueA);
+        }
+    }
+
     private static final long serialVersionUID = 4856619691781902215L;
 
     private static final Logger LOGGER = PianoLogger.getLogger(WikipediaSchoolsDumpIndexer.class.getName());
@@ -99,6 +122,15 @@ public class WikipediaSchoolsDumpIndexer extends IndexWriterRessource {
      * directory
      */
     private static final String RELATIVE_WIKI_SITES_CONTENT_PATH = "wp";
+
+    /**
+     * Separator of domains used in filenames: each domain has it's own well
+     * named site out of that the domain name can be extracted nicely.
+     */
+    private static final String DOMAIN_TREE_SITE_SEPARATOR = "\\.";
+
+    private static final String NO_SUBJECT_FOUND_STRING = "no-subject-found";
+
     /**
      * html tags that match one of these attributes will be ignored
      */
@@ -115,7 +147,20 @@ public class WikipediaSchoolsDumpIndexer extends IndexWriterRessource {
     private final Set<String> anchorTagTypes = new HashSet<String>();
     private CleanerProperties cleanerProperties = new CleanerProperties();
 
-    private static final String NO_SUBJECT_FOUND_STRING = "no-subject-found";
+    /**
+     * staticstics
+     * 
+     * @{
+     */
+    private int numberDocumentsCount = 0;
+    private int numberParagraphsCount = 0;
+    private int numberDocumentsWithoutDomainCount = 0;
+    private int numberParagraphsWithoutDomainCount = 0;
+    Map<String, AtomicInteger> seenDomains = new HashMap<String, AtomicInteger>();
+
+    /**
+     * @}
+     */
 
     public WikipediaSchoolsDumpIndexer(File outIndexPath, Version luceneVersion) throws IOException {
         super(outIndexPath);
@@ -227,7 +272,7 @@ public class WikipediaSchoolsDumpIndexer extends IndexWriterRessource {
      *            all matching files
      * @throws IOException
      */
-    public static void collectPathFiles(Path rootDir, Set<String> fileExtensionWhiteList, Set<String> dirsBlackList, List<Path> matchedFiles)
+    public static void collectFilePaths(Path rootDir, Set<String> fileExtensionWhiteList, Set<String> dirsBlackList, List<Path> matchedFiles)
             throws IOException {
         try (DirectoryStream<Path> stream = Files.newDirectoryStream(rootDir)) {
             for (Path entry : stream) {
@@ -241,7 +286,7 @@ public class WikipediaSchoolsDumpIndexer extends IndexWriterRessource {
                 } else {
                     for (String blackToken : dirsBlackList) {
                         if (!entry.endsWith(blackToken)) {
-                            collectPathFiles(entry, fileExtensionWhiteList, dirsBlackList, matchedFiles);
+                            collectFilePaths(entry, fileExtensionWhiteList, dirsBlackList, matchedFiles);
                         }
                     }
                 }
@@ -249,6 +294,26 @@ public class WikipediaSchoolsDumpIndexer extends IndexWriterRessource {
         } catch (DirectoryIteratorException ex) {
             throw new IOException(ex);
         }
+    }
+
+    /**
+     * Splits a given string of domains by {@value #DOMAIN_TREE_SITE_SEPARATOR}
+     * separator to a list of strings but removes the last element (the file
+     * extension - i.e. "htm").
+     * 
+     * @param domainPath
+     *            string to be separated to domains
+     * @return
+     */
+    public static List<String> stripDomains(String domainPath) {
+
+        List<String> domainList = new LinkedList<String>(Arrays.asList(domainPath.toLowerCase().split(DOMAIN_TREE_SITE_SEPARATOR)));
+        if (!domainList.isEmpty()) {
+            Iterator<String> iterator = domainList.listIterator(domainList.size() - 1);
+            iterator.next();
+            iterator.remove();
+        }
+        return domainList;
     }
 
     private static void buildIndex(File tempFile, String[] args) {
@@ -273,11 +338,12 @@ public class WikipediaSchoolsDumpIndexer extends IndexWriterRessource {
 
                 List<Path> files = new ArrayList<Path>();
 
-                collectPathFiles(FileSystems.getDefault().getPath(args[0] + RELATIVE_WIKI_SITES_CONTENT_PATH), fileExtensionWhiteList, dirsBlackListlackList,
+                collectFilePaths(FileSystems.getDefault().getPath(args[0] + RELATIVE_WIKI_SITES_CONTENT_PATH), fileExtensionWhiteList, dirsBlackListlackList,
                         files);
                 String filePathAbsolutePrefix = args[0];
 
                 for (Path file : files) {
+                    numberDocumentsCount++;
                     String filePathString = file.toString();
                     Set<String> documentSubjects = parseDocumentSubjects(filePathString);
                     TagNode document = cleanDocument(filePathString);
@@ -285,9 +351,15 @@ public class WikipediaSchoolsDumpIndexer extends IndexWriterRessource {
                     String documentTitle = StringEscapeUtils.unescapeHtml(removeWhitespaces(parseXpathPartFromHTML(filePathString, XPATH_FIRST_HEADING)));
                     List<DocumentParagraph> paragraphs = getParagraphsOfDocument(document, documentTitle, documentAnchors);
                     indexDocumentParagraphs(filePathString.replaceFirst(filePathAbsolutePrefix, ""), documentTitle, documentSubjects, paragraphs);
+
+                    logNewlySeenDomains(documentSubjects);
+                    if (documentSubjects.isEmpty()) {
+                        numberDocumentsWithoutDomainCount++;
+                    }
                 }
+                printStatistics();
             } catch (IOException e) {
-                StringBuilder message = new StringBuilder("failed to open wikipedia for schools dump directory");
+                StringBuilder message = new StringBuilder("failed create index");
                 if (args.length > 0) {
                     message.append("[" + args[0] + "]");
                 }
@@ -298,7 +370,60 @@ public class WikipediaSchoolsDumpIndexer extends IndexWriterRessource {
         }
     }
 
-    private String removeWhitespaces(String text) {
+    @SuppressWarnings({ "unchecked", "rawtypes" })
+    private static Map sortByValue(Map unsortedMap) {
+        Map sortedMap = new TreeMap(new AtomicIntegerValueComparator(unsortedMap));
+        sortedMap.putAll(unsortedMap);
+        return sortedMap;
+    }
+
+    private void printStatistics() {
+
+        int maxCount = 0, minCount = Integer.MAX_VALUE;
+        for (Map.Entry<String, AtomicInteger> entry : seenDomains.entrySet()) {
+            int entryValue = entry.getValue().intValue();
+            if (entryValue > maxCount) {
+                maxCount = entryValue;
+            }
+            if (entryValue < minCount) {
+                minCount = entryValue;
+            }
+        }
+
+        @SuppressWarnings("unchecked")
+        Map<String, AtomicInteger> seenDomainsSortedByValue = (Map<String, AtomicInteger>) sortByValue(seenDomains);
+
+        System.out.println("------------------");
+        System.out.println("documents count .... [" + numberDocumentsCount + "]  [" + numberDocumentsWithoutDomainCount / (double) numberDocumentsCount
+                + "]% without domains [" + numberDocumentsWithoutDomainCount + "]");
+        System.out.println("paragraphs count ... [" + numberParagraphsCount + "] [" + numberParagraphsWithoutDomainCount / (double) numberParagraphsCount
+                + "]% without domains [" + numberParagraphsWithoutDomainCount + "]");
+        System.out.println("seen domains ....... [" + seenDomains.size() + "] max count [" + maxCount + "] min count[" + minCount + "]");
+        System.out.println(" domain histogram ");
+
+        maxCount++;
+        for (Map.Entry<String, AtomicInteger> entry : seenDomainsSortedByValue.entrySet()) {
+            for (int times = 0; times < (entry.getValue().intValue() / ((double) maxCount)) * 100; times++) {
+                System.out.print(".");
+            }
+            System.out.println(" " + entry.getKey());
+        }
+        System.out.println("------------------");
+
+    }
+
+    private void logNewlySeenDomains(Set<String> documentSubjects) {
+        for (String domain : documentSubjects) {
+            AtomicInteger seenDomainCount = seenDomains.get(domain);
+            if (null == seenDomainCount) {
+                seenDomains.put(domain, new AtomicInteger(1));
+            } else {
+                seenDomainCount.incrementAndGet();
+            }
+        }
+    }
+
+    private static String removeWhitespaces(String text) {
         return text.replaceAll("\\s+", " ").replaceAll("\\\\n", "");
     }
 
@@ -330,7 +455,7 @@ public class WikipediaSchoolsDumpIndexer extends IndexWriterRessource {
                     paragraphTitle.replace(Long.toString(WikipediaSchoolsDumpIndexer.serialVersionUID), "")).trim(), paragraphLevel,
                     StringEscapeUtils.unescapeHtml(paragraphText.trim()));
 
-            paragraph.isSosParagraph(isSosDocumentTitle(documentTitle));
+            paragraph.isSosParagraph(isSosDocumentTitle(documentTitle, documentTitleFilter));
 
             result.add(paragraph);
         }
@@ -345,7 +470,7 @@ public class WikipediaSchoolsDumpIndexer extends IndexWriterRessource {
      * @return true if the paragraph is detected to be an SOS Children's Village
      *         advertisement
      */
-    private boolean isSosDocumentTitle(String documentTitle) {
+    private static boolean isSosDocumentTitle(String documentTitle, Set<String> documentTitleFilter) {
 
         for (String skipTitleToken : documentTitleFilter) {
             if (documentTitle.toLowerCase().contains(skipTitleToken)) {
@@ -372,13 +497,14 @@ public class WikipediaSchoolsDumpIndexer extends IndexWriterRessource {
         LOGGER.info("indexing [" + relativeFilePath + "]");
         int paragraphPositionCounter = 0;
         for (DocumentParagraph paragraph : paragraphs) {
-
+            numberParagraphsCount++;
             Document document = new Document();
 
             if (paragraph.isSosParagraph()) {
                 document.add(new TextField("document-is-sos-advertisement", "true", Field.Store.YES));
             } else {
                 document.add(new TextField("document-is-sos-advertisement", "false", Field.Store.YES));
+                numberParagraphsWithoutDomainCount++;
             }
 
             document.add(new TextField("document-relative-path", relativeFilePath, Field.Store.YES));
@@ -412,16 +538,35 @@ public class WikipediaSchoolsDumpIndexer extends IndexWriterRessource {
      * @return a list of (lower case) subjects
      * @throws IOException
      */
-    private Set<String> parseDocumentSubjects(String absoluteFilePath) throws IOException {
+    private static Set<String> parseDocumentSubjects(String absoluteFilePath) throws IOException {
+        Set<String> documentSubjects = new HashSet<String>();
+
+        String documentString = new String(Files.readAllBytes(new File(absoluteFilePath).toPath()), "utf-8");
+        StringBuffer documentBuffer = new StringBuffer(documentString.toLowerCase());
+
+        String startAnchor = "related subjects:";
+        String endAnchor = "</div>";
+
+        documentBuffer.delete(0, documentBuffer.indexOf(startAnchor) + startAnchor.length());
+        documentBuffer.delete(documentBuffer.indexOf(endAnchor), documentBuffer.length());
+
+        /**
+         * matches: '<a href="xxx">' where xxx can be found in group 1
+         */
+        String domainRegexp = "<a\\s+href=(\"[^\"]*\"|'[^']*'|[^'\">])*\\s*>";
+        Pattern pattern = Pattern.compile(domainRegexp);
+        java.util.regex.Matcher matcher = pattern.matcher(documentBuffer);
 
         try {
-            WikipediaSchoolsDocumentSubjectSaxHandler siteSubjectsHandler = new WikipediaSchoolsDocumentSubjectSaxHandler();
-            SAXParserImpl.newInstance(null).parse(new FileInputStream(absoluteFilePath), siteSubjectsHandler);
-            return siteSubjectsHandler.getSubjects();
-        } catch (SAXException e) {
-            throw new IOException(e);
+            while (matcher.find()) {
+                List<String> stripedDomains = stripDomains(matcher.group(1));
+                documentSubjects.add(stripedDomains.get(stripedDomains.size() - 1));
+            }
+        } catch (NoSuchElementException e) {
+            throw new IOException("failed parsing document subject of document [" + absoluteFilePath + "]");
         }
 
+        return documentSubjects;
     }
 
     /**
@@ -435,7 +580,7 @@ public class WikipediaSchoolsDumpIndexer extends IndexWriterRessource {
      * @throws IOException
      *             on any tika or inpustream exception
      */
-    private String parseXpathPartFromHTML(String absoluteFilPath, String xPathString) throws IOException {
+    private static String parseXpathPartFromHTML(String absoluteFilPath, String xPathString) throws IOException {
         XPathParser xhtmlParser = new XPathParser("xhtml", XHTMLContentHandler.XHTML);
 
         Matcher divContentMatcher = xhtmlParser.parse(xPathString);

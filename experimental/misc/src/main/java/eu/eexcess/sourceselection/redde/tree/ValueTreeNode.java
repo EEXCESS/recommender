@@ -26,50 +26,79 @@ import java.util.Set;
 
 public class ValueTreeNode<T> extends BaseTreeNode<T> {
 
-	private Set<T> values;
+    private Set<T> values;
 
-	public ValueTreeNode() {
-		values = new HashSet<T>();
-	}
+    public ValueTreeNode() {
+        values = new HashSet<T>();
+    }
 
-	public Set<T> getValues() {
-		return values;
-	}
+    public Set<T> getValues() {
+        return values;
+    }
 
-	public void addValue(T value) {
-		values.add(value);
-	}
+    public void addValue(T value) {
+        values.add(value);
+    }
 
-	public void addValues(Set<T> valueSet) {
-		values.addAll(valueSet);
-	}
+    public void addValues(Set<T> valueSet) {
+        values.addAll(valueSet);
+    }
 
-	@Override
-	public String toString() {
-		StringBuilder childrenString = new StringBuilder();
-		boolean isFirstChild = true;
-		Iterator<TreeNode<T>> iterator = iterator();
+    @Override
+    public String toString() {
+        StringBuilder childrenString = new StringBuilder();
+        boolean isFirstChild = true;
+        Iterator<TreeNode<T>> iterator = iterator();
 
-		while (iterator.hasNext()) {
-			TreeNode<T> next = iterator.next();
-			if (!isFirstChild) {
-				childrenString.append(", ");
-			}
-			childrenString.append("name [" + next.getName() + "]");
-			isFirstChild = false;
-		}
+        while (iterator.hasNext()) {
+            TreeNode<T> next = iterator.next();
+            if (!isFirstChild) {
+                childrenString.append(", ");
+            }
+            childrenString.append("name [" + next.getName() + "]");
+            isFirstChild = false;
+        }
 
-		StringBuilder valuesString = new StringBuilder();
-		boolean isFirstValue = true;
-		for (T value : values) {
+        StringBuilder valuesString = new StringBuilder();
+        boolean isFirstValue = true;
+        for (T value : values) {
 
-			if (!isFirstValue) {
-				valuesString.append(", ");
-			}
-			valuesString.append(value.toString());
-			isFirstValue = false;
-		}
+            if (!isFirstValue) {
+                valuesString.append(", ");
+            }
+            valuesString.append(value.toString());
+            isFirstValue = false;
+        }
 
-		return "values [" + valuesString + "] children [" + childrenString + "]";
-	}
+        return "name [" + getName() + "] values [" + valuesString + "] children [" + childrenString + "]";
+    }
+
+    /**
+     * Hash depends on super class implementation. Usually only the node name is
+     * considered.
+     */
+    @Override
+    public int hashCode() {
+        /**
+         * note: do not autogenerate hashCode() and equals()
+         */
+        return super.hashCode();
+    }
+
+    /**
+     * Equality depends on super class implementation. Usually only the node
+     * name is considered.
+     */
+    @Override
+    public boolean equals(Object obj) {
+        /**
+         * note: do not autogenerate hashCode() and equals()
+         */
+        if (this == obj)
+            return true;
+        if (!super.equals(obj))
+            return false;
+        return true;
+    }
+
 }
