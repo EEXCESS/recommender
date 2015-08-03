@@ -363,6 +363,7 @@ public class XmlParser {
 		if (dom == null) return resultEntitySet;
         PartnerdataTracer.dumpFile(DbpediaSpotlight.class,config, XMLTools.getStringFromDocument(dom), "dbpedia-response", FILETYPE.XML, logger);
 		Element annotationElement = dom.getDocumentElement();
+		// TODO: the value of the local variable text is not used
 		String text="";
 		if (annotationElement.getAttributes() != null && annotationElement.getAttributes().getNamedItem("text") != null)
 		{

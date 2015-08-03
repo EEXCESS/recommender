@@ -74,6 +74,7 @@ public class KIMPortalTransformer extends Transformer{
 		XPath xPath = XPathFactory.newInstance().newXPath();
 		NodeList nodes;
 		try {
+		    // TODO: the value of the local variable itemsRootNode is not used
 			NodeList itemsRootNode = (NodeList)xPath.evaluate("/response/result",input.getDocumentElement(), XPathConstants.NODESET);
 			nodes = (NodeList)xPath.evaluate("/response/result/doc",input.getDocumentElement(), XPathConstants.NODESET);
 			for (int i = 0; i < nodes.getLength();i++) {

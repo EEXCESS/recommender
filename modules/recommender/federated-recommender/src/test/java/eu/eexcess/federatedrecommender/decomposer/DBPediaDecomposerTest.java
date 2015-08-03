@@ -16,8 +16,8 @@ import eu.eexcess.federatedrecommender.utils.FederatedRecommenderException;
 
 public class DBPediaDecomposerTest {
 
-	private static final String OBAMA = "obama";
-	private static final String CLINTON = "Clinton";
+//	private static final String OBAMA = "obama";
+//	private static final String CLINTON = "Clinton";
 	private static final String SCHWARZENEGGER = "schwarzenegger";
 	private static final String TERMINATOR = "terminator";
 	private static final String CONAN = "conan";

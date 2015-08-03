@@ -24,10 +24,8 @@ package eu.eexcess.partnerrecommender.reference;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
-import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -37,12 +35,6 @@ import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
 import org.json.XML;
 import org.w3c.dom.Document;
-
-import com.fasterxml.jackson.core.JsonGenerationException;
-import com.github.jsonldjava.core.JsonLdError;
-import com.github.jsonldjava.core.JsonLdOptions;
-import com.github.jsonldjava.core.JsonLdProcessor;
-import com.github.jsonldjava.utils.JsonUtils;
 
 import eu.eexcess.config.PartnerConfiguration;
 import eu.eexcess.dataformats.PartnerBadge;
@@ -305,24 +297,25 @@ public class PartnerRecommender implements PartnerRecommenderApi {
         return documents;
     }
 
-    private String transformRDFXMLToResponseDetailNew(String rdfXML) {
-        String json = XML.toJSONObject(rdfXML).toString();
-
-        json = json.replaceAll("\"rdf:", "\"rdf");
-        json = json.replaceAll("\"rdfs:", "\"rdfs");
-        json = json.replaceAll("\"eexcess:", "\"eexcess");
-        json = json.replaceAll("\"dc:", "\"dc");
-        json = json.replaceAll("\"dcterms:", "\"dcterms");
-        json = json.replaceAll("\"edm:", "\"edm");
-        json = json.replaceAll("\"ore:", "\"ore");
-        json = json.replaceAll("\"owl:", "\"owl");
-        json = json.replaceAll("\"foaf:", "\"foaf");
-        json = json.replaceAll("\"xsd:", "\"xsd");
-        json = json.replaceAll("\"xmlns:", "\"xmlns");
-        json = json.replaceAll("\"xml:", "\"xml");
-        json = json.replaceAll("\"wgs84:", "\"wgs84");
-        return json;
-    }
+    // commented due to unused method warning
+//    private String transformRDFXMLToResponseDetailNew(String rdfXML) {
+//        String json = XML.toJSONObject(rdfXML).toString();
+//
+//        json = json.replaceAll("\"rdf:", "\"rdf");
+//        json = json.replaceAll("\"rdfs:", "\"rdfs");
+//        json = json.replaceAll("\"eexcess:", "\"eexcess");
+//        json = json.replaceAll("\"dc:", "\"dc");
+//        json = json.replaceAll("\"dcterms:", "\"dcterms");
+//        json = json.replaceAll("\"edm:", "\"edm");
+//        json = json.replaceAll("\"ore:", "\"ore");
+//        json = json.replaceAll("\"owl:", "\"owl");
+//        json = json.replaceAll("\"foaf:", "\"foaf");
+//        json = json.replaceAll("\"xsd:", "\"xsd");
+//        json = json.replaceAll("\"xmlns:", "\"xmlns");
+//        json = json.replaceAll("\"xml:", "\"xml");
+//        json = json.replaceAll("\"wgs84:", "\"wgs84");
+//        return json;
+//    }
 
     private String transformRDFXMLToResponseDetail(String rdfXML, PartnerdataLogger partnerdataLogger, int index) {
         String json = XML.toJSONObject(rdfXML).toString();
@@ -467,67 +460,69 @@ public class PartnerRecommender implements PartnerRecommenderApi {
         }
         return eexcessProxyItem;
     }
+    
+    // commented due to unused method warning
+//    private String transformRDFXMLToResponseDetailJSONLD(String rdfXML) {
+//        try {
+//            LOGGER.log(Level.INFO, XML.toJSONObject(rdfXML).toString());
+//            // Open a valid json(-ld) input file
+//            // InputStream inputStream = new FileInputStream("d:\\input.json");
+//            // Read the file into an Object (The type of this object will be a
+//            // List, Map, String, Boolean,
+//            // Number or null depending on the root object in the file).
+//            // Object jsonObject = JsonUtils.fromInputStream(inputStream);
+//
+//            // Create a context JSON map containing prefixes and definitions
+//            // Map context = new HashMap();
+//            // Customise context...
+//            // Create an instance of JsonLdOptions with the standard JSON-LD
+//            // options
+//            JsonLdOptions options = new JsonLdOptions();
+//            // xxx options.format =
+//            // Customise options...
+//            // options.setCompactArrays(true);
+//            // Call whichever JSONLD function you want! (e.g. compact)
+//            Object compact;
+//            compact = JsonLdProcessor.fromRDF(rdfXML, options);
+//            // Print out the result (or don't, it's your call!)
+//            return JsonUtils.toPrettyString(compact);
+//        } catch (JsonLdError e) {
+//            LOGGER.log(Level.INFO, "", e);
+//        } catch (JsonGenerationException e) {
+//            LOGGER.log(Level.INFO, "", e);
+//        } catch (IOException e) {
+//            LOGGER.log(Level.INFO, "", e);
+//        }
+//        return "";
+//    }
 
-    private String transformRDFXMLToResponseDetailJSONLD(String rdfXML) {
-        try {
-            LOGGER.log(Level.INFO, XML.toJSONObject(rdfXML).toString());
-            // Open a valid json(-ld) input file
-            // InputStream inputStream = new FileInputStream("d:\\input.json");
-            // Read the file into an Object (The type of this object will be a
-            // List, Map, String, Boolean,
-            // Number or null depending on the root object in the file).
-            // Object jsonObject = JsonUtils.fromInputStream(inputStream);
-
-            // Create a context JSON map containing prefixes and definitions
-            // Map context = new HashMap();
-            // Customise context...
-            // Create an instance of JsonLdOptions with the standard JSON-LD
-            // options
-            JsonLdOptions options = new JsonLdOptions();
-            // xxx options.format =
-            // Customise options...
-            // options.setCompactArrays(true);
-            // Call whichever JSONLD function you want! (e.g. compact)
-            Object compact;
-            compact = JsonLdProcessor.fromRDF(rdfXML, options);
-            // Print out the result (or don't, it's your call!)
-            return JsonUtils.toPrettyString(compact);
-        } catch (JsonLdError e) {
-            LOGGER.log(Level.INFO, "", e);
-        } catch (JsonGenerationException e) {
-            LOGGER.log(Level.INFO, "", e);
-        } catch (IOException e) {
-            LOGGER.log(Level.INFO, "", e);
-        }
-        return "";
-    }
-
-    @SuppressWarnings("rawtypes")
-    private String transformJSONLDToResponseDetailJSONLDCompact(String jsonLD) {
-        try {
-            // Object jsonObject = JsonUtils.fromInputStream(inputStream);
-            // Create a context JSON map containing prefixes and definitions
-            Map context = new HashMap();
-            // Customise context...
-            // Create an instance of JsonLdOptions with the standard JSON-LD
-            // options
-            JsonLdOptions options = new JsonLdOptions();
-            // Customise options...
-            // Call whichever JSONLD function you want! (e.g. compact)
-            Object compact = JsonLdProcessor.compact(jsonLD, context, options);
-            // Print out the result (or don't, it's your call!)
-            LOGGER.log(Level.INFO, JsonUtils.toPrettyString(compact));
-
-            return JsonUtils.toPrettyString(compact);
-        } catch (JsonLdError e) {
-            LOGGER.log(Level.INFO, "", e);
-        } catch (JsonGenerationException e) {
-            LOGGER.log(Level.INFO, "", e);
-        } catch (IOException e) {
-            LOGGER.log(Level.INFO, "", e);
-        }
-        return "";
-    }
+    // commented due to unused method warning
+//    @SuppressWarnings("rawtypes")
+//    private String transformJSONLDToResponseDetailJSONLDCompact(String jsonLD) {
+//        try {
+//            // Object jsonObject = JsonUtils.fromInputStream(inputStream);
+//            // Create a context JSON map containing prefixes and definitions
+//            Map context = new HashMap();
+//            // Customise context...
+//            // Create an instance of JsonLdOptions with the standard JSON-LD
+//            // options
+//            JsonLdOptions options = new JsonLdOptions();
+//            // Customise options...
+//            // Call whichever JSONLD function you want! (e.g. compact)
+//            Object compact = JsonLdProcessor.compact(jsonLD, context, options);
+//            // Print out the result (or don't, it's your call!)
+//            LOGGER.log(Level.INFO, JsonUtils.toPrettyString(compact));
+//
+//            return JsonUtils.toPrettyString(compact);
+//        } catch (JsonLdError e) {
+//            LOGGER.log(Level.INFO, "", e);
+//        } catch (JsonGenerationException e) {
+//            LOGGER.log(Level.INFO, "", e);
+//        } catch (IOException e) {
+//            LOGGER.log(Level.INFO, "", e);
+//        }
+//        return "";
+//    }
 
     /**
      * Returns the EEXCESS user profile for a given user.
