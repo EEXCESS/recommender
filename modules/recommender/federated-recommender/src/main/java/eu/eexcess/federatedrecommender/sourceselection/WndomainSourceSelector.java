@@ -28,6 +28,7 @@ import java.util.Map;
 import java.util.TreeMap;
 import java.util.TreeSet;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import eu.eexcess.config.FederatedRecommenderConfiguration;
@@ -133,7 +134,7 @@ public class WndomainSourceSelector implements PartnerSelector {
         try {
             domainDetector = new WordnetDomainsDetector(new File(configuration.getWordnetPath()), new File(configuration.getWordnetDomainFilePath()), true);
         } catch (DomainDetectorException e) {
-            logger.severe("unable to instanciate [" + WordnetDomainsDetector.class.getSimpleName() + "]: " + e.getMessage());
+            logger.log(Level.SEVERE, "unable to instanciate [" + WordnetDomainsDetector.class.getSimpleName() + "]", e);
         }
     }
 
@@ -241,7 +242,7 @@ public class WndomainSourceSelector implements PartnerSelector {
                     }
                 }
             } catch (DomainDetectorException e) {
-                logger.info("failed to detect domain(s) for kontext keyword");
+                logger.log(Level.SEVERE, "failed to detect domain(s) for kontext keyword", e);
                 return;
             }
         }

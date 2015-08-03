@@ -50,8 +50,8 @@ import eu.eexcess.logger.PianoLogger;
 public class QueryExpansionEvaluation {
 
 	private static Logger logger = PianoLogger.getLogger(QueryExpansionEvaluation.class);
-	public static long totalTime = 0;
-	public static long decomposeCounts = 0;
+	private static long totalTime = 0;
+	private static long decomposeCounts = 0;
 	private static PseudoRelevanceWikipediaDecomposer decomposer = newDecomposer();
 
 	/**

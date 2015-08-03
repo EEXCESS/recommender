@@ -25,6 +25,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import com.sun.jersey.api.client.Client;
@@ -62,7 +63,7 @@ public class AsyncPartnerDomainsProbeMonitor implements ProbeDoneCallback {
             domainDetector = new WordnetDomainsDetector(wordnetDir, wordNetFile, true);
             probeTemplate = new PartnerDomainsProbe(domainDetector, numRandomPhrases, considerNumPartnerResults);
         } catch (Exception e) {
-            LOGGER.severe("failed to instanciate domain detection resources: " + e.getMessage());
+            LOGGER.log(Level.SEVERE, "failed to instanciate domain detection resources", e);
         }
     }
 
@@ -74,7 +75,7 @@ public class AsyncPartnerDomainsProbeMonitor implements ProbeDoneCallback {
         try {
             return new AsyncPartnerDomainsProbe(partnerConfig, partnerClient, probeTemplate, probeTimeout);
         } catch (CloneNotSupportedException e) {
-            LOGGER.severe("failed to create new instance of partner probe because of unsopported clone(): " + e.getMessage());
+            LOGGER.log(Level.SEVERE, "failed to create new instance of partner probe because of unsopported clone()", e);
             return null;
         }
     }

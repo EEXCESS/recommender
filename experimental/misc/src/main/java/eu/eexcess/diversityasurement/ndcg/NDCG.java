@@ -107,14 +107,14 @@ public class NDCG {
 				if (categoryFlagNRel) {
 					nrelI = sortedByRelevance.results.get(i).nDCGRelevance;
 				}
-				if (categoryFlagNRel && categoryFlagRel && log2I != null && log2I != 0.0) {
+				if (categoryFlagNRel && categoryFlagRel && log2I != null && Double.doubleToRawLongBits(log2I) != 0) {
 					double d = (Math.pow(2, relI) - 1.0) / log2I;
 					dCG += d;
 					double e = (Math.pow(2, nrelI) - 1.0) / log2I;
 					iDCG += e;
 				}
 			}
-			if (iDCG == 0.0) {
+			if (Double.doubleToRawLongBits(iDCG) == 0) {
 				ndcg = 0.0;
 			} else {
 				ndcg = dCG / iDCG;

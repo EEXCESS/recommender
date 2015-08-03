@@ -24,6 +24,7 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Locale;
 import java.util.Set;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import javax.management.RuntimeErrorException;
@@ -224,7 +225,7 @@ public class PartnerDomainsProbe implements Cloneable {
                 }
                 ambiguousPhrases.add(domainDetector.drawRandomAmbiguousWord(ambiguousPhrases));
             } catch (DomainDetectorException e) {
-                LOGGER.info("failed to draw random phrase and going to retry but reason was: " + e.getMessage());
+                LOGGER.log(Level.SEVERE, "failed to draw random phrase and going to retry", e);
                 continue;
             }
         }

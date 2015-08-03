@@ -193,7 +193,7 @@ public class MainCategoryRelevanceEstimator {
         private int topK;
         private MainCategoryRelevanceEstimator relevanceEstimator;
         static Map<Integer, List<List<ArrayListPath>>> topKShortestPaths = new HashMap<Integer, List<List<ArrayListPath>>>();
-        public static int numCategoriesToCalculateBundled = 5;
+        private static int numCategoriesToCalculateBundled = 5;
 
         private static Object sourceLock = new Object();
         public static final Object sinkLock = new Object();

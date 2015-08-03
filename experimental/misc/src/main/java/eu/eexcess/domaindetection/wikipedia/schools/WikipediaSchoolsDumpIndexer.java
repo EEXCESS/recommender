@@ -563,7 +563,7 @@ public class WikipediaSchoolsDumpIndexer extends IndexWriterRessource {
                 documentSubjects.add(stripedDomains.get(stripedDomains.size() - 1));
             }
         } catch (NoSuchElementException e) {
-            throw new IOException("failed parsing document subject of document [" + absoluteFilePath + "]");
+            throw new IOException("failed parsing document subject of document [" + absoluteFilePath + "]", e);
         }
 
         return documentSubjects;

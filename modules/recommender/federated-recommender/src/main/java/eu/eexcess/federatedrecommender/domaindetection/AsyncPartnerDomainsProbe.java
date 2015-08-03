@@ -146,6 +146,7 @@ public class AsyncPartnerDomainsProbe {
                     }
                 }
             } catch (Exception e) {
+                LOGGER.log(Level.SEVERE, "failed to probe", e);
                 for (ProbeDoneCallback callback : callbacks) {
                     try {
                         callback.onProbeFailedCallback(partnerConfig.getSystemId());
