@@ -16,24 +16,6 @@ limitations under the License.
  */
 package eu.eexcess.kimportal.recommender;
 
-import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
-
-import javax.ws.rs.core.MediaType;
-
-import org.apache.commons.lang.text.StrSubstitutor;
-import org.w3c.dom.Document;
-
-import com.sun.jersey.api.client.Client;
-import com.sun.jersey.api.client.WebResource;
-import com.sun.jersey.api.client.WebResource.Builder;
-
-import eu.eexcess.config.PartnerConfiguration;
-import eu.eexcess.dataformats.result.DocumentBadge;
-import eu.eexcess.dataformats.userprofile.SecureUserProfile;
-import eu.eexcess.partnerdata.reference.PartnerdataLogger;
-import eu.eexcess.partnerrecommender.api.PartnerConfigurationCache;
 import eu.eexcess.partnerrecommender.api.PartnerConnectorApi;
 import eu.eexcess.partnerrecommender.reference.PartnerConnectorBase;
 

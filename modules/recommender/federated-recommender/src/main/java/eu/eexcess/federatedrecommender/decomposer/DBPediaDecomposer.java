@@ -29,8 +29,6 @@ import java.util.logging.Logger;
 
 import org.jgraph.graph.DefaultEdge;
 import org.jgrapht.alg.DijkstraShortestPath;
-import org.jgrapht.alg.FloydWarshallShortestPaths;
-import org.jgrapht.alg.KShortestPaths;
 import org.jgrapht.graph.SimpleWeightedGraph;
 
 import eu.eexcess.config.FederatedRecommenderConfiguration;

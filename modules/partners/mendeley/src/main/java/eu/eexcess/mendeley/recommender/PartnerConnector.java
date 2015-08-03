@@ -46,7 +46,6 @@ import com.sun.jersey.api.json.JSONConfiguration;
 
 import eu.eexcess.config.PartnerConfiguration;
 import eu.eexcess.dataformats.result.DocumentBadge;
-import eu.eexcess.dataformats.result.ResultList;
 import eu.eexcess.dataformats.userprofile.SecureUserProfile;
 import eu.eexcess.mendeley.recommender.dataformat.MendeleyAuthors;
 import eu.eexcess.mendeley.recommender.dataformat.MendeleyDocs;

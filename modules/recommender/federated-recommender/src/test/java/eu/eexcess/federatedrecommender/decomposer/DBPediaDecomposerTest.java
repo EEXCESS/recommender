@@ -1,7 +1,5 @@
 package eu.eexcess.federatedrecommender.decomposer;
 
-import static org.junit.Assert.*;
-
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -10,12 +8,6 @@ import java.util.logging.Logger;
 
 import org.codehaus.jackson.map.ObjectMapper;
 import org.junit.Test;
-
-
-
-
-
-
 
 import eu.eexcess.config.FederatedRecommenderConfiguration;
 import eu.eexcess.dataformats.userprofile.ContextKeyword;

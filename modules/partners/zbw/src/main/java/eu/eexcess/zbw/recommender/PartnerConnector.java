@@ -46,13 +46,11 @@ import com.sun.jersey.api.client.WebResource.Builder;
 
 import eu.eexcess.config.PartnerConfiguration;
 import eu.eexcess.dataformats.result.DocumentBadge;
-import eu.eexcess.dataformats.result.ResultList;
 import eu.eexcess.dataformats.userprofile.SecureUserProfile;
 import eu.eexcess.partnerdata.reference.PartnerdataLogger;
 import eu.eexcess.partnerdata.reference.PartnerdataTracer;
 import eu.eexcess.partnerrecommender.api.PartnerConfigurationCache;
 import eu.eexcess.partnerrecommender.api.PartnerConnectorApi;
-import eu.eexcess.partnerrecommender.api.QueryGeneratorApi;
 import eu.eexcess.partnerrecommender.reference.PartnerConnectorBase;
 import eu.eexcess.zbw.recommender.dataformat.ZBWDocument;
 import eu.eexcess.zbw.recommender.dataformat.ZBWDocumentHit;
