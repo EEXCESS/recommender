@@ -542,7 +542,7 @@ public class WikipediaSchoolsDumpIndexer extends IndexWriterRessource {
         Set<String> documentSubjects = new HashSet<String>();
 
         String documentString = new String(Files.readAllBytes(new File(absoluteFilePath).toPath()), "utf-8");
-        StringBuffer documentBuffer = new StringBuffer(documentString.toLowerCase());
+        StringBuilder documentBuffer = new StringBuilder(documentString.toLowerCase());
 
         String startAnchor = "related subjects:";
         String endAnchor = "</div>";

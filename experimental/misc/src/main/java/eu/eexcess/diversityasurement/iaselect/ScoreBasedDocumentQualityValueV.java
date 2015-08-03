@@ -77,6 +77,7 @@ public class ScoreBasedDocumentQualityValueV implements DocumentQualityValueV {
 	 * @throws IOException
 	 * @throws InvalidStateException
 	 */
+	@Override
 	public double V(Document d, Query q, Category c) throws InvalidStateException, IOException, ParseException {
 		for (Category documentCategory : d.categories()) {
 			if (documentCategory.equals(c)) {

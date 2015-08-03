@@ -24,12 +24,19 @@ import java.io.File;
 
 public class Settings {
 
+    private Settings() {
+    }
+
     public static class RelevanceEvaluation {
 
         public static class Lucene {
+
             public static final String SEARCH_FIELD_SECTIONTEXT = "sectionText";
             public static final String SEARCH_FIELD_CATEGORY = "category";
             public static final String SEARCH_FIELD_TITLE = "title";
+
+            private Lucene() {
+            }
         }
 
         public static class IOFiles {
@@ -50,6 +57,9 @@ public class Settings {
                     "/opt/iaselect/results/queries/queriesEn-with-categories-filtered-weighted-not-normalized.json");
 
             public static final File additionalDefinedCategoryIDs = new File("/opt/iaselect/results/queries/in-additional-category-ids.json");
+
+            private IOFiles() {
+            }
         }
 
         public static class EstimationArguments {
@@ -58,6 +68,12 @@ public class Settings {
             public static final int kShortestPaths = 1;
             public static final int nodesPerChunk = 2000;
             public static final boolean isDistributionStartedAtSiblings = false;
+
+            private EstimationArguments() {
+            }
+        }
+
+        private RelevanceEvaluation() {
         }
     }
 
@@ -66,6 +82,12 @@ public class Settings {
             public static final File inCategoryIdToName = new File("/opt/iaselect/results/cache/category-id-to-name.bin");
             public static final File inCategoryNameToId = new File("/opt/iaselect/results/cache/category-name-to-id.bin");
             public static final File inRelevances = new File("/opt/iaselect/results/cache/in-category-relevances.bin");
+
+            private IOFIles() {
+            }
+        }
+
+        private ContrastEvaluation() {
         }
     }
 
@@ -75,6 +97,10 @@ public class Settings {
         public static boolean isQueriesFileAvailable() {
             return printWarning(PATH);
         }
+
+        private Queries() {
+        }
+
     }
 
     public static class QueryExpansionEvaluation {
@@ -83,6 +109,12 @@ public class Settings {
 
         public static class IOFiles {
             public static final File outExpandedCategoryIDs = new File("/opt/iaselect/results/queries/out-additional-category-ids.json");
+
+            private IOFiles() {
+            }
+        }
+
+        private QueryExpansionEvaluation() {
         }
     }
 

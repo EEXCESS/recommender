@@ -22,7 +22,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 package eu.eexcess.diversityasurement.ndcg;
 
-import java.util.ArrayList;
+import java.util.List;
 
 /**
  * NDCG-IA Intend aware implementation for ndcg
@@ -38,7 +38,7 @@ public class NDCGIA extends NDCG {
 	 *            e.g. NDCG@5
 	 * @return
 	 */
-	public Double calcNDCGIA(NDCGResultList resultList,ArrayList<NDCGIACategory> queryCategories,int at) {
+	public Double calcNDCGIA(NDCGResultList resultList, List<NDCGIACategory> queryCategories, int at) {
 		Double nDCGIA = 0.0;
 //		List<NDCGIACategory> categories = new ArrayList<NDCGIACategory>();
 //		for (NDCGResult result : resultList.results) {

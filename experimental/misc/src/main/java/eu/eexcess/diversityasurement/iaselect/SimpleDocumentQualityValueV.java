@@ -64,6 +64,7 @@ public class SimpleDocumentQualityValueV implements DocumentQualityValueV {
 	 * @throws IllegalArgumentException
 	 *             if document or category is not found
 	 */
+	@Override
 	public double V(Document d, Query q, Category c) throws IllegalArgumentException {
 		for (Category documentCategory : documentQualities.get(d)) {
 			if (documentCategory.equals(c)) {

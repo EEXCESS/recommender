@@ -49,201 +49,198 @@ import eu.eexcess.logger.PianoLogger;
 
 public class QueryExpansionEvaluation {
 
-	private static Logger logger = PianoLogger.getLogger(QueryExpansionEvaluation.class);
-	private static long totalTime = 0;
-	private static long decomposeCounts = 0;
-	private static PseudoRelevanceWikipediaDecomposer decomposer = newDecomposer();
+    private static final Logger LOGGER = PianoLogger.getLogger(QueryExpansionEvaluation.class);
+    private static long totalTime = 0;
+    private static long decomposeCounts = 0;
+    private static PseudoRelevanceWikipediaDecomposer decomposer = newDecomposer();
 
-	/**
-	 * expand queries, fetch all categories in every query's top documents and
-	 * store to file
-	 * 
-	 * @param args
-	 * @throws Exception
-	 */
-	public static void main(String[] args) throws Exception {
+    private QueryExpansionEvaluation() {
+    }
 
-		int[] termExpansions = { 5, 10, 15, 20 };
-		Set<SecureUserProfile> expandedQueries = getExpandedQueries(termExpansions);
+    /**
+     * expand queries, fetch all categories in every query's top documents and
+     * store to file
+     * 
+     * @param args
+     * @throws Exception
+     */
+    public static void main(String[] args) throws Exception {
 
-		QueryCategoryKShortestPathsEvaluation.openInIndex();
-		QueryCategoryKShortestPathsEvaluation.init();
-		QueryCategoryKShortestPathsEvaluation.restoreCache();
+        int[] termExpansions = { 5, 10, 15, 20 };
+        Set<SecureUserProfile> expandedQueries = getExpandedQueries(termExpansions);
 
-		Set<Integer> newExpandedcategories = new HashSet<>();
+        QueryCategoryKShortestPathsEvaluation.openInIndex();
+        QueryCategoryKShortestPathsEvaluation.init();
+        QueryCategoryKShortestPathsEvaluation.restoreCache();
 
-		// get all cat. for expanded queries
-		getAllCategories(expandedQueries, newExpandedcategories,
-						Settings.QueryExpansionEvaluation.NUM_TOP_DOCS_TO_CONSIDER, false);
-		// get all cat. for expanded queries wit removed brackets
-		getAllCategories(expandedQueries, newExpandedcategories,
-						Settings.QueryExpansionEvaluation.NUM_TOP_DOCS_TO_CONSIDER, true);
+        Set<Integer> newExpandedcategories = new HashSet<>();
 
-		storeCategories(newExpandedcategories);
-		QueryCategoryKShortestPathsEvaluation.closeInIndex();
-	}
-	
-	private static void storeCategories(Set<Integer> categories) throws IllegalStateException, IOException {
+        // get all cat. for expanded queries
+        getAllCategories(expandedQueries, newExpandedcategories, Settings.QueryExpansionEvaluation.NUM_TOP_DOCS_TO_CONSIDER, false);
+        // get all cat. for expanded queries wit removed brackets
+        getAllCategories(expandedQueries, newExpandedcategories, Settings.QueryExpansionEvaluation.NUM_TOP_DOCS_TO_CONSIDER, true);
 
-		Map<String, Integer> mapping = new LinkedHashMap<>();
-		for (Integer id : categories) {
-			String name = QueryCategoryKShortestPathsEvaluation.categoryIdToName.get(id);
-			if (null == name) {
-				throw new IllegalStateException("failed to fetch name of category [" + id + "]");
-			}
-			mapping.put(name, id);
-		}
+        storeCategories(newExpandedcategories);
+        QueryCategoryKShortestPathsEvaluation.closeInIndex();
+    }
 
-		System.out.println("storing [" + categories.size() + "] categories to file ["
-						+ Settings.QueryExpansionEvaluation.IOFiles.outExpandedCategoryIDs.getAbsoluteFile() + "]");
-		FileWriter writer = new FileWriter(
-						Settings.QueryExpansionEvaluation.IOFiles.outExpandedCategoryIDs.getAbsoluteFile());
-		Gson gson = new GsonBuilder().enableComplexMapKeySerialization().setPrettyPrinting().create();
-		gson.toJson(mapping, writer);
-		writer.close();
-	}
+    private static void storeCategories(Set<Integer> categories) throws IllegalStateException, IOException {
 
-	private static Set<SecureUserProfile> getExpandedQueries(int[] termExpansions) throws FileNotFoundException,
-					IOException {
-		Set<SecureUserProfile> expandedQueries = new LinkedHashSet<>();
-		for (String q : QueryCategoryKShortestPathsEvaluation.getQueries()) {
-			logger.info("expanding query [" + q + "]");
-			Query iasQuery = new Query(q);
+        Map<String, Integer> mapping = new LinkedHashMap<>();
+        for (Integer id : categories) {
+            String name = QueryCategoryKShortestPathsEvaluation.categoryIdToName.get(id);
+            if (null == name) {
+                throw new IllegalStateException("failed to fetch name of category [" + id + "]");
+            }
+            mapping.put(name, id);
+        }
 
-			for (int k : termExpansions) {
-				expandedQueries.add(expandQuery(iasQuery, k));
-			}
-		}
-		return expandedQueries;
-	}
+        LOGGER.info("storing [" + categories.size() + "] categories to file ["
+                + Settings.QueryExpansionEvaluation.IOFiles.outExpandedCategoryIDs.getAbsoluteFile() + "]");
+        FileWriter writer = new FileWriter(Settings.QueryExpansionEvaluation.IOFiles.outExpandedCategoryIDs.getAbsoluteFile());
+        Gson gson = new GsonBuilder().enableComplexMapKeySerialization().setPrettyPrinting().create();
+        gson.toJson(mapping, writer);
+        writer.close();
+    }
 
-	/**
-	 * get all categories of all queries generated out of
-	 * {@link SecureUserProfile} that appear in top documents
-	 * 
-	 * @param queries
-	 */
-	private static void getAllCategories(Set<SecureUserProfile> queries, Set<Integer> categoryCollector,
-					int numTopDocumentsToConsider, boolean doRemoveBracket) throws IOException, ParseException {
-		ArrayList<String> queryStrings = new ArrayList<>(queries.size());
+    private static Set<SecureUserProfile> getExpandedQueries(int[] termExpansions) throws FileNotFoundException, IOException {
+        Set<SecureUserProfile> expandedQueries = new LinkedHashSet<>();
+        for (String q : QueryCategoryKShortestPathsEvaluation.getQueries()) {
+            LOGGER.info("expanding query [" + q + "]");
+            Query iasQuery = new Query(q);
 
-		for (SecureUserProfile q : queries) {
-			String queryString = toQuery(q);
-			if (doRemoveBracket) {
-				queryString = queryString.replace(")", " ").replace("(", " ");
-			}
+            for (int k : termExpansions) {
+                expandedQueries.add(expandQuery(iasQuery, k));
+            }
+        }
+        return expandedQueries;
+    }
 
-			System.out.println("query generator: [" + queryString + "] doReplaceBracket=[" + doRemoveBracket + "]");
-			queryStrings.add(queryString);
-		}
+    /**
+     * get all categories of all queries generated out of
+     * {@link SecureUserProfile} that appear in top documents
+     * 
+     * @param queries
+     */
+    private static void getAllCategories(Set<SecureUserProfile> queries, Set<Integer> categoryCollector, int numTopDocumentsToConsider, boolean doRemoveBracket)
+            throws IOException, ParseException {
+        ArrayList<String> queryStrings = new ArrayList<>(queries.size());
 
-		for (Integer categoryID : QueryCategoryKShortestPathsEvaluation.collectTopDocsCategories(queryStrings,
-						numTopDocumentsToConsider)) {
-			if (!categoryCollector.contains(categoryID)) {
-				categoryCollector.add(categoryID);
-			}
-		}
-	}
+        for (SecureUserProfile q : queries) {
+            String queryString = toQuery(q);
+            if (doRemoveBracket) {
+                queryString = queryString.replace(")", " ").replace("(", " ");
+            }
 
-	/**
-	 * generate lucene query string out of user profile distinguishing expanded
-	 * and original keywords
-	 * 
-	 * @param userProfile
-	 * @return
-	 */
-	static String toQuery(SecureUserProfile userProfile) {
-		StringBuilder result = new StringBuilder();
-		boolean expansion = false;
-		for (ContextKeyword key : userProfile.contextKeywords) {
+            LOGGER.info("query generator: [" + queryString + "] doReplaceBracket=[" + doRemoveBracket + "]");
+            queryStrings.add(queryString);
+        }
 
-			if (key.expansion != null
-							&& (key.expansion == ExpansionType.PSEUDORELEVANCEWP || key.expansion == ExpansionType.SERENDIPITY)) {
-				if (!expansion) {
-					expansion = true;
-					if (result.length() > 0) {
-						if (key.expansion == ExpansionType.PSEUDORELEVANCEWP)
-							result.append(" OR (\"" + key.text + "\"");
-						else
-							result.append(" AND (\"" + key.text + "\"");
-					} else
-						result.append("(\"" + key.text + "\"");
-				} else {
-					result.append(" OR \"" + key.text + "\"");
-				}
-			} else {
-				if (expansion) {
-					result.append(") OR \"" + key.text + "\"");
-					expansion = false;
-				} else if (result.length() > 0)
-					result.append(" \"" + key.text + "\"");
-				else
-					result.append("\"" + key.text + "\"");
-			}
-		}
-		if (expansion)
-			result.append(")");
+        for (Integer categoryID : QueryCategoryKShortestPathsEvaluation.collectTopDocsCategories(queryStrings, numTopDocumentsToConsider)) {
+            if (!categoryCollector.contains(categoryID)) {
+                categoryCollector.add(categoryID);
+            }
+        }
+    }
 
-		return result.toString();
-	}
+    /**
+     * generate lucene query string out of user profile distinguishing expanded
+     * and original keywords
+     * 
+     * @param userProfile
+     * @return
+     */
+    static String toQuery(SecureUserProfile userProfile) {
+        StringBuilder result = new StringBuilder();
+        boolean expansion = false;
+        for (ContextKeyword key : userProfile.contextKeywords) {
 
-	/**
-	 * expands a query
-	 * 
-	 * @param q
-	 * @param maxTermsToExpand
-	 * @return
-	 */
-	static SecureUserProfile expandQuery(Query q, int maxTermsToExpand) {
+            if (key.expansion != null && (key.expansion == ExpansionType.PSEUDORELEVANCEWP || key.expansion == ExpansionType.SERENDIPITY)) {
+                if (!expansion) {
+                    expansion = true;
+                    if (result.length() > 0) {
+                        if (key.expansion == ExpansionType.PSEUDORELEVANCEWP)
+                            result.append(" OR (\"" + key.text + "\"");
+                        else
+                            result.append(" AND (\"" + key.text + "\"");
+                    } else
+                        result.append("(\"" + key.text + "\"");
+                } else {
+                    result.append(" OR \"" + key.text + "\"");
+                }
+            } else {
+                if (expansion) {
+                    result.append(") OR \"" + key.text + "\"");
+                    expansion = false;
+                } else if (result.length() > 0)
+                    result.append(" \"" + key.text + "\"");
+                else
+                    result.append("\"" + key.text + "\"");
+            }
+        }
+        if (expansion)
+            result.append(")");
 
-		SecureUserProfile expandedSecureProfile = null;
-		SecureUserProfile userProfile = newSecureUserProfile(q);
-		decomposer.setMaxNumTermsToExpand(maxTermsToExpand);
+        return result.toString();
+    }
 
-		long timestamp = System.currentTimeMillis();
-		expandedSecureProfile = (SecureUserProfile) decomposer.decompose(userProfile);
-		double localDuration = System.currentTimeMillis() - timestamp;
+    /**
+     * expands a query
+     * 
+     * @param q
+     * @param maxTermsToExpand
+     * @return
+     */
+    static SecureUserProfile expandQuery(Query q, int maxTermsToExpand) {
 
-		totalTime += localDuration;
-		decomposeCounts++;
-		double mean = (double) totalTime / (double) decomposeCounts;
+        SecureUserProfile expandedSecureProfile = null;
+        SecureUserProfile userProfile = newSecureUserProfile(q);
+        decomposer.setMaxNumTermsToExpand(maxTermsToExpand);
 
-		if (decomposeCounts % 20 == 0) {
-			System.out.println("decomposer: mean [" + mean + "] total [" + decomposeCounts + "] calls [" + totalTime
-							+ "]ms numTerms[" + maxTermsToExpand + "] last call [" + localDuration + "]");
-		}
+        long timestamp = System.currentTimeMillis();
+        expandedSecureProfile = (SecureUserProfile) decomposer.decompose(userProfile);
+        double localDuration = System.currentTimeMillis() - timestamp;
 
-		return expandedSecureProfile;
-	}
+        totalTime += localDuration;
+        decomposeCounts++;
+        double mean = (double) totalTime / (double) decomposeCounts;
 
-	/**
-	 * Splits the query string into terms and creates a new
-	 * {@link SecureUserProfile}.
-	 * 
-	 * @param q
-	 * @return
-	 */
-	private static SecureUserProfile newSecureUserProfile(Query q) {
-		ArrayList<ContextKeyword> keywords = new ArrayList<>();
-		for (String term : q.query.split("\\s+")) {
-			keywords.add(new ContextKeyword(term, ExpansionType.NONE));
-		}
-		SecureUserProfile userProfile = new SecureUserProfile();
-		userProfile.contextKeywords = keywords;
-		return userProfile;
-	}
+        if (decomposeCounts % 20 == 0) {
+            LOGGER.info("decomposer: mean [" + mean + "] total [" + decomposeCounts + "] calls [" + totalTime + "]ms numTerms[" + maxTermsToExpand
+                    + "] last call [" + localDuration + "]");
+        }
 
-	private static PseudoRelevanceWikipediaDecomposer newDecomposer() {
-		PseudoRelevanceWikipediaDecomposer sUPDecomposer = null;
-		try {
-			sUPDecomposer = new PseudoRelevanceWikipediaDecomposer();
-			FederatedRecommenderConfiguration fedRecConfig = new FederatedRecommenderConfiguration();
-			fedRecConfig.setWikipediaIndexDir(Settings.RelevanceEvaluation.IOFiles.inLuceneIndexParentDirectory.getAbsolutePath());
-			sUPDecomposer.setConfiguration(fedRecConfig );
-		} catch (IOException | FederatedRecommenderException e) {
-			logger.log(Level.SEVERE, "Wikipedia index directory could be wrong or not readable: "
-							+ Settings.RelevanceEvaluation.IOFiles.inLuceneIndexParentDirectory.getAbsolutePath(), e);
-		}
-		return sUPDecomposer;
-	}
+        return expandedSecureProfile;
+    }
+
+    /**
+     * Splits the query string into terms and creates a new
+     * {@link SecureUserProfile}.
+     * 
+     * @param q
+     * @return
+     */
+    private static SecureUserProfile newSecureUserProfile(Query q) {
+        ArrayList<ContextKeyword> keywords = new ArrayList<>();
+        for (String term : q.query.split("\\s+")) {
+            keywords.add(new ContextKeyword(term, ExpansionType.NONE));
+        }
+        SecureUserProfile userProfile = new SecureUserProfile();
+        userProfile.contextKeywords = keywords;
+        return userProfile;
+    }
+
+    private static PseudoRelevanceWikipediaDecomposer newDecomposer() {
+        PseudoRelevanceWikipediaDecomposer sUPDecomposer = null;
+        try {
+            sUPDecomposer = new PseudoRelevanceWikipediaDecomposer();
+            FederatedRecommenderConfiguration fedRecConfig = new FederatedRecommenderConfiguration();
+            fedRecConfig.setWikipediaIndexDir(Settings.RelevanceEvaluation.IOFiles.inLuceneIndexParentDirectory.getAbsolutePath());
+            sUPDecomposer.setConfiguration(fedRecConfig);
+        } catch (IOException | FederatedRecommenderException e) {
+            LOGGER.log(Level.SEVERE, "Wikipedia index directory could be wrong or not readable: "
+                    + Settings.RelevanceEvaluation.IOFiles.inLuceneIndexParentDirectory.getAbsolutePath(), e);
+        }
+        return sUPDecomposer;
+    }
 }
