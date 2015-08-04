@@ -29,23 +29,19 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.apache.lucene.document.Document;
-import org.apache.lucene.index.DirectoryReader;
-import org.apache.lucene.index.IndexReader;
 import org.apache.lucene.index.IndexableField;
-import org.apache.lucene.store.FSDirectory;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
 import eu.eexcess.logger.PianoLogger;
-import eu.eexcess.sourceselection.redde.tree.BaseTreeNode;
+import eu.eexcess.sourceselection.redde.tree.TreeNode;
 
 /**
- * Check every indexed domain of {@link WikipediaSchoolsDomainTreeParser} and
+ * Check every indexed domain of {@link WikipediaSchoolsDomainTreeIndexer} and
  * link {@link WikipediaSchoolsDumpIndexer} if it is contained in the
  * respectively other index.
  * 
@@ -55,71 +51,35 @@ import eu.eexcess.sourceselection.redde.tree.BaseTreeNode;
 public class WikipediaSchoolsReasonableDomainsTest {
 
     private static final Logger LOGGER = PianoLogger.getLogger(WikipediaSchoolsReasonableDomainsTest.class.getName());
-    private static final Map<String, BaseTreeNode<String>> nodeMap = new HashMap<String, BaseTreeNode<String>>();
     private static final File domainTreeIndex = new File("/opt/data/wikipedia-schools/domain-index/wikipedia-schools-domain-index/");
     private static final File paragraphIndex = new File("/opt/data/wikipedia-schools/paragraph-index/wikipedia-schools-paragraph-index/");
-    private static volatile IndexReader domainTreeIndexReader = null;
-    private static volatile IndexReader paragraphIndexReader = null;
-    private static BaseTreeNode<String> domainTree = null;
+    private static volatile IndexReaderRessource domainTreeIndexReaderResource = new IndexReaderRessource(domainTreeIndex);
+    private static volatile IndexReaderRessource paragraphIndexReaderResource = new IndexReaderRessource(paragraphIndex);
+    private static Map<String, TreeNode<String>> nodeMap = null;
 
     @BeforeClass
     public static void inflateTree() {
-
-        try {
-            domainTreeIndexReader = DirectoryReader.open(FSDirectory.open(domainTreeIndex));
-            for (int i = 0; i < domainTreeIndexReader.maxDoc(); i++) {
-                Document doc = domainTreeIndexReader.document(i);
-                String parentName = doc.get(WikipediaSchoolsDomainTreeParser.LUCENE_DOCUMENT_DOCUMENT_FIELD_NAME);
-
-                BaseTreeNode<String> parentNode = addNodeToMap(parentName);
-
-                if (domainTree == null) {
-                    domainTree = parentNode;
-                }
-
-                for (IndexableField field : doc.getFields(WikipediaSchoolsDomainTreeParser.LUCENE_DOCUMENT_CHILD_FIELD_NAME)) {
-                    String childName = field.stringValue();
-                    BaseTreeNode<String> childNode = addNodeToMap(childName);
-                    parentNode.addChild(childNode);
-                }
-            }
-
-            // BaseTreeNode.depthFirstTraverser(domainTree, (n) ->
-            // System.out.println(n.toString()));
-
-        } catch (IOException e) {
-            LOGGER.log(Level.SEVERE, "unable to open index at [" + domainTreeIndex.getAbsolutePath() + "]", e);
+        try (WikiediaSchoolsDomainTreeInflator treeBuilder = new WikiediaSchoolsDomainTreeInflator(domainTreeIndex)) {
+            treeBuilder.inflateDomainTree();
+            nodeMap = treeBuilder.getNodeMap();
         }
     }
 
     @BeforeClass
     public static void openParagraphsReader() {
-
-        try {
-            paragraphIndexReader = DirectoryReader.open(FSDirectory.open(paragraphIndex));
-        } catch (IOException e) {
-            LOGGER.log(Level.SEVERE, "unable to open index at [" + paragraphIndex.getAbsolutePath() + "]", e);
-        }
+        paragraphIndexReaderResource.open();
     }
 
     @AfterClass
     public static void close() {
 
-        try {
-            if (domainTreeIndexReader != null) {
-                domainTreeIndexReader.close();
-                domainTreeIndexReader = null;
-            }
-        } catch (IOException e) {
-            LOGGER.log(Level.SEVERE, "failed to close domain tree index", e);
+        if (domainTreeIndexReaderResource != null) {
+            domainTreeIndexReaderResource.close();
+            domainTreeIndexReaderResource = null;
         }
-        try {
-            if (paragraphIndexReader != null) {
-                paragraphIndexReader.close();
-                paragraphIndexReader = null;
-            }
-        } catch (IOException e) {
-            LOGGER.log(Level.SEVERE, "failed to close paragraph index", e);
+        if (paragraphIndexReaderResource != null) {
+            paragraphIndexReaderResource.close();
+            paragraphIndexReaderResource = null;
         }
     }
 
@@ -166,7 +126,6 @@ public class WikipediaSchoolsReasonableDomainsTest {
 
         assertEquals(nodeMap.size(), paragraphsDomainsInTreeIndexCount.size());
         WikipediaSchoolsDumpIndexer.printHistogram(paragraphsDomainsInTreeIndexCount);
-
     }
 
     /**
@@ -180,8 +139,8 @@ public class WikipediaSchoolsReasonableDomainsTest {
 
         int documentCount = 0, sysoutEveryCount = 7000;
 
-        for (; documentCount < paragraphIndexReader.maxDoc(); documentCount++) {
-            Document doc = paragraphIndexReader.document(documentCount);
+        for (; documentCount < paragraphIndexReaderResource.getIndexReader().maxDoc(); documentCount++) {
+            Document doc = paragraphIndexReaderResource.getIndexReader().document(documentCount);
 
             Set<String> domainNames = new HashSet<String>();
             for (IndexableField domain : doc.getFields(WikipediaSchoolsDumpIndexer.LUCENE_FIELD_DOCUMENT_SUBJECT)) {
@@ -191,25 +150,25 @@ public class WikipediaSchoolsReasonableDomainsTest {
             WikipediaSchoolsDumpIndexer.logNewlySeenDomains(domainNames, seenDomainsOfParagraphs);
 
             if (0 == documentCount % sysoutEveryCount) {
-                LOGGER.info("processed [" + documentCount + "/" + paragraphIndexReader.maxDoc() + "] documetns");
+                LOGGER.info("processed [" + documentCount + "/" + paragraphIndexReaderResource.getIndexReader().maxDoc() + "] documetns");
             }
         }
         return seenDomainsOfParagraphs;
     }
-
-    /**
-     * add new node to map if not already existent
-     * 
-     * @param nodeName
-     * @return the new or an already mapped node
-     */
-    private static BaseTreeNode<String> addNodeToMap(String nodeName) {
-        BaseTreeNode<String> theNode = nodeMap.get(nodeName);
-        if (theNode == null) {
-            theNode = new BaseTreeNode<String>(nodeName);
-            nodeMap.put(nodeName, theNode);
-        }
-
-        return theNode;
-    }
+    //
+    // /**
+    // * add new node to map if not already existent
+    // *
+    // * @param nodeName
+    // * @return the new or an already mapped node
+    // */
+    // private static BaseTreeNode<String> addNodeToMap(String nodeName) {
+    // BaseTreeNode<String> theNode = nodeMap.get(nodeName);
+    // if (theNode == null) {
+    // theNode = new BaseTreeNode<String>(nodeName);
+    // nodeMap.put(nodeName, theNode);
+    // }
+    //
+    // return theNode;
+    // }
 }

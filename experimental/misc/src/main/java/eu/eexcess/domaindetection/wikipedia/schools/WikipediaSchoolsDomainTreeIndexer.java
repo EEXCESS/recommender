@@ -39,7 +39,7 @@ import org.apache.lucene.document.TextField;
 
 import eu.eexcess.logger.PianoLogger;
 import eu.eexcess.sourceselection.redde.tree.BaseTreeNode;
-import eu.eexcess.sourceselection.redde.tree.BaseTreeNode.NodeInspector;
+import eu.eexcess.sourceselection.redde.tree.NodeInspector;
 import eu.eexcess.sourceselection.redde.tree.TreeNode;
 import eu.eexcess.sourceselection.redde.tree.ValueTreeNode;
 
@@ -50,7 +50,7 @@ import eu.eexcess.sourceselection.redde.tree.ValueTreeNode;
  * @author Raoul Rubien
  *
  */
-public class WikipediaSchoolsDomainTreeParser extends IndexWriterRessource {
+public class WikipediaSchoolsDomainTreeIndexer extends IndexWriterRessource {
 
     /**
      * The node traverser creates a Lucene document for each node. Each document
@@ -59,12 +59,12 @@ public class WikipediaSchoolsDomainTreeParser extends IndexWriterRessource {
      * @author Raoul Rubien
      *
      */
-    private static class DocumentGeneratingNodeInspector implements BaseTreeNode.NodeInspector<String> {
+    private static class DocumentGeneratingNodeInspector implements NodeInspector<String> {
 
         private List<Document> documents = new ArrayList<Document>();
 
         @Override
-        public void invoke(TreeNode<String> n) {
+        public boolean invoke(TreeNode<String> n) {
             Document document = new Document();
             document.add(new TextField(LUCENE_DOCUMENT_DOCUMENT_FIELD_NAME, n.getName(), Field.Store.YES));
 
@@ -72,6 +72,7 @@ public class WikipediaSchoolsDomainTreeParser extends IndexWriterRessource {
                 document.add(new TextField(LUCENE_DOCUMENT_CHILD_FIELD_NAME, child.getName(), Field.Store.YES));
             }
             documents.add(document);
+            return false;
         }
 
         public List<Document> getDocuments() {
@@ -79,7 +80,7 @@ public class WikipediaSchoolsDomainTreeParser extends IndexWriterRessource {
         }
     }
 
-    private static final Logger LOGGER = PianoLogger.getLogger(WikipediaSchoolsDomainTreeParser.class);
+    private static final Logger LOGGER = PianoLogger.getLogger(WikipediaSchoolsDomainTreeIndexer.class);
     private static final String DOMAIN_TREE_ENTRYPOINT_DIRECTORY = "wp/index/";
     private static final String DOMAIN_TREE_SITE_PREFIX = "subject.";
     private static final String DOMAIN_TREE_SITE_SUFFIX = ".htm";
@@ -88,7 +89,7 @@ public class WikipediaSchoolsDomainTreeParser extends IndexWriterRessource {
     public static final String LUCENE_DOCUMENT_CHILD_FIELD_NAME = "child-subject";
     public static final String LUCENE_DOCUMENT_DOCUMENT_FIELD_NAME = "subject";
 
-    public WikipediaSchoolsDomainTreeParser(File outIndexPath) {
+    public WikipediaSchoolsDomainTreeIndexer(File outIndexPath) {
         super(outIndexPath);
     }
 
@@ -152,7 +153,7 @@ public class WikipediaSchoolsDomainTreeParser extends IndexWriterRessource {
     }
 
     private static void buildTree(File tempDir, String[] args) {
-        try (WikipediaSchoolsDomainTreeParser parser = new WikipediaSchoolsDomainTreeParser(tempDir)) {
+        try (WikipediaSchoolsDomainTreeIndexer parser = new WikipediaSchoolsDomainTreeIndexer(tempDir)) {
             long timestamp = System.currentTimeMillis();
             parser.open();
             parser.run(args);
@@ -189,7 +190,7 @@ public class WikipediaSchoolsDomainTreeParser extends IndexWriterRessource {
 
             NodeInspector<String> graphmlContentWriter = new NodeInspector<String>() {
                 @Override
-                public void invoke(TreeNode<String> n) {
+                public boolean invoke(TreeNode<String> n) {
                     try {
                         writer.write("    <node id=\"n" + n.getName() + "\">\n");
                         // writer.write("      <data key=\"d4\"><![CDATA["+ some
@@ -234,6 +235,7 @@ public class WikipediaSchoolsDomainTreeParser extends IndexWriterRessource {
                     } catch (IOException e) {
                         LOGGER.log(Level.SEVERE, "failed to write graph to file [" + file.getPath() + "/" + file.getName() + "]", e);
                     }
+                    return false;
                 }
             };
             BaseTreeNode.depthFirstTraverser(rootNode, graphmlContentWriter);
@@ -260,7 +262,10 @@ public class WikipediaSchoolsDomainTreeParser extends IndexWriterRessource {
             Path domainTreeRoot = FileSystems.getDefault().getPath(args[0] + DOMAIN_TREE_ENTRYPOINT_DIRECTORY);
             List<File> domainFiles = collectDomainFiles(domainTreeRoot);
             ValueTreeNode<String> rootDomain = parseDomainFilesToTree(domainFiles);
-            BaseTreeNode.depthFirstTraverser(rootDomain, (n) -> System.out.println(n.toString()));
+            BaseTreeNode.depthFirstTraverser(rootDomain, (n) -> {
+                System.out.println(n.toString());
+                return false;
+            });
 
             File visTempFile = File.createTempFile("wikipedia-schools-domains-graph-", ".graphml");
             LOGGER.info("writing domain-tree to graphml [" + visTempFile.getAbsolutePath() + "]");

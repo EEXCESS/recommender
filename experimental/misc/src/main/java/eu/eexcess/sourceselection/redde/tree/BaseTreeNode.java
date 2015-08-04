@@ -26,10 +26,6 @@ import java.util.Set;
 
 public class BaseTreeNode<T> implements Iterable<TreeNode<T>>, TreeNode<T> {
 
-    public interface NodeInspector<E> {
-        void invoke(TreeNode<E> n);
-    }
-
     private Set<TreeNode<T>> children;
     private String name;
 
@@ -42,7 +38,6 @@ public class BaseTreeNode<T> implements Iterable<TreeNode<T>>, TreeNode<T> {
         children = new HashSet<TreeNode<T>>();
     }
 
-    
     @Override
     public boolean addChild(TreeNode<T> n) {
         return children.add(n);
@@ -125,8 +120,15 @@ public class BaseTreeNode<T> implements Iterable<TreeNode<T>>, TreeNode<T> {
         }
     }
 
+    /**
+     * Invokes the operator and traverses (depth first) the nodes until invocation returns true (abort traversal) or all nodes are traversed.
+     * @param root node where to start from
+     * @param operator the node visitor
+     */
     public static <E> void depthFirstTraverser(TreeNode<E> root, NodeInspector<E> operator) {
-        operator.invoke(root);
+        if (operator.invoke(root)) {
+            return;
+        }
         for (TreeNode<E> child : root.getChildren()) {
             BaseTreeNode<E> c = (BaseTreeNode<E>) child;
             depthFirstTraverser(c, operator);

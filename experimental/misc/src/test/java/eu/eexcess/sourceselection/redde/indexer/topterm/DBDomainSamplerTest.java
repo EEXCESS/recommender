@@ -32,102 +32,98 @@ import org.junit.Test;
 import eu.eexcess.sourceselection.redde.config.Settings;
 import eu.eexcess.sourceselection.redde.indexer.topterm.DBDomainSampler.SampleArguments;
 import eu.eexcess.sourceselection.redde.indexer.topterm.DBDomainSampler.WordNetArguments;
+import eu.eexcess.sourceselection.redde.tree.NodeInspector;
 import eu.eexcess.sourceselection.redde.tree.TreeNode;
 import eu.eexcess.sourceselection.redde.tree.ValueTreeNode;
 
 public class DBDomainSamplerTest {
 
-	private static WordNetArguments getDefaultWordNetArguments() {
-		WordNetArguments args = new WordNetArguments();
+    private static WordNetArguments getDefaultWordNetArguments() {
+        WordNetArguments args = new WordNetArguments();
 
-		args.wordnetDomainCsvTreePath = Settings.WordnetDomains.CSVDomainPath;
-		args.wordnetDomainsPath = Settings.WordnetDomains.Path;
-		args.wordnetPath = Settings.WordNet.Path_2_0;
-		return args;
-	}
+        args.wordnetDomainCsvTreePath = Settings.WordnetDomains.CSVDomainPath;
+        args.wordnetDomainsPath = Settings.WordnetDomains.Path;
+        args.wordnetPath = Settings.WordNet.Path_2_0;
+        return args;
+    }
 
-	private static Set<SampleArguments> getDefaultSampleArguments() {
+    private static Set<SampleArguments> getDefaultSampleArguments() {
 
-		return new HashSet<SampleArguments>();
-	}
+        return new HashSet<SampleArguments>();
+    }
 
-	@Test
-	public void construct_expectNotExceptional() {
+    @Test
+    public void construct_expectNotExceptional() {
 
-		if (Settings.isResourceAvailable(Settings.BaseIndex) && Settings.isWordNet20ResourceAvailable()
-						&& Settings.isWordNet30ResourceAvailable() && Settings.isWordNetDomainsResourceAvailable()) {
+        if (Settings.isResourceAvailable(Settings.BaseIndex) && Settings.isWordNet20ResourceAvailable() && Settings.isWordNet30ResourceAvailable()
+                && Settings.isWordNetDomainsResourceAvailable()) {
 
-			try {
+            try {
 
-				WordNetArguments wnArgs = getDefaultWordNetArguments();
-				DBDomainSampler sampler = new DBDomainSampler(Settings.BaseIndex.baseIndexPath, wnArgs);
-				sampler.close();
+                WordNetArguments wnArgs = getDefaultWordNetArguments();
+                DBDomainSampler sampler = new DBDomainSampler(Settings.BaseIndex.baseIndexPath, wnArgs);
+                sampler.close();
 
-			} catch (Exception e) {
-				e.printStackTrace();
-				assertTrue(false);
-			}
-		}
-	}
+            } catch (Exception e) {
+                e.printStackTrace();
+                assertTrue(false);
+            }
+        }
+    }
 
-	@Test
-	public void alignTerms_expectNotExceptional() {
-		if (Settings.isResourceAvailable(Settings.BaseIndex) && Settings.isWordNet20ResourceAvailable()
-						&& Settings.isWordNet30ResourceAvailable() && Settings.isWordNetDomainsResourceAvailable()) {
+    @Test
+    public void alignTerms_expectNotExceptional() {
+        if (Settings.isResourceAvailable(Settings.BaseIndex) && Settings.isWordNet20ResourceAvailable() && Settings.isWordNet30ResourceAvailable()
+                && Settings.isWordNetDomainsResourceAvailable()) {
 
-			try {
+            WordNetArguments wnArgs = getDefaultWordNetArguments();
+            try (DBDomainSampler sampler = new DBDomainSampler(Settings.BaseIndex.baseIndexPath, wnArgs)) {
+                TreeNode<String> domainToTerms = sampler.alignTerms(0, 99);
 
-				WordNetArguments wnArgs = getDefaultWordNetArguments();
-				DBDomainSampler sampler = new DBDomainSampler(Settings.BaseIndex.baseIndexPath, wnArgs);
-				TreeNode<String> domainToTerms = sampler.alignTerms(0, 99);
+                final AtomicInteger numNodes = new AtomicInteger(0);
+                final AtomicInteger numTerms = new AtomicInteger(0);
+                NodeInspector<String> counter = (n) -> {
+                    numNodes.incrementAndGet();
+                    numTerms.set(numTerms.get() + ((ValueTreeNode<String>) n).getValues().size());
+                    return false;
+                };
 
-				final AtomicInteger numNodes = new AtomicInteger(0);
-				final AtomicInteger numTerms = new AtomicInteger(0);
-				ValueTreeNode.NodeInspector<String> counter = (n) -> {
-					numNodes.incrementAndGet();
-					numTerms.set(numTerms.get() + ((ValueTreeNode<String>) n).getValues().size());
-				};
+                ValueTreeNode.depthFirstTraverser(domainToTerms, counter);
+                System.out.println("num terms [" + numTerms.get() + "] num nodes [" + numNodes.get() + "] ");
+                assertTrue(numTerms.get() >= (99.0 * 0.04));
+                assertTrue(numNodes.get() > 1);
+            } catch (Exception e) {
+                e.printStackTrace();
+                assertTrue(false);
+            }
+        }
+    }
 
-				ValueTreeNode.depthFirstTraverser(domainToTerms, counter);
-				System.out.println("num terms [" + numTerms.get() + "] num nodes [" + numNodes.get() + "] ");
-				assertTrue(numTerms.get() >= (99.0 * 0.04));
-				assertTrue(numNodes.get() > 1);
+    @Ignore
+    @Test
+    public void sampleDatabase_expectNotExceptoinal() {
+        if (Settings.isResourceAvailable(Settings.BaseIndex) && Settings.isWordNet20ResourceAvailable() && Settings.isWordNet30ResourceAvailable()
+                && Settings.isWordNetDomainsResourceAvailable()) {
+            WordNetArguments wnArgs = getDefaultWordNetArguments();
+            try (DBDomainSampler sampler = new DBDomainSampler(Settings.BaseIndex.baseIndexPath, wnArgs)) {
+                TreeNode<String> domainToTermTree = sampler.alignTerms(0, 500);
 
-				sampler.close();
+                NodeInspector<String> printer = (n) -> {
+                    if (((ValueTreeNode<String>) n).getValues().size() > 0) {
+                        System.out.print("#terms: " + ((ValueTreeNode<String>) n).getValues().size() + " ");
+                        System.out.println(n.toString());
+                    }
+                    return false;
+                };
+                ValueTreeNode.depthFirstTraverser(domainToTermTree, printer);
+                // TODO: wn domain alignment does not deliver expected result :/
+                sampler.sample(getDefaultSampleArguments());
+                sampler.close();
 
-			} catch (Exception e) {
-				e.printStackTrace();
-				assertTrue(false);
-			}
-		}
-	}
-
-	@Ignore
-	@Test
-	public void sampleDatabase_expectNotExceptoinal() {
-		if (Settings.isResourceAvailable(Settings.BaseIndex) && Settings.isWordNet20ResourceAvailable()
-						&& Settings.isWordNet30ResourceAvailable() && Settings.isWordNetDomainsResourceAvailable()) {
-			try {
-
-				WordNetArguments wnArgs = getDefaultWordNetArguments();
-				DBDomainSampler sampler = new DBDomainSampler(Settings.BaseIndex.baseIndexPath, wnArgs);
-				TreeNode<String> domainToTermTree = sampler.alignTerms(0, 500);
-
-				ValueTreeNode.NodeInspector<String> printer = (n) -> {
-					if (((ValueTreeNode<String>) n).getValues().size() > 0) {
-						System.out.print("#terms: " + ((ValueTreeNode<String>) n).getValues().size() + " ");
-						System.out.println(n.toString());
-					}
-				};
-				ValueTreeNode.depthFirstTraverser(domainToTermTree, printer);
-				// TODO: wn domain alignment does not deliver expected result :/
-				sampler.sample(getDefaultSampleArguments());
-				sampler.close();
-
-			} catch (Exception e) {
-				e.printStackTrace();
-				assertTrue(false);
-			}
-		}
-	}
+            } catch (Exception e) {
+                e.printStackTrace();
+                assertTrue(false);
+            }
+        }
+    }
 }

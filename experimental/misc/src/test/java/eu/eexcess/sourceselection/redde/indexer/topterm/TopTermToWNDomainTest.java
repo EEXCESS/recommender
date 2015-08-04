@@ -38,29 +38,38 @@ import eu.eexcess.federatedrecommender.domaindetection.probing.Domain;
 import eu.eexcess.federatedrecommender.domaindetection.probing.DomainDetectorException;
 import eu.eexcess.federatedrecommender.domaindetection.wordnet.WordnetDomainsDetector;
 import eu.eexcess.sourceselection.redde.config.Settings;
+import eu.eexcess.sourceselection.redde.tree.NodeInspector;
 import eu.eexcess.sourceselection.redde.tree.TreeNode;
 import eu.eexcess.sourceselection.redde.tree.ValueTreeNode;
 
 public class TopTermToWNDomainTest {
 
     private int nodeCount;
-    private ValueTreeNode.NodeInspector<String> nodeCounter = (n) -> TopTermToWNDomainTest.this.nodeCount++;
+    private NodeInspector<String> nodeCounter = (n) -> {
+        TopTermToWNDomainTest.this.nodeCount++;
+        return false;
+    };
 
     private int termCount;
-    private ValueTreeNode.NodeInspector<String> termCounter = (n) -> TopTermToWNDomainTest.this.termCount += ((ValueTreeNode<String>) n).getValues().size();
+    private NodeInspector<String> termCounter = (n) -> {
+        TopTermToWNDomainTest.this.termCount += ((ValueTreeNode<String>) n).getValues().size();
+        return false;
+    };
 
     private Set<String> collectedTerms = new HashSet<String>();
-    private ValueTreeNode.NodeInspector<String> termCollector = (n) -> {
+    private NodeInspector<String> termCollector = (n) -> {
         for (String term : ((ValueTreeNode<String>) n).getValues()) {
             TopTermToWNDomainTest.this.collectedTerms.add(term);
         }
+        return false;
     };
 
     private Map<String, String> termToDmain = new HashMap<String, String>();
-    private ValueTreeNode.NodeInspector<String> termToDomainCollector = (n) -> {
+    private NodeInspector<String> termToDomainCollector = (n) -> {
         for (String term : ((ValueTreeNode<String>) n).getValues()) {
             TopTermToWNDomainTest.this.termToDmain.put(term, n.getName());
         }
+        return false;
     };
 
     // private NodeInspector printer = (n) -> System.out.println(n.toString());
@@ -78,7 +87,7 @@ public class TopTermToWNDomainTest {
 
                 nodeCount = 0;
                 ValueTreeNode.depthFirstTraverser(domainTree, nodeCounter);
-                assertEquals(168+1, nodeCount);
+                assertEquals(168 + 1, nodeCount);
             } catch (JWNLException | IOException e) {
                 e.printStackTrace();
                 assertTrue(false);
@@ -217,7 +226,7 @@ public class TopTermToWNDomainTest {
                 ValueTreeNode.depthFirstTraverser(startNode, termCollector);
                 assertEquals(2, startNode.getValues().size());
                 assertEquals(0, startNode.getChildren().size());
-                assertEquals(2, collectedTerms.size() );
+                assertEquals(2, collectedTerms.size());
 
             } catch (Exception e) {
                 e.printStackTrace();

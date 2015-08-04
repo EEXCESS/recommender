@@ -34,6 +34,7 @@ import org.apache.lucene.search.Query;
 import org.apache.lucene.search.TopScoreDocCollector;
 
 import eu.eexcess.sourceselection.redde.tree.BaseTreeNode;
+import eu.eexcess.sourceselection.redde.tree.NodeInspector;
 import eu.eexcess.sourceselection.redde.tree.ValueTreeNode;
 
 public class DBDomainSampler extends TopTermToWNDomain {
@@ -102,10 +103,11 @@ public class DBDomainSampler extends TopTermToWNDomain {
 	Set<String> distinctUnifyValues(Set<ValueTreeNode<String>> trees) {
 		final Set<String> unified = new HashSet<String>();
 
-		BaseTreeNode.NodeInspector<String> operator = (n) -> {
+		NodeInspector<String> operator = (n) -> {
 			for (String value : ((ValueTreeNode<String>) n).getValues()) {
 				unified.add(value);
 			}
+			return false;
 		};
 		for (ValueTreeNode<String> tree : trees) {
 			BaseTreeNode.depthFirstTraverser(tree, operator);
