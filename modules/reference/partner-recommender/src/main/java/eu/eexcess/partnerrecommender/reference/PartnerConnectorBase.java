@@ -80,6 +80,7 @@ public class PartnerConnectorBase implements PartnerConnectorApi {
         return queryGenerator;
     }
 
+    @Override
     public ResultList queryPartnerNative(PartnerConfiguration partnerConfiguration, SecureUserProfile userProfile, PartnerdataLogger logger) throws IOException {
         return null;
     }
@@ -131,6 +132,7 @@ public class PartnerConnectorBase implements PartnerConnectorApi {
         }
     }
 
+    @Override
     public Document queryPartner(PartnerConfiguration partnerConfiguration, SecureUserProfile userProfile, PartnerdataLogger logger) throws IOException {
         // Configure
         try {
@@ -160,6 +162,7 @@ public class PartnerConnectorBase implements PartnerConnectorApi {
 
     }
 
+    @Override
     public Document queryPartnerDetails(PartnerConfiguration partnerConfiguration, DocumentBadge document, PartnerdataLogger logger) throws IOException {
         // Configure
         try {

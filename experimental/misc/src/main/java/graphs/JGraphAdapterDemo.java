@@ -58,7 +58,8 @@ public class JGraphAdapterDemo extends JApplet {
     /**
      * @see java.applet.Applet#init().
      */
-    public void init(  ) {
+    @Override
+    public void init() {
     	
 		String vertexA = JGraphPerformanceTest.randomString();
 		String vertexB = JGraphPerformanceTest.randomString();

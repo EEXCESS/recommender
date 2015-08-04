@@ -137,7 +137,8 @@ public class DbpediaSpotlightResult {
 		return ret;
 	}
 
-	public String toString()
+	@Override
+    public String toString()
     {
 		String ret = "";
 		ret += "uri:" + (this.uri== null ? "" : this.getURI()) + "\n";
