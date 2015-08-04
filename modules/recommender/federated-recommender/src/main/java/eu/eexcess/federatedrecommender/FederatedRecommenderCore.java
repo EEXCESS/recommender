@@ -567,8 +567,8 @@ public class FederatedRecommenderCore implements ProbeResultChanged {
                     while (results.next()) {
                         restoredDomainsCount++;
                         PartnerDomain domain = new PartnerDomain();
-                        domain.domainName = results.getString(PartnersDomainsTableQuery.Tables.PartnerProbes.Domains.DOMAIN_NAME.ROW_NUMBER);
-                        domain.weight = results.getDouble(PartnersDomainsTableQuery.Tables.PartnerProbes.Domains.DOMAIN_WEIGHT.ROW_NUMBER);
+                        domain.domainName = results.getString(PartnersDomainsTableQuery.Tables.PartnerProbes.Domains.DOMAIN_NAME.row_number);
+                        domain.weight = results.getDouble(PartnersDomainsTableQuery.Tables.PartnerProbes.Domains.DOMAIN_WEIGHT.row_number);
                         hasDomainsRestored = true;
                         partnerConfig.getDomainContent().add(domain);
                     }

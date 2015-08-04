@@ -28,13 +28,13 @@ public enum PartnersDomainsTableQuery implements DatabasePreparedQuery {
     PARTNER_DOMAINS_TABLE_QUERY;
 
     public static class Domain {
-        public final String NAME;
-        public final String SQL_TYPE;
+        public final String name;
+        public final String sql_type;
         /**
          * provides information about the row position i.e. for "SELECT *"
          * queries
          */
-        public final int ROW_NUMBER;
+        public final int row_number;
 
         /**
          * 
@@ -47,9 +47,9 @@ public enum PartnersDomainsTableQuery implements DatabasePreparedQuery {
          *            "SELECT *" queries
          */
         public Domain(String domainName, String domainSqlType, int rowNumber) {
-            this.NAME = domainName;
-            this.SQL_TYPE = domainSqlType;
-            this.ROW_NUMBER = rowNumber;
+            this.name = domainName;
+            this.sql_type = domainSqlType;
+            this.row_number = rowNumber;
         }
     }
 
@@ -68,12 +68,12 @@ public enum PartnersDomainsTableQuery implements DatabasePreparedQuery {
              */
             private static final String NAME = "PartnerDomainProbes";
 
-            private static final String CREATE_TABLE = "CREATE TABLE IF NOT EXISTS " + NAME + " (" + PartnerProbes.Domains.ID_PRIMARY_KEY.NAME + " "
-                    + PartnerProbes.Domains.ID_PRIMARY_KEY.SQL_TYPE + " PRIMARY KEY NOT NULL, " + PartnerProbes.Domains.PROBE_TIMESTAMP.NAME + " "
-                    + PartnerProbes.Domains.PROBE_TIMESTAMP.SQL_TYPE + " NOT NULL, " + PartnerProbes.Domains.PARTNER_NAME.NAME + " "
-                    + PartnerProbes.Domains.PARTNER_NAME.SQL_TYPE + " NOT NULL, " + PartnerProbes.Domains.DOMAIN_NAME.NAME + " "
-                    + PartnerProbes.Domains.DOMAIN_NAME.SQL_TYPE + " NOT NULL, " + PartnerProbes.Domains.DOMAIN_WEIGHT.NAME + " "
-                    + PartnerProbes.Domains.DOMAIN_WEIGHT.SQL_TYPE + " NOT NULL)";
+            private static final String CREATE_TABLE = "CREATE TABLE IF NOT EXISTS " + NAME + " (" + PartnerProbes.Domains.ID_PRIMARY_KEY.name + " "
+                    + PartnerProbes.Domains.ID_PRIMARY_KEY.sql_type + " PRIMARY KEY NOT NULL, " + PartnerProbes.Domains.PROBE_TIMESTAMP.name + " "
+                    + PartnerProbes.Domains.PROBE_TIMESTAMP.sql_type + " NOT NULL, " + PartnerProbes.Domains.PARTNER_NAME.name + " "
+                    + PartnerProbes.Domains.PARTNER_NAME.sql_type + " NOT NULL, " + PartnerProbes.Domains.DOMAIN_NAME.name + " "
+                    + PartnerProbes.Domains.DOMAIN_NAME.sql_type + " NOT NULL, " + PartnerProbes.Domains.DOMAIN_WEIGHT.name + " "
+                    + PartnerProbes.Domains.DOMAIN_WEIGHT.sql_type + " NOT NULL)";
             /**
              * 1st ?: table name @see {@link PartnerProbes#NAME}
              */
@@ -81,20 +81,20 @@ public enum PartnersDomainsTableQuery implements DatabasePreparedQuery {
             /**
              * 1st ?: partner name
              */
-            private static final String DELETE_PARTNER_PROBES = "DELETE FROM " + PartnerProbes.NAME + " WHERE " + PartnerProbes.Domains.PARTNER_NAME.NAME
+            private static final String DELETE_PARTNER_PROBES = "DELETE FROM " + PartnerProbes.NAME + " WHERE " + PartnerProbes.Domains.PARTNER_NAME.name
                     + " LIKE ?";
             /**
              * 1st ?: partner name, 2nd ?: time stamp, 3rd ?: domain name, 4th
              * ?: domain weight
              */
             private static final String INSERT_PROBE_INTO_TABLE = "INSERT OR REPLACE INTO " + PartnerProbes.NAME + " ("
-                    + PartnerProbes.Domains.PARTNER_NAME.NAME + ", " + PartnerProbes.Domains.PROBE_TIMESTAMP.NAME + ", "
-                    + PartnerProbes.Domains.DOMAIN_NAME.NAME + ", " + PartnerProbes.Domains.DOMAIN_WEIGHT.NAME + ") VALUES (?, ?, ?, ?)";
+                    + PartnerProbes.Domains.PARTNER_NAME.name + ", " + PartnerProbes.Domains.PROBE_TIMESTAMP.name + ", "
+                    + PartnerProbes.Domains.DOMAIN_NAME.name + ", " + PartnerProbes.Domains.DOMAIN_WEIGHT.name + ") VALUES (?, ?, ?, ?)";
 
             /**
              * 1st ?: partner name
              */
-            private static final String SELECT_FROM_TABLE = "SELECT * FROM " + PartnerProbes.NAME + " WHERE " + PartnerProbes.Domains.PARTNER_NAME.NAME
+            private static final String SELECT_FROM_TABLE = "SELECT * FROM " + PartnerProbes.NAME + " WHERE " + PartnerProbes.Domains.PARTNER_NAME.name
                     + " LIKE ?";
         }
     }
