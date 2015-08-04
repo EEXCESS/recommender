@@ -42,10 +42,17 @@ public class BaseTreeNode<T> implements Iterable<TreeNode<T>>, TreeNode<T> {
         children = new HashSet<TreeNode<T>>();
     }
 
+    
+    @Override
     public boolean addChild(TreeNode<T> n) {
         return children.add(n);
     }
 
+    public boolean addChildren(Set<? extends TreeNode<T>> nodes) {
+        return children.addAll(nodes);
+    }
+
+    @Override
     public Set<TreeNode<T>> getChildren() {
         return new HashSet<TreeNode<T>>(children);
     }
@@ -54,14 +61,21 @@ public class BaseTreeNode<T> implements Iterable<TreeNode<T>>, TreeNode<T> {
         return children.remove(n);
     }
 
+    public void removeChildren() {
+        children.clear();
+    }
+
+    @Override
     public Iterator<TreeNode<T>> iterator() {
         return children.iterator();
     }
 
+    @Override
     public void setName(String name) {
         this.name = name;
     }
 
+    @Override
     public String getName() {
         return name;
     }

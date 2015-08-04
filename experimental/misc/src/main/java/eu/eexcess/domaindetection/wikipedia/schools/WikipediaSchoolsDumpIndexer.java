@@ -32,17 +32,18 @@ import java.nio.file.LinkOption;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.ListIterator;
 import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Set;
-import java.util.TreeMap;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -92,21 +93,21 @@ import eu.eexcess.logger.PianoLogger;
  */
 public class WikipediaSchoolsDumpIndexer extends IndexWriterRessource {
 
-    private static class AtomicIntegerValueComparator implements Comparator<String> {
+    private static final String LUCENE_FIELD_DOCUMENT_RELATIVE_PATH = "document-relative-path";
 
-        Map<? extends Object, AtomicInteger> map;
+    private static final String LUCENE_FIELD_PARAGRAPH_POSITION_IN_DOCUMENT = "paragraph-position-in-document";
 
-        public AtomicIntegerValueComparator(Map<? extends Object, AtomicInteger> map) {
-            this.map = map;
-        }
+    private static final String LUCENE_FIELD_PARAGRAPH_TEXT = "paragraph-text";
 
-        @Override
-        public int compare(String keyA, String keyB) {
-            Integer valueA = new Integer(map.get(keyA).intValue());
-            Integer valueB = new Integer(map.get(keyB).intValue());
-            return valueB.compareTo(valueA);
-        }
-    }
+    private static final String LUCENE_FIELD_PARAGRAPH_LEVEL = "paragraph-level";
+
+    private static final String LUCENE_FIELD_PARAGRAPH_TITLE = "paragraph-title";
+
+    private static final String LUCENE_FIELD_DOCUMENT_TITLE = "document-title";
+
+    public static final String LUCENE_FIELD_DOCUMENT_SUBJECT = "document-subject";
+
+    private static final String LUCENE_FIELD_DOCUMENT_IS_SOS_ADVERTISEMENT = "document-is-sos-advertisement";
 
     private static final long serialVersionUID = 4856619691781902215L;
 
@@ -129,7 +130,7 @@ public class WikipediaSchoolsDumpIndexer extends IndexWriterRessource {
      */
     private static final String DOMAIN_TREE_SITE_SEPARATOR = "\\.";
 
-    private static final String NO_SUBJECT_FOUND_STRING = "no-subject-found";
+    public static final String NO_SUBJECT_FOUND_STRING = "no-subject-found";
 
     /**
      * html tags that match one of these attributes will be ignored
@@ -156,7 +157,7 @@ public class WikipediaSchoolsDumpIndexer extends IndexWriterRessource {
     private int numberParagraphsCount = 0;
     private int numberDocumentsWithoutDomainCount = 0;
     private int numberParagraphsWithoutDomainCount = 0;
-    Map<String, AtomicInteger> seenDomains = new HashMap<String, AtomicInteger>();
+    private Map<String, AtomicInteger> seenDomains = new HashMap<String, AtomicInteger>();
 
     /**
      * @}
@@ -242,16 +243,29 @@ public class WikipediaSchoolsDumpIndexer extends IndexWriterRessource {
      *            args[0]='/home/hugo/.../wikipedia-schools-3.0.2/'
      */
     public static void main(String[] args) {
-        File tempDir;
         try {
-            tempDir = File.createTempFile("wikipedia-schools-index-" + WikipediaSchoolsDumpIndexer.class.getSimpleName(), "");
-            if (tempDir.delete() && tempDir.mkdir()) {
-                buildIndex(tempDir, args);
-            } else {
-                LOGGER.severe("failed to perform indexing: unable to crate folder [" + tempDir.getCanonicalPath() + "]");
-            }
+            File tempDir = getNewEmptyTempDir("wikipedia-schools-paragraph-index-");
+            buildIndex(tempDir, args);
         } catch (IOException e) {
             LOGGER.log(Level.SEVERE, "failed to perform indexing: unable to crate folder", e);
+        }
+    }
+
+    /**
+     * creates a new empty temporary directory
+     * 
+     * @param dirPrefix
+     * @return the path to the newly created directory
+     */
+    public static File getNewEmptyTempDir(String dirPrefix) throws IOException {
+        try {
+            File tempDir = File.createTempFile(dirPrefix, "");
+            tempDir.delete();
+            tempDir.mkdir();
+            return tempDir;
+        } catch (IOException e) {
+            LOGGER.log(Level.SEVERE, "failed to create directory [" + dirPrefix + "] ", e);
+            throw e;
         }
     }
 
@@ -352,12 +366,13 @@ public class WikipediaSchoolsDumpIndexer extends IndexWriterRessource {
                     List<DocumentParagraph> paragraphs = getParagraphsOfDocument(document, documentTitle, documentAnchors);
                     indexDocumentParagraphs(filePathString.replaceFirst(filePathAbsolutePrefix, ""), documentTitle, documentSubjects, paragraphs);
 
-                    logNewlySeenDomains(documentSubjects);
+                    logNewlySeenDomains(documentSubjects, seenDomains);
                     if (documentSubjects.isEmpty()) {
                         numberDocumentsWithoutDomainCount++;
                     }
                 }
                 printStatistics();
+                printHistogram(seenDomains);
             } catch (IOException e) {
                 StringBuilder message = new StringBuilder("failed create index");
                 if (args.length > 0) {
@@ -370,14 +385,33 @@ public class WikipediaSchoolsDumpIndexer extends IndexWriterRessource {
         }
     }
 
-    @SuppressWarnings({ "unchecked", "rawtypes" })
-    private static Map sortByValue(Map unsortedMap) {
-        Map sortedMap = new TreeMap(new AtomicIntegerValueComparator(unsortedMap));
-        sortedMap.putAll(unsortedMap);
-        return sortedMap;
+    private static Map<String, AtomicInteger> sortByValue(Map<String, AtomicInteger> unsortedMap) {
+
+        List<Map.Entry<String, AtomicInteger>> entries = new ArrayList<Map.Entry<String, AtomicInteger>>(unsortedMap.entrySet());
+
+        Collections.sort(entries, new Comparator<Map.Entry<String, AtomicInteger>>() {
+            @Override
+            public int compare(Map.Entry<String, AtomicInteger> entry1, Map.Entry<String, AtomicInteger> entry2) {
+                return new Integer(entry2.getValue().intValue()).compareTo(new Integer(entry1.getValue().intValue()));
+            }
+        });
+
+        Map<String, AtomicInteger> orderedMap = new LinkedHashMap<String, AtomicInteger>();
+        for (Map.Entry<String, AtomicInteger> entry : entries) {
+            orderedMap.put(entry.getKey(), entry.getValue());
+        }
+        return orderedMap;
     }
 
     private void printStatistics() {
+        System.out.println("documents count .... [" + numberDocumentsCount + "]  [" + numberDocumentsWithoutDomainCount / (double) numberDocumentsCount
+                + "]% without domains [" + numberDocumentsWithoutDomainCount + "]");
+        System.out.println("paragraphs count ... [" + numberParagraphsCount + "] [" + numberParagraphsWithoutDomainCount / (double) numberParagraphsCount
+                + "]% without domains [" + numberParagraphsWithoutDomainCount + "]");
+
+    }
+
+    public static void printHistogram(Map<String, AtomicInteger> seenDomains) {
 
         int maxCount = 0, minCount = Integer.MAX_VALUE;
         for (Map.Entry<String, AtomicInteger> entry : seenDomains.entrySet()) {
@@ -390,29 +424,21 @@ public class WikipediaSchoolsDumpIndexer extends IndexWriterRessource {
             }
         }
 
-        @SuppressWarnings("unchecked")
-        Map<String, AtomicInteger> seenDomainsSortedByValue = (Map<String, AtomicInteger>) sortByValue(seenDomains);
+        Map<String, AtomicInteger> seenDomainsSortedByValue = sortByValue(seenDomains);
 
-        System.out.println("------------------");
-        System.out.println("documents count .... [" + numberDocumentsCount + "]  [" + numberDocumentsWithoutDomainCount / (double) numberDocumentsCount
-                + "]% without domains [" + numberDocumentsWithoutDomainCount + "]");
-        System.out.println("paragraphs count ... [" + numberParagraphsCount + "] [" + numberParagraphsWithoutDomainCount / (double) numberParagraphsCount
-                + "]% without domains [" + numberParagraphsWithoutDomainCount + "]");
         System.out.println("seen domains ....... [" + seenDomains.size() + "] max count [" + maxCount + "] min count[" + minCount + "]");
-        System.out.println(" domain histogram ");
+        System.out.println("domain histogram:");
 
         maxCount++;
         for (Map.Entry<String, AtomicInteger> entry : seenDomainsSortedByValue.entrySet()) {
             for (int times = 0; times < (entry.getValue().intValue() / ((double) maxCount)) * 100; times++) {
                 System.out.print(".");
             }
-            System.out.println(" " + entry.getKey());
+            System.out.println(" " + entry.getKey() + " [" + entry.getValue().intValue() + "]x");
         }
-        System.out.println("------------------");
-
     }
 
-    private void logNewlySeenDomains(Set<String> documentSubjects) {
+    public static void logNewlySeenDomains(Set<String> documentSubjects, Map<String, AtomicInteger> seenDomains) {
         for (String domain : documentSubjects) {
             AtomicInteger seenDomainCount = seenDomains.get(domain);
             if (null == seenDomainCount) {
@@ -501,31 +527,31 @@ public class WikipediaSchoolsDumpIndexer extends IndexWriterRessource {
             Document document = new Document();
 
             if (paragraph.isSosParagraph()) {
-                document.add(new TextField("document-is-sos-advertisement", "true", Field.Store.YES));
+                document.add(new TextField(LUCENE_FIELD_DOCUMENT_IS_SOS_ADVERTISEMENT, "true", Field.Store.YES));
             } else {
-                document.add(new TextField("document-is-sos-advertisement", "false", Field.Store.YES));
+                document.add(new TextField(LUCENE_FIELD_DOCUMENT_IS_SOS_ADVERTISEMENT, "false", Field.Store.YES));
                 numberParagraphsWithoutDomainCount++;
             }
 
-            document.add(new TextField("document-relative-path", relativeFilePath, Field.Store.YES));
+            document.add(new TextField(LUCENE_FIELD_DOCUMENT_RELATIVE_PATH, relativeFilePath, Field.Store.YES));
 
             if (siteSubjects.isEmpty() && !paragraph.isSosParagraph()) {
-                document.add(new TextField("document-subject", NO_SUBJECT_FOUND_STRING, Field.Store.YES));
+                document.add(new TextField(LUCENE_FIELD_DOCUMENT_SUBJECT, NO_SUBJECT_FOUND_STRING, Field.Store.YES));
             } else {
                 for (String subject : siteSubjects) {
-                    document.add(new TextField("document-subject", subject, Field.Store.YES));
+                    document.add(new TextField(LUCENE_FIELD_DOCUMENT_SUBJECT, subject, Field.Store.YES));
                 }
             }
 
-            document.add(new TextField("document-title", siteTitle, Field.Store.YES));
+            document.add(new TextField(LUCENE_FIELD_DOCUMENT_TITLE, siteTitle, Field.Store.YES));
 
-            document.add(new TextField("paragraph-title", paragraph.getTitle(), Field.Store.YES));
-            document.add(new TextField("paragraph-level", paragraph.getLevel(), Field.Store.YES));
-            document.add(new TextField("paragraph-text", paragraph.getParagraph(), Field.Store.YES));
+            document.add(new TextField(LUCENE_FIELD_PARAGRAPH_TITLE, paragraph.getTitle(), Field.Store.YES));
+            document.add(new TextField(LUCENE_FIELD_PARAGRAPH_LEVEL, paragraph.getLevel(), Field.Store.YES));
+            document.add(new TextField(LUCENE_FIELD_PARAGRAPH_TEXT, paragraph.getParagraph(), Field.Store.YES));
 
             int paragraphPosition = paragraphs.size() - paragraphPositionCounter;
             paragraphPositionCounter++;
-            document.add(new TextField("paragraph-position-in-document", paragraphPosition + "/" + paragraphs.size(), Field.Store.YES));
+            document.add(new TextField(LUCENE_FIELD_PARAGRAPH_POSITION_IN_DOCUMENT, paragraphPosition + "/" + paragraphs.size(), Field.Store.YES));
 
             outIndexWriter.addDocument(document);
         }

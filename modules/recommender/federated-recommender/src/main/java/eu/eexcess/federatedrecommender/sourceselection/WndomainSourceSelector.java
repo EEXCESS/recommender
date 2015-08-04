@@ -66,7 +66,7 @@ public class WndomainSourceSelector implements PartnerSelector {
             } else if (this.weight > o.weight) {
                 return 1;
             }
-            return (this.name.compareTo(o.name));
+            return this.name.compareTo(o.name);
         }
 
         @Override
@@ -153,7 +153,7 @@ public class WndomainSourceSelector implements PartnerSelector {
         seenDomains.clear();
 
         // don't touch if already selected
-        if (userProfile.partnerList.size() <= 0) {
+        if (userProfile.partnerList.isEmpty()) {
             // match partners and user profile languages
             matchKeywordDomainsOnParterDomains(userProfile.contextKeywords, partners);
             selectPartners(partners, userProfile.partnerList);
@@ -162,7 +162,7 @@ public class WndomainSourceSelector implements PartnerSelector {
             return userProfile;
         }
 
-        if (userProfile.partnerList.size() > 0) {
+        if (!userProfile.partnerList.isEmpty()) {
             StringBuilder info = new StringBuilder("partners: ");
             for (PartnerBadge entry : userProfile.partnerList) {
                 info.append("[" + entry.getSystemId() + "] ");

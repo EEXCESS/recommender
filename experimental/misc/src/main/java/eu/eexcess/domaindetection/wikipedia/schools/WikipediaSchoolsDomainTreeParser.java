@@ -33,19 +33,60 @@ import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import org.apache.lucene.document.Document;
+import org.apache.lucene.document.Field;
+import org.apache.lucene.document.TextField;
+
 import eu.eexcess.logger.PianoLogger;
 import eu.eexcess.sourceselection.redde.tree.BaseTreeNode;
 import eu.eexcess.sourceselection.redde.tree.BaseTreeNode.NodeInspector;
 import eu.eexcess.sourceselection.redde.tree.TreeNode;
 import eu.eexcess.sourceselection.redde.tree.ValueTreeNode;
 
+/**
+ * This class parses the Wikipedia for Schools subjects and the their hierarchy.
+ * The tree is visualized and also stored as Lucene index.
+ * 
+ * @author Raoul Rubien
+ *
+ */
 public class WikipediaSchoolsDomainTreeParser extends IndexWriterRessource {
+
+    /**
+     * The node traverser creates a Lucene document for each node. Each document
+     * contains the node name its childrens' names.
+     * 
+     * @author Raoul Rubien
+     *
+     */
+    private static class DocumentGeneratingNodeInspector implements BaseTreeNode.NodeInspector<String> {
+
+        private List<Document> documents = new ArrayList<Document>();
+
+        @Override
+        public void invoke(TreeNode<String> n) {
+            Document document = new Document();
+            document.add(new TextField(LUCENE_DOCUMENT_DOCUMENT_FIELD_NAME, n.getName(), Field.Store.YES));
+
+            for (TreeNode<String> child : n.getChildren()) {
+                document.add(new TextField(LUCENE_DOCUMENT_CHILD_FIELD_NAME, child.getName(), Field.Store.YES));
+            }
+            documents.add(document);
+        }
+
+        public List<Document> getDocuments() {
+            return documents;
+        }
+    }
 
     private static final Logger LOGGER = PianoLogger.getLogger(WikipediaSchoolsDomainTreeParser.class);
     private static final String DOMAIN_TREE_ENTRYPOINT_DIRECTORY = "wp/index/";
     private static final String DOMAIN_TREE_SITE_PREFIX = "subject.";
     private static final String DOMAIN_TREE_SITE_SUFFIX = ".htm";
     private static final String ROOT_DOMAIN_NAME = "factotum";
+
+    public static final String LUCENE_DOCUMENT_CHILD_FIELD_NAME = "child-subject";
+    public static final String LUCENE_DOCUMENT_DOCUMENT_FIELD_NAME = "subject";
 
     public WikipediaSchoolsDomainTreeParser(File outIndexPath) {
         super(outIndexPath);
@@ -60,15 +101,54 @@ public class WikipediaSchoolsDomainTreeParser extends IndexWriterRessource {
      */
     public static void main(String[] args) {
         try {
-            File tempDir = File.createTempFile("wikipedia-schools-domains-index-" + WikipediaSchoolsDumpIndexer.class.getSimpleName(), "");
-            if (tempDir.delete() && tempDir.mkdir()) {
-                buildTree(tempDir, args);
-            } else {
-                LOGGER.severe("failed to perform indexing: unable to crate folder [" + tempDir.getCanonicalPath() + "]");
-            }
+            File tempDir = WikipediaSchoolsDumpIndexer.getNewEmptyTempDir("wikipedia-schools-domain-index-");
+            buildTree(tempDir, args);
         } catch (IOException e) {
             LOGGER.log(Level.SEVERE, "failed to perform indexing: unable to crate folder", e);
         }
+    }
+
+    static ValueTreeNode<String> parseDomainFilesToTree(List<File> domainFiles) {
+        ValueTreeNode<String> rootDomain = newNode(ROOT_DOMAIN_NAME);
+
+        // expected domainFile name "subject.domain1.domain2.domainN.html"
+        for (File domainFile : domainFiles) {
+            List<String> domainPath = WikipediaSchoolsDumpIndexer.stripDomains(domainFile.getName());
+
+            ValueTreeNode<String> lastVisited = rootDomain;
+            Set<TreeNode<String>> collector = newNodeCollector();
+
+            for (Iterator<String> domainIterator = domainPath.listIterator(); domainIterator.hasNext();) {
+                ValueTreeNode<String> toBeFound = newNode(domainIterator.next());
+                domainIterator.remove();
+                ValueTreeNode.findFirstNode(toBeFound, lastVisited, collector);
+
+                // find path connection point: skip all already seen domains
+                if (!collector.isEmpty()) {
+                    lastVisited = (ValueTreeNode<String>) collector.iterator().next();
+
+                    // if domain is unseen ad it and all subsequent one
+                } else {
+                    lastVisited.addChild(toBeFound);
+                    lastVisited = toBeFound;
+                    // add all remaining domains
+                    for (Iterator<String> unseenDomainsIterator = domainPath.iterator(); unseenDomainsIterator.hasNext();) {
+                        ValueTreeNode<String> newChild = newNode(unseenDomainsIterator.next());
+                        lastVisited.addChild(newChild);
+                        lastVisited = newChild;
+                    }
+                    break;
+                }
+                collector.clear();
+            }
+        }
+
+        // hack to replace the "subject" root by "factotum"
+        Set<? extends TreeNode<String>> children = rootDomain.getChildren().iterator().next().getChildren();
+        rootDomain.removeChildren();
+        rootDomain.addChildren(children);
+
+        return rootDomain;
     }
 
     private static void buildTree(File tempDir, String[] args) {
@@ -107,11 +187,13 @@ public class WikipediaSchoolsDomainTreeParser extends IndexWriterRessource {
             writer.write("  <graph edgedefault=\"directed\" id=\"G\">\n");
             writer.write("    <data key=\"d0\"/>\n");
 
-            NodeInspector<String> xmlPrinter = new NodeInspector<String>() {
+            NodeInspector<String> graphmlContentWriter = new NodeInspector<String>() {
                 @Override
                 public void invoke(TreeNode<String> n) {
                     try {
                         writer.write("    <node id=\"n" + n.getName() + "\">\n");
+                        // writer.write("      <data key=\"d4\"><![CDATA["+ some
+                        // url to local file goes here+"]]></data>");
                         writer.write("      <data key=\"d5\"/>\n");
                         writer.write("      <data key=\"d6\">\n");
                         writer.write("        <y:ShapeNode>\n");
@@ -154,7 +236,7 @@ public class WikipediaSchoolsDomainTreeParser extends IndexWriterRessource {
                     }
                 }
             };
-            BaseTreeNode.depthFirstTraverser(rootNode, xmlPrinter);
+            BaseTreeNode.depthFirstTraverser(rootNode, graphmlContentWriter);
 
             writer.write("  </graph>\n");
             writer.write("  <data key=\"d7\">\n");
@@ -179,49 +261,28 @@ public class WikipediaSchoolsDomainTreeParser extends IndexWriterRessource {
             List<File> domainFiles = collectDomainFiles(domainTreeRoot);
             ValueTreeNode<String> rootDomain = parseDomainFilesToTree(domainFiles);
             BaseTreeNode.depthFirstTraverser(rootDomain, (n) -> System.out.println(n.toString()));
-            writeTreeGraphml(rootDomain, new File("/tmp/wikipedia-schools-domains.graphml"));
-            // TODO store relations to index
-            throw new IOException("TODO store relations to index");
+
+            File visTempFile = File.createTempFile("wikipedia-schools-domains-graph-", ".graphml");
+            LOGGER.info("writing domain-tree to graphml [" + visTempFile.getAbsolutePath() + "]");
+            writeTreeGraphml(rootDomain, visTempFile);
+            writeTreeToIndex(rootDomain);
         } else {
-            throw new IOException("no surce path given");
+            throw new IOException("no source path given");
         }
     }
 
-    static ValueTreeNode<String> parseDomainFilesToTree(List<File> domainFiles) {
-        ValueTreeNode<String> rootDomain = newNode(ROOT_DOMAIN_NAME);
-
-        // expected domainFile name "subject.domain1.domain2.domainN.html"
-        for (File domainFile : domainFiles) {
-            List<String> domainPath = WikipediaSchoolsDumpIndexer.stripDomains(domainFile.getName());
-
-            ValueTreeNode<String> lastVisited = rootDomain;
-            Set<TreeNode<String>> collector = newNodeCollector();
-
-            for (Iterator<String> domainIterator = domainPath.listIterator(); domainIterator.hasNext();) {
-                ValueTreeNode<String> toBeFound = newNode(domainIterator.next());
-                domainIterator.remove();
-                ValueTreeNode.findFirstNode(toBeFound, lastVisited, collector);
-
-                // find path connection point: skip all already seen domains
-                if (!collector.isEmpty()) {
-                    lastVisited = (ValueTreeNode<String>) collector.iterator().next();
-
-                    // if domain is unseen ad it and all subsequent one
-                } else {
-                    lastVisited.addChild(toBeFound);
-                    lastVisited = toBeFound;
-                    // add all remaining domains
-                    for (Iterator<String> unseenDomainsIterator = domainPath.iterator(); unseenDomainsIterator.hasNext();) {
-                        ValueTreeNode<String> newChild = newNode(unseenDomainsIterator.next());
-                        lastVisited.addChild(newChild);
-                        lastVisited = newChild;
-                    }
-                    break;
-                }
-                collector.clear();
-            }
-        }
-        return rootDomain;
+    /**
+     * stores a whole tree to a Lucene index
+     * 
+     * @param rootDomain
+     *            the root to indexed from
+     * @throws IOException
+     *             if there is a low-level IO error
+     */
+    private void writeTreeToIndex(ValueTreeNode<String> rootDomain) throws IOException {
+        DocumentGeneratingNodeInspector nodeToDocsMapper = new DocumentGeneratingNodeInspector();
+        BaseTreeNode.depthFirstTraverser(rootDomain, nodeToDocsMapper);
+        outIndexWriter.addDocuments(nodeToDocsMapper.getDocuments());
     }
 
     private static ValueTreeNode<String> newNode(String nodeName) {

@@ -47,7 +47,7 @@ public class WikipediaSchoolsDomainTreeParserTest {
 
         ValueTreeNode<String> tree = WikipediaSchoolsDomainTreeParser.parseDomainFilesToTree(domainFiles);
 
-        BaseTreeNode.depthFirstTraverser(tree, (n) -> System.out.println(n.getName()));
+        BaseTreeNode.depthFirstTraverser(tree, n -> System.out.println(n.getName()));
 
         assertTrue(false);
     }
