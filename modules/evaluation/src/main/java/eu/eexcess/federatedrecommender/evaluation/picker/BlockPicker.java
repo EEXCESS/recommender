@@ -228,6 +228,7 @@ public class BlockPicker extends PartnersFederatedRecommendationsPicker {
      * @param basicCount
      * @param numResults
      */
+    @SuppressWarnings("fallthrough")
     private ResultList assignAndGetTopResults(Integer blockCount, ResultList basicList, ResultList diversityList, ResultList serendipityList, ResultList resultList,
             int basicCount, int diversityCount, int serendipityCount, Integer numResults) {
         int tmpBlockCount = blockCount;
@@ -260,9 +261,8 @@ public class BlockPicker extends PartnersFederatedRecommendationsPicker {
                 if (serendipityList != null) {
                     resultListToAdd = serendipityList;
                     numListResultsToAdd = serendipityCount;
-                    break;
                 }
-
+                break;
             default:
                 break;
             }

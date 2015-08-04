@@ -150,8 +150,8 @@ public class FederatedRecommenderEvaluationService extends FederatedRecommenderS
 
     @POST
     @Path("/blockEvaluation")
-    @Consumes({ MediaType.APPLICATION_XML, MediaType.WILDCARD })
-    @Produces({ MediaType.APPLICATION_XML, MediaType.WILDCARD })
+    @Consumes({ MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON })
+    @Produces({ MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON })
     public EvaluationResultLists blockEvaluation(SecureUserProfileEvaluation userProfile) {
         EvaluationResultLists resultList = fREC.getblockResult(userProfile);
         resultList.queryID = userProfile.queryID;
