@@ -29,7 +29,8 @@ public interface TreeNode<T> extends Iterable<TreeNode<T>> {
 
 	public abstract Set<? extends TreeNode<T>> getChildren();
 
-	public abstract Iterator<TreeNode<T>> iterator();
+	@Override
+    public abstract Iterator<TreeNode<T>> iterator();
 
 	public abstract void setName(String name);
 

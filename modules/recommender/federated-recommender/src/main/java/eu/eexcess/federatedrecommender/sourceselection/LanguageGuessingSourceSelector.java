@@ -55,9 +55,9 @@ public class LanguageGuessingSourceSelector implements PartnerSelector {
         selectedPartners.clear();
 
         // don't touch if already selected
-        if (userProfile.partnerList.size() <= 0) {
+        if (userProfile.partnerList.isEmpty()) {
             // no query language(s) are specified; try to guess
-            if (userProfile.languages.size() <= 0) {
+            if (userProfile.languages.isEmpty()) {
                 String textFragment = joinContextKeywords(userProfile.contextKeywords);
                 String userLanguage = LanguageGuesser.getInstance().guessLanguage(textFragment);
                 collectPartnersOnLanguageMatch(userLanguage, partners, userProfile.partnerList);
@@ -70,7 +70,7 @@ public class LanguageGuessingSourceSelector implements PartnerSelector {
             return userProfile;
         }
 
-        if (selectedPartners.size() > 0) {
+        if (!selectedPartners.isEmpty()) {
             logger.info("context-keywords-based source selection:");
             for (Map.Entry<PartnerBadge, List<String>> entry : selectedPartners.entrySet()) {
                 StringBuilder info = new StringBuilder();

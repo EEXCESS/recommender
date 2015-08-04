@@ -46,13 +46,15 @@ public class Enrichment implements IEnrichment{
 
 	EnrichmentServicesProxy services;
 
-	public void init(PartnerConfiguration partnerConfig)
+	@Override
+    public void init(PartnerConfiguration partnerConfig)
 	{
 		this.partnerConfig = partnerConfig;
 		this.services  = new EnrichmentServicesProxy(this.partnerConfig);
 	}
 	
-	public Document enrichResultList(Document input, PartnerdataLogger logger){
+	@Override
+    public Document enrichResultList(Document input, PartnerdataLogger logger){
 		if (!this.partnerConfig.getEnableEnriching()) return input;
 		PartnerdataTracer.dumpFile(this.getClass(), this.partnerConfig, input, "before-enrichment", logger);
 		OntModel model = XMLTools.createModel(input);
@@ -243,7 +245,8 @@ public class Enrichment implements IEnrichment{
 	}
 
 
-	public Document enrichResultObject(Document input){
+	@Override
+    public Document enrichResultObject(Document input){
 		return input;
 	}
 

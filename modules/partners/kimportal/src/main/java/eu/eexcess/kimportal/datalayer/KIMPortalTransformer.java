@@ -47,7 +47,8 @@ public class KIMPortalTransformer extends Transformer{
 		return result;
 	}
 	
-	protected Document postTransformationResultsDetail(Document orgPartnerResults, Document transformedResults) {
+	@Override
+    protected Document postTransformationResultsDetail(Document orgPartnerResults, Document transformedResults) {
 		XPath xPath = XPathFactory.newInstance().newXPath();
 		NodeList nodes;
 			try {

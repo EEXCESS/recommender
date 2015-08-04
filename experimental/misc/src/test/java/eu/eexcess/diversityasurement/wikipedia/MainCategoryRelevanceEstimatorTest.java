@@ -454,6 +454,9 @@ public class MainCategoryRelevanceEstimatorTest {
                 p.extend(104);
                 pathes.add(p);
                 break;
+
+            default:
+                break;
         }
         return pathes;
     }
@@ -590,6 +593,8 @@ public class MainCategoryRelevanceEstimatorTest {
                         break;
                     case 104:
                         assertEquals(0.2344, estimationEntry.getValue(), 0.0001);
+                        break;
+                    default:
                         break;
                 }
             }
