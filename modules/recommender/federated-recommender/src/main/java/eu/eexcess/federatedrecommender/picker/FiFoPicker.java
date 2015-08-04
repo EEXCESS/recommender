@@ -45,68 +45,61 @@ import eu.eexcess.federatedrecommender.interfaces.PartnersFederatedRecommendatio
  */
 public class FiFoPicker extends PartnersFederatedRecommendationsPicker {
 
-	public FiFoPicker() {
-		super();
-	}
+    public FiFoPicker() {
+        super();
+    }
 
-	private static final Logger logger = Logger.getLogger(FiFoPicker.class
-			.getName());
+    private static final Logger logger = Logger.getLogger(FiFoPicker.class.getName());
 
-	@Override
-	public ResultList pickResults(PFRChronicle pFRChronicle, int numResults) {
-		logger.log(Level.SEVERE, "Not Implemented!");
-		return null;
-	}
+    @Override
+    public ResultList pickResults(PFRChronicle pFRChronicle, int numResults) {
+        logger.log(Level.SEVERE, "Not Implemented!");
+        return null;
+    }
 
-	@Override
-	public ResultList pickResults(SecureUserProfile secureUserProfile,
-			PartnersFederatedRecommendations resultList,
-			List<PartnerBadge> partners, int numResults) {
-		ResultList result = new ResultList();
-		List<PartnerBadge> partnerTmp = new ArrayList<PartnerBadge>();
-		while (result.results.size() < numResults){
-			if (partnerTmp.size() == partners.size())
-					break;
-			for (PartnerBadge partnerBadge : partners) {
-			if (resultList.getResults().get(partnerBadge) != null)
-				if (resultList.getResults().get(partnerBadge).results.size() == 0) {
-					partnerTmp.add(partnerBadge);
-					break;
-				} else if (resultList.getResults().get(partnerBadge).results
-						.size() > 0 && result.results.size() < numResults) {
-					Result resultToAdd = resultList.getResults().get(
-							partnerBadge).results.get(0);
-					if (resultToAdd == null)
-						break;
+    @Override
+    public ResultList pickResults(SecureUserProfile secureUserProfile, PartnersFederatedRecommendations resultList, List<PartnerBadge> partners, int numResults) {
+        ResultList result = new ResultList();
+        List<PartnerBadge> partnerTmp = new ArrayList<PartnerBadge>();
+        while (resultList != null && !resultList.getResults().isEmpty() && result.results.size() < numResults) {
+            if (partnerTmp.size() == partners.size())
+                break;
+            for (PartnerBadge partnerBadge : partners) {
+                if (resultList.getResults().get(partnerBadge) != null)
+                    if (resultList.getResults().get(partnerBadge).results.size() == 0) {
+                        partnerTmp.add(partnerBadge);
+                        break;
+                    } else if (resultList.getResults().get(partnerBadge).results.size() > 0 && result.results.size() < numResults) {
+                        Result resultToAdd = resultList.getResults().get(partnerBadge).results.get(0);
+                        if (resultToAdd == null)
+                            break;
 
-					byte[] signNewResult = getFuzzyHashSignature(resultToAdd);
-					Result found = null;
-					for (Result selectedResult : result.results) {
-						if (Arrays.equals(signNewResult,
-								getFuzzyHashSignature(selectedResult))) {
-							found = selectedResult;
-							break;
-						}
-					}
-					
-					if (found==null) {
-						result.results.add(resultToAdd);
-					}
-					else{
-						if(found.resultGroup!=null)
-						found.resultGroup.add(resultToAdd);
-						else{
-							found.resultGroup = new LinkedList<Result>();
-							found.resultGroup.add(resultToAdd);
-						}
-							
-					}
-					resultList.getResults().get(partnerBadge).results.remove(0);
-				}
-		}
-		}
-		return result;
-	}
-	
+                        byte[] signNewResult = getFuzzyHashSignature(resultToAdd);
+                        Result found = null;
+                        for (Result selectedResult : result.results) {
+                            if (Arrays.equals(signNewResult, getFuzzyHashSignature(selectedResult))) {
+                                found = selectedResult;
+                                break;
+                            }
+                        }
+
+                        if (found == null) {
+                            result.results.add(resultToAdd);
+                        } else {
+                            if (found.resultGroup != null)
+                                found.resultGroup.add(resultToAdd);
+                            else {
+                                found.resultGroup = new LinkedList<Result>();
+                                found.resultGroup.add(resultToAdd);
+                            }
+
+                        }
+                        resultList.getResults().get(partnerBadge).results.remove(0);
+                    }
+
+            }
+        }
+        return result;
+    }
 
 }

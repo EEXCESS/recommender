@@ -88,6 +88,7 @@ public class LuceneQueryGenerator implements QueryGeneratorApi {
                 if (key.expansion == ExpansionType.PSEUDORELEVANCEWP)
                     result.append(" OR (" + keyword + "");
                 else
+                    // result.append(" AND (" + keyword + "");
                     result.append(" AND (" + keyword + "");
             } else
                 result.append("(" + keyword + "");
