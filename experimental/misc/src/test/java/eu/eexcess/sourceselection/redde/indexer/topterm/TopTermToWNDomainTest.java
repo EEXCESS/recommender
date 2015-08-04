@@ -73,12 +73,12 @@ public class TopTermToWNDomainTest {
                 TopTermToWNDomain mapper = new TopTermToWNDomain(Settings.BaseIndex.baseIndexPath, Settings.WordNet.Path_2_0, Settings.WordnetDomains.Path,
                         Settings.WordnetDomains.CSVDomainPath);
 
-                TreeNode<String> domainTree = mapper.inflateDomainTree();
+                ValueTreeNode<String> domainTree = TopTermToWNDomain.inflateDomainTree(mapper.getTreeFile());
                 mapper.close();
 
                 nodeCount = 0;
                 ValueTreeNode.depthFirstTraverser(domainTree, nodeCounter);
-                assertEquals(168, nodeCount);
+                assertEquals(168+1, nodeCount);
             } catch (JWNLException | IOException e) {
                 e.printStackTrace();
                 assertTrue(false);
@@ -93,7 +93,7 @@ public class TopTermToWNDomainTest {
             try {
                 TopTermToWNDomain mapper = new TopTermToWNDomain(Settings.BaseIndex.baseIndexPath, Settings.WordNet.Path_2_0, Settings.WordnetDomains.Path,
                         Settings.WordnetDomains.CSVDomainPath);
-                TreeNode<String> domainTree = mapper.inflateDomainTree();
+                TreeNode<String> domainTree = TopTermToWNDomain.inflateDomainTree(mapper.getTreeFile());
                 mapper.close();
 
                 // count level 2
@@ -215,8 +215,9 @@ public class TopTermToWNDomainTest {
 
                 collectedTerms.clear();
                 ValueTreeNode.depthFirstTraverser(startNode, termCollector);
-                assertTrue(collectedTerms.size() == 0);
-                assertTrue(startNode.getValues().size() == 2);
+                assertEquals(2, startNode.getValues().size());
+                assertEquals(0, startNode.getChildren().size());
+                assertEquals(2, collectedTerms.size() );
 
             } catch (Exception e) {
                 e.printStackTrace();

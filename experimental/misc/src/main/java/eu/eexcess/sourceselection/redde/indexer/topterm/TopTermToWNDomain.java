@@ -35,16 +35,17 @@ import org.apache.commons.io.LineIterator;
 
 import eu.eexcess.federatedrecommender.domaindetection.probing.Domain;
 import eu.eexcess.federatedrecommender.domaindetection.wordnet.WordnetDomainsDetector;
+import eu.eexcess.sourceselection.redde.tree.BaseTreeNode;
 import eu.eexcess.sourceselection.redde.tree.TreeNode;
 import eu.eexcess.sourceselection.redde.tree.ValueTreeNode;
 
 public class TopTermToWNDomain extends Resources {
 
     private File wordnetCSVTreeFile;
-    private static final String tokenDelimiter = "[,]";
+    private static final String TOKEN_DELIMITER = "[,]";
 
-    private ValueTreeNode<String> wnDomainTree;
-    private static final String rootNodeName = "factotum";
+    private ValueTreeNode<String> wnDomainTree = null;
+    private static final String ROOT_NODE_NAME = "factotum";
     private String[] topTerms;
     private File wordnetDomainDetectorFile;
     private File wordnetDomainsPath;
@@ -70,8 +71,6 @@ public class TopTermToWNDomain extends Resources {
         this.wordnetDomainDetectorFile = new File(wordnet20Path);
         this.wordnetCSVTreeFile = new File(wordnetDomainCsvTreePath);
         this.wordnetDomainsPath = new File(wordnetDomainsPath);
-        wnDomainTree = new ValueTreeNode<String>();
-        wnDomainTree.setName(rootNodeName);
     }
 
     /**
@@ -98,7 +97,7 @@ public class TopTermToWNDomain extends Resources {
     ValueTreeNode<String> assignToDomains(String[] terms) throws Exception {
         this.topTerms = terms;
         WordnetDomainsDetector wdt = new WordnetDomainsDetector(wordnetDomainDetectorFile, wordnetDomainsPath, true);
-        inflateDomainTree();
+        wnDomainTree = inflateDomainTree(wordnetCSVTreeFile);
 
         // construct a domain map containing terms
         IdentityHashMap<String, HashSet<String>> domainToTerms = new IdentityHashMap<String, HashSet<String>>();
@@ -145,16 +144,19 @@ public class TopTermToWNDomain extends Resources {
         return topTerms;
     }
 
-    TreeNode<String> inflateDomainTree() throws FileNotFoundException {
+    static ValueTreeNode<String> inflateDomainTree(File wordnetCSVTreeFile) throws FileNotFoundException {
         LineIterator iterator = new LineIterator(new FileReader(wordnetCSVTreeFile));
         String[] currentBranch = new String[5];
-        currentBranch[0] = rootNodeName;
+        currentBranch[0] = ROOT_NODE_NAME;
 
+        ValueTreeNode<String> treeRootNode = new ValueTreeNode<String>();
+        treeRootNode.setName(ROOT_NODE_NAME);
+        
         while (iterator.hasNext()) {
 
             // read current node and store its parents
             String line = iterator.nextLine();
-            String[] tokensInLine = line.split(tokenDelimiter);
+            String[] tokensInLine = line.split(TOKEN_DELIMITER);
 
             int depth = -1;
             for (int i = 0; i < tokensInLine.length; i++) {
@@ -171,7 +173,7 @@ public class TopTermToWNDomain extends Resources {
 
             // reconstruct and append the missing branch according to the
             // current tree
-            ValueTreeNode<String> branch = null;
+            BaseTreeNode<String> branch = null;
             for (int branchDepth = currentBranch.length; branchDepth > 0; branchDepth--) {
                 String nodeName = currentBranch[branchDepth - 1];
                 if (nodeName == null) {
@@ -181,7 +183,7 @@ public class TopTermToWNDomain extends Resources {
                 Set<TreeNode<String>> result = new HashSet<TreeNode<String>>();
                 ValueTreeNode<String> node = new ValueTreeNode<String>();
                 node.setName(nodeName);
-                ValueTreeNode.findFirstNode(node, wnDomainTree, result);
+                BaseTreeNode.findFirstNode(node, treeRootNode, result);
                 TreeNode<String> nodeInTree = null;
                 if (result.iterator().hasNext()) {
                     nodeInTree = result.iterator().next();
@@ -197,7 +199,7 @@ public class TopTermToWNDomain extends Resources {
                     // if node !∈ tree -> reconstruct the branch until the mount
                     // point is clear
                 } else {
-                    ValueTreeNode<String> newParent = new ValueTreeNode<String>();
+                    BaseTreeNode<String> newParent = new ValueTreeNode<String>();
                     newParent.setName(nodeName);
 
                     if (branch != null) {
@@ -208,7 +210,10 @@ public class TopTermToWNDomain extends Resources {
             }
         }
         iterator.close();
-        return wnDomainTree;
+        return treeRootNode;
     }
 
+    public File getTreeFile(){
+        return wordnetCSVTreeFile;
+    }
 }

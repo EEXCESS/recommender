@@ -199,8 +199,8 @@ public class WndomainSourceSelector implements PartnerSelector {
     }
 
     /**
-     * selects partners from {@link #matchingPartners} and adds their references
-     * the partner list
+     * Picks partners from {@link #matchingPartners} and adds their references
+     * the partner list.
      * 
      * @param partnerList
      *            list where selected partners are added to
@@ -227,7 +227,7 @@ public class WndomainSourceSelector implements PartnerSelector {
      */
     private void matchKeywordDomainsOnParterDomains(List<ContextKeyword> contextKeywords, List<PartnerBadge> partners) {
 
-        // find keywords' domains
+        // detect keywords' domains
         List<String> keywords = getQueryTerms(contextKeywords);
         for (String keyword : keywords) {
             try {
