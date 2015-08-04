@@ -23,9 +23,7 @@ package eu.eexcess.diversityasurement.wikipedia.querytocategoryrelevance;
 import java.io.Serializable;
 
 public class Query implements Serializable {
-    /**
-	 * 
-	 */
+
     private static final long serialVersionUID = 6247519623069807448L;
     public String query;
     public String description;
