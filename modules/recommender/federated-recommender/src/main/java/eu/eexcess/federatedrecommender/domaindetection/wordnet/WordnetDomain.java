@@ -34,71 +34,71 @@ import eu.eexcess.federatedrecommender.domaindetection.probing.Domain;
  * @author rkern@know-center.at
  */
 public class WordnetDomain extends Domain {
-	private String domainName;
-	private Map<Annotation, Synset> termToSynset;
+    private String domainName;
+    private Map<Annotation, Synset> termToSynset;
 
-	/**
-	 * Creates a new instance of this class.
-	 * 
-	 * @param domainName
-	 * @param termToSynset
-	 */
-	WordnetDomain(String domainName, Map<Annotation, Synset> termToSynset) {
-		this.domainName = domainName;
-		this.termToSynset = termToSynset;
-	}
+    /**
+     * Creates a new instance of this class.
+     * 
+     * @param domainName
+     * @param termToSynset
+     */
+    WordnetDomain(String domainName, Map<Annotation, Synset> termToSynset) {
+        this.domainName = domainName;
+        this.termToSynset = termToSynset;
+    }
 
-	/**
-	 * Returns the termToSynset.
-	 * 
-	 * @return the termToSynset
-	 */
-	Map<Annotation, Synset> getTermToSynset() {
-		return termToSynset;
-	}
+    /**
+     * Returns the termToSynset.
+     * 
+     * @return the termToSynset
+     */
+    Map<Annotation, Synset> getTermToSynset() {
+        return termToSynset;
+    }
 
-	/**
-	 * Returns the domainName.
-	 * 
-	 * @return the domainName
-	 */
-	public String getDomainName() {
-		return domainName;
-	}
+    /**
+     * Returns the domainName.
+     * 
+     * @return the domainName
+     */
+    public String getDomainName() {
+        return domainName;
+    }
 
-	@Override
-	public String toString() {
-		return domainName;
-	}
+    @Override
+    public String toString() {
+        return domainName;
+    }
 
-	@Override
-	public int hashCode() {
-		final int prime = 31;
-		int result = 1;
-		result = prime * result + ((domainName == null) ? 0 : domainName.hashCode());
-		return result;
-	}
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + ((domainName == null) ? 0 : domainName.hashCode());
+        return result;
+    }
 
-	@Override
-	public boolean equals(Object obj) {
-		if (this == obj)
-			return true;
-		if (obj == null)
-			return false;
-		if (getClass() != obj.getClass())
-			return false;
-		WordnetDomain other = (WordnetDomain) obj;
-		if (domainName == null) {
-			if (other.domainName != null)
-				return false;
-		} else if (!domainName.equals(other.domainName))
-			return false;
-		return true;
-	}
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj)
+            return true;
+        if (obj == null)
+            return false;
+        if (getClass() != obj.getClass())
+            return false;
+        WordnetDomain other = (WordnetDomain) obj;
+        if (domainName == null) {
+            if (other.domainName != null)
+                return false;
+        } else if (!domainName.equals(other.domainName))
+            return false;
+        return true;
+    }
 
-	@Override
-	public String getName() {
-		return domainName;
-	}
+    @Override
+    public String getName() {
+        return domainName;
+    }
 
 }

@@ -48,7 +48,7 @@ import eu.eexcess.logger.PianoLogger;
  */
 public class BinaryIndexResource implements Closeable {
 
-	private Logger LOGGER = PianoLogger.getLogger(BinaryIndexResource.class.getCanonicalName());
+	private static final Logger LOGGER = PianoLogger.getLogger(BinaryIndexResource.class.getCanonicalName());
 	protected String inIndexPath = null;
 	protected String outIndexPath = null;
 	protected Version luceneVersion = null;

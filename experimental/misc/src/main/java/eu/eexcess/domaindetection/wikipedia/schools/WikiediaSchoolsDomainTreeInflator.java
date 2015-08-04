@@ -95,9 +95,13 @@ public class WikiediaSchoolsDomainTreeInflator extends IndexReaderRessource {
     /**
      * 
      * @return a map of same nodes created in {@link #inflateDomainTree()}
-     * @throws IllegalStateException if {@link #inflateDomainTree()} was not called before
+     * @throws IllegalStateException
+     *             if {@link #inflateDomainTree()} was not called before
      */
-    public Map<String, TreeNode<String>> getNodeMap() throws IllegalStateException {
+    public Map<String, TreeNode<String>> getNodeMap() /*
+                                                       * throws
+                                                       * IllegalStateException
+                                                       */{
         if (nodeMap == null) {
             throw new IllegalStateException();
         }

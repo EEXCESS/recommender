@@ -25,15 +25,15 @@ import java.util.Set;
 
 public interface TreeNode<T> extends Iterable<TreeNode<T>> {
 
-	public abstract boolean addChild(TreeNode<T> n);
+    public abstract boolean addChild(TreeNode<T> n);
 
-	public abstract Set<? extends TreeNode<T>> getChildren();
+    public abstract Set<? extends TreeNode<T>> getChildren();
 
-	@Override
+    @Override
     public abstract Iterator<TreeNode<T>> iterator();
 
-	public abstract void setName(String name);
+    public abstract void setName(String name);
 
-	public abstract String getName();
+    public abstract String getName();
 
 }

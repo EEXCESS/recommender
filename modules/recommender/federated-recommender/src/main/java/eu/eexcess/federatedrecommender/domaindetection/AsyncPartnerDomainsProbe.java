@@ -72,7 +72,7 @@ public class AsyncPartnerDomainsProbe {
 
         private Thread task;
         private long timeout;
-        private Logger logger;
+        private final Logger logger;
         private CancelCondition condition;
 
         public TaskController(Thread task, long timeoutMs, CancelCondition condition, Logger logger) {

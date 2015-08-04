@@ -27,8 +27,8 @@ import java.util.List;
 
 import org.junit.Test;
 
-import eu.eexcess.opensearch.opensearch_description_document.documentFields.Url;
-import eu.eexcess.opensearch.opensearch_description_document.documentFields.Url.UrlRel;
+import eu.eexcess.opensearch.opensearchdescriptiondocument.documentfields.Url;
+import eu.eexcess.opensearch.opensearchdescriptiondocument.documentfields.Url.UrlRel;
 import eu.eexcess.opensearch.recommender.searchLink.SearchLinkFilter;
 import eu.eexcess.opensearch.recommender.searchLink.SearchLinkSelector;
 

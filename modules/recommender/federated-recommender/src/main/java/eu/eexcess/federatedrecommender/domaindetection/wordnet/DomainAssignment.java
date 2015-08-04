@@ -19,18 +19,19 @@ GNU Affero General Public License for more details.
 
 You should have received a copy of the GNU Affero General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
-*/
+ */
 package eu.eexcess.federatedrecommender.domaindetection.wordnet;
 
 import java.io.Serializable;
 
 class DomainAssignment implements Comparable<DomainAssignment>, Serializable {
-	private static final long serialVersionUID = -6947985645523081761L;
-	public final String domain;
+    private static final long serialVersionUID = -6947985645523081761L;
+    public final String domain;
     public final double weight;
-    
+
     /**
      * Creates a new instance of this class.
+     * 
      * @param domain
      * @param weight
      */
@@ -53,7 +54,7 @@ class DomainAssignment implements Comparable<DomainAssignment>, Serializable {
         }
         return d;
     }
-    
+
     @Override
     public int hashCode() {
         final int prime = 31;
@@ -64,13 +65,18 @@ class DomainAssignment implements Comparable<DomainAssignment>, Serializable {
 
     @Override
     public boolean equals(Object obj) {
-        if (this == obj) return true;
-        if (obj == null) return false;
-        if (getClass() != obj.getClass()) return false;
-        DomainAssignment other = (DomainAssignment)obj;
+        if (this == obj)
+            return true;
+        if (obj == null)
+            return false;
+        if (getClass() != obj.getClass())
+            return false;
+        DomainAssignment other = (DomainAssignment) obj;
         if (domain == null) {
-            if (other.domain != null) return false;
-        } else if (!domain.equals(other.domain)) return false;
+            if (other.domain != null)
+                return false;
+        } else if (!domain.equals(other.domain))
+            return false;
         return true;
     }
 

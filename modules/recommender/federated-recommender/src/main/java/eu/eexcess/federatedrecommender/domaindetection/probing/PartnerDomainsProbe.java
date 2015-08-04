@@ -83,7 +83,10 @@ public class PartnerDomainsProbe implements Cloneable {
     /**
      * see {@link #PartnersDomainsProbe(DomainDetector, int, int)}
      */
-    public PartnerDomainsProbe(DomainDetector domainDetector) throws RuntimeException {
+    public PartnerDomainsProbe(DomainDetector domainDetector) /*
+                                                               * throws
+                                                               * RuntimeException
+                                                               */{
         this.domainDetector = domainDetector;
         generateRandomPhrases();
     }
@@ -91,7 +94,10 @@ public class PartnerDomainsProbe implements Cloneable {
     /**
      * see {@link #PartnersDomainsProbe(DomainDetector, int, int)}
      */
-    public PartnerDomainsProbe(DomainDetector domainDetector, int numProbePhrases) throws RuntimeException {
+    public PartnerDomainsProbe(DomainDetector domainDetector, int numProbePhrases) /*
+                                                                                    * throws
+                                                                                    * RuntimeException
+                                                                                    */{
         this.domainDetector = domainDetector;
         this.maxWords = numProbePhrases;
         generateRandomPhrases();
@@ -108,7 +114,10 @@ public class PartnerDomainsProbe implements Cloneable {
      * @throws RuntimeException
      *             if random words cannot be generated
      */
-    public PartnerDomainsProbe(DomainDetector domainDetector, int numProbePhrases, int considerNumResults) throws RuntimeException {
+    public PartnerDomainsProbe(DomainDetector domainDetector, int numProbePhrases, int considerNumResults) /*
+                                                                                                            * throws
+                                                                                                            * RuntimeException
+                                                                                                            */{
         this.domainDetector = domainDetector;
         this.maxWords = numProbePhrases;
         this.maxResults = considerNumResults;
@@ -213,7 +222,7 @@ public class PartnerDomainsProbe implements Cloneable {
      * 
      * @throws DomainDetectorException
      */
-    private void generateRandomPhrases() throws RuntimeException {
+    private void generateRandomPhrases() /* throws RuntimeException */{
         int tries = 0;
         long startTimestamp = System.currentTimeMillis();
         while (ambiguousPhrases.size() < maxWords) {
@@ -269,7 +278,10 @@ public class PartnerDomainsProbe implements Cloneable {
      * @throws RuntimeErrorException
      *             if an exception occurs
      */
-    private ResultList getPartnerResult(Client client, PartnerBadge partner, SecureUserProfile secureUserProfile) throws RuntimeException {
+    private ResultList getPartnerResult(Client client, PartnerBadge partner, SecureUserProfile secureUserProfile) /*
+                                                                                                                   * throws
+                                                                                                                   * RuntimeException
+                                                                                                                   */{
         ResultList resultList = new ResultList();
 
         if (client != null) {

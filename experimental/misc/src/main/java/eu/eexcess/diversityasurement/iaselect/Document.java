@@ -44,85 +44,85 @@ import java.util.Set;
  */
 public class Document extends MessageCategories {
 
-	// public static double maxDocumentScore = 0.0f;
-	public double documentScore = 0.0f;
+    // public static double maxDocumentScore = 0.0f;
+    public double documentScore = 0.0f;
 
-	public String name;
-	public Integer documentId;
+    public String name;
+    public Integer documentId;
 
-	public int priority;
+    public int priority;
 
-	public Document(String name, Set<Category> categories, Integer documentId) {
-		this(name, categories);
-		this.documentId = documentId;
-	}
+    public Document(String name, Set<Category> categories, Integer documentId) {
+        this(name, categories);
+        this.documentId = documentId;
+    }
 
-	public Document(String name, Set<Category> categories) {
-		super(categories);
-		this.name = name;
-	}
+    public Document(String name, Set<Category> categories) {
+        super(categories);
+        this.name = name;
+    }
 
-	public Document(String name, Category category) {
-		this(name);
-		super.addCategory(category);
-	}
+    public Document(String name, Category category) {
+        this(name);
+        super.addCategory(category);
+    }
 
-	public Document(String name) {
-		this.name = name;
-	}
+    public Document(String name) {
+        this.name = name;
+    }
 
-	@Override
-	public int hashCode() {
-		final int prime = 31;
-		int result = 1;
-		result = prime * result + ((documentId == null) ? 0 : documentId.hashCode());
-		result = prime * result + ((name == null) ? 0 : name.hashCode());
-		return result;
-	}
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + ((documentId == null) ? 0 : documentId.hashCode());
+        result = prime * result + ((name == null) ? 0 : name.hashCode());
+        return result;
+    }
 
-	@Override
-	public boolean equals(Object obj) {
-		if (this == obj)
-			return true;
-		if (obj == null)
-			return false;
-		if (getClass() != obj.getClass())
-			return false;
-		Document other = (Document) obj;
-		if (documentId == null) {
-			if (other.documentId != null)
-				return false;
-		} else if (!documentId.equals(other.documentId))
-			return false;
-		if (name == null) {
-			if (other.name != null)
-				return false;
-		} else if (!name.equals(other.name))
-			return false;
-		return true;
-	}
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj)
+            return true;
+        if (obj == null)
+            return false;
+        if (getClass() != obj.getClass())
+            return false;
+        Document other = (Document) obj;
+        if (documentId == null) {
+            if (other.documentId != null)
+                return false;
+        } else if (!documentId.equals(other.documentId))
+            return false;
+        if (name == null) {
+            if (other.name != null)
+                return false;
+        } else if (!name.equals(other.name))
+            return false;
+        return true;
+    }
 
-	@Override
-	public String toString() {
-		return "Document [name=" + name + ", documentId=" + documentId + ", documentScore=" + documentScore + "]";
-	}
+    @Override
+    public String toString() {
+        return "Document [name=" + name + ", documentId=" + documentId + ", documentScore=" + documentScore + "]";
+    }
 
-	public List<Category> getTopCategories(int size) {
-		List<Category> list = new ArrayList<Category>(categories());
-		Comparator<Category> comparator = new Comparator<Category>() {
+    public List<Category> getTopCategories(int size) {
+        List<Category> list = new ArrayList<Category>(categories());
+        Comparator<Category> comparator = new Comparator<Category>() {
 
-			@Override
-			public int compare(Category o1, Category o2) {
-				if (o1.probability < o2.probability) {
-					return -1;
-				} else if (o1.probability > o2.probability)
-					return 1;
-				return 0;
-			}
-		};
-		Collections.sort(list, comparator);
-		size = (size > list.size()) ? list.size() : size;
-		return list.subList(0, size);
-	}
+            @Override
+            public int compare(Category o1, Category o2) {
+                if (o1.probability < o2.probability) {
+                    return -1;
+                } else if (o1.probability > o2.probability)
+                    return 1;
+                return 0;
+            }
+        };
+        Collections.sort(list, comparator);
+        size = (size > list.size()) ? list.size() : size;
+        return list.subList(0, size);
+    }
 
 }

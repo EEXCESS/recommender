@@ -26,7 +26,6 @@ import grph.path.ArrayListPath;
 
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
@@ -312,16 +311,13 @@ public class MainCategoryRelevanceEstimator {
      * @param distributeOverSiblingCategories
      *            {@code #disperseProbabilityOverPathes(int, List, boolean)}
      */
-    public Map<Integer, Map<Integer, Double>> estimateRelevances(List<Integer> startCategories, int topKShortestPathes,
-            boolean distributeOverSiblingCategories) {
+    public Map<Integer, Map<Integer, Double>> estimateRelevances(List<Integer> startCategories, int topKShortestPathes, boolean distributeOverSiblingCategories) {
 
         List<List<List<ArrayListPath>>> sourcesToTargetsPathes = yenTopKShortestPaths(startCategories, topKShortestPathes);
-
-        Map<Integer, Map<Integer, Double>> relevances = calculateProbabilites(startCategories, sourcesToTargetsPathes, distributeOverSiblingCategories);
-
+        // Map<Integer, Map<Integer, Double>> relevances =
+        return calculateProbabilites(startCategories, sourcesToTargetsPathes, distributeOverSiblingCategories);
         // writeRelevancesToIndex(relevances);
-
-        return relevances;
+        // return relevances;
     }
 
     /**
@@ -379,10 +375,10 @@ public class MainCategoryRelevanceEstimator {
         }
 
         LOGGER.info("probabilities for [" + startCategories.size() + "] nodes ready");
-        Map<Integer, Map<Integer, Double>> relevances = calculateProbabilites(startCategories, sourcesToTargetsPathes, distributeOverSiblingCategories);
+        // Map<Integer, Map<Integer, Double>> relevances =
+        return calculateProbabilites(startCategories, sourcesToTargetsPathes, distributeOverSiblingCategories);
         // writeRelevancesToIndex(relevances);
-
-        return relevances;
+        // return relevances;
     }
 
     // private void writeRelevancesToIndex(HashMap<Integer, HashMap<Integer,
@@ -791,7 +787,9 @@ public class MainCategoryRelevanceEstimator {
         LOGGER.info("read [" + cachedTopKShortestPaths.size() + "] paths from file [" + cacheFile.getAbsolutePath() + "]");
     }
 
-    public void writeCachedNodes(File cacheFile) throws FileNotFoundException, IOException {
+    public void writeCachedNodes(File cacheFile) throws /*
+                                                         * FileNotFoundException,
+                                                         */IOException {
         synchronized (cachedNodes) {
             FileOutputStream fos = new FileOutputStream(cacheFile);
             ObjectOutputStream oos = new ObjectOutputStream(fos);

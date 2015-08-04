@@ -21,7 +21,6 @@
 package eu.eexcess.diversityasurement.wikipedia.querytocategoryrelevance;
 
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -32,26 +31,30 @@ import com.google.gson.stream.JsonReader;
 
 public class QueryJsonIO {
 
-	public static Queries readQueries(File queryFile) throws FileNotFoundException, IOException {
-		JsonReader reader = new JsonReader(new FileReader(queryFile));
-		Gson gson = new GsonBuilder().create();
-		Queries queries = gson.fromJson(reader, Queries.class);
-		reader.close();
-		return queries;
-	}
+    public static Queries readQueries(File queryFile) throws /*
+                                                              * FileNotFoundException
+                                                              * ,
+                                                              */IOException {
+        JsonReader reader = new JsonReader(new FileReader(queryFile));
+        Gson gson = new GsonBuilder().create();
+        Queries queries = gson.fromJson(reader, Queries.class);
+        reader.close();
+        return queries;
+    }
 
-	static void writeQueries(File queryFile, Queries queries) throws IOException {
-		FileWriter writer = new FileWriter(queryFile);
-		Gson gson = new GsonBuilder().create();
-		gson.toJson(queries, writer);
-		writer.close();
-	}
+    static void writeQueries(File queryFile, Queries queries) throws IOException {
+        FileWriter writer = new FileWriter(queryFile);
+        Gson gson = new GsonBuilder().create();
+        gson.toJson(queries, writer);
+        writer.close();
+    }
 
-//	public static void writeQueries(File queryFile, Relevances relevances) throws IOException {
-//		FileWriter writer = new FileWriter(queryFile);
-//		Gson gson = new GsonBuilder().setPrettyPrinting().create();
-//		gson.toJson(relevances, writer);
-//		writer.close();
-//	}
+    // public static void writeQueries(File queryFile, Relevances relevances)
+    // throws IOException {
+    // FileWriter writer = new FileWriter(queryFile);
+    // Gson gson = new GsonBuilder().setPrettyPrinting().create();
+    // gson.toJson(relevances, writer);
+    // writer.close();
+    // }
 
 }

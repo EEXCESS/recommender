@@ -32,12 +32,12 @@ import java.util.logging.Logger;
 import org.apache.commons.lang.StringUtils;
 import org.junit.Test;
 
-import eu.eexcess.opensearch.opensearch_description_document.OpensearchDescription;
-import eu.eexcess.opensearch.opensearch_description_document.documentFields.Image;
-import eu.eexcess.opensearch.opensearch_description_document.documentFields.Query;
-import eu.eexcess.opensearch.opensearch_description_document.documentFields.Url;
-import eu.eexcess.opensearch.opensearch_description_document.documentFields.Url.UrlRel;
-import eu.eexcess.opensearch.opensearch_description_document.parse.OpenSearchDocumentParser;
+import eu.eexcess.opensearch.opensearchdescriptiondocument.OpensearchDescription;
+import eu.eexcess.opensearch.opensearchdescriptiondocument.documentfields.Image;
+import eu.eexcess.opensearch.opensearchdescriptiondocument.documentfields.Query;
+import eu.eexcess.opensearch.opensearchdescriptiondocument.documentfields.Url;
+import eu.eexcess.opensearch.opensearchdescriptiondocument.documentfields.Url.UrlRel;
+import eu.eexcess.opensearch.opensearchdescriptiondocument.parse.OpenSearchDocumentParser;
 
 public class OpenSearchDocumentParserTest {
 

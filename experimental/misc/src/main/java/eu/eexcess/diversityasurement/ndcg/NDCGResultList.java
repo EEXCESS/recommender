@@ -31,11 +31,11 @@ import java.util.List;
  *
  */
 public class NDCGResultList {
-	public List<NDCGResult> results = new ArrayList<>();
+    public List<NDCGResult> results = new ArrayList<>();
 
-	@Override
-	public String toString() {
-		return "NDCGResultList [results=" + results + "]";
-	}
+    @Override
+    public String toString() {
+        return "NDCGResultList [results=" + results + "]";
+    }
 
 }

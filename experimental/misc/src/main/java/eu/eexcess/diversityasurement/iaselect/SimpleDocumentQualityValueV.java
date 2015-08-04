@@ -45,33 +45,32 @@ import java.util.Map;
  */
 public class SimpleDocumentQualityValueV implements DocumentQualityValueV {
 
-	Map<Document, HashSet<Category>> documentQualities = new HashMap<Document, HashSet<Category>>();
+    Map<Document, HashSet<Category>> documentQualities = new HashMap<Document, HashSet<Category>>();
 
-	public SimpleDocumentQualityValueV() {
-	}
+    public SimpleDocumentQualityValueV() {
+    }
 
-	/**
-	 * V(d|q,c) - relevance of a document or the quality of a document d for
-	 * query q when the intended category is c
-	 * 
-	 * @param d
-	 *            one document out of R(q)
-	 * @param q
-	 *            query used for R(q)
-	 * @param c
-	 *            category the document belongs to
-	 * @return document relevance
-	 * @throws IllegalArgumentException
-	 *             if document or category is not found
-	 */
-	@Override
-	public double V(Document d, Query q, Category c) throws IllegalArgumentException {
-		for (Category documentCategory : documentQualities.get(d)) {
-			if (documentCategory.equals(c)) {
-				return documentCategory.probability;
-			}
-		}
-		throw new IllegalArgumentException("failed fetching document quality value: category[" + c.name
-						+ "] for document[" + d.name + "] not found");
-	}
+    /**
+     * V(d|q,c) - relevance of a document or the quality of a document d for
+     * query q when the intended category is c
+     * 
+     * @param d
+     *            one document out of R(q)
+     * @param q
+     *            query used for R(q)
+     * @param c
+     *            category the document belongs to
+     * @return document relevance
+     * @throws IllegalArgumentException
+     *             if document or category is not found
+     */
+    @Override
+    public double v(Document d, Query q, Category c) /*throws IllegalArgumentException*/ {
+        for (Category documentCategory : documentQualities.get(d)) {
+            if (documentCategory.equals(c)) {
+                return documentCategory.probability;
+            }
+        }
+        throw new IllegalArgumentException("failed fetching document quality value: category[" + c.name + "] for document[" + d.name + "] not found");
+    }
 }

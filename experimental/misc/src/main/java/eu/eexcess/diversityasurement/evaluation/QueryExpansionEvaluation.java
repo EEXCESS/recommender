@@ -20,7 +20,6 @@
 
 package eu.eexcess.diversityasurement.evaluation;
 
-import java.io.FileNotFoundException;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -84,7 +83,7 @@ public class QueryExpansionEvaluation {
         QueryCategoryKShortestPathsEvaluation.closeInIndex();
     }
 
-    private static void storeCategories(Set<Integer> categories) throws IllegalStateException, IOException {
+    private static void storeCategories(Set<Integer> categories) throws /*IllegalStateException,*/ IOException {
 
         Map<String, Integer> mapping = new LinkedHashMap<>();
         for (Integer id : categories) {
@@ -103,7 +102,7 @@ public class QueryExpansionEvaluation {
         writer.close();
     }
 
-    private static Set<SecureUserProfile> getExpandedQueries(int[] termExpansions) throws FileNotFoundException, IOException {
+    private static Set<SecureUserProfile> getExpandedQueries(int[] termExpansions) throws IOException {
         Set<SecureUserProfile> expandedQueries = new LinkedHashSet<>();
         for (String q : QueryCategoryKShortestPathsEvaluation.getQueries()) {
             LOGGER.info("expanding query [" + q + "]");
@@ -198,7 +197,7 @@ public class QueryExpansionEvaluation {
         decomposer.setMaxNumTermsToExpand(maxTermsToExpand);
 
         long timestamp = System.currentTimeMillis();
-        expandedSecureProfile = (SecureUserProfile) decomposer.decompose(userProfile);
+        expandedSecureProfile = decomposer.decompose(userProfile);
         double localDuration = System.currentTimeMillis() - timestamp;
 
         totalTime += localDuration;

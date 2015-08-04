@@ -20,7 +20,7 @@ GNU Affero General Public License for more details.
 You should have received a copy of the GNU Affero General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
  * @author Raoul Rubien
-*/
+ */
 package eu.eexcess.diversityasurement.iaselect;
 
 import java.util.HashSet;
@@ -36,67 +36,67 @@ import edu.stanford.nlp.util.StringUtils;
  *
  */
 public class MessageCategories {
-	private Set<Category> categories = new HashSet<Category>();
+    private Set<Category> categories = new HashSet<Category>();
 
-	public MessageCategories(Set<Category> categories) {
-		this.categories = categories;
-	}
+    public MessageCategories(Set<Category> categories) {
+        this.categories = categories;
+    }
 
-	public MessageCategories() {
-		categories = new HashSet<Category>();
-	}
+    public MessageCategories() {
+        categories = new HashSet<Category>();
+    }
 
-	/**
-	 * adds c to categories if categories.contains(c) == false.
-	 * 
-	 * @param c
-	 * @throws IllegalArgumentException
-	 */
-	public void addCategory(Category c) throws IllegalArgumentException {
-		if (categories.contains(c)) {
-			throw new IllegalArgumentException("failed adding category: [" + c.name + "] already exist");
-		}
-		categories.add(c);
-	}
-	
-	/**
-	 * adds all c ∈ cats to categories if categories.contains(cats) == false.
-	 * 
-	 * @param cats
-	 * @throws IllegalArgumentException
-	 */
-	public void addCategories(Set<Category> cats) throws IllegalArgumentException {
-		for (Category c : cats) {
-			addCategory(c);
-		}
-	}
+    /**
+     * adds c to categories if categories.contains(c) == false.
+     * 
+     * @param c
+     * @throws IllegalArgumentException
+     */
+    public void addCategory(Category c) throws IllegalArgumentException {
+        if (categories.contains(c)) {
+            throw new IllegalArgumentException("failed adding category: [" + c.name + "] already exist");
+        }
+        categories.add(c);
+    }
 
-	/**
-	 * returns category c* if c.equals(c*) == true.
-	 * 
-	 * @param c
-	 * @return
-	 * @throws IllegalArgumentException
-	 */
-	public Category getCategory(Category c) throws IllegalArgumentException {
-		for (Category iterator : categories) {
-			if (iterator.equals(c)) {
-				return c;
-			}
-		}
-		throw new IllegalArgumentException("failed fetching category: [" + c.name + "] not found");
-	}
+    /**
+     * adds all c ∈ cats to categories if categories.contains(cats) == false.
+     * 
+     * @param cats
+     * @throws IllegalArgumentException
+     */
+    public void addCategories(Set<Category> cats) /*throws IllegalArgumentException*/ {
+        for (Category c : cats) {
+            addCategory(c);
+        }
+    }
 
-	/**
-	 * @return the whole category set
-	 */
-	public Set<Category> categories() {
-		return categories;
-	}
+    /**
+     * returns category c* if c.equals(c*) == true.
+     * 
+     * @param c
+     * @return
+     * @throws IllegalArgumentException
+     */
+    public Category getCategory(Category c) throws IllegalArgumentException {
+        for (Category iterator : categories) {
+            if (iterator.equals(c)) {
+                return c;
+            }
+        }
+        throw new IllegalArgumentException("failed fetching category: [" + c.name + "] not found");
+    }
 
-	@Override
-	public String toString() {
-		return "MessageCategories [categories=" + StringUtils.join(categories, ", ") + "]";
-	}
+    /**
+     * @return the whole category set
+     */
+    public Set<Category> categories() {
+        return categories;
+    }
+
+    @Override
+    public String toString() {
+        return "MessageCategories [categories=" + StringUtils.join(categories, ", ") + "]";
+    }
 
 }

@@ -44,101 +44,100 @@ import book.InvalidStateException;
  */
 public class ScoreBasedDocumentQualityValueV implements DocumentQualityValueV {
 
-	// private Logger logger =
-	// PianoLogger.getLogger(ScoreBasedDocumentQualityValueV.class);
-	// Map<Document, HashSet<Category>> documentQualities = new
-	// HashMap<Document, HashSet<Category>>();
+    // private Logger logger =
+    // PianoLogger.getLogger(ScoreBasedDocumentQualityValueV.class);
+    // Map<Document, HashSet<Category>> documentQualities = new
+    // HashMap<Document, HashSet<Category>>();
 
-	// @Deprecated
-	// private IndexReader indexReader;
-	// @Deprecated
-	// private IndexSearcher indexSearcher;
-	// @Deprecated
-	// private QueryParser queryParser;
+    // @Deprecated
+    // private IndexReader indexReader;
+    // @Deprecated
+    // private IndexSearcher indexSearcher;
+    // @Deprecated
+    // private QueryParser queryParser;
 
-	public ScoreBasedDocumentQualityValueV() throws IOException {
-		// openInIndex();
-	}
+    public ScoreBasedDocumentQualityValueV() throws IOException {
+        // openInIndex();
+    }
 
-	/**
-	 * V(d|q,c) - relevance of a document or the quality of a document d for
-	 * query q when the intended category is c
-	 * 
-	 * @param d
-	 *            one document out of R(q)
-	 * @param q
-	 *            query used for R(q)
-	 * @param c
-	 *            category the document belongs to
-	 * @return document relevance
-	 * @throws IllegalArgumentException
-	 *             if document or category is not found
-	 * @throws ParseException
-	 * @throws IOException
-	 * @throws InvalidStateException
-	 */
-	@Override
-	public double V(Document d, Query q, Category c) throws InvalidStateException, IOException, ParseException {
-		for (Category documentCategory : d.categories()) {
-			if (documentCategory.equals(c)) {
-				// return documentScore(d, q) * documentCategory.probability;
-				return d.documentScore * documentCategory.probability;
-			}
-		}
-		throw new IllegalArgumentException("failed fetching document quality value: category[" + c.name
-						+ "] for document[" + d.name + "] not found");
-	}
+    /**
+     * V(d|q,c) - relevance of a document or the quality of a document d for
+     * query q when the intended category is c
+     * 
+     * @param d
+     *            one document out of R(q)
+     * @param q
+     *            query used for R(q)
+     * @param c
+     *            category the document belongs to
+     * @return document relevance
+     * @throws IllegalArgumentException
+     *             if document or category is not found
+     * @throws ParseException
+     * @throws IOException
+     * @throws InvalidStateException
+     */
+    @Override
+    public double v(Document d, Query q, Category c) throws /*InvalidStateException,*/ IOException, ParseException {
+        for (Category documentCategory : d.categories()) {
+            if (documentCategory.equals(c)) {
+                // return documentScore(d, q) * documentCategory.probability;
+                return d.documentScore * documentCategory.probability;
+            }
+        }
+        throw new IllegalArgumentException("failed fetching document quality value: category[" + c.name + "] for document[" + d.name + "] not found");
+    }
 
-	// @Deprecated
-	// private void openInIndex() throws IOException {
-	// Directory directory =
-	// FSDirectory.open(Settings.RelevanceEvaluation.IOFIles.inLuceneIndexDirectory);
-	// indexReader = DirectoryReader.open(directory);
-	//
-	// indexSearcher = new IndexSearcher(indexReader);
-	// queryParser = new
-	// QueryParser(Settings.RelevanceEvaluation.Lucene.SEARCH_FIELD_SECTIONTEXT,
-	// new EnglishAnalyzer());
-	// }
+    // @Deprecated
+    // private void openInIndex() throws IOException {
+    // Directory directory =
+    // FSDirectory.open(Settings.RelevanceEvaluation.IOFIles.inLuceneIndexDirectory);
+    // indexReader = DirectoryReader.open(directory);
+    //
+    // indexSearcher = new IndexSearcher(indexReader);
+    // queryParser = new
+    // QueryParser(Settings.RelevanceEvaluation.Lucene.SEARCH_FIELD_SECTIONTEXT,
+    // new EnglishAnalyzer());
+    // }
 
-	// @Deprecated
-	// @Override
-	// public void close() throws IOException {
-	// try {
-	// indexReader.close();
-	// } catch (IOException e) {
-	// logger.log(Level.SEVERE, "index reader closed erroneous", e);
-	// } catch (NullPointerException npe) {
-	// logger.log(Level.SEVERE, "index reader already closed");
-	// }
-	// indexReader = null;
-	// }
+    // @Deprecated
+    // @Override
+    // public void close() throws IOException {
+    // try {
+    // indexReader.close();
+    // } catch (IOException e) {
+    // logger.log(Level.SEVERE, "index reader closed erroneous", e);
+    // } catch (NullPointerException npe) {
+    // logger.log(Level.SEVERE, "index reader already closed");
+    // }
+    // indexReader = null;
+    // }
 
-	// @Deprecated
-	// /**
-	// * Calculate document d relevance regarding query q.
-	// * @param d
-	// * @param q
-	// * @return scoreDoc.score / topDocs.getMaxScore()
-	// * @throws InvalidStateException if document with d.documentId not found
-	// * @throws IOException
-	// * @throws ParseException
-	// */
-	// private double documentScore(Document d, Query q) throws
-	// InvalidStateException, IOException, ParseException {
-	// org.apache.lucene.search.Query query = queryParser.parse(q.query);
-	// TopDocs topDocs = indexSearcher.search(query,
-	// Settings.RelevanceEvaluation.EstimationArguments.numTopDocumentsToConsider);
-	//
-	// for (ScoreDoc sDoc : topDocs.scoreDocs) {
-	// if (d.documentId == sDoc.doc) {
-	// return 1.0 - (sDoc.score / topDocs.getMaxScore());
-	// }
-	// }
-	// throw new InvalidStateException("failed to find document id [" +
-	// d.documentId + "] within ["
-	// +
-	// Settings.RelevanceEvaluation.EstimationArguments.numTopDocumentsToConsider
-	// + "] top docs for query [" + q.query + "]");
-	// }
+    // @Deprecated
+    // /**
+    // * Calculate document d relevance regarding query q.
+    // * @param d
+    // * @param q
+    // * @return scoreDoc.score / topDocs.getMaxScore()
+    // * @throws InvalidStateException if document with d.documentId not found
+    // * @throws IOException
+    // * @throws ParseException
+    // */
+    // private double documentScore(Document d, Query q) throws
+    // InvalidStateException, IOException, ParseException {
+    // org.apache.lucene.search.Query query = queryParser.parse(q.query);
+    // TopDocs topDocs = indexSearcher.search(query,
+    // Settings.RelevanceEvaluation.EstimationArguments.numTopDocumentsToConsider);
+    //
+    // for (ScoreDoc sDoc : topDocs.scoreDocs) {
+    // if (d.documentId == sDoc.doc) {
+    // return 1.0 - (sDoc.score / topDocs.getMaxScore());
+    // }
+    // }
+    // throw new InvalidStateException("failed to find document id [" +
+    // d.documentId + "] within ["
+    // +
+    // Settings.RelevanceEvaluation.EstimationArguments.numTopDocumentsToConsider
+    // + "] top docs for query [" + q.query + "]");
+    // }
 }

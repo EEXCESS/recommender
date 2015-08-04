@@ -35,7 +35,7 @@ import eu.eexcess.utils.LanguageGuesser;
 
 public class LanguageGuessingSourceSelector implements PartnerSelector {
 
-    private Logger logger = Logger.getLogger(LanguageGuessingSourceSelector.class.getName());
+    private static final Logger LOGGER = Logger.getLogger(LanguageGuessingSourceSelector.class.getName());
     private Map<PartnerBadge, List<String>> selectedPartners = new HashMap<>();
 
     public LanguageGuessingSourceSelector(FederatedRecommenderConfiguration configuration) {
@@ -62,26 +62,26 @@ public class LanguageGuessingSourceSelector implements PartnerSelector {
                 String userLanguage = LanguageGuesser.getInstance().guessLanguage(textFragment);
                 collectPartnersOnLanguageMatch(userLanguage, partners, userProfile.partnerList);
             } else {
-                logger.info("refusing to guess languages due to [" + userProfile.languages.size() + "] already specified languages");
+                LOGGER.info("refusing to guess languages due to [" + userProfile.languages.size() + "] already specified languages");
                 return userProfile;
             }
         } else {
-            logger.info("refusing to select partners due to [" + userProfile.partnerList.size() + "] prevoiously selected partners");
+            LOGGER.info("refusing to select partners due to [" + userProfile.partnerList.size() + "] prevoiously selected partners");
             return userProfile;
         }
 
         if (!selectedPartners.isEmpty()) {
-            logger.info("context-keywords-based source selection:");
+            LOGGER.info("context-keywords-based source selection:");
             for (Map.Entry<PartnerBadge, List<String>> entry : selectedPartners.entrySet()) {
                 StringBuilder info = new StringBuilder();
                 info.append("partner [" + entry.getKey().getSystemId() + "] matching language:");
                 for (String language : entry.getValue()) {
                     info.append(" [" + language + "]");
                 }
-                logger.info(info.toString());
+                LOGGER.info(info.toString());
             }
         } else {
-            logger.info("unsuccessfull partner selection");
+            LOGGER.info("unsuccessfull partner selection");
         }
 
         return userProfile;
@@ -118,7 +118,7 @@ public class LanguageGuessingSourceSelector implements PartnerSelector {
                 if (partnerLanguage.compareTo(language) == 0 && false == partnerConnectorList.contains(partner)) {
                     partnerConnectorList.add(partner);
 
-                    if (false == selectedPartners.containsKey(partner)) {
+                    if (!selectedPartners.containsKey(partner)) {
                         List<String> newList = new ArrayList<String>();
                         newList.add(language);
                         selectedPartners.put(partner, newList);

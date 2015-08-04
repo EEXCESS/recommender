@@ -31,42 +31,42 @@ import java.util.List;
  *
  */
 public class NDCGIA extends NDCG {
-	/**
-	 * 
-	 * @param resultList
-	 * @param at
-	 *            e.g. NDCG@5
-	 * @return
-	 */
-	public Double calcNDCGIA(NDCGResultList resultList, List<NDCGIACategory> queryCategories, int at) {
-		Double nDCGIA = 0.0;
-//		List<NDCGIACategory> categories = new ArrayList<NDCGIACategory>();
-//		for (NDCGResult result : resultList.results) {
-//			for (NDCGIACategory cat : result.categories) {
-//				if (!categories.contains(cat)) {
-//					categories.add(cat);
-//				}
-//			}
-//		}
-		for (NDCGIACategory cat : queryCategories) {
-			if(cat==null)
-				cat=new NDCGIACategory("", 0.0);
-			Double nDCG = calcNDCG(resultList, cat, at);
-			nDCGIA += calcIAWeight(cat, nDCG);
-			// System.out.println(nDCG + " IA "+ cat.getQueryWeight()+" "+ nDCG*
-			// cat.getQueryWeight() );
-		}
-		return nDCGIA;
-	}
+    /**
+     * 
+     * @param resultList
+     * @param at
+     *            e.g. NDCG@5
+     * @return
+     */
+    public Double calcNDCGIA(NDCGResultList resultList, List<NDCGIACategory> queryCategories, int at) {
+        Double nDCGIA = 0.0;
+        // List<NDCGIACategory> categories = new ArrayList<NDCGIACategory>();
+        // for (NDCGResult result : resultList.results) {
+        // for (NDCGIACategory cat : result.categories) {
+        // if (!categories.contains(cat)) {
+        // categories.add(cat);
+        // }
+        // }
+        // }
+        for (NDCGIACategory cat : queryCategories) {
+            if (cat == null)
+                cat = new NDCGIACategory("", 0.0);
+            Double nDCG = calcNDCG(resultList, cat, at);
+            nDCGIA += calcIAWeight(cat, nDCG);
+            // System.out.println(nDCG + " IA "+ cat.getQueryWeight()+" "+ nDCG*
+            // cat.getQueryWeight() );
+        }
+        return nDCGIA;
+    }
 
-	public double calcIAWeight(NDCGIACategory cat, Double nDCG) {
-		if(nDCG.isNaN()){
-			throw new IllegalArgumentException("failed to calculate NDCG with NAN value");
-		}
-		if(nDCG.isInfinite()){
-			throw new IllegalArgumentException("failed to calculate NDCG with INF value");
-		}
-		return nDCG * cat.getQueryWeight();
-	}
+    public double calcIAWeight(NDCGIACategory cat, Double nDCG) {
+        if (nDCG.isNaN()) {
+            throw new IllegalArgumentException("failed to calculate NDCG with NAN value");
+        }
+        if (nDCG.isInfinite()) {
+            throw new IllegalArgumentException("failed to calculate NDCG with INF value");
+        }
+        return nDCG * cat.getQueryWeight();
+    }
 
 }

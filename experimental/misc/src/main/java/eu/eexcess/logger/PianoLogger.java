@@ -36,47 +36,47 @@ import java.util.logging.SimpleFormatter;
  */
 public class PianoLogger {
 
-	private static class PianoHandler extends Handler {
-		@Override
-		public void publish(LogRecord record) {
-			if (getFormatter() == null) {
-				setFormatter(new SimpleFormatter());
-			}
+    private static class PianoHandler extends Handler {
+        @Override
+        public void publish(LogRecord record) {
+            if (getFormatter() == null) {
+                setFormatter(new SimpleFormatter());
+            }
 
-			try {
-				String message = getFormatter().format(record);
-				if (record.getLevel().intValue() >= Level.WARNING.intValue()) {
-					System.err.write(message.getBytes());
-				} else {
-					System.out.write(message.getBytes());
-				}
-			} catch (Exception exception) {
-				reportError(null, exception, ErrorManager.FORMAT_FAILURE);
-				return;
-			}
+            try {
+                String message = getFormatter().format(record);
+                if (record.getLevel().intValue() >= Level.WARNING.intValue()) {
+                    System.err.write(message.getBytes());
+                } else {
+                    System.out.write(message.getBytes());
+                }
+            } catch (Exception exception) {
+                reportError(null, exception, ErrorManager.FORMAT_FAILURE);
+                return;
+            }
 
-		}
+        }
 
-		@Override
-		public void close() throws SecurityException {
-		}
+        @Override
+        public void close() throws SecurityException {
+        }
 
-		@Override
-		public void flush() {
-		}
-	};
+        @Override
+        public void flush() {
+        }
+    };
 
-	public static <T> Logger getLogger(Class<T> c) {
-		return getLogger(c.getCanonicalName());
-	}
+    public static <T> Logger getLogger(Class<T> c) {
+        return getLogger(c.getCanonicalName());
+    }
 
-	public static Logger getLogger(String className) {
-		Logger logger = Logger.getLogger(className);
+    public static Logger getLogger(String className) {
+        Logger logger = Logger.getLogger(className);
 
-		PianoHandler handler = new PianoHandler();
-		handler.setLevel(Level.ALL);
-		logger.setUseParentHandlers(false);
-		logger.addHandler(handler);
-		return logger;
-	}
+        PianoHandler handler = new PianoHandler();
+        handler.setLevel(Level.ALL);
+        logger.setUseParentHandlers(false);
+        logger.addHandler(handler);
+        return logger;
+    }
 }

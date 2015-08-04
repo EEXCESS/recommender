@@ -27,8 +27,6 @@ import eu.eexcess.sqlite.DatabasePreparedQuery;
 public enum PartnersDomainsTableQuery implements DatabasePreparedQuery {
     PARTNER_DOMAINS_TABLE_QUERY;
 
-    private final static Logger LOGGER = Logger.getLogger(PartnersDomainsTableQuery.class.getName());
-
     public static class Domain {
         public final String NAME;
         public final String SQL_TYPE;
@@ -101,8 +99,7 @@ public enum PartnersDomainsTableQuery implements DatabasePreparedQuery {
         }
     }
 
-    private PartnersDomainsTableQuery() {
-    }
+    private static final Logger LOGGER = Logger.getLogger(PartnersDomainsTableQuery.class.getName());
 
     /**
      * @see {@link Tables.PartnerProbes#NAME}
@@ -156,6 +153,9 @@ public enum PartnersDomainsTableQuery implements DatabasePreparedQuery {
     @Override
     public String getSelectQuery() {
         return Tables.PartnerProbes.SELECT_FROM_TABLE;
+    }
+
+    private PartnersDomainsTableQuery() {
     }
 
 }

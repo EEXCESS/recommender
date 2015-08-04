@@ -40,7 +40,7 @@ import eu.eexcess.federatedrecommender.interfaces.PartnerSelector;
  */
 public class LanguageSourceSelector implements PartnerSelector {
 
-    private Logger logger = Logger.getLogger(LanguageSourceSelector.class.getName());
+    private static final Logger LOGGER = Logger.getLogger(LanguageSourceSelector.class.getName());
     private Map<PartnerBadge, List<String>> selectedPartners = new HashMap<>();
 
     public LanguageSourceSelector(FederatedRecommenderConfiguration configuration) {
@@ -65,26 +65,26 @@ public class LanguageSourceSelector implements PartnerSelector {
                     collectPartnersOnLanguageMatch(userLanguage, partners, userProfile.partnerList);
                 }
             } else {
-                logger.info("refusing to select partners due to no specified languages");
+                LOGGER.info("refusing to select partners due to no specified languages");
                 return userProfile;
             }
         } else {
-            logger.info("refusing to select partners due to [" + userProfile.partnerList.size() + "] prevoiously selected partners");
+            LOGGER.info("refusing to select partners due to [" + userProfile.partnerList.size() + "] prevoiously selected partners");
             return userProfile;
         }
 
         if (selectedPartners.size() > 0) {
-            logger.info("language-based source selection:");
+            LOGGER.info("language-based source selection:");
             for (Map.Entry<PartnerBadge, List<String>> entry : selectedPartners.entrySet()) {
                 StringBuilder info = new StringBuilder();
                 info.append("partner [" + entry.getKey().getSystemId() + "] matching language(s):");
                 for (String language : entry.getValue()) {
                     info.append(" [" + language + "]");
                 }
-                logger.info(info.toString());
+                LOGGER.info(info.toString());
             }
         } else {
-            logger.info("unsuccessfull partner selection");
+            LOGGER.info("unsuccessfull partner selection");
         }
 
         return userProfile;
@@ -108,10 +108,10 @@ public class LanguageSourceSelector implements PartnerSelector {
         for (PartnerBadge partner : partners) {
             for (String partnerLanguage : partner.getLanguageContent()) {
                 if (partnerLanguage.compareTo(language) == 0) {
-                    if (false == partnerConnectorList.contains(partner)) {
+                    if (!partnerConnectorList.contains(partner)) {
                         partnerConnectorList.add(partner);
                     }
-                    if (false == selectedPartners.containsKey(partner)) {
+                    if (!selectedPartners.containsKey(partner)) {
                         ArrayList<String> newList = new ArrayList<String>();
                         newList.add(language);
                         selectedPartners.put(partner, newList);

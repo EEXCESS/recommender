@@ -31,64 +31,64 @@ import sqlite.Database;
 
 public class LanguageModel {
 
-	public String resource;
+    public String resource;
 
-	Hashtable<String, Integer> model = new Hashtable<String, Integer>();
+    Hashtable<String, Integer> model = new Hashtable<String, Integer>();
 
-	public LanguageModel(String resource) {
-		super();
-		this.resource = resource;
-	}
+    public LanguageModel(String resource) {
+        super();
+        this.resource = resource;
+    }
 
-	public void addTerm(String term) {
+    public void addTerm(String term) {
 
-		if (this.model.containsKey(term)) {
-			this.model.put(term, this.model.get(term) + 1);
-		} else {
-			this.model.put(term, 1);
-		}
-	}
+        if (this.model.containsKey(term)) {
+            this.model.put(term, this.model.get(term) + 1);
+        } else {
+            this.model.put(term, 1);
+        }
+    }
 
-	public void storeInDatabase(String dbName) throws SQLException {
+    public void storeInDatabase(String dbName) throws SQLException {
 
-		Connection dbConnection = null;
+        Connection dbConnection = null;
 
-		Statement stat = null;
+        Statement stat = null;
 
-		try {
+        try {
 
-			dbConnection = Database.connect(dbName);
+            dbConnection = Database.connect(dbName);
 
-			dbConnection.setAutoCommit(false);
-			stat = dbConnection.createStatement();
+            dbConnection.setAutoCommit(false);
+            stat = dbConnection.createStatement();
 
-			stat.executeUpdate(clearQuery(this.resource));
+            stat.executeUpdate(clearQuery(this.resource));
 
-		} catch (Exception e1) {
-			// TODO Auto-generated catch block
-			e1.printStackTrace();
-		}
+        } catch (Exception e1) {
+            // TODO Auto-generated catch block
+            e1.printStackTrace();
+        }
 
-		for (String term : model.keySet()) {
-			stat.executeUpdate(updateQuery(this.resource, term, model.get(term)));
-		}
-		if (dbConnection != null)
-			dbConnection.commit();
+        for (String term : model.keySet()) {
+            stat.executeUpdate(updateQuery(this.resource, term, model.get(term)));
+        }
+        if (dbConnection != null)
+            dbConnection.commit();
 
-		Database.disconnect();
-	}
+        Database.disconnect();
+    }
 
-	private static String clearQuery(String tableName) {
-		return "DELETE FROM " + tableName;
-	}
+    private static String clearQuery(String tableName) {
+        return "DELETE FROM " + tableName;
+    }
 
-	private static String updateQuery(String tableName, String term, int count) {
-		return "INSERT INTO " + tableName + " VALUES ('" + term + "', " + count + ")";
-	}
+    private static String updateQuery(String tableName, String term, int count) {
+        return "INSERT INTO " + tableName + " VALUES ('" + term + "', " + count + ")";
+    }
 
-	@Override
-	public String toString() {
-		return "LanguageModel [resource=" + resource + ", model=" + model + "]";
-	}
+    @Override
+    public String toString() {
+        return "LanguageModel [resource=" + resource + ", model=" + model + "]";
+    }
 
 }

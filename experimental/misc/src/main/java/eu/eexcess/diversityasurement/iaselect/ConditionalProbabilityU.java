@@ -20,7 +20,7 @@ GNU Affero General Public License for more details.
 You should have received a copy of the GNU Affero General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
  * @author Raoul Rubien
-*/
+ */
 
 package eu.eexcess.diversityasurement.iaselect;
 
@@ -42,72 +42,77 @@ import java.util.Set;
  */
 public class ConditionalProbabilityU {
 
-	private HashMap<Category, Double> probabilitiesU;
+    private HashMap<Category, Double> probabilitiesU;
 
-	/**
-	 * Constructs this class and initializes probabilities for the case:
-	 * <p>
-	 * if S=Ø, ∀c, U(c|q,S) = P(c|q)
-	 * 
-	 * @param categories
-	 *            set of c ∈ C(q)
-	 */
-	public ConditionalProbabilityU(Set<Category> categories) {
-		probabilitiesU = new HashMap<Category, Double>(categories.size());
+    /**
+     * Constructs this class and initializes probabilities for the case:
+     * <p>
+     * if S=Ø, ∀c, U(c|q,S) = P(c|q)
+     * 
+     * @param categories
+     *            set of c ∈ C(q)
+     */
+    public ConditionalProbabilityU(Set<Category> categories) {
+        probabilitiesU = new HashMap<Category, Double>(categories.size());
 
-		for (Category c : categories) {
-			probabilitiesU.put(c, ProbabilityDistributionCQ.P(c));
-		}
-	}
+        for (Category c : categories) {
+            probabilitiesU.put(c, ProbabilityDistributionCQ.P(c));
+        }
+    }
 
-	/**
-	 * U(c|q,S) - conditional probability that the query q belongs to category c
-	 * given that all documents in S fail to satisfy the user
-	 * <p>
-	 * 
-	 * @param c
-	 *            category
-	 * @param q
-	 *            query (treated as constant)
-	 * @param S
-	 *            set of already selected documents (treated as constant)
-	 * @return
-	 */
-	public double U(Category c, Query q, Set<Document> S) {
-		return probabilitiesU.get(c);
-	}
+    /**
+     * U(c|q,S) - conditional probability that the query q belongs to category c
+     * given that all documents in S fail to satisfy the user
+     * <p>
+     * 
+     * @param c
+     *            category
+     * @param q
+     *            query (treated as constant)
+     * @param s
+     *            set of already selected documents (treated as constant)
+     * @return
+     */
+    public double U(Category c, Query q, Set<Document> s) {
+        return probabilitiesU.get(c);
+    }
 
-	/**
-	 * ∀ c ∈ { C(d*) ⋂ C(q)), U(c|q,S) ← (1 - V(d*|q,c)) * U(c|q,S) - updates
-	 * U(c|q,S) in relation to its previous value and the document quality value
-	 * V(d*|q,c).
-	 * 
-	 * @param c set of categories ∈ { C(d*) ⋂ C(q))
-	 * @param q query (treated as constant)
-	 * @param S set of already seen documents (treated as constant)
-	 * @param d the desired document to update U(c|q,S)
-	 * @param V document quality values 
-	 * @throws Exception 
-	 */
-	public void updateU(Category c, Query q, Set<Document> S, Document d, DocumentQualityValueV V) throws Exception {
-		double previousU = probabilitiesU.get(c);
-		double newU = (1 - V.V(d, q, c)) * previousU;
-		probabilitiesU.put(c, newU);
-	}
+    /**
+     * ∀ c ∈ { C(d*) ⋂ C(q)), U(c|q,S) ← (1 - V(d*|q,c)) * U(c|q,S) - updates
+     * U(c|q,S) in relation to its previous value and the document quality value
+     * V(d*|q,c).
+     * 
+     * @param c
+     *            set of categories ∈ { C(d*) ⋂ C(q))
+     * @param q
+     *            query (treated as constant)
+     * @param s
+     *            set of already seen documents (treated as constant)
+     * @param d
+     *            the desired document to update U(c|q,S)
+     * @param v
+     *            document quality values
+     * @throws Exception
+     */
+    public void updateU(Category c, Query q, Set<Document> s, Document d, DocumentQualityValueV v) throws Exception {
+        double previousU = probabilitiesU.get(c);
+        double newU = (1 - v.v(d, q, c)) * previousU;
+        probabilitiesU.put(c, newU);
+    }
 
-	@Override
-	public String toString() {
+    @Override
+    public String toString() {
 
-		boolean isFirst = true;
-		StringBuilder mapString = new StringBuilder();
-		for (HashMap.Entry<Category, Double> entry : probabilitiesU.entrySet()) {
-			if (!isFirst) {
-				mapString.append(", ");
-			}
-			isFirst = false;
-			mapString.append(entry.getKey() + "=" + entry.getValue());
-		}
+        boolean isFirst = true;
+        StringBuilder mapString = new StringBuilder();
+        for (HashMap.Entry<Category, Double> entry : probabilitiesU.entrySet()) {
+            if (!isFirst) {
+                mapString.append(", ");
+            }
+            isFirst = false;
+            mapString.append(entry.getKey() + "=" + entry.getValue());
+        }
 
-		return "U:{" + mapString + "}";
-	}
+        return "U:{" + mapString + "}";
+    }
 }

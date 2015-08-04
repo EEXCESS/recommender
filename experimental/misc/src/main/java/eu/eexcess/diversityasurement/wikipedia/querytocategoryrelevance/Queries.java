@@ -21,5 +21,5 @@
 package eu.eexcess.diversityasurement.wikipedia.querytocategoryrelevance;
 
 public class Queries {
-	public Query[] queries;
+    public Query[] queries;
 }

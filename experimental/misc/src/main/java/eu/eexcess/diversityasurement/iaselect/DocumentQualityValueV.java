@@ -38,17 +38,17 @@ package eu.eexcess.diversityasurement.iaselect;
  */
 public interface DocumentQualityValueV {
 
-	/**
-	 * V(d|q,c) - relevance of a document or the quality of a document d for
-	 * query q when the intended category is c
-	 * 
-	 * @param d
-	 *            one document out of R(q)
-	 * @param q
-	 *            query used for R(q)
-	 * @param c
-	 *            category the document belongs to
-	 * @return document relevance
-	 */
-	public double V(Document d, Query q, Category c) throws Exception;
+    /**
+     * V(d|q,c) - relevance of a document or the quality of a document d for
+     * query q when the intended category is c
+     * 
+     * @param d
+     *            one document out of R(q)
+     * @param q
+     *            query used for R(q)
+     * @param c
+     *            category the document belongs to
+     * @return document relevance
+     */
+    public double v(Document d, Query q, Category c) throws Exception;
 }

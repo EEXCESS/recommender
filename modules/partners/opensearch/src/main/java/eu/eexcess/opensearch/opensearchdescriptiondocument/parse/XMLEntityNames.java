@@ -1,4 +1,4 @@
-package eu.eexcess.opensearch.opensearch_description_document.parse;
+package eu.eexcess.opensearch.opensearchdescriptiondocument.parse;
 
 /**
  * Node Names explained in <a

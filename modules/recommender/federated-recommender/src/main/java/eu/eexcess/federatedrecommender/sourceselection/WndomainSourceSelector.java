@@ -108,7 +108,7 @@ public class WndomainSourceSelector implements PartnerSelector {
      */
     protected Map<PartnerBadge, TreeSet<DomainWeight>> matchingPartners = new HashMap<>();
 
-    private Logger logger = Logger.getLogger(WndomainSourceSelector.class.getName());
+    private static final Logger LOGGER = Logger.getLogger(WndomainSourceSelector.class.getName());
 
     private DomainDetector domainDetector = null;
 
@@ -134,7 +134,7 @@ public class WndomainSourceSelector implements PartnerSelector {
         try {
             domainDetector = new WordnetDomainsDetector(new File(configuration.getWordnetPath()), new File(configuration.getWordnetDomainFilePath()), true);
         } catch (DomainDetectorException e) {
-            logger.log(Level.SEVERE, "unable to instanciate [" + WordnetDomainsDetector.class.getSimpleName() + "]", e);
+            LOGGER.log(Level.SEVERE, "unable to instanciate [" + WordnetDomainsDetector.class.getSimpleName() + "]", e);
         }
     }
 
@@ -145,7 +145,7 @@ public class WndomainSourceSelector implements PartnerSelector {
     public SecureUserProfile sourceSelect(SecureUserProfile userProfile, List<PartnerBadge> partners) {
 
         if (null == domainDetector) {
-            logger.severe("failed to select sources due to missing domain detector: skipping source selection");
+            LOGGER.severe("failed to select sources due to missing domain detector: skipping source selection");
             return userProfile;
         }
 
@@ -158,7 +158,7 @@ public class WndomainSourceSelector implements PartnerSelector {
             matchKeywordDomainsOnParterDomains(userProfile.contextKeywords, partners);
             selectPartners(partners, userProfile.partnerList);
         } else {
-            logger.info("refusing to select partners due to [" + userProfile.partnerList.size() + "] prevoiously selected partners");
+            LOGGER.info("refusing to select partners due to [" + userProfile.partnerList.size() + "] prevoiously selected partners");
             return userProfile;
         }
 
@@ -167,9 +167,9 @@ public class WndomainSourceSelector implements PartnerSelector {
             for (PartnerBadge entry : userProfile.partnerList) {
                 info.append("[" + entry.getSystemId() + "] ");
             }
-            logger.info("WordnetDomain-based source selection selected: " + info.toString());
+            LOGGER.info("WordnetDomain-based source selection selected: " + info.toString());
         } else {
-            logger.info("unsuccessfull partner selection");
+            LOGGER.info("unsuccessfull partner selection");
         }
         return userProfile;
     }
@@ -194,7 +194,7 @@ public class WndomainSourceSelector implements PartnerSelector {
      * 
      * @return the referenced domain detector instance
      */
-    synchronized public DomainDetector getDomainDetector() {
+    public synchronized DomainDetector getDomainDetector() {
         return domainDetector;
     }
 
@@ -242,7 +242,7 @@ public class WndomainSourceSelector implements PartnerSelector {
                     }
                 }
             } catch (DomainDetectorException e) {
-                logger.log(Level.SEVERE, "failed to detect domain(s) for kontext keyword", e);
+                LOGGER.log(Level.SEVERE, "failed to detect domain(s) for kontext keyword", e);
                 return;
             }
         }
@@ -260,7 +260,7 @@ public class WndomainSourceSelector implements PartnerSelector {
                 if (null == timesSeen) {
                     continue;
                 } else {
-                    if (false == matchingPartners.containsKey(partner)) {
+                    if (!matchingPartners.containsKey(partner)) {
                         matchingPartners.put(partner, new TreeSet<>());
                     }
                     DomainWeight domain = new DomainWeight(partnerContentDomain.domainName, timesSeen.doubleValue());

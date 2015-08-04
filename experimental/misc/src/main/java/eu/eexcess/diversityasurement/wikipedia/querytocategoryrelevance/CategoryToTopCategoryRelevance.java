@@ -31,54 +31,52 @@ import java.util.Comparator;
  *
  */
 public class CategoryToTopCategoryRelevance implements Serializable {
-	private static final long serialVersionUID = 2662323424344375687L;
+    private static final long serialVersionUID = 2662323424344375687L;
 
-	public static class CategoryRelevance implements Serializable {
+    public static class CategoryRelevance implements Serializable {
 
-		public static class DescRelevanceComparator implements Comparator<CategoryRelevance> {
-			@Override
-			public int compare(CategoryRelevance o1, CategoryRelevance o2) {
-				if (o1.categoryRelevance == o2.categoryRelevance) {
-					return 0;
-				}
-				if (o1.categoryRelevance > o2.categoryRelevance) {
-					return -1;
-				}
-				return 1;
-			}
-		}
+        public static class DescRelevanceComparator implements Comparator<CategoryRelevance> {
+            @Override
+            public int compare(CategoryRelevance o1, CategoryRelevance o2) {
+                if (o1.categoryRelevance == o2.categoryRelevance) {
+                    return 0;
+                }
+                if (o1.categoryRelevance > o2.categoryRelevance) {
+                    return -1;
+                }
+                return 1;
+            }
+        }
 
-		private static final long serialVersionUID = 2990339220973007267L;
-		public String categoryName = "";
-		public Integer categoryId = -1;
-		public Double categoryRelevance = Double.NaN;
+        private static final long serialVersionUID = 2990339220973007267L;
+        public String categoryName = "";
+        public Integer categoryId = -1;
+        public Double categoryRelevance = Double.NaN;
 
-		@Override
-		public String toString() {
-			return "CategoryRelevance [categoryName=" + categoryName + ", categoryId=" + categoryId
-							+ ", categoryRelevance=" + categoryRelevance + "]";
-		}
-	};
+        @Override
+        public String toString() {
+            return "CategoryRelevance [categoryName=" + categoryName + ", categoryId=" + categoryId + ", categoryRelevance=" + categoryRelevance + "]";
+        }
+    }
 
-	public String categoryName;
-	public Integer categoryId = -1;
+    public String categoryName;
+    public Integer categoryId = -1;
 
-	/**
-	 * optional details how the category was chosen
-	 */
-	public String query;
-	public String queryDescription;
+    /**
+     * optional details how the category was chosen
+     */
+    public String query;
+    public String queryDescription;
 
-	/**
-	 * relevances to top most categories
-	 */
-	public CategoryRelevance[] topCategoryRelevances;
+    /**
+     * relevances to top most categories
+     */
+    public CategoryRelevance[] topCategoryRelevances;
 
-	@Override
-	public String toString() {
-		return "CategoryToTopCategoryRelevance [categoryName=" + categoryName + ", categoryId=" + categoryId
-						+ ", query=" + query + ", queryDescription=" + queryDescription + ", topCategoryRelevances="
-						+ Arrays.toString(topCategoryRelevances) + "]";
-	}
+    @Override
+    public String toString() {
+        return "CategoryToTopCategoryRelevance [categoryName=" + categoryName + ", categoryId=" + categoryId + ", query=" + query + ", queryDescription="
+                + queryDescription + ", topCategoryRelevances=" + Arrays.toString(topCategoryRelevances) + "]";
+    }
 
 }

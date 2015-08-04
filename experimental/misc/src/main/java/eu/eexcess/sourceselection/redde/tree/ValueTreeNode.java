@@ -80,7 +80,7 @@ public class ValueTreeNode<T> extends BaseTreeNode<T> {
     @Override
     public int hashCode() {
         /**
-         * note: do not autogenerate hashCode() and equals()
+         * note: do not auto generate hashCode() and equals()
          */
         return super.hashCode();
     }
@@ -92,7 +92,7 @@ public class ValueTreeNode<T> extends BaseTreeNode<T> {
     @Override
     public boolean equals(Object obj) {
         /**
-         * note: do not autogenerate hashCode() and equals()
+         * note: do not auto generate hashCode() and equals()
          */
         if (this == obj)
             return true;

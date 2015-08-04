@@ -262,7 +262,7 @@ public class WikipediaSchoolsDomainTreeIndexer extends IndexWriterRessource {
             Path domainTreeRoot = FileSystems.getDefault().getPath(args[0] + DOMAIN_TREE_ENTRYPOINT_DIRECTORY);
             List<File> domainFiles = collectDomainFiles(domainTreeRoot);
             ValueTreeNode<String> rootDomain = parseDomainFilesToTree(domainFiles);
-            BaseTreeNode.depthFirstTraverser(rootDomain, (n) -> {
+            BaseTreeNode.depthFirstTraverser(rootDomain, n -> {
                 System.out.println(n.toString());
                 return false;
             });

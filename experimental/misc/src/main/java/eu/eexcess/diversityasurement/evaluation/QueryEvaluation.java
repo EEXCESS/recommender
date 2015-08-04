@@ -22,7 +22,6 @@ package eu.eexcess.diversityasurement.evaluation;
 
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.util.ArrayList;
@@ -97,7 +96,7 @@ public class QueryEvaluation {
         Map<Query, ArrayList<CategoryRelevance>> queryRelevancesCollapsedShortenedNormalized = new HashMap<>();
     }
 
-    private static Logger LOGGER = PianoLogger.getLogger(IASelectVSQueryExpansionEvaluation.class);
+    private static final Logger LOGGER = PianoLogger.getLogger(IASelectVSQueryExpansionEvaluation.class);
 
     private static Map<Integer, String> categoryIdToName;
     private static Map<String, Integer> categoryNameToId;
@@ -428,8 +427,7 @@ public class QueryEvaluation {
     }
 
     private static void collapseQueryProbabilities(Queries queries, Map<Query, ArrayList<CategoryToTopCategoryRelevance>> queryRelevancesCollector,
-            Map<Query, ArrayList<CategoryRelevance>> queryRelevancesCollapsedShortenedNormalizedCollector) throws FileNotFoundException, IOException,
-            ParseException {
+            Map<Query, ArrayList<CategoryRelevance>> queryRelevancesCollapsedShortenedNormalizedCollector) throws IOException, ParseException {
 
         collectQueryRelevances(stats.inQueries, stats.queryRelevances);
 

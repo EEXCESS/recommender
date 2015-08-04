@@ -33,12 +33,12 @@ import eu.eexcess.dataformats.userprofile.SecureUserProfile;
  */
 public interface PartnerSelector {
 
-	/**
-	 * Perform source selection according to the given parameters.
-	 * 
-	 * @param userProfile
-	 * @param partners
-	 * @return
-	 */
-	public SecureUserProfile sourceSelect(SecureUserProfile userProfile, List<PartnerBadge> partners);
+    /**
+     * Perform source selection according to the given parameters.
+     * 
+     * @param userProfile
+     * @param partners
+     * @return
+     */
+    public SecureUserProfile sourceSelect(SecureUserProfile userProfile, List<PartnerBadge> partners);
 }

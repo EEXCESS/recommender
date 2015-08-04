@@ -1,4 +1,4 @@
-package eu.eexcess.opensearch.opensearch_description_document.parse;
+package eu.eexcess.opensearch.opensearchdescriptiondocument.parse;
 
 import java.util.Arrays;
 import java.util.logging.Logger;
@@ -8,11 +8,11 @@ import org.xml.sax.Attributes;
 import org.xml.sax.SAXException;
 import org.xml.sax.helpers.DefaultHandler;
 
-import eu.eexcess.opensearch.opensearch_description_document.OpensearchDescription;
-import eu.eexcess.opensearch.opensearch_description_document.OpensearchDescription.SyndicationRight;
-import eu.eexcess.opensearch.opensearch_description_document.documentFields.Image;
-import eu.eexcess.opensearch.opensearch_description_document.documentFields.Query;
-import eu.eexcess.opensearch.opensearch_description_document.documentFields.Url;
+import eu.eexcess.opensearch.opensearchdescriptiondocument.OpensearchDescription;
+import eu.eexcess.opensearch.opensearchdescriptiondocument.OpensearchDescription.SyndicationRight;
+import eu.eexcess.opensearch.opensearchdescriptiondocument.documentfields.Image;
+import eu.eexcess.opensearch.opensearchdescriptiondocument.documentfields.Query;
+import eu.eexcess.opensearch.opensearchdescriptiondocument.documentfields.Url;
 
 /**
  * Class handles tags, attributes and tag-values of an <a

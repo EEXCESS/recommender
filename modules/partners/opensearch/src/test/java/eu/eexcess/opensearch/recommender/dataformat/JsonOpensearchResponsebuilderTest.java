@@ -35,7 +35,7 @@ import org.junit.Test;
 import eu.eexcess.dataformats.result.DocumentBadge;
 import eu.eexcess.dataformats.result.Result;
 import eu.eexcess.dataformats.result.ResultList;
-import eu.eexcess.opensearch.opensearch_description_document.OpensearchDescription;
+import eu.eexcess.opensearch.opensearchdescriptiondocument.OpensearchDescription;
 import eu.eexcess.opensearch.recommender.dataformat.JsonOpensearchResultListBuilder;
 import eu.eexcess.opensearch.recommender.dataformat.OpensearchResultListBuilder;
 
