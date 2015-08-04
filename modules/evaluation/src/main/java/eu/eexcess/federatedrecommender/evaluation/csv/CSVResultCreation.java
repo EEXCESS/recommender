@@ -56,6 +56,7 @@ public class CSVResultCreation {
     public static final String DIRECTORYPATH = "/home/hziak/Datasets/EEXCESS/evaluationBlockRanking/";
     private static final Logger LOGGER = Logger.getLogger(CSVResultCreation.class.getName());
     private static final String HEADER = "QUERY,DESCRIPTION,INT1,INT2,INT3,INT4,INT5,INT6,INT7,INT8,INT9,INT10,INT11,INT12,INT13,INT14,INT15,INT16,INT17,INT18,INT19,INT20,INT21,INT22,INT23,INT24,INT25,INT26,INT27,INT28,INT29,INT30"
+            + ",TYPEFIRSTLIST"
             + ",FIRSTTITLE1,FIRSTDESCRIPTION1,FIRSTTITLE2,FIRSTDESCRIPTION2,FIRSTTITLE3,FIRSTDESCRIPTION3,FIRSTTITLE4,FIRSTDESCRIPTION4,FIRSTTITLE5,FIRSTDESCRIPTION5,FIRSTTITLE6,FIRSTDESCRIPTION6,FIRSTTITLE7,FIRSTDESCRIPTION7,FIRSTTITLE8,FIRSTDESCRIPTION8,FIRSTTITLE9,FIRSTDESCRIPTION9,FIRSTTITLE10,FIRSTDESCRIPTION10,"
             + ",SECONDTITLE1,SECONDDESCRIPTION1,SECONDTITLE2,SECONDDESCRIPTION2,SECONDTITLE3,SECONDDESCRIPTION3,SECONDTITLE4,SECONDDESCRIPTION4,SECONDTITLE5,SECONDDESCRIPTION5,SECONDTITLE6,SECONDDESCRIPTION6,SECONDTITLE7,SECONDDESCRIPTION7,SECONDTITLE8,SECONDDESCRIPTION8,SECONDTITLE9,SECONDDESCRIPTION9,SECONDTITLE10,SECONDDESCRIPTION10";
     private static final String REGEXPREPLACE = ",|\"|\n|\r";
@@ -89,25 +90,39 @@ public class CSVResultCreation {
 
         for (EvaluationQuery query : queries.getQueries()) {
             SecureUserProfileEvaluation secureUserProfileEvaluation = convertEvalQueryToSecUserProfile(query);
-            String blockResultString = getQueryResultCSV(getwRBlock(), secureUserProfileEvaluation);
+            String blockResultString = getQueryResultCSV(getwRBlock(), secureUserProfileEvaluation, false);
+            String blockResultStringInterchanged = getQueryResultCSV(getwRBlock(), secureUserProfileEvaluation, true);
             // String defaultResultString = ""; // Todo: Get default string from
             // // get queyr resultCSV
             // defaultResultString = getQueryResultCSV(getwRDefault(),
             // secureUserProfileEvaluation);
             String queryCSV = getQueryCSV(query);
-            String finalCSVString = null;
-            if (queryCSV != null && blockResultString != null)
-                finalCSVString = queryCSV + blockResultString;
-            if (finalCSVString != null)
-                try {
-                    ofqw.write(finalCSVString + "\n");
-                    LOGGER.log(Level.INFO, finalCSVString + "\n");
-                    // System.out.println(finalCSVString);
-                } catch (IOException e) {
-                    LOGGER.log(Level.WARNING, "", e);
-                }
+            writeCSVLine(ofqw, blockResultString, queryCSV);
+            writeCSVLine(ofqw, blockResultStringInterchanged, queryCSV);
         }
 
+    }
+
+    private void writeCSVLine(FileWriter ofqw, String blockResultString, String queryCSV) {
+        String finalCSVString = null;
+        if (queryCSV != null && blockResultString != null)
+            finalCSVString = queryCSV + blockResultString;
+        if (finalCSVString != null)
+            try {
+                ofqw.write(finalCSVString + "\n");
+                LOGGER.log(Level.INFO, finalCSVString + "\n");
+                // System.out.println(finalCSVString);
+            } catch (IOException e) {
+                LOGGER.log(Level.WARNING, "", e);
+            }
+        // if (finalCSVString != null)
+        // try {
+        // ofqw.write(finalCSVString + "\n");
+        // LOGGER.log(Level.INFO, finalCSVString + "\n");
+        // // System.out.println(finalCSVString);
+        // } catch (IOException e) {
+        // LOGGER.log(Level.WARNING, "", e);
+        // }
     }
 
     public EvaluationQueryList getEvaluationQueriesFromJson(String fileName) {
@@ -175,7 +190,7 @@ public class CSVResultCreation {
     private FileWriter openCSV() {
         FileWriter ofqw = null;
         try {
-            ofqw = new FileWriter(new File(DIRECTORYPATH + "query.csv"));
+            ofqw = new FileWriter(new File(DIRECTORYPATH + "query2.csv"));
         } catch (IOException e1) {
             LOGGER.log(Level.WARNING, "", e1);
         }
@@ -235,7 +250,7 @@ public class CSVResultCreation {
     }
 
     @SuppressWarnings("deprecation")
-    private static String getQueryResultCSV(WebResource wresource, SecureUserProfileEvaluation secureUserProfileEvaluation) {
+    private static String getQueryResultCSV(WebResource wresource, SecureUserProfileEvaluation secureUserProfileEvaluation, boolean interchanged) {
         StringBuilder builder = new StringBuilder();
         EvaluationResultLists resp = null;
         secureUserProfileEvaluation.numResults = 10;
@@ -267,13 +282,20 @@ public class CSVResultCreation {
         }
         if (isValidBlock && isValidBasic) {
             try {
-                File file = new File(DIRECTORYPATH + "results/" + secureUserProfileEvaluation.queryID + ".json");
+                File file = new File(DIRECTORYPATH + "results/" + secureUserProfileEvaluation.queryID + "#" + Long.toBinaryString(Math.round(Math.random())) + ".json");
                 mapper.defaultPrettyPrintingWriter().writeValue(file, resp);
                 // System.out.println("Writing to file:" +
                 // file.getAbsolutePath());
             } catch (IOException e) {
                 LOGGER.log(Level.WARNING, "", e);
             }
+        }
+        if (interchanged) {
+            EvaluationResultList first = resp.results.removeFirst();
+            resp.results.addLast(first);
+            builder.append("\"block\",");
+        } else {
+            builder.append("\"basic\",");
         }
 
         for (EvaluationResultList resultList : resp.results) {

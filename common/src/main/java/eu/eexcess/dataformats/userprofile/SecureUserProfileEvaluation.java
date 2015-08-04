@@ -25,8 +25,7 @@ package eu.eexcess.dataformats.userprofile;
 import java.io.Serializable;
 import java.util.ArrayList;
 
-import javax.xml.bind.annotation.XmlAttribute;
-import javax.xml.bind.annotation.XmlElementWrapper;
+import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlTransient;
 
@@ -36,18 +35,13 @@ import eu.eexcess.dataformats.PartnerBadge;
 public class SecureUserProfileEvaluation extends SecureUserProfile implements Serializable {
     private static final long serialVersionUID = 2359464317396073509L;
 
-    @XmlElementWrapper(name = "queryExpansionSourcePartner")
     private ArrayList<PartnerBadge> queryExpansionSourcePartner = new ArrayList<PartnerBadge>();
     @XmlTransient
     private ArrayList<ArrayList<ContextKeyword>> contextKeywordsGroups = new ArrayList<ArrayList<ContextKeyword>>();
 
-    @XmlAttribute
     private String picker;
-    @XmlAttribute
     private String decomposer;
-    @XmlAttribute
     private String sourceSelect;
-    @XmlAttribute
     private String description;
 
     @XmlTransient
@@ -68,6 +62,7 @@ public class SecureUserProfileEvaluation extends SecureUserProfile implements Se
         this.contextKeywordsGroups = contextKeywordsGroups;
     }
 
+    @XmlElement
     public ArrayList<PartnerBadge> getQueryExpansionSourcePartner() {
         return queryExpansionSourcePartner;
     }
@@ -76,6 +71,7 @@ public class SecureUserProfileEvaluation extends SecureUserProfile implements Se
         this.queryExpansionSourcePartner = queryExpansionSourcePartner;
     }
 
+    @XmlElement
     public String getPicker() {
         return picker;
     }
@@ -84,6 +80,7 @@ public class SecureUserProfileEvaluation extends SecureUserProfile implements Se
         this.picker = picker;
     }
 
+    @XmlElement
     public String getDecomposer() {
         return decomposer;
     }
@@ -92,6 +89,7 @@ public class SecureUserProfileEvaluation extends SecureUserProfile implements Se
         this.decomposer = decomposer;
     }
 
+    @XmlElement
     public String getSourceSelect() {
         return sourceSelect;
     }
@@ -100,6 +98,7 @@ public class SecureUserProfileEvaluation extends SecureUserProfile implements Se
         this.sourceSelect = sourceSelect;
     }
 
+    @XmlElement
     public String getDescription() {
         return description;
     }
