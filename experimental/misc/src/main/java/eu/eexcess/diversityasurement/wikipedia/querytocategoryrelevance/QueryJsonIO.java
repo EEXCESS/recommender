@@ -31,6 +31,9 @@ import com.google.gson.stream.JsonReader;
 
 public class QueryJsonIO {
 
+    private QueryJsonIO() {
+    }
+
     public static Queries readQueries(File queryFile) throws /*
                                                               * FileNotFoundException
                                                               * ,

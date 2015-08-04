@@ -32,7 +32,7 @@ package eu.eexcess.diversityasurement.iaselect;
  */
 public class Query extends MessageCategories {
 
-    public String query;
+    public final String query;
 
     public Query(String query) {
         this.query = query;

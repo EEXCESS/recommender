@@ -94,7 +94,7 @@ public class ConditionalProbabilityU {
      *            document quality values
      * @throws Exception
      */
-    public void updateU(Category c, Query q, Set<Document> s, Document d, DocumentQualityValueV v) throws Exception {
+    public void updateU(Category c, Query q, Set<Document> s, Document d, DocumentQualityValueV v) throws IllegalArgumentException {
         double previousU = probabilitiesU.get(c);
         double newU = (1 - v.v(d, q, c)) * previousU;
         probabilitiesU.put(c, newU);

@@ -105,6 +105,9 @@ public class QueryEvaluation {
 
     private static DataStatistics stats = new DataStatistics();
 
+    private QueryEvaluation() {
+    }
+
     public static void main(String[] args) throws IOException, ParseException {
         restoreCache();
 
@@ -116,8 +119,11 @@ public class QueryEvaluation {
         }
         System.out.println();
 
-        collectProbabilityDistribution(estimatedRelevances, stats.topCategoriesPerCategoryDistibution, 10, stats.withNumtopCategories,
-                stats.probabilityDistribution);
+        collectProbabilityDistribution(estimatedRelevances, /*
+                                                             * stats.
+                                                             * topCategoriesPerCategoryDistibution
+                                                             * ,
+                                                             */10, stats.withNumtopCategories, stats.probabilityDistribution);
         System.out.println("probability distribution:");
         for (Map.Entry<Integer, HashMap<Integer, Integer>> entry : stats.probabilityDistribution.entrySet()) {
             Integer numTopCategories = entry.getKey();
@@ -551,7 +557,7 @@ public class QueryEvaluation {
      *            enumerated in the set
      */
     private static void collectProbabilityDistribution(HashMap<Integer, HashMap<Integer, Double>> estimatedRelevances,
-            Map<Integer, Integer> topCategoriesPerCategoryDistibution, int numSections, Set<Integer> withNumtopCategories,
+    /* Map<Integer, Integer> topCategoriesPerCategoryDistibution, */int numSections, Set<Integer> withNumtopCategories,
             Map<Integer, HashMap<Integer, Integer>> probabilityDistributionCollector) {
         for (Map.Entry<Integer, HashMap<Integer, Double>> relevance : estimatedRelevances.entrySet()) {
             HashMap<Integer, Double> relevances = relevance.getValue();
@@ -587,7 +593,7 @@ public class QueryEvaluation {
     }
 
     private static int getSection(int numSections, double normalizedValue) {
-        return new Double(Math.floor(numSections * normalizedValue)).intValue();
+        return (int) Math.floor(numSections * normalizedValue);
     }
 
     private static int getNumProbabilitiesGTZero(HashMap<Integer, Double> relevances) {

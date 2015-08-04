@@ -47,6 +47,9 @@ public class Settings {
     public static class RDFCategories {
         public static final String PATH = "/opt/data/wikipedia/dbpedia/skos_categories_en.nt";
 
+        private RDFCategories() {
+        }
+
         public static boolean isCategoryFileAvailable() {
             return printWarning(PATH);
         }
@@ -55,9 +58,16 @@ public class Settings {
     public static class Grph {
         public static final String PATH = "/opt/iaselect/gategories.grphbin";
 
+        private Grph() {
+        }
+
         public static boolean isGrphFileAvailable() {
             return printWarning(PATH);
         }
+    }
+
+    private Settings() {
+
     }
 
     private static boolean printWarning(String path) {

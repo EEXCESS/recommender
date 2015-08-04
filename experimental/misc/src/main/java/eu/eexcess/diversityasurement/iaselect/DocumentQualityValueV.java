@@ -50,5 +50,5 @@ public interface DocumentQualityValueV {
      *            category the document belongs to
      * @return document relevance
      */
-    public double v(Document d, Query q, Category c) throws Exception;
+    public double v(Document d, Query q, Category c) throws IllegalArgumentException;
 }

@@ -386,7 +386,7 @@ public class Redde {
             List<ScoreDoc> rankedSampleDocuments = filterDocumentsFromSource(sampleDatabaseDetails, rankedCentralizedSampleDocuments,
                     generalizedSampleDatabaseReader);
 
-            double probabilityOfRelevanceRatio = (useRatio1) ? probabilityOfRelevanceRatio1 : probabilityOfRelevanceRatio2;
+            double probabilityOfRelevanceRatio = useRatio1 ? probabilityOfRelevanceRatio1 : probabilityOfRelevanceRatio2;
             double sum = 0;
             for (ScoreDoc document : rankedSampleDocuments) {
 

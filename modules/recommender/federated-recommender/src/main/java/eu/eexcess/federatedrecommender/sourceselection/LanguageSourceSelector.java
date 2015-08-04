@@ -56,9 +56,9 @@ public class LanguageSourceSelector implements PartnerSelector {
     public SecureUserProfile sourceSelect(SecureUserProfile userProfile, List<PartnerBadge> partners) {
         selectedPartners.clear();
         // don't touch if already selected
-        if (userProfile.partnerList.size() <= 0) {
+        if (userProfile.partnerList.isEmpty()) {
             // query language(s) are specified in user profile
-            if (userProfile.languages.size() > 0) {
+            if (!userProfile.languages.isEmpty()) {
                 // match partners and user profile languages
                 for (Language userLangDetails : userProfile.languages) {
                     String userLanguage = userLangDetails.getIso2();
