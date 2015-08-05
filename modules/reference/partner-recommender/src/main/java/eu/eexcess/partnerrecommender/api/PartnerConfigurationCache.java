@@ -36,23 +36,23 @@ import eu.eexcess.partnerrecommender.reference.PartnerRegistrationThread;
  */
 public enum PartnerConfigurationCache {
     CONFIG;
-    private final Logger logger;
+    private final transient Logger LOGGER;
     private boolean intializedFlag;
     private PartnerConfiguration partnerConfiguration;
-    private PartnerConnectorApi partnerConnector;
-    private ITransformer transformer;
-    private Enrichment enricher;
-    private Client clientJacksonJson;
-    private Client clientJAXBContext;
-    private Client clientDefault;
-    private ObjectMapper objectMapper;
-    private Map<String, QueryGeneratorApi> queryGeneratorMapping = new HashMap<String, QueryGeneratorApi>();
-    private QueryGeneratorApi defaultQueryGen;
-    private Thread regThread;
+    private transient PartnerConnectorApi partnerConnector;
+    private transient ITransformer transformer;
+    private transient Enrichment enricher;
+    private transient Client clientJacksonJson;
+    private transient Client clientJAXBContext;
+    private transient Client clientDefault;
+    private transient ObjectMapper objectMapper;
+    private transient Map<String, QueryGeneratorApi> queryGeneratorMapping = new HashMap<String, QueryGeneratorApi>();
+    private transient QueryGeneratorApi defaultQueryGen;
+    private transient Thread regThread;
 
     private PartnerConfigurationCache() {
 
-        this.logger = Logger.getLogger(PartnerConfigurationCache.class.getName());
+        this.LOGGER = Logger.getLogger(PartnerConfigurationCache.class.getName());
         this.objectMapper = new ObjectMapper();
         ClientConfig configDefault = new DefaultClientConfig();
         ClientConfig configJacksonJson = new DefaultClientConfig();
@@ -77,27 +77,17 @@ public enum PartnerConfigurationCache {
              * Read global partner key file
              */
             String eexcessPartnerKeyFile = System.getenv("EEXCESS_PARTNER_KEY_FILE");
-            logger.log(Level.INFO, "Reading Api Keys from: " + eexcessPartnerKeyFile);
+            LOGGER.log(Level.INFO, "Reading Api Keys from: " + eexcessPartnerKeyFile);
             PartnerApiKeys partnerKeys = null;
             if (eexcessPartnerKeyFile == null) {
-                logger.log(Level.INFO, "Environment variable \"EEXCESS_PARTNER_KEY_FILE\" for " + partnerConfiguration.getSystemId() + " has to be set");
+                LOGGER.log(Level.INFO, "Environment variable \"EEXCESS_PARTNER_KEY_FILE\" for " + partnerConfiguration.getSystemId() + " has to be set");
             } else {
                 partnerKeys = mapper.readValue(new File(eexcessPartnerKeyFile), PartnerApiKeys.class);
             }
 
             if (partnerKeys != null)
                 for (PartnerConfiguration badge : partnerKeys.getPartners()) {
-                    if (partnerConfiguration.getSystemId().equals(badge.getSystemId())) {
-                        if (badge.getApiKey() != null) {
-                            partnerConfiguration.setApiKey(badge.getApiKey());
-                        }
-                        if (badge.getUserName() != null) {
-                            partnerConfiguration.setUserName(badge.getUserName());
-                        }
-                        if (badge.getPassword() != null) {
-                            partnerConfiguration.setPassword(badge.getPassword());
-                        }
-                    }
+                    setPartnerConfigParamters(badge);
                 }
 
             /*
@@ -123,19 +113,33 @@ public enum PartnerConfigurationCache {
 
         } catch (Exception e) {
             if (partnerConfiguration != null)
-                logger.log(Level.WARNING, "Cannot initialize enrichment service for " + partnerConfiguration.getSystemId() + " recommender", e);
+                LOGGER.log(Level.WARNING, "Cannot initialize enrichment service for " + partnerConfiguration.getSystemId() + " recommender", e);
         }
         try {
             QueryGeneratorApi queryGen = (QueryGeneratorApi) Class.forName(partnerConfiguration.getQueryGeneratorClass()).newInstance();
             this.defaultQueryGen = queryGen;
             queryGeneratorMapping.put(partnerConfiguration.getQueryGeneratorClass(), queryGen);
         } catch (InstantiationException | IllegalAccessException | ClassNotFoundException e1) {
-            logger.log(Level.SEVERE, "Cannot initialize query generator for " + partnerConfiguration.getSystemId() + " recommender", e1);
+            LOGGER.log(Level.SEVERE, "Cannot initialize query generator for " + partnerConfiguration.getSystemId() + " recommender", e1);
+        }
+    }
+
+    private void setPartnerConfigParamters(PartnerConfiguration badge) {
+        if (partnerConfiguration.getSystemId().equals(badge.getSystemId())) {
+            if (badge.getApiKey() != null) {
+                partnerConfiguration.setApiKey(badge.getApiKey());
+            }
+            if (badge.getUserName() != null) {
+                partnerConfiguration.setUserName(badge.getUserName());
+            }
+            if (badge.getPassword() != null) {
+                partnerConfiguration.setPassword(badge.getPassword());
+            }
         }
     }
 
     public void registerPartnerAtServer() {
-        logger.log(Level.INFO, "Starting Partner Helper Thread:" + PartnerConfigurationCache.CONFIG.getPartnerConfiguration().getSystemId());
+        LOGGER.log(Level.INFO, "Starting Partner Helper Thread:" + PartnerConfigurationCache.CONFIG.getPartnerConfiguration().getSystemId());
         this.regThread = new Thread(new PartnerRegistrationThread(partnerConfiguration));
         regThread.setName(PartnerConfigurationCache.CONFIG.partnerConfiguration.getSystemId() + " Registration Thread");
         regThread.start();
@@ -148,7 +152,7 @@ public enum PartnerConfigurationCache {
         jClientconfig.getClasses().add(JacksonJsonProvider.class);
         Client client = new Client(new URLConnectionClientHandler(), jClientconfig);
         WebResource service = client.resource(partnerConfiguration.getFederatedRecommenderURI() + "unregister");
-        logger.log(Level.INFO, "Unregistering Partner: " + badge.getSystemId() + " at " + partnerConfiguration.getFederatedRecommenderURI());
+        LOGGER.log(Level.INFO, "Unregistering Partner: " + badge.getSystemId() + " at " + partnerConfiguration.getFederatedRecommenderURI());
         Builder builder = service.accept(MediaType.APPLICATION_JSON);
         builder.type(MediaType.APPLICATION_JSON).post(PartnerBadge.class, badge);
     }
@@ -212,7 +216,7 @@ public enum PartnerConfigurationCache {
                 queryGeneratorMapping.put(queryGen, queryGenerator);
                 return queryGenerator;
             } catch (InstantiationException | IllegalAccessException | ClassNotFoundException e1) {
-                logger.log(Level.SEVERE, "Cannot load query generation class: " + queryGen + " for partner " + partnerConfiguration.getSystemId(), e1);
+                LOGGER.log(Level.SEVERE, "Cannot load query generation class: " + queryGen + " for partner " + partnerConfiguration.getSystemId(), e1);
             }
             return this.defaultQueryGen;
         } else

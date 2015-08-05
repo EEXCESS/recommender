@@ -144,10 +144,10 @@ public class PartnerConnectorBase implements PartnerConnectorApi {
 
             Map<String, String> valuesMap = new HashMap<String, String>();
             valuesMap.put("query", query);
-            int numResults = 10;
+            Integer numResults = 10;
             if (userProfile.numResults != null && userProfile.numResults != 0)
                 numResults = userProfile.numResults;
-            valuesMap.put("numResults", numResults + "");
+            valuesMap.put("numResults", numResults.toString());
 
             String searchRequest = StrSubstitutor.replace(partnerConfiguration.getSearchEndpoint(), valuesMap);
 
