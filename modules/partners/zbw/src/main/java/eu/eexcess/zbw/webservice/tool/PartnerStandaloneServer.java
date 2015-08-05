@@ -45,9 +45,6 @@ public class PartnerStandaloneServer {
     private static Server server;
     private static final Logger LOGGER = Logger.getLogger(PartnerStandaloneServer.class.getName());
 
-    private PartnerStandaloneServer() {
-    }
-
     public static synchronized void start(int port) {
         if (server != null) {
             throw new IllegalStateException("Server is already running");
