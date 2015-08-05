@@ -135,7 +135,11 @@ public class FederatedRecommenderEvaluationService extends FederatedRecommenderS
     }
 
     /**
-     * @deprecated (function not used anymore)
+     * 
+     * @param userProfile
+     * @return
+     * @throws IOException
+     * @deprecated
      */
     @POST
     @Path("/evaluation")
