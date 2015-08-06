@@ -55,7 +55,8 @@ public class LuceneQueryGenerator implements QueryGeneratorApi {
             keyword = matcher2.replaceAll(" OR ");
 
             if (key.expansion != null && (key.expansion == ExpansionType.PSEUDORELEVANCEWP || key.expansion == ExpansionType.SERENDIPITY)) {
-                if (PartnerConfigurationCache.CONFIG.getPartnerConfiguration().isQueryExpansionEnabled()) {
+                if (PartnerConfigurationCache.CONFIG.getPartnerConfiguration().isQueryExpansionEnabled() != null
+                        && PartnerConfigurationCache.CONFIG.getPartnerConfiguration().isQueryExpansionEnabled()) {
                     expansion = addExpansionTerm(result, expansion, key, keyword);
                 }
             } else {

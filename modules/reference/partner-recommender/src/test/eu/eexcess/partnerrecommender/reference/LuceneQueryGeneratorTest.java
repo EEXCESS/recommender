@@ -33,7 +33,8 @@ public class LuceneQueryGeneratorTest {
         ContextKeyword keyword7 = new ContextKeyword("k7");
         keyword7.expansion = ExpansionType.PSEUDORELEVANCEWP;
         userProfile.contextKeywords.add(keyword7);
-        synchronized (PartnerConfigurationCache.CONFIG.getPartnerConfiguration().isQueryExpansionEnabled()) {
+        PartnerConfigurationCache.CONFIG.getPartnerConfiguration().setQueryGeneratorClass("eu.eexcess.partnerrecommender.reference.LuceneQueryGenerator");
+        synchronized (PartnerConfigurationCache.CONFIG.getPartnerConfiguration()) {
             PartnerConfigurationCache.CONFIG.getPartnerConfiguration().setIsQueryExpansionEnabled(true);
             String result = gen.toQuery(userProfile);
             System.out.println(result);
@@ -51,7 +52,8 @@ public class LuceneQueryGeneratorTest {
         ContextKeyword keyword2 = new ContextKeyword("k2");
         keyword2.expansion = ExpansionType.PSEUDORELEVANCEWP;
         userProfile.contextKeywords.add(keyword2);
-        synchronized (PartnerConfigurationCache.CONFIG.getPartnerConfiguration().isQueryExpansionEnabled()) {
+        PartnerConfigurationCache.CONFIG.getPartnerConfiguration().setQueryGeneratorClass("eu.eexcess.partnerrecommender.reference.LuceneQueryGenerator");
+        synchronized (PartnerConfigurationCache.CONFIG.getPartnerConfiguration()) {
             PartnerConfigurationCache.CONFIG.getPartnerConfiguration().setIsQueryExpansionEnabled(true);
             String result = gen.toQuery(userProfile);
             System.out.println(result);
@@ -83,11 +85,16 @@ public class LuceneQueryGeneratorTest {
         ContextKeyword keyword7 = new ContextKeyword("k7");
         keyword7.expansion = ExpansionType.PSEUDORELEVANCEWP;
         userProfile.contextKeywords.add(keyword7);
-        synchronized (PartnerConfigurationCache.CONFIG.getPartnerConfiguration().isQueryExpansionEnabled()) {
-            PartnerConfigurationCache.CONFIG.getPartnerConfiguration().setIsQueryExpansionEnabled(true);
-            String result = gen.toQuery(userProfile);
-            System.out.println(result);
-            assertTrue(result.equals("k1 OR (k2 OR k3) OR k4 OR (k5 OR k6 OR k7)"));
+        PartnerConfigurationCache.CONFIG.getPartnerConfiguration().setQueryGeneratorClass("eu.eexcess.partnerrecommender.reference.LuceneQueryGenerator");
+        synchronized (PartnerConfigurationCache.CONFIG.getPartnerConfiguration()) {
+            try {
+                PartnerConfigurationCache.CONFIG.getPartnerConfiguration().setIsQueryExpansionEnabled(true);
+                String result = gen.toQuery(userProfile);
+                System.out.println(result);
+                assertTrue(result.equals("k1 OR (k2 OR k3) OR k4 OR (k5 OR k6 OR k7)"));
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
         }
     }
 
@@ -115,7 +122,7 @@ public class LuceneQueryGeneratorTest {
         ContextKeyword keyword7 = new ContextKeyword("k7");
         keyword7.expansion = ExpansionType.PSEUDORELEVANCEWP;
         userProfile.contextKeywords.add(keyword7);
-        synchronized (PartnerConfigurationCache.CONFIG.getPartnerConfiguration().isQueryExpansionEnabled()) {
+        synchronized (PartnerConfigurationCache.CONFIG.getPartnerConfiguration()) {
             PartnerConfigurationCache.CONFIG.getPartnerConfiguration().setIsQueryExpansionEnabled(true);
             String result = gen.toQuery(userProfile);
             System.out.println(result);
@@ -148,7 +155,8 @@ public class LuceneQueryGeneratorTest {
         ContextKeyword keyword7 = new ContextKeyword("k7");
         keyword7.expansion = ExpansionType.PSEUDORELEVANCEWP;
         userProfile.contextKeywords.add(keyword7);
-        synchronized (PartnerConfigurationCache.CONFIG.getPartnerConfiguration().isQueryExpansionEnabled()) {
+        PartnerConfigurationCache.CONFIG.getPartnerConfiguration().setQueryGeneratorClass("eu.eexcess.partnerrecommender.reference.LuceneQueryGenerator");
+        synchronized (PartnerConfigurationCache.CONFIG.getPartnerConfiguration()) {
             PartnerConfigurationCache.CONFIG.getPartnerConfiguration().setIsQueryExpansionEnabled(true);
             String result = gen.toQuery(userProfile);
             System.out.println(result);
@@ -181,7 +189,7 @@ public class LuceneQueryGeneratorTest {
         ContextKeyword keyword7 = new ContextKeyword("k7");
         keyword7.expansion = ExpansionType.SERENDIPITY;
         userProfile.contextKeywords.add(keyword7);
-        synchronized (PartnerConfigurationCache.CONFIG.getPartnerConfiguration().isQueryExpansionEnabled()) {
+        synchronized (PartnerConfigurationCache.CONFIG.getPartnerConfiguration()) {
             PartnerConfigurationCache.CONFIG.getPartnerConfiguration().setIsQueryExpansionEnabled(true);
             String result = gen.toQuery(userProfile);
             System.out.println(result);
@@ -214,11 +222,17 @@ public class LuceneQueryGeneratorTest {
         ContextKeyword keyword7 = new ContextKeyword("k7");
         keyword7.expansion = ExpansionType.SERENDIPITY;
         userProfile.contextKeywords.add(keyword7);
-        synchronized (PartnerConfigurationCache.CONFIG.getPartnerConfiguration().isQueryExpansionEnabled()) {
-            PartnerConfigurationCache.CONFIG.getPartnerConfiguration().setIsQueryExpansionEnabled(false);
-            String result = gen.toQuery(userProfile);
-            System.out.println(result);
-            assertTrue(result.equals("k4"));
+        PartnerConfigurationCache.CONFIG.getPartnerConfiguration().setQueryGeneratorClass("eu.eexcess.partnerrecommender.reference.LuceneQueryGenerator");
+
+        synchronized (PartnerConfigurationCache.CONFIG.getPartnerConfiguration()) {
+            try {
+                PartnerConfigurationCache.CONFIG.getPartnerConfiguration().setIsQueryExpansionEnabled(false);
+                String result = gen.toQuery(userProfile);
+                System.out.println(result);
+                assertTrue(result.equals("k4"));
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
         }
     }
 
@@ -248,11 +262,15 @@ public class LuceneQueryGeneratorTest {
         keyword7.expansion = ExpansionType.SERENDIPITY;
         userProfile.contextKeywords.add(keyword7);
         PartnerConfigurationCache.CONFIG.getPartnerConfiguration().setQueryGeneratorClass("eu.eexcess.partnerrecommender.reference.LuceneQueryGenerator");
-        synchronized (PartnerConfigurationCache.CONFIG.getPartnerConfiguration().isQueryExpansionEnabled()) {
-            PartnerConfigurationCache.CONFIG.getPartnerConfiguration().setIsQueryExpansionEnabled(null);
-            String result = gen.toQuery(userProfile);
-            System.out.println(result);
-            assertTrue(result.equals("k4"));
+        synchronized (PartnerConfigurationCache.CONFIG.getPartnerConfiguration()) {
+            try {
+                PartnerConfigurationCache.CONFIG.getPartnerConfiguration().setIsQueryExpansionEnabled(null);
+                String result = gen.toQuery(userProfile);
+                System.out.println(result);
+                assertTrue(result.equals("k4"));
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
         }
     }
 }
