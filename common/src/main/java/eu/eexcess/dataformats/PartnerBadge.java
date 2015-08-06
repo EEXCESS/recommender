@@ -145,7 +145,7 @@ public class PartnerBadge implements Serializable {
     public void pushLastResponseTimes(Long lastResponseTime) {
         while (this.getShortTimeStats().lastResponseTimes.size() > 50)
             this.getShortTimeStats().lastResponseTimes.pop();
-        this.getShortTimeStats().lastResponseTimes.push(lastResponseTime);
+        this.getShortTimeStats().lastResponseTimes.addLast(lastResponseTime);
     }
 
     /**
@@ -157,25 +157,14 @@ public class PartnerBadge implements Serializable {
      */
     public void updatePartnerResponseTime(long respTime) {
         pushLastResponseTimes(respTime);
-        java.util.Iterator<Long> iter = getLastResponseTimes().iterator();
-        Long first = iter.next();
-        while (first == null && iter.hasNext())
-            first = iter.next();
-        if (first != null)
-            setShortTimeResponseTime(first);
-        while (iter.hasNext()) {
-            Long next = iter.next();
-            if (next != null)
-                setShortTimeResponseTime((getShortTimeResponseTime() + next) / 2);
-        }
-
-        double[] values = new double[getLastResponseTimes().toArray().length];
-        Object[] respTimes = getLastResponseTimes().toArray();
-        int count = 0;
-        for (Object long1 : respTimes) {
-            if (long1 != null)
-                values[count] = ((Long) long1).doubleValue();
-            count++;
+        boolean first = true;
+        for (Long tmpTime : getLastResponseTimes()) {
+            if (first) {
+                setShortTimeResponseTime(tmpTime);
+                first = false;
+            } else {
+                setShortTimeResponseTime((tmpTime + getShortTimeResponseTime()) / 2);
+            }
         }
     }
 
