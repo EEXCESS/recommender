@@ -96,7 +96,7 @@ public class KIMPortalTransformer extends Transformer{
 										if(fieldChilds != null && fieldChilds.getLength() > 0) {
 											for(int k = 0 ; k < fieldChilds.getLength();k++) {
 												Node fieldChild = fieldChilds.item(k);
-													eexcessURI.appendChild(input.createTextNode("http://www.kim.bl.openinteractive.ch/sammlungen#" + fieldChild.getNodeValue()));
+													eexcessURI.appendChild(input.createTextNode("https://www.kgportal.bl.ch/sammlungen#" + fieldChild.getNodeValue()));
 													field.getParentNode().appendChild(eexcessURI);
 											}
 										}

@@ -152,9 +152,9 @@ public class KIMPortalPartnerRecommenderTest {
         ArrayList<String> ids = new ArrayList<String>();
 		ArrayList<String> uris = new ArrayList<String>();
         ids.add("E1.6882");
-        uris.add("http://www.kim.bl.openinteractive.ch/sammlungen#f19e71ca-4dc6-48b8-858c-60a1710066f0");
+        uris.add("https://www.kgportal.bl.ch/sammlungen#f19e71ca-4dc6-48b8-858c-60a1710066f0");
         ids.add("E1.6880");
-        uris.add("http://www.kim.bl.openinteractive.ch/sammlungen#f04ae6c5-45fd-ff40-333c-f3b50dffbe3d");
+        uris.add("https://www.kgportal.bl.ch/sammlungen#f04ae6c5-45fd-ff40-333c-f3b50dffbe3d");
         DocumentBadgeList documentDetails = PartnerRecommenderTestHelper.getDetails(DEPLOYMENT_CONTEXT,	
         		port, 
         		PartnerRecommenderTestHelper.createParamsForPartnerRecommenderDetailCall(ids, uris, DATAPROVIDER));
@@ -170,7 +170,7 @@ public class KIMPortalPartnerRecommenderTest {
         ArrayList<String> ids = new ArrayList<String>();
 		ArrayList<String> uris = new ArrayList<String>();
         ids.add("E1.6889");
-        uris.add("http://www.kim.bl.openinteractive.ch/sammlungen#7c627767-4511-144e-8c29-c8a475aca2ac");
+        uris.add("https://www.kgportal.bl.ch/sammlungen#7c627767-4511-144e-8c29-c8a475aca2ac");
         DocumentBadgeList documentDetails = PartnerRecommenderTestHelper.getDetails(DEPLOYMENT_CONTEXT,	
         		port, 
         		PartnerRecommenderTestHelper.createParamsForPartnerRecommenderDetailCall(ids, uris, DATAPROVIDER));
@@ -186,7 +186,7 @@ public class KIMPortalPartnerRecommenderTest {
         ArrayList<String> ids = new ArrayList<String>();
 		ArrayList<String> uris = new ArrayList<String>();
         ids.add("Mz 000068");
-        uris.add("http://www.kim.bl.openinteractive.ch/sammlungen#aa0b5559-6e86-46db-9785-0329ab800956");
+        uris.add("https://www.kgportal.bl.ch/sammlungen#aa0b5559-6e86-46db-9785-0329ab800956");
         DocumentBadgeList documentDetails = PartnerRecommenderTestHelper.getDetails(DEPLOYMENT_CONTEXT,	
         		port, 
         		PartnerRecommenderTestHelper.createParamsForPartnerRecommenderDetailCall(ids, uris, DATAPROVIDER));
@@ -202,7 +202,7 @@ public class KIMPortalPartnerRecommenderTest {
         ArrayList<String> ids = new ArrayList<String>();
 		ArrayList<String> uris = new ArrayList<String>();
         ids.add("Mz 000068");
-        uris.add("http://www.kim.bl.openinteractive.ch/sammlungen#aa0b5559-6e86-46db-9785-0329ab800956");
+        uris.add("https://www.kgportal.bl.ch/sammlungen#aa0b5559-6e86-46db-9785-0329ab800956");
         DocumentBadgeList documentDetails = PartnerRecommenderTestHelper.getDetailsJSON(DEPLOYMENT_CONTEXT,	
         		port, 
         		PartnerRecommenderTestHelper.createParamsForPartnerRecommenderDetailCallJSON(ids, uris, DATAPROVIDER));
