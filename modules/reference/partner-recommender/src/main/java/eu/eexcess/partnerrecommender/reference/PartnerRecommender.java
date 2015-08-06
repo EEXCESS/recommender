@@ -233,49 +233,12 @@ public class PartnerRecommender implements PartnerRecommenderApi {
 
                 String rdfXML = XMLTools.getStringFromDocument(enrichedDetailResultEexcess);
 
-                // StringReader stream = new StringReader(document.details);
-                // OntModel model = ModelFactory.createOntologyModel();
-                // model.read(stream,null);
-                // document.detailsRDF = XMLTools.writeModel(model);
-                /*
-                 * OntModel modelEnriched =
-                 * XMLTools.createModel(enrichedDetailResultEexcess);
-                 * document.detailsJSONLD =
-                 * XMLTools.writeModelJsonLD(modelEnriched);
-                 * 
-                 * 
-                 * // document.details =
-                 * transformRDFXMLToResponseDetailJSONLD(rdfXML);
-                 * document.detailsJSONLDCompacted =
-                 * transformJSONLDToResponseDetailJSONLDCompact
-                 * (document.detailsJSONLD); document.detailXMLJSON =
-                 * transformRDFXMLToResponseDetail(rdfXML);
-                 */
                 PartnerdataTracer.dumpFile(this.getClass(), PartnerRecommender.partnerConfiguration, rdfXML, "partner-recommender-results-details-before-reduce-" + i,
                         PartnerdataTracer.FILETYPE.XML, partnerdataLogger);
                 document.details = transformRDFXMLToResponseDetail(rdfXML, partnerdataLogger, i);
                 PartnerdataTracer.dumpFile(this.getClass(), PartnerRecommender.partnerConfiguration, document.details, "partner-recommender-results-details-" + i,
                         PartnerdataTracer.FILETYPE.JSON, partnerdataLogger);
 
-                /*
-                 * String contextJSON =
-                 * "{\"@context\": {\"aggregatedCHO\": {\"@id\": \"http://www.europeana.eu/schemas/edm/aggregatedCHO\", \"@type\": \"@id\"}, \"collectionName\": \"http://www.europeana.eu/schemas/edm/collectionName\", \"dataProvider\": {\"@id\": \"http://www.europeana.eu/schemas/edm/dataProvider\", \"@type\": \"@id\"}, \"imports\": {\"@id\": \"http://www.w3.org/2002/07/owl#imports\", \"@type\": \"@id\"}, \"isShownAt\": {\"@id\": \"http://www.europeana.eu/schemas/edm/isShownAt\", \"@type\": \"@id\"}, \"isShownBy\": {\"@id\": \"http://www.europeana.eu/schemas/edm/isShownBy\", \"@type\": \"@id\"}, \"preview\": {\"@id\": \"http://www.europeana.eu/schemas/edm/preview\", \"@type\": \"@id\"}, \"provider\": {\"@id\": \"http://www.europeana.eu/schemas/edm/provider\", \"@type\": \"@id\"}, \"rights\": {\"@id\": \"http://www.europeana.eu/schemas/edm/rights\", \"@type\": \"@id\"} } }"
-                 * ; final Object contextJson =
-                 * JSONObject.fromObject(contextJSON) ;
-                 * 
-                 * final com.github.jsonldjava.core.JsonLdOptions options = new
-                 * com.github.jsonldjava.core.JsonLdOptions(); options.format =
-                 * "application/jsonld";
-                 * 
-                 * Object compact = JsonLdProcessor.compact(new
-                 * ByteArrayInputStream
-                 * (XMLTools.writeModelJsonLD(model).getBytes("UTF-8")),
-                 * contextJson, options);
-                 * 
-                 * System.out.println(JSONUtils.valueToString(compact));
-                 * document.details = JSONUtils.valueToString(compact);
-                 */
-                // long endTransform1 = System.currentTimeMillis();
             } catch (EEXCESSDataTransformationException e) {
                 LOGGER.log(Level.INFO, "", e);
             }
@@ -284,38 +247,11 @@ public class PartnerRecommender implements PartnerRecommenderApi {
 
         partnerdataLogger.getActLogEntry().end();
         partnerdataLogger.save();
-        /*
-         * DocumentBadgeList returnList = new DocumentBadgeList();
-         * returnList.documentBadges = new LinkedList<DocumentBadge>();
-         * DocumentBadge e = new DocumentBadge("id", "uri", "provider");
-         * returnList.documentBadges.add(e ); DocumentBadge e2 = new
-         * DocumentBadge("id1", "uri1", "provider1");
-         * returnList.documentBadges.add(e2 ); return returnList ;
-         */
+
         PartnerdataTracer.dumpFile(this.getClass(), partnerConfiguration, documents, "partner-recommender-results-details", PartnerdataTracer.FILETYPE.XML, partnerdataLogger);
 
         return documents;
     }
-
-    // commented due to unused method warning
-//    private String transformRDFXMLToResponseDetailNew(String rdfXML) {
-//        String json = XML.toJSONObject(rdfXML).toString();
-//
-//        json = json.replaceAll("\"rdf:", "\"rdf");
-//        json = json.replaceAll("\"rdfs:", "\"rdfs");
-//        json = json.replaceAll("\"eexcess:", "\"eexcess");
-//        json = json.replaceAll("\"dc:", "\"dc");
-//        json = json.replaceAll("\"dcterms:", "\"dcterms");
-//        json = json.replaceAll("\"edm:", "\"edm");
-//        json = json.replaceAll("\"ore:", "\"ore");
-//        json = json.replaceAll("\"owl:", "\"owl");
-//        json = json.replaceAll("\"foaf:", "\"foaf");
-//        json = json.replaceAll("\"xsd:", "\"xsd");
-//        json = json.replaceAll("\"xmlns:", "\"xmlns");
-//        json = json.replaceAll("\"xml:", "\"xml");
-//        json = json.replaceAll("\"wgs84:", "\"wgs84");
-//        return json;
-//    }
 
     private String transformRDFXMLToResponseDetail(String rdfXML, PartnerdataLogger partnerdataLogger, int index) {
         String json = XML.toJSONObject(rdfXML).toString();
@@ -347,12 +283,12 @@ public class PartnerRecommender implements PartnerRecommenderApi {
                         JSONArray eexcessProxyArray = (JSONArray) rdfRDF.get("eexcessProxy");
                         for (int i = 0; i < eexcessProxyArray.length(); i++) {
                             JSONObject eexcessProxyItem = (JSONObject) eexcessProxyArray.get(i);
-                            processEEXCESSProxyItemJSON(ret, eexcessProxyItem);
+                            processEEXCESSProxyItemJSON(ret, eexcessProxyItem,rdfRDF);
                         }
                     } else {
                         if (rdfRDF.get(eexcessProxyKey) instanceof JSONObject) {
                             JSONObject eexcessProxyItem = (JSONObject) rdfRDF.get("eexcessProxy");
-                            processEEXCESSProxyItemJSON(ret, eexcessProxyItem);
+                            processEEXCESSProxyItemJSON(ret, eexcessProxyItem,rdfRDF);
                         }
 
                     }
@@ -364,22 +300,26 @@ public class PartnerRecommender implements PartnerRecommenderApi {
         return ret.toString();
     }
 
-    private void processEEXCESSProxyItemJSON(JSONObject ret, JSONObject eexcessProxyItem) throws JSONException {
+    private void processEEXCESSProxyItemJSON(JSONObject ret, JSONObject eexcessProxyItem, JSONObject rdfRDF) throws JSONException {
         String rdfaboutKey = "rdfabout";
         if (eexcessProxyItem.has(rdfaboutKey)) {
             String rdfabout = eexcessProxyItem.getString(rdfaboutKey);
             String oreProxyInKey = "oreproxyIn";
             String oreAggregationKey = "oreAggregation";
-            if (eexcessProxyItem.has(oreProxyInKey)) {
-                JSONObject oreProxyIn = (JSONObject) eexcessProxyItem.get(oreProxyInKey);
-                if (oreProxyIn.has(oreAggregationKey)) {
-                    JSONObject oreAggregation = (JSONObject) oreProxyIn.get(oreAggregationKey);
+//            if (eexcessProxyItem.has(oreProxyInKey)) {
+//                JSONObject oreProxyIn = (JSONObject) eexcessProxyItem.get(oreProxyInKey);
+                if (rdfRDF.has(oreAggregationKey)) {
+                    JSONObject oreAggregation = (JSONObject) rdfRDF.get(oreAggregationKey);
                     String edmCollectionNameKey = "edmcollectionName";
                     if (oreAggregation.has(edmCollectionNameKey)) {
                         eexcessProxyItem.put(edmCollectionNameKey, oreAggregation.get(edmCollectionNameKey));
                     }
+                    String edmpreviewKey = "edmpreview";
+                    if (oreAggregation.has(edmpreviewKey)) {
+                        eexcessProxyItem.put(edmpreviewKey, oreAggregation.get(edmpreviewKey));
+                    }
                 }
-            }
+//            }
             if (rdfabout.endsWith("/enrichedProxy/")) {
                 eexcessProxyItem.remove(rdfaboutKey);
                 eexcessProxyItem.remove("oreproxyFor");
@@ -411,6 +351,10 @@ public class PartnerRecommender implements PartnerRecommenderApi {
                         String content = myChild.getString("content");
                         eexcessProxyItem.put(key, content);
                     }
+                    if (myChild.has("rdfresource")) {
+                        String content = myChild.getString("rdfresource");
+                        eexcessProxyItem.put(key, content);
+                    }
                     Iterator<?> keysChild = myChild.keys();
 
                     ArrayList<String> keysToRemove = new ArrayList<String>();
@@ -432,6 +376,10 @@ public class PartnerRecommender implements PartnerRecommenderApi {
                             if (myChild.has("content")) {
                                 String content = myChild.getString("content");
                                 myNewChilds.put(content);
+                            }
+                            if (myChild.has("rdfresource")) {
+                                String rdfresource = myChild.getString("rdfresource");
+                                myNewChilds.put(rdfresource);
                             }
                             Iterator<?> keysChild = myChild.keys();
 
@@ -460,69 +408,6 @@ public class PartnerRecommender implements PartnerRecommenderApi {
         }
         return eexcessProxyItem;
     }
-    
-    // commented due to unused method warning
-//    private String transformRDFXMLToResponseDetailJSONLD(String rdfXML) {
-//        try {
-//            LOGGER.log(Level.INFO, XML.toJSONObject(rdfXML).toString());
-//            // Open a valid json(-ld) input file
-//            // InputStream inputStream = new FileInputStream("d:\\input.json");
-//            // Read the file into an Object (The type of this object will be a
-//            // List, Map, String, Boolean,
-//            // Number or null depending on the root object in the file).
-//            // Object jsonObject = JsonUtils.fromInputStream(inputStream);
-//
-//            // Create a context JSON map containing prefixes and definitions
-//            // Map context = new HashMap();
-//            // Customise context...
-//            // Create an instance of JsonLdOptions with the standard JSON-LD
-//            // options
-//            JsonLdOptions options = new JsonLdOptions();
-//            // xxx options.format =
-//            // Customise options...
-//            // options.setCompactArrays(true);
-//            // Call whichever JSONLD function you want! (e.g. compact)
-//            Object compact;
-//            compact = JsonLdProcessor.fromRDF(rdfXML, options);
-//            // Print out the result (or don't, it's your call!)
-//            return JsonUtils.toPrettyString(compact);
-//        } catch (JsonLdError e) {
-//            LOGGER.log(Level.INFO, "", e);
-//        } catch (JsonGenerationException e) {
-//            LOGGER.log(Level.INFO, "", e);
-//        } catch (IOException e) {
-//            LOGGER.log(Level.INFO, "", e);
-//        }
-//        return "";
-//    }
-
-    // commented due to unused method warning
-//    @SuppressWarnings("rawtypes")
-//    private String transformJSONLDToResponseDetailJSONLDCompact(String jsonLD) {
-//        try {
-//            // Object jsonObject = JsonUtils.fromInputStream(inputStream);
-//            // Create a context JSON map containing prefixes and definitions
-//            Map context = new HashMap();
-//            // Customise context...
-//            // Create an instance of JsonLdOptions with the standard JSON-LD
-//            // options
-//            JsonLdOptions options = new JsonLdOptions();
-//            // Customise options...
-//            // Call whichever JSONLD function you want! (e.g. compact)
-//            Object compact = JsonLdProcessor.compact(jsonLD, context, options);
-//            // Print out the result (or don't, it's your call!)
-//            LOGGER.log(Level.INFO, JsonUtils.toPrettyString(compact));
-//
-//            return JsonUtils.toPrettyString(compact);
-//        } catch (JsonLdError e) {
-//            LOGGER.log(Level.INFO, "", e);
-//        } catch (JsonGenerationException e) {
-//            LOGGER.log(Level.INFO, "", e);
-//        } catch (IOException e) {
-//            LOGGER.log(Level.INFO, "", e);
-//        }
-//        return "";
-//    }
 
     /**
      * Returns the EEXCESS user profile for a given user.
