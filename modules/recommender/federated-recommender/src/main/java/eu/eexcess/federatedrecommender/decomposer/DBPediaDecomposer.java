@@ -34,7 +34,8 @@ import org.jgrapht.graph.SimpleWeightedGraph;
 import eu.eexcess.config.FederatedRecommenderConfiguration;
 import eu.eexcess.dataformats.userprofile.ContextKeyword;
 import eu.eexcess.dataformats.userprofile.SecureUserProfileEvaluation;
-import eu.eexcess.federatedrecommender.dbpedia.DbPediaGraph;
+import eu.eexcess.federatedrecommender.dbpedia.DBPediaGraphInterface;
+import eu.eexcess.federatedrecommender.dbpedia.DBPediaGraphJGraph;
 import eu.eexcess.federatedrecommender.dbpedia.DbPediaSolrIndex;
 import eu.eexcess.federatedrecommender.interfaces.SecureUserProfileDecomposer;
 import eu.eexcess.federatedrecommender.utils.FederatedRecommenderException;
@@ -110,7 +111,7 @@ public class DBPediaDecomposer implements SecureUserProfileDecomposer<SecureUser
                                                                    // keywords
                                                                    // from the
                                                                    // inputProfile
-        DbPediaGraph dbPediaGraph = new DbPediaGraph(dbPediaSolrIndex);
+        DBPediaGraphInterface dbPediaGraph = new DBPediaGraphJGraph(dbPediaSolrIndex);
         SimpleWeightedGraph<String, DefaultEdge> semanticGraph;
 
         /*
@@ -118,7 +119,7 @@ public class DBPediaDecomposer implements SecureUserProfileDecomposer<SecureUser
          */
 
         try {
-            semanticGraph = dbPediaGraph.getFromKeywords(profileKeywords, dbPediaEntityNames, hitsLimit, depthLimit);
+            semanticGraph = (SimpleWeightedGraph<String, DefaultEdge>) dbPediaGraph.getGraphFromKeywords(profileKeywords, dbPediaEntityNames, hitsLimit, depthLimit);
             // WARNING: dbPediaKeywords is an i/o parameter, now contains
             // DBpedia entities representing keywords from the inputProfile
         } catch (FederatedRecommenderException e) {
