@@ -16,6 +16,9 @@ limitations under the License.
  */
 package eu.eexcess.europeana.datalayer;
 
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
 import javax.xml.xpath.XPath;
 import javax.xml.xpath.XPathConstants;
 import javax.xml.xpath.XPathFactory;
@@ -35,51 +38,48 @@ import eu.eexcess.partnerdata.reference.PartnerdataLogger;
 import eu.eexcess.partnerdata.reference.PartnerdataTracer;
 import eu.eexcess.partnerdata.reference.Transformer;
 
-public class EuropeanaTransformer extends Transformer implements ITransformer{
-	
-	@Override
-	protected Result postProcessResult(Document orgPartnerResult, Result result, QuerySolution querySol) {
-		result.documentBadge.uri = "http://europeana.eu/resolve/record"+ result.documentBadge.id;
-		return result;
-	}
+public class EuropeanaTransformer extends Transformer implements ITransformer {
 
-	@Override
-	protected ResultList postProcessResults(Document orgPartnerResult, ResultList resultList) {
-		resultList.totalResults = Integer.parseInt(getValueWithXPath("/o/totalResults", orgPartnerResult));
-		return resultList;
-	}
+    private static final Logger LOGGER = Logger.getLogger(EuropeanaTransformer.class.getName());
 
-	@Override
-	public Document preProcessTransform(Document input, PartnerdataLogger logger)  throws EEXCESSDataTransformationException{
-		PartnerdataTracer.dumpFile(this.getClass(), partnerConfig, input, "before-transform-before-process", logger); 
+    @Override
+    protected Result postProcessResult(Document orgPartnerResult, Result result, QuerySolution querySol) {
+        result.documentBadge.uri = "http://europeana.eu/resolve/record" + result.documentBadge.id;
+        return result;
+    }
 
-		XPath xPath = XPathFactory.newInstance().newXPath();
-		NodeList nodes;
-		try {
-			NodeList itemsRootNode = (NodeList)xPath.evaluate("/o/items",
-					input.getDocumentElement(), XPathConstants.NODESET);
-			nodes = (NodeList)xPath.evaluate("/o/items/e",
-					input.getDocumentElement(), XPathConstants.NODESET);
-			for (int i = 0; i < nodes.getLength();i++) {
-			    Element e = (Element) nodes.item(i);
-			    NodeList itemFields = e.getChildNodes();
-			    for (int j = 0; j < itemFields.getLength(); j++) {
-					Node field = itemFields.item(j);
-					if (field.getNodeName().equalsIgnoreCase("edmIsShownAt"))
-					{
-						if (!field.hasChildNodes())
-						{
-							itemsRootNode.item(0).removeChild(e);
-						}
-					}
-				}
-			}
-		} catch (Exception e) {
-			System.out.println(e.toString());
-		}
-		PartnerdataTracer.dumpFile(this.getClass(), partnerConfig, input, "before-transform-done-process", logger); 
-		return input;
-	}
+    @Override
+    protected ResultList postProcessResults(Document orgPartnerResult, ResultList resultList) {
+        resultList.totalResults = Integer.parseInt(getValueWithXPath("/o/totalResults", orgPartnerResult));
+        return resultList;
+    }
 
+    @Override
+    public Document preProcessTransform(Document input, PartnerdataLogger logger) throws EEXCESSDataTransformationException {
+        PartnerdataTracer.dumpFile(this.getClass(), partnerConfig, input, "before-transform-before-process", logger);
+
+        XPath xPath = XPathFactory.newInstance().newXPath();
+        NodeList nodes;
+        try {
+            NodeList itemsRootNode = (NodeList) xPath.evaluate("/o/items", input.getDocumentElement(), XPathConstants.NODESET);
+            nodes = (NodeList) xPath.evaluate("/o/items/e", input.getDocumentElement(), XPathConstants.NODESET);
+            for (int i = 0; i < nodes.getLength(); i++) {
+                Element e = (Element) nodes.item(i);
+                NodeList itemFields = e.getChildNodes();
+                for (int j = 0; j < itemFields.getLength(); j++) {
+                    Node field = itemFields.item(j);
+                    if (field.getNodeName().equalsIgnoreCase("edmIsShownAt")) {
+                        if (!field.hasChildNodes()) {
+                            itemsRootNode.item(0).removeChild(e);
+                        }
+                    }
+                }
+            }
+        } catch (Exception e) {
+            LOGGER.log(Level.WARNING, "Could not transform europeana results", e);
+        }
+        PartnerdataTracer.dumpFile(this.getClass(), partnerConfig, input, "before-transform-done-process", logger);
+        return input;
+    }
 
 }

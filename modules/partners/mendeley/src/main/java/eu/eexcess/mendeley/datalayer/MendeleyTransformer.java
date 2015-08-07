@@ -16,6 +16,9 @@ limitations under the License.
  */
 package eu.eexcess.mendeley.datalayer;
 
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
 import javax.xml.xpath.XPath;
 import javax.xml.xpath.XPathConstants;
 import javax.xml.xpath.XPathFactory;
@@ -35,64 +38,59 @@ import eu.eexcess.partnerdata.reference.PartnerdataLogger;
 import eu.eexcess.partnerdata.reference.PartnerdataTracer;
 import eu.eexcess.partnerdata.reference.Transformer;
 
-public class MendeleyTransformer extends Transformer implements ITransformer{
-	
-	@Override
-	protected ResultList postProcessResults(Document orgPartnerResult, ResultList resultList) {
+public class MendeleyTransformer extends Transformer implements ITransformer {
+    private static final Logger LOGGER = Logger.getLogger(MendeleyTransformer.class.getName());
+
+    @Override
+    protected ResultList postProcessResults(Document orgPartnerResult, ResultList resultList) {
         resultList.totalResults = resultList.results.size();
-		return resultList;
-	}
+        return resultList;
+    }
 
-	@Override
-	protected Result postProcessResult(Document orgPartnerResult, Result result, QuerySolution querySol) {
-		result.licence = "https://creativecommons.org/licenses/by/3.0/legalcode";
-		return result;
-	}
+    @Override
+    protected Result postProcessResult(Document orgPartnerResult, Result result, QuerySolution querySol) {
+        result.licence = "https://creativecommons.org/licenses/by/3.0/legalcode";
+        return result;
+    }
 
-	@Override
-	public Document preProcessTransformDetail(Document input, PartnerdataLogger logger)  throws EEXCESSDataTransformationException{
-		PartnerdataTracer.dumpFile(this.getClass(), partnerConfig, input, "before-transform-before-process", logger); 
+    @Override
+    public Document preProcessTransformDetail(Document input, PartnerdataLogger logger) throws EEXCESSDataTransformationException {
+        PartnerdataTracer.dumpFile(this.getClass(), partnerConfig, input, "before-transform-before-process", logger);
 
-		XPath xPath = XPathFactory.newInstance().newXPath();
-		NodeList nodes;
-		try {
-			NodeList itemsRootNode = (NodeList)xPath.evaluate("/o",
-					input.getDocumentElement(), XPathConstants.NODESET);
-			nodes = (NodeList)xPath.evaluate("/o/authors/e",
-					input.getDocumentElement(), XPathConstants.NODESET);
-			for (int i = 0; i < nodes.getLength();i++) {
-			    Element e = (Element) nodes.item(i);
-			    NodeList itemFields = e.getChildNodes();
-				String firstName="";
-				String lastName="";
-			    for (int j = 0; j < itemFields.getLength(); j++) {
-					Node field = itemFields.item(j);
-					if (field.getNodeName().equalsIgnoreCase("first_name"))
-					{
-						if (field.getNodeValue() != null)
-							firstName = field.getNodeValue();
-						else 
-							if (field.hasChildNodes())
-								firstName = field.getChildNodes().item(0).getNodeValue();
-					}
-					if (field.getNodeName().equalsIgnoreCase("last_name"))
-					{
-						if (field.getNodeValue() != null)
-							lastName = field.getNodeValue();
-						else 
-							if (field.hasChildNodes())
-								lastName = field.getChildNodes().item(0).getNodeValue();
-					}
-				}
-			    Element authorString = input.createElement("authorsString");
-			    authorString.appendChild(input.createTextNode(firstName + " " + lastName));
-				itemsRootNode.item(0).appendChild(authorString);
-			}
-		} catch (Exception e) {
-			System.out.println(e.toString());
-		}
-		PartnerdataTracer.dumpFile(this.getClass(), partnerConfig, input, "before-transform-done-process", logger); 
-		return input;
-	}
+        XPath xPath = XPathFactory.newInstance().newXPath();
+        NodeList nodes;
+        try {
+            NodeList itemsRootNode = (NodeList) xPath.evaluate("/o", input.getDocumentElement(), XPathConstants.NODESET);
+            nodes = (NodeList) xPath.evaluate("/o/authors/e", input.getDocumentElement(), XPathConstants.NODESET);
+            for (int i = 0; i < nodes.getLength(); i++) {
+                Element e = (Element) nodes.item(i);
+                NodeList itemFields = e.getChildNodes();
+                String firstName = "";
+                String lastName = "";
+                for (int j = 0; j < itemFields.getLength(); j++) {
+                    Node field = itemFields.item(j);
+                    if (field.getNodeName().equalsIgnoreCase("first_name")) {
+                        if (field.getNodeValue() != null)
+                            firstName = field.getNodeValue();
+                        else if (field.hasChildNodes())
+                            firstName = field.getChildNodes().item(0).getNodeValue();
+                    }
+                    if (field.getNodeName().equalsIgnoreCase("last_name")) {
+                        if (field.getNodeValue() != null)
+                            lastName = field.getNodeValue();
+                        else if (field.hasChildNodes())
+                            lastName = field.getChildNodes().item(0).getNodeValue();
+                    }
+                }
+                Element authorString = input.createElement("authorsString");
+                authorString.appendChild(input.createTextNode(firstName + " " + lastName));
+                itemsRootNode.item(0).appendChild(authorString);
+            }
+        } catch (Exception e) {
+            LOGGER.log(Level.WARNING, "Could not transform Mendeley results", e);
+        }
+        PartnerdataTracer.dumpFile(this.getClass(), partnerConfig, input, "before-transform-done-process", logger);
+        return input;
+    }
 
 }

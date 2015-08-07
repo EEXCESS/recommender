@@ -135,15 +135,15 @@ public class PartnerConnector extends PartnerConnectorBase implements PartnerCon
                 }
 
                 // item.edmConcept.addAll(details.concepts);
-                // item.edmConcept = details.concepts; TODO: copy into doc
+                // item.edmConcept = details.concepts;
                 // item.edmCountry = details.edmCountry;
                 // item.edmPlace = details.places;
             }
         }
 
-        long end = System.currentTimeMillis();
+        // long end = System.currentTimeMillis();
 
-        long startXML = System.currentTimeMillis();
+        // long startXML = System.currentTimeMillis();
 
         Document newResponse = null;
         try {
@@ -151,7 +151,7 @@ public class PartnerConnector extends PartnerConnectorBase implements PartnerCon
         } catch (EEXCESSDataTransformationException e) {
             LOGGER.log(Level.INFO, "Error Transforming Json to xml", e);
         }
-        long endXML = System.currentTimeMillis();
+        // long endXML = System.currentTimeMillis();
         // LOGGER.log(Level.INFO, "millis " + (endXML - startXML) + "   " + (end
         // - start));
 
