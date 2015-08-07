@@ -217,19 +217,10 @@ public class PartnerRecommender implements PartnerRecommenderApi {
                 /*
                  * Transform Document in partner format to EEXCESS RDF format
                  */
-                // long startTransform1 = System.currentTimeMillis();
-                // partnerdataLogger.addQuery(userProfile);
                 Document detailResultEexcess = transformer.transformDetail(detailResultNative, partnerdataLogger);
 
-                // long startEnrich = System.currentTimeMillis();
-                // partnerdataLogger.getActLogEntry().enrichStart();
                 Document enrichedDetailResultEexcess = null;
-                // boolean queryHasResults=
-                // transformer.hasEEXCESSRDFResponseResults(searchResultsEexcess);
-                // if (queryHasResults)
                 enrichedDetailResultEexcess = enricher.enrichResultList(detailResultEexcess, partnerdataLogger);
-                // partnerdataLogger.getActLogEntry().enrichEnd();
-                // long endEnrich = System.currentTimeMillis();
 
                 String rdfXML = XMLTools.getStringFromDocument(enrichedDetailResultEexcess);
 
