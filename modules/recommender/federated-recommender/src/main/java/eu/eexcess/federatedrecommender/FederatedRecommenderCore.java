@@ -25,6 +25,7 @@ package eu.eexcess.federatedrecommender;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.InputStream;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.sql.PreparedStatement;
@@ -815,6 +816,17 @@ public class FederatedRecommenderCore implements ProbeResultChanged {
             throw e;
         }
         return resultList;
+    }
+
+    /**
+     * Returns the partner favIcon as input stream out of the favIcon cache
+     * 
+     * @param partnerId
+     * @return {@link InputStream}
+     */
+    public byte[] getPartnerFavIcon(String partnerId) {
+        LOGGER.log(Level.INFO, "Trying to get FavIcon for partner " + partnerId);
+        return partnerRegister.getFavIconCache().get(partnerId);
     }
 
 }

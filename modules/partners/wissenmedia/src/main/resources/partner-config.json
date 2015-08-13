@@ -7,6 +7,7 @@
   "detailEndpoint": "http://service.wissens-server.com/wissensserver/view.html?a=s&t=artikel-id:${detailQuery}&w=EEXCESS&fields=substanz-id,artikeltyp,first_published_date,geschlecht,last_published_date,lang,lat,long,searchtags,epoche,tempstart-iso8601,tempend-iso8601,dailyarticle_date,wservice-fachgebiet-texttree,ws-uri,preview-image&cdata=false&fq=wservice-searchtype:textsuche&p=intro&v=eexcess&r=CURRENT",
   "userName": "",
   "password": "",
+  "favIconURI":"http://www.wissen.de/sites/all/themes/wissen/favicon.ico",
   "transformerClass": "eu.eexcess.wissenmedia.recommender.WissenmediaTransformer",
   "mappingListTransformationFile":"mapperResultList.xsl",
   "mappingObjectTransformationFile":"mapperObject.xsl",

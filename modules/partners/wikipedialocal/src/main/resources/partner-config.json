@@ -8,6 +8,7 @@
   "searchEndpoint" : "/opt/datasets/EExcess/wiki/enwiki/" ,
   "userName": "",
   "password": "",
+  "favIconURI":"https://de.wikipedia.org/static/favicon/wikipedia.ico",
   "mappingListTransformationFile":"mapperResultList.xsl",
   "mappingObjectTransformationFile":"mapperObject.xsl",
   "partnerDataRequestsTrace":"false",

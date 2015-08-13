@@ -1,5 +1,6 @@
 {
   "systemId": "ZBW",
+  "favIconURI":"http://www.zbw.eu/favicon.ico",
   "partnerConnectorClass": "eu.eexcess.zbw.recommender.PartnerConnector",
   "queryGeneratorClass": "eu.eexcess.partnerrecommender.reference.OrQueryGeneratorFieldTermConjunction",
   "searchEndpoint": "https://api.econbiz.de/v1/search?q=${query}&xml=on&size=${size}&profile=eexcess",
