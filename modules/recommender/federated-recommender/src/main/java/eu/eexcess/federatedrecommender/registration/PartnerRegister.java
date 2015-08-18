@@ -65,24 +65,34 @@ public class PartnerRegister {
 
     public void addPartner(PartnerBadge badge) {
         synchronized (partners) {
-            if (badge.getFavIconURI() != null) {
-                DefaultClientConfig config = new DefaultClientConfig();
-                Client favClient = Client.create(config);
-                WebResource resource = favClient.resource(badge.getFavIconURI());
-                InputStream favIconInputStream = resource.get(InputStream.class);
-
-                try {
-                    favIconCache.put(badge.getSystemId(), IOUtils.toByteArray(favIconInputStream));
-                    favIconInputStream.close();
-
-                } catch (IOException e) {
-                    LOGGER.log(Level.INFO, "could not retrieve favicon from partner", e);
-                }
-            }
+            checkAndFetchFavIcon(badge);
             partners.add(badge);
             DefaultClientConfig config = new DefaultClientConfig();
             Client client = Client.create(config); // new Client(null, config);
             partnerToClient.put(badge.getSystemId(), client);
+        }
+    }
+
+    /**
+     * Checks if the favicon url is avaiable and it was allready fetched before
+     * 
+     * @param badge
+     */
+
+    private void checkAndFetchFavIcon(PartnerBadge badge) {
+        if (badge.getFavIconURI() != null && favIconCache.get(badge.getFavIconURI()) == null) {
+            DefaultClientConfig config = new DefaultClientConfig();
+            Client favClient = Client.create(config);
+            WebResource resource = favClient.resource(badge.getFavIconURI());
+            InputStream favIconInputStream = resource.get(InputStream.class);
+
+            try {
+                favIconCache.put(badge.getSystemId(), IOUtils.toByteArray(favIconInputStream));
+                favIconInputStream.close();
+
+            } catch (IOException e) {
+                LOGGER.log(Level.INFO, "could not retrieve favicon from partner", e);
+            }
         }
     }
 

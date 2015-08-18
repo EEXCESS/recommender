@@ -20,6 +20,7 @@ import com.sun.jersey.api.client.WebResource;
 import com.sun.jersey.api.client.config.ClientConfig;
 import com.sun.jersey.api.client.config.DefaultClientConfig;
 
+import eu.eexcess.dataformats.PartnerBadge;
 import eu.eexcess.dataformats.result.ResultList;
 import eu.eexcess.dataformats.userprofile.ContextKeyword;
 import eu.eexcess.dataformats.userprofile.SecureUserProfile;
@@ -43,134 +44,51 @@ public class MassivFedRecQueryTest {
         searchRequest = serverUri;
     }
 
-    // @Test
-    // public void singleQuery() {
-    // final MassivFedRecQueryTest test = new MassivFedRecQueryTest();
-    // List<String> queryList = test.getQueryList();
-    // HashMap<String,Future<String>> futures = new
-    // HashMap<String,Future<String>>();
-    // for (int i = 0; i < 30; i++) {
-    // for (final String string : queryList) {
-    //
-    // Future<String> future = threadPool.submit(new Callable<String>() {
-    // @Override
-    // public String call() throws Exception {
-    // long start = System.currentTimeMillis();
-    // ResultList resList= test.submitQueryToFedRec(string);
-    // long end = System.currentTimeMillis();
-    // return "" +(end - start) +"ms numResults:"+resList.totalResults;
-    // }
-    //
-    // });
-    //
-    // futures.put(string + i, future);
-    // try {
-    // Thread.sleep(300);
-    // } catch (InterruptedException e) {
-    // // TODO Auto-generated catch block
-    // e.printStackTrace();
-    // }
-    // }
-    // }
-    //
-    // for (String string : futures.keySet()) {
-    // try {
-    // System.out.println("Query "+string+" took "+
-    // futures.get(string).get(5000, TimeUnit.MILLISECONDS));
-    // futures.get(string).cancel(true);
-    // } catch (InterruptedException | ExecutionException
-    // | TimeoutException e) {
-    // futures.get(string).cancel(true);
-    // // TODO Auto-generated catch block
-    // // e.printStackTrace();
-    // System.out.println("Timeout "+ string);
-    //
-    // }
-    // }
-    // futures.clear();
-    // threadPool.shutdown();
-    // assertTrue(true);
-    // }
-    //
-
-    // public void singleOnceQuery() {
-    // final MassivFedRecQueryTest test = new MassivFedRecQueryTest();
-    // List<String> queryList = test.getQueryList();
-    // HashMap<String, Future<String>> futures = new HashMap<String,
-    // Future<String>>();
-    // for (final String string : queryList) {
-    //
-    // Future<String> future = threadPool.submit(new Callable<String>() {
-    // @Override
-    // public String call() throws Exception {
-    // long start = System.currentTimeMillis();
-    // ResultList resList = test.submitQueryToFedRec(string);
-    // long end = System.currentTimeMillis();
-    // return "" + (end - start) + "ms numResults:" + resList.totalResults;
-    // }
-    //
-    // });
-    //
-    // futures.put(string, future);
-    // try {
-    // Thread.sleep(30);
-    // } catch (InterruptedException e) {
-    // // TODO Auto-generated catch block
-    // e.printStackTrace();
-    // }
-    // }
-    //
-    // for (String string : futures.keySet()) {
-    // try {
-    // System.out.println("Query " + string + " took " +
-    // futures.get(string).get(5000, TimeUnit.MILLISECONDS));
-    // futures.get(string).cancel(true);
-    // } catch (Exception e) {
-    // futures.get(string).cancel(true);
-    // // TODO Auto-generated catch block
-    // // e.printStackTrace();
-    // System.out.println("Timeout " + string);
-    //
-    // }
-    // }
-    // futures.clear();
-    // threadPool.shutdown();
-    // assertTrue(true);
-    // }
-
     public Results testPartnersWithSimulatnousThreads(Integer threadAmount, Integer sleepTime) {
+
+        List<String> queryList = getQueryList();
+
         Results result = new Results();
         threadPool = Executors.newFixedThreadPool(threadAmount);
         Long start = System.currentTimeMillis();
-        List<String> queryList = getQueryList();
-        HashMap<String, Future<String>> futures = new HashMap<String, Future<String>>();
+        int counter = 0;
+        HashMap<String, Future<Integer>> futures = new HashMap<String, Future<Integer>>();
         for (final String string : queryList) {
 
-            Future<String> future = threadPool.submit(new Callable<String>() {
+            if (counter % threadAmount == 0 && counter != 0) {
+                try {
+                    Thread.sleep(sleepTime);
+                } catch (InterruptedException e) {
+                    LOGGER.log(Level.INFO, "Could not send Thread to sleep", e);
+                }
+
+            }
+            counter++;
+            Future<Integer> future = threadPool.submit(new Callable<Integer>() {
                 @Override
-                public String call() throws Exception {
+                public Integer call() throws Exception {
                     long start = System.currentTimeMillis();
                     ResultList resList = submitQueryToFedRec(string);
                     long end = System.currentTimeMillis();
-                    return resList.totalResults + "";
+                    return resList.totalResults;
                 }
             });
 
             futures.put(string, future);
-            try {
-                Thread.sleep(sleepTime);
-            } catch (InterruptedException e) {
-                LOGGER.log(Level.WARNING, "Could  not send thread to sleep", e);
-            }
         }
 
         for (String string : futures.keySet()) {
+
             try {
-                if (!futures.get(string).get(7000, TimeUnit.MILLISECONDS).equals("10"))
+                // futures.get(string).get(7000, TimeUnit.MILLISECONDS);
+                if (futures.get(string).get(7000, TimeUnit.MILLISECONDS) < 1)
                     result.setFailure(result.getFailure() + 1);
+
             } catch (Exception e) {
                 futures.get(string).cancel(true);
                 result.setFailure(result.getFailure() + 1);
+                // LOGGER.log(Level.INFO,
+                // "Federated Recommender returned an error", e);
             }
         }
         futures.clear();
@@ -180,36 +98,6 @@ public class MassivFedRecQueryTest {
         return result;
     }
 
-    //
-    //
-    // @Test
-    // public void singleOnceSingleThreadedQuery() {
-    // final MassivFedRecQueryTest test = new MassivFedRecQueryTest();
-    // List<String> queryList = test.getQueryList();
-    // HashMap<String, Future<String>> futures = new HashMap<String,
-    // Future<String>>();
-    // for (final String string : queryList) {
-    //
-    // long start = System.currentTimeMillis();
-    // ResultList resList = null;
-    // try {
-    // resList = test.submitQueryToFedRec(string);
-    // } catch (SAXNotRecognizedException e) {
-    // // TODO Auto-generated catch block
-    //
-    // }
-    // long end = System.currentTimeMillis();
-    // if (resList != null)
-    // System.out.println("" + (end - start) + "ms numResults:" +
-    // resList.totalResults);
-    // else
-    // System.out.println("" + (end - start) + "ms numResults:" + 0);
-    // }
-    // }
-
-    //
-    //
-    //
     public ResultList submitQueryToFedRec(String string) throws SAXNotRecognizedException {
         WebResource service = null;
         Client client;
@@ -225,108 +113,75 @@ public class MassivFedRecQueryTest {
         SecureUserProfile sUserProfile = new SecureUserProfile();
         sUserProfile.numResults = 10;
         sUserProfile.contextKeywords.add(new ContextKeyword(string));
+        PartnerBadge badge = new PartnerBadge();
+        badge.setSystemId("Wikipedia-Local");
+        // badge.setSystemId("Mendeley");
+        sUserProfile.partnerList.add(badge);
         return sUserProfile;
     }
 
-    // @Test
-    // public void multiQuery() {
-    // final MassivFedRecQueryTest test = new MassivFedRecQueryTest();
-    // List<String> queryList = test.getQueryList();
-    // HashMap<String,Future<String>> futures = new
-    // HashMap<String,Future<String>>();
-    // for (int i = 0; i < 1; i++) {
-    // try {
-    // Thread.sleep(5000);
-    // } catch(InterruptedException ex) {
-    // Thread.currentThread().interrupt();
-    // }
-    // String prevString=" ";
-    // for (final String string : queryList) {
-    // if(prevString.length()==0)
-    // prevString += " "+string +" ";
-    // else{
-    // final String query = prevString +" "+ string +" ";
-    // prevString=" ";
-    // Future<String> future = threadPool.submit(new Callable<String>() {
-    // @Override
-    // public String call() throws Exception {
-    // long start = System.currentTimeMillis();
-    //
-    // ResultList resList= test.submitQueryToFedRec(query);
-    //
-    // long end = System.currentTimeMillis();
-    // return "" +(end - start) +"ms numResults:"+resList.totalResults;
-    // }
-    //
-    // });
-    //
-    // futures.put(string + i, future);
-    // }
-    // }
-    // }
-    //
-    // for (String string : futures.keySet()) {
-    // try {
-    // System.out.println("Query "+string+" took "+
-    // futures.get(string).get(5000, TimeUnit.MILLISECONDS));
-    // // futures.get(string).cancel(true);
-    // } catch (InterruptedException | ExecutionException
-    // | TimeoutException e) {
-    // futures.get(string).cancel(true);
-    // // TODO Auto-generated catch block
-    // // e.printStackTrace();
-    // System.out.println("Timeout "+ string);
-    //
-    // }
-    // }
-    // futures.clear();
-    // threadPool.shutdown();
-    // assertTrue(true);
-    // }
-    // @Test
-    // public void combinedQuery() {
-    // final MassivFedRecQueryTest test = new MassivFedRecQueryTest();
-    //
-    // for (String query : getQueryList()) {
-    // if(true){
-    // long start = System.currentTimeMillis();
-    //
-    // ResultList resList = null;
-    // try {
-    // resList = test.submitQueryToFedRec(query);
-    // } catch (SAXNotRecognizedException e) {
-    // // TODO Auto-generated catch block
-    // }
-    //
-    // long end = System.currentTimeMillis();
-    // if(resList!=null)
-    // System.out.println( "" +(end - start)
-    // +"ms numResults:"+resList.totalResults);
-    // else
-    // System.out.println( "" +(end - start) +"ms numResults:"+0);
-    // }
-    // for (String query2 : getQueryList()) {
-    // long start = System.currentTimeMillis();
-    //
-    // ResultList resList = null;
-    // try {
-    // resList = test.submitQueryToFedRec(query+ " "+ query2);
-    // } catch (SAXNotRecognizedException e) {
-    // // TODO Auto-generated catch block
-    // }
-    //
-    // long end = System.currentTimeMillis();
-    // if(resList!=null)
-    // System.out.println( "" +(end - start)
-    // +"ms numResults:"+resList.totalResults);
-    // else
-    // System.out.println( "" +(end - start) +"ms numResults:"+0);
-    //
-    // }
-    //
-    // }
-    //
-    // }
+    public static void main(String[] args) {
+
+        MassivFedRecQueryTest m = null;
+        // m = new
+        // MassivFedRecQueryTest("http://eexcess-demo.know-center.tugraz.at/eexcess-federated-recommender-web-service-1.0-SNAPSHOT/recommender/recommend");
+        m = new MassivFedRecQueryTest("http://localhost/eexcess-federated-recommender-web-service-1.0-SNAPSHOT/recommender/recommend");
+
+        try {
+            m.submitQueryToFedRec("test");
+        } catch (SAXNotRecognizedException e) {
+            LOGGER.log(Level.INFO, "Could not send warming query to federated recommender", e);
+        }
+        // Integer threadTimeout = 30000;
+        Integer threadTimeout = 10000;
+        Integer simThreads = 10;
+        m.logResult(simThreads, threadTimeout, m.testPartnersWithSimulatnousThreads(simThreads, threadTimeout));
+        simThreads = 30;
+
+        m.logResult(simThreads, threadTimeout, m.testPartnersWithSimulatnousThreads(simThreads, threadTimeout));
+        simThreads = 50;
+
+        m.logResult(simThreads, threadTimeout, m.testPartnersWithSimulatnousThreads(simThreads, threadTimeout));
+        simThreads = 100;
+        m.logResult(simThreads, threadTimeout, m.testPartnersWithSimulatnousThreads(simThreads, threadTimeout));
+        simThreads = 150;
+        m.logResult(simThreads, threadTimeout, m.testPartnersWithSimulatnousThreads(simThreads, threadTimeout));
+        simThreads = 500;
+        m.logResult(simThreads, threadTimeout, m.testPartnersWithSimulatnousThreads(simThreads, threadTimeout));
+
+    }
+
+    private void logResult(Integer simThreads, Integer threadTimeout, Results results) {
+        LOGGER.log(Level.INFO, "Simultainous Threads: " + simThreads + " Time between calls: " + threadTimeout + " Time to get all results: " + results.getTime() + " Failure: "
+                + results.getFailure());
+    }
+
+    class Results {
+        private long time = 0;
+        private Integer failure = 0;
+
+        public long getTime() {
+            return time;
+        }
+
+        public void setTime(long time) {
+            this.time = time;
+        }
+
+        public Integer getFailure() {
+            return failure;
+        }
+
+        public void setFailure(Integer failure) {
+            this.failure = failure;
+        }
+    }
+
+    /**
+     * List of the used queries
+     * 
+     * @return
+     */
     private List<String> getQueryList() {
         List<String> queries = new ArrayList<String>();
         queries.add("Mozart");
@@ -479,69 +334,1505 @@ public class MassivFedRecQueryTest {
         queries.add("National Security Agency");
         queries.add("NSA");
         queries.add("National Security");
-
+        queries.add("   graffiti fonts alphabet");
+        queries.add("   rutgers online graduate classes");
+        queries.add("   review on breezes");
+        queries.add("   westbury music fair");
+        queries.add("   u.s. railroad trips fares");
+        queries.add("   how to make a bed");
+        queries.add("   cspan live radio");
+        queries.add("   7 last sayings of christ");
+        queries.add("   mb financial bank");
+        queries.add("   broward court clerk");
+        queries.add("   newport news va");
+        queries.add("   security first financial");
+        queries.add("   ontario raceway ca");
+        queries.add("   funny dinosaur videos");
+        queries.add("   animal behavior college");
+        queries.add("   occupational license in ma");
+        queries.add("   distance from omaha to california");
+        queries.add("   meaning of erin go bragh");
+        queries.add("   rock and republic jeans wholesale");
+        queries.add("   joan oliver author");
+        queries.add("   record tv on computer");
+        queries.add("   cotton wrapped in paper");
+        queries.add("   cheap hotel in st. petersburg fl");
+        queries.add("   nikon d50 digital camera");
+        queries.add("   rose garden fantasy art");
+        queries.add("   building blocks aca");
+        queries.add("   garbanzo beans salad");
+        queries.add("   homes for sale in pa");
+        queries.add("   millennium maxwell house");
+        queries.add("   countryside assisted living");
+        queries.add("   king james's school");
+        queries.add("   charlotte area chamber of commerce");
+        queries.add("   philadelphia breast enhancement surgeons");
+        queries.add("   the mars volta");
+        queries.add("   anteverted uterus and pregnancy");
+        queries.add("   new york city department of finance");
+        queries.add("   retail ice cream stores in california");
+        queries.add("   boys basketball camps indiana");
+        queries.add("   historic bayview chapel fl");
+        queries.add("   the daily herald");
+        queries.add("   happy anniversary clip art");
+        queries.add("   fit for life");
+        queries.add("   houston texas bbq supplies");
+        queries.add("   fort minor lyrics");
+        queries.add("   creature comforts veterinary");
+        queries.add("   jade eidolon photo gallery");
+        queries.add("   effexor and weight loss");
+        queries.add("   find my spot");
+        queries.add("   buy rimonabant buy acomplia");
+        queries.add("   using the elliptical trainer");
+        queries.add("   charlotte chat rooms");
+        queries.add("   pier 1 patio umbrella");
+        queries.add("   university of illinois of chicago");
+        queries.add("   xenosaga 1 quizzes");
+        queries.add("   moonlight avo theatre and vista");
+        queries.add("   final fantasy 7 advent children");
+        queries.add("   elizabeth city north carolina");
+        queries.add("   song lyrics for sean paul");
+        queries.add("   pto president information");
+        queries.add("   duck head cotton capri");
+        queries.add("   perennial ornamental grass");
+        queries.add("   kent county michigan");
+        queries.add("   qplot cnc simulator");
+        queries.add("   recent episode of cbs survivor");
+        queries.add("   eagle pond adirondack real estate");
+        queries.add("   bear voyage 2006");
+        queries.add("   nokia sport phones");
+        queries.add("   pease public library");
+        queries.add("   wisconsin memoriam for ronald verne schirmacher");
+        queries.add("   cheats codes for final fantasy tactics advance");
+        queries.add("   flash flash revolution");
+        queries.add("   university of san marcos");
+        queries.add("   northwest medical center");
+        queries.add("   the rock house");
+        queries.add("   bow strings and cables");
+        queries.add("   pay ebay mastercard bill online");
+        queries.add("   jones beach theatre");
+        queries.add("   university of pittsburgh at johnstown");
+        queries.add("   night at the roxbury soundtrack");
+        queries.add("   vince lombardi trophy replica");
+        queries.add("   4th and main cedar falls iowa");
+        queries.add("   guajilote and mahogany");
+        queries.add("   select a gift 2006");
+        queries.add("   oil industry rate sheet");
+        queries.add("   albany real estate 12205");
+        queries.add("   shelby county texas genealogy");
+        queries.add("   edge precision tile");
+        queries.add("   bartlesville ok on mapquest");
+        queries.add("   madden 06 online cheats");
+        queries.add("   jacque showalter sparrow");
+        queries.add("   restaurants in weehawken");
+        queries.add("   assura assurance restoration");
+        queries.add("   felton chamber of commerce");
+        queries.add("   burning the nerves in the neck");
+        queries.add("   bob carr performing arts studio");
+        queries.add("   indy 500 rv parking");
+        queries.add("   eaton differential gear oil");
+        queries.add("   letter of recommendation");
+        queries.add("   georgia festivals and fairs 2006");
+        queries.add("   robindell private school");
+        queries.add("   great wall of china");
+        queries.add("   ron white comedy central");
+        queries.add("   cost components of gasoline");
+        queries.add("   next day pets");
+        queries.add("   picture of basketball stars");
+        queries.add("   budget rental cars");
+        queries.add("   sarah mclachlan lyrics");
+        queries.add("   tradewinds island grande resort");
+        queries.add("   format for a query letter");
+        queries.add("   college style full beds");
+        queries.add("   michigan yorkie breeders");
+        queries.add("   fluid accumulation in legs");
+        queries.add("   springbrook pool rockford");
+        queries.add("   tarot card readings online");
+        queries.add("   barbershop haircuts link");
+        queries.add("   louisiana high school baseball championship");
+        queries.add("   healthy smoothie recipes");
+        queries.add("   columbia baptist church falls church");
+        queries.add("   stp stickers for sale");
+        queries.add("   doctor on deal or no deal");
+        queries.add("   tommy hilfiger bedskirt");
+        queries.add("   specialist matt hertlein");
+        queries.add("   california state employees association");
+        queries.add("   jack's camera muncie indiana");
+        queries.add("   memorial hospital savannah");
+        queries.add("   virgin records san francisco");
+        queries.add("   susan komen breast cancer run");
+        queries.add("   mls broward county");
+        queries.add("   reset user passwords");
+        queries.add("   contact tyra banks");
+        queries.add("   calvin klein swimsuits for her");
+        queries.add("   peugeot 905 racing photo");
+        queries.add("   in wall aquarium");
+        queries.add("   cape cod lakes articles 2005");
+        queries.add("   john winters swimming");
+        queries.add("   marion k. salomon agency in ny");
+        queries.add("   bullet cam recorder");
+        queries.add("   west monroe high school");
+        queries.add("   north tree fire international");
+        queries.add("   how would you answer this question");
+        queries.add("   coach barclay tote");
+        queries.add("   jimmy kimmel show");
+        queries.add("   veterans programs for prescription drugs");
+        queries.add("   interments wwii italians");
+        queries.add("   jordan christopher michael");
+        queries.add("   busch gardens tampa fl");
+        queries.add("   where was shakespeare born");
+        queries.add("   find a grave in ecuador");
+        queries.add("   the strokes lyrics");
+        queries.add("   natural resources of israel");
+        queries.add("   tutorial on how to ftp to your xbox");
+        queries.add("   post nasal drip hoarseness");
+        queries.add("   compare prices baracuda g4 pool cleaner");
+        queries.add("   kathryn elwood gordon texas");
+        queries.add("   ruger 38 pistols");
+        queries.add("   dateline mother's day angelina jolie");
+        queries.add("   kimora lee simmons baby phat cat");
+        queries.add("   lucy from narnia");
+        queries.add("   dsl by aol");
+        queries.add("   hoyer lift 9805");
+        queries.add("   how to tie a tie");
+        queries.add("   arundel park mall");
+        queries.add("   electrolysis training ri ma");
+        queries.add("   wild west dressage");
+        queries.add("   perri gaustad montana");
+        queries.add("   kimberly pratt oxford mi");
+        queries.add("   pump it lyrics");
+        queries.add("   university of notre dame");
+        queries.add("   basset hound puppies");
+        queries.add("   navy credit union");
+        queries.add("   history of prometheus");
+        queries.add("   larry britt adams");
+        queries.add("   storage unit auction syracuse");
+        queries.add("   affirmation to find a new home");
+        queries.add("   power control module");
+        queries.add("   baby sign language");
+        queries.add("   small easter eggs coloring sheets");
+        queries.add("   why is memoirs of a geisha false");
+        queries.add("   ohio department of corrections");
+        queries.add("   water pressure schodack");
+        queries.add("   wire transfer of money");
+        queries.add("   simmons juvenile products");
+        queries.add("   south swinton avenue in delray beach");
+        queries.add("   david williams the natural way");
+        queries.add("   brandon de wilde");
+        queries.add("   lloyd banks with blue chain");
+        queries.add("   daytona beach royal holiday inn");
+        queries.add("   pokemon cheats and walkthrough");
+        queries.add("   information about radio waves");
+        queries.add("   salvation army tulsa");
+        queries.add("   georgie herro salon");
+        queries.add("   petersburg va government");
+        queries.add("   vero beach fl");
+        queries.add("   region 14 ct");
+        queries.add("   house of tropicals");
+        queries.add("   seattle chop suey");
+        queries.add("   american used cars in san antonio tx");
+        queries.add("   lion country safari");
+        queries.add("   official minnesota lottery");
+        queries.add("   need for speed underground");
+        queries.add("   thomas buckingham matlock");
+        queries.add("   natural habitat of the elaphe guttata guttata");
+        queries.add("   franklin county animal shelter");
+        queries.add("   country music awards las vegas");
+        queries.add("   fort george washington");
+        queries.add("   t-mobile cell phones");
+        queries.add("   the balkan states");
+        queries.add("   walgreens sales 77068");
+        queries.add("   west virginia wesleyan college");
+        queries.add("   baseball umpire career");
+        queries.add("   timing chain problem with 300zx twin turbo");
+        queries.add("   i love movies");
+        queries.add("   what is the current speed and direction of our galaxy");
+        queries.add("   two pocket apron");
+        queries.add("   movies about jesus");
+        queries.add("   motorola spectra ebay");
+        queries.add("   2006 nc talent showcase");
+        queries.add("   organize pederson krag");
+        queries.add("   the great mall of the great plains");
+        queries.add("   laura ashley bedding sophia");
+        queries.add("   greenwich public schools");
+        queries.add("   nw racing news");
+        queries.add("   nickels tulsa oklahoma boats");
+        queries.add("   steamfitter local 638 elections 2006");
+        queries.add("   golf club alameda ca");
+        queries.add("   ybor city history");
+        queries.add("   clovis community college");
+        queries.add("   windows 98gold 98se me 2000 xp for driver only");
+        queries.add("   character lessons for boys");
+        queries.add("   virginia realty company");
+        queries.add("   classic hot rods");
+        queries.add("   video texts workshop");
+        queries.add("   tiffany apartments wichita falls texas");
+        queries.add("   motley crue tabs");
+        queries.add("   music group switch in denver");
+        queries.add("   linkshare affiliate program");
+        queries.add("   popeye wig wig");
+        queries.add("   frisco daily news");
+        queries.add("   lil' jon lyrics");
+        queries.add("   citimortgage loss draft");
+        queries.add("   ny yankees tumblers");
+        queries.add("   mulcahy modern dallas");
+        queries.add("   amityville horror biography");
+        queries.add("   act 1 staffing");
+        queries.add("   maps topo molded");
+        queries.add("   kenny forgione fest for beatle fans");
+        queries.add("   new york city technical college department of dental hygiene");
+        queries.add("   sea pro boats");
+        queries.add("   dairyland classic dog show");
+        queries.add("   san miguel beer");
+        queries.add("   flat fee realty");
+        queries.add("   homes for sale in salisbury md");
+        queries.add("   townhomes for rent apple valley");
+        queries.add("   type search words keywords or web addresses here");
+        queries.add("   mapquest driving directions");
+        queries.add("   chinese birth chart");
+        queries.add("   tavis neal real estate");
+        queries.add("   michigan math and science scholars");
+        queries.add("   here i am");
+        queries.add("   how to upload mods on css server");
+        queries.add("   lewiston recreation lacrosse");
+        queries.add("   golden retriever dog");
+        queries.add("   banks that cash state checks");
+        queries.add("   ellensburg bed and breakfast");
+        queries.add("   sea world tickets");
+        queries.add("   cars that get good gas mileage");
+        queries.add("   black bad ass bitches");
+        queries.add("   ge 8mm camcorder model cg818");
+        queries.add("   christina aguilera lyrics");
+        queries.add("   prime numbers of 7");
+        queries.add("   vivien leigh biography");
+        queries.add("   welburn gourd farm");
+        queries.add("   homes for sale in wichita falls texas");
+        queries.add("   juvenile what's happening");
+        queries.add("   roseville culinary school");
+        queries.add("   booze cruise detroit");
+        queries.add("   the annunciation school in crestwood ny");
+        queries.add("   online newspapers in connersville indiana");
+        queries.add("   metal post hole diggers");
+        queries.add("   mobile alabama yellow pages");
+        queries.add("   auto transmission 92 geo prizm");
+        queries.add("   ms. america pageant website");
+        queries.add("   concrete block dimensions");
+        queries.add("   army games to play online");
+        queries.add("   concorde la fayette");
+        queries.add("   custom guitar shops");
+        queries.add("   southern maryland classified");
+        queries.add("   catholic canon law");
+        queries.add("   color of fear");
+        queries.add("   daddy yankee no me dejes solo lyrics");
+        queries.add("   professional skin care products");
+        queries.add("   larry the cable guy ebay");
+        queries.add("   2mm central annular tear");
+        queries.add("   aristotle three forms of government");
+        queries.add("   may 26 news quiz");
+        queries.add("   volunteer state community college");
+        queries.add("   vccl soccer league");
+        queries.add("   child rubber gloves");
+        queries.add("   joe we keep");
+        queries.add("   orlando to scotland");
+        queries.add("   catering halls suffolk county ny");
+        queries.add("   ops muzzle brake");
+        queries.add("   abc the survivor");
+        queries.add("   townhomes in omaha nebraska");
+        queries.add("   tom cruise on oprah winfrey");
+        queries.add("   air jordan xii");
+        queries.add("   rabbit vegetables how to grow");
+        queries.add("   bed and breakfast inns in tx");
+        queries.add("   camel trophy decals");
+        queries.add("   aurora illinois chat");
+        queries.add("   antioxidant value of creatine");
+        queries.add("   york county va genealogy");
+        queries.add("   duck egg incubation");
+        queries.add("   myspace music codes");
+        queries.add("   dr. razdan tulsa");
+        queries.add("   dr. weiss plastic surgeon breast pattern marker");
+        queries.add("   dragon ball z bio broly trailer");
+        queries.add("   mcna dental plan");
+        queries.add("   prices modular homes in pa");
+        queries.add("   mission impossible 3");
+        queries.add("   income tax rates");
+        queries.add("   galveston daily news");
+        queries.add("   landon donovan birthdate");
+        queries.add("   tourist attractions tennessee");
+        queries.add("   bbc ice cream fashion show");
+        queries.add("   international reading association");
+        queries.add("   atl night clubs for teenagers");
+        queries.add("   university of illinois employees credit union");
+        queries.add("   sitting bar in basement");
+        queries.add("   strength training exercises for women");
+        queries.add("   little willy song lyrics");
+        queries.add("   women in history");
+        queries.add("   4-leaf clover picture i bet you're magically delicious");
+        queries.add("   fruit trees northeast");
+        queries.add("   wells fargo home");
+        queries.add("   june 14 2003 concerts");
+        queries.add("   anaheim hills schools");
+        queries.add("   the deal with bow wow and ciara");
+        queries.add("   menotti opera the consul");
+        queries.add("   ides of march");
+        queries.add("   ira contributions deductible");
+        queries.add("   rubber duckie images");
+        queries.add("   mccurtain county assessor");
+        queries.add("   open bidding application");
+        queries.add("   crown bavaria fantasy china");
+        queries.add("   price waterhouse coopers");
+        queries.add("   fluid on the knee");
+        queries.add("   blindness in dachshunds");
+        queries.add("   prom dress shops in portsmouth new hampshire");
+        queries.add("   scooby-doo where are you seasons");
+        queries.add("   humboldt holiday inn");
+        queries.add("   native americans and the progress they made");
+        queries.add("   troubled teens summer programs");
+        queries.add("   old fashioned candy display");
+        queries.add("   funny scion stickers");
+        queries.add("   redhead and models and swimsuits");
+        queries.add("   turner family owned plantation virginia");
+        queries.add("   lawyers in texas");
+        queries.add("   1980 porsche turbo");
+        queries.add("   zen teachings of jesus");
+        queries.add("   fantasia barrino boyfriend");
+        queries.add("   history children's foreign holidays");
+        queries.add("   screen names for im");
+        queries.add("   dogs biting their snout");
+        queries.add("   chick-fil-a customer service");
+        queries.add("   williamson county tennessee area");
+        queries.add("   lol u fell for it");
+        queries.add("   bye bye bye 'n sync lyrics");
+        queries.add("   stadium arcadium lyrics");
+        queries.add("   cook county jail");
+        queries.add("   blackhawk real estate company");
+        queries.add("   how to hack video games");
+        queries.add("   tracking a package from fedex");
+        queries.add("   pride and prejudice");
+        queries.add("   worldwide flight services");
+        queries.add("   how to make ham");
+        queries.add("   truetype fonts download");
+        queries.add("   basement as main living area");
+        queries.add("   gymnastics training center");
+        queries.add("   nyc housing authority");
+        queries.add("   richard hamilton bio pistons");
+        queries.add("   zsnes emulator download");
+        queries.add("   metal bed risers");
+        queries.add("   tye tribbett victory");
+        queries.add("   easter card for my daughter");
+        queries.add("   rushmore plaza civic center");
+        queries.add("   price is right");
+        queries.add("   appraiser citrus county florida");
+        queries.add("   crash team racing time trial cheats");
+        queries.add("   video of sun rising setting");
+        queries.add("   rent jet skis palm beach county");
+        queries.add("   sanctuary golf course");
+        queries.add("   adidas shoe size based on us sizes");
+        queries.add("   foreclosure specialists in san diego");
+        queries.add("   online sites for teens");
+        queries.add("   sodom and gomorrah found");
+        queries.add("   real estate market boston");
+        queries.add("   miami skate shop");
+        queries.add("   city of hamilton municipal court");
+        queries.add("   jackson ohio newspaper");
+        queries.add("   chapel hill classifieds");
+        queries.add("   geauga clerk of court");
+        queries.add("   international specialty underwriters john wilbur");
+        queries.add("   map of jamaica");
+        queries.add("   weight of military weapons");
+        queries.add("   beginner guitar songs");
+        queries.add("   ludwig pancreatic research center");
+        queries.add("   wholesale golf supplies balls");
+        queries.add("   model airplane down thrust");
+        queries.add("   pacific symphony orchestra");
+        queries.add("   best execution time");
+        queries.add("   hilo tide calendar");
+        queries.add("   the saugerties times");
+        queries.add("   the number 1 doctor recommended vagina excelsior");
+        queries.add("   michael of union square");
+        queries.add("   what is gluten");
+        queries.add("   bijou restaurant buffalo");
+        queries.add("   buckingham doolittle and burroughs");
+        queries.add("   ge money bank official site");
+        queries.add("   email address jane fonda");
+        queries.add("   spring hill florida adult communities");
+        queries.add("   pic of dogs");
+        queries.add("   gold china coin");
+        queries.add("   chad michael murray");
+        queries.add("   fly anniversary car");
+        queries.add("   where do i find the history of house prices");
+        queries.add("   warped sportz dark angel 2003 paintball marker");
+        queries.add("   yellow pages switchboard");
+        queries.add("   nj pick 3 results");
+        queries.add("   national invitational tournament");
+        queries.add("   philips magnavox rc0801/04");
+        queries.add("   intelligence level of selective mutism");
+        queries.add("   sherwood scuba outfit");
+        queries.add("   chevy 4x4 truck parts");
+        queries.add("   pianist and tenor in nyc for wedding parties");
+        queries.add("   treasure island wisconsin");
+        queries.add("   aol and pogo");
+        queries.add("   busch gardens virginia");
+        queries.add("   penske truck rental");
+        queries.add("   the red pony book rags");
+        queries.add("   university ent new york");
+        queries.add("   how to make a mortar");
+        queries.add("   campgrounds in lasalle county and surrounding areas");
+        queries.add("   teapots for gifts");
+        queries.add("   teen paid internships");
+        queries.add("   country club in bristol");
+        queries.add("   undisputed 2 movie");
+        queries.add("   used boats for sale");
+        queries.add("   canadian coast guard shark");
+        queries.add("   a.a. ridgewood kennels");
+        queries.add("   paul revere society");
+        queries.add("   u.s. embassy london");
+        queries.add("   grandia 3 where is lucky skill book");
+        queries.add("   metro open doors");
+        queries.add("   property tax sales");
+        queries.add("   lake country united");
+        queries.add("   half moon bay rv park");
+        queries.add("   legal animals in ca");
+        queries.add("   easley cattle catch trailers");
+        queries.add("   internal medicine ohio state university");
+        queries.add("   williamstown new jersey");
+        queries.add("   add another email to my account");
+        queries.add("   destin beach realtors vacation rentals");
+        queries.add("   fresh water fishing magazines");
+        queries.add("   dallas appraisal district");
+        queries.add("   broad film comedy irwin cohan");
+        queries.add("   bolle supercell golf");
+        queries.add("   comedy club in denver");
+        queries.add("   flower shops in lancaster virginia");
+        queries.add("   bus crash in chile");
+        queries.add("   movie theatres branford ct");
+        queries.add("   bronx municipal buildings");
+        queries.add("   links to penpals");
+        queries.add("   business partner wanted nj");
+        queries.add("   garden city beach");
+        queries.add("   patsy cline biography");
+        queries.add("   computers outlet sales");
+        queries.add("   medical for hair remover");
+        queries.add("   tennessee tech university");
+        queries.add("   gravity storm ride");
+        queries.add("   better business bureau houston tx");
+        queries.add("   saint marys ohio newspaper");
+        queries.add("   sony ericsson w600i");
+        queries.add("   the palace resort myrtle beach");
+        queries.add("   how to get in contact with an aol provider");
+        queries.add("   social structure argentina");
+        queries.add("   diesel mechanic requirements");
+        queries.add("   replacement blind louvers");
+        queries.add("   louisiana state police");
+        queries.add("   chatham new jersey");
+        queries.add("   unlocked cell phones");
+        queries.add("   osage beach missouri antiques");
+        queries.add("   burlington times newspaper burlington county new jersey");
+        queries.add("   bronx branch ymca");
+        queries.add("   kids knock knock jokes");
+        queries.add("   draft dodger rag folk singer");
+        queries.add("   baby spits up a lot");
+        queries.add("   joe weider crossbow");
+        queries.add("   north carolina state parks");
+        queries.add("   mario rizzi and son");
+        queries.add("   lipoma at base of spine and children");
+        queries.add("   baker dental division");
+        queries.add("   hotels in savannah");
+        queries.add("   hooters calendar archive");
+        queries.add("   spamming cell phones");
+        queries.add("   author harlan hall");
+        queries.add("   department of corrections");
+        queries.add("   uwgb summer band camps");
+        queries.add("   legal aid of oklahoma");
+        queries.add("   russian federation trips");
+        queries.add("   panama city news");
+        queries.add("   north texas state university");
+        queries.add("   park city mountain resort");
+        queries.add("   city codes for huntington beach california");
+        queries.add("   large hex nuts");
+        queries.add("   omaha lancers hockey");
+        queries.add("   rolodex ruled refill");
+        queries.add("   yahoo music lyrics");
+        queries.add("   charles robert lepp");
+        queries.add("   jokes about retirement");
+        queries.add("   pamela rogers on cell phone");
+        queries.add("   used car dealerships in charlotte");
+        queries.add("   knoxville news sentinel");
+        queries.add("   nassau police department");
+        queries.add("   heineken media stunts");
+        queries.add("   kids thank you cards");
+        queries.add("   doughboys bakery los angeles");
+        queries.add("   poems in spanish");
+        queries.add("   tampa downs race track");
+        queries.add("   virginia non-resident concealed carry");
+        queries.add("   angelo's and vinci's");
+        queries.add("   hiv and sports");
+        queries.add("   ustinov in quo vadis");
+        queries.add("   bullet for my valentine");
+        queries.add("   mary washington hospital");
+        queries.add("   types of birds");
+        queries.add("   words that start with as");
+        queries.add("   city of bellingham");
+        queries.add("   gulfstream ceramic supply");
+        queries.add("   halex electronic dartboard");
+        queries.add("   sirius subscription discount");
+        queries.add("   sony music box for access gift card");
+        queries.add("   full quarter horse saddles western");
+        queries.add("   flight of the navigator");
+        queries.add("   yahoo people search");
+        queries.add("   spray on tans");
+        queries.add("   missouri motor vehicle accidents");
+        queries.add("   medical center of plano tx");
+        queries.add("   to be or not to be");
+        queries.add("   boys batting association");
+        queries.add("   supportive housing facilities");
+        queries.add("   chronicles of narnia wardrobe replica");
+        queries.add("   silver daddies bcn");
+        queries.add("   duke university football");
+        queries.add("   mid south wrestling");
+        queries.add("   high desert mavericks game schedule");
+        queries.add("   newport daily news");
+        queries.add("   0 percent interest credit cards");
+        queries.add("   moen monticello bathroom faucet brushed nickel");
+        queries.add("   blue ridge college in virginia");
+        queries.add("   secretary of state michigan");
+        queries.add("   bon jovi ringtones");
+        queries.add("   cartoon monsters bdsm");
+        queries.add("   can ferrets eat apples");
+        queries.add("   mohawk carpet aladdin pricing");
+        queries.add("   reverse phone book");
+        queries.add("   attention deficit disorder children in school");
+        queries.add("   ways to make her smile");
+        queries.add("   how to start magnolia seeds");
+        queries.add("   wolf creek resort timeshares");
+        queries.add("   single men in ohio");
+        queries.add("   madison ms middle school");
+        queries.add("   certification addictions nursing");
+        queries.add("   aaa four diamond hotel list");
+        queries.add("   hawthorn berry syrup");
+        queries.add("   xylitol recipe salad dressing");
+        queries.add("   playstation 2 repair");
+        queries.add("   jutsus and the hand signs");
+        queries.add("   ntelos my records");
+        queries.add("   tea staining fabric");
+        queries.add("   nyc parking tickets");
+        queries.add("   baltimore community college");
+        queries.add("   love lust live");
+        queries.add("   mortal kombat deadly alliance cheats");
+        queries.add("   identifying elements by their emissions");
+        queries.add("   hardwood flooring wholesale dealers near knoxville tn");
+        queries.add("   landlords association for osceola county florida");
+        queries.add("   college of agricultural science and natural resources");
+        queries.add("   finger foods for baby shower");
+        queries.add("   schecter deluxe bass");
+        queries.add("   briggs and stratton engine model 135203");
+        queries.add("   leslie nielsen auto");
+        queries.add("   plexiglass photo frame");
+        queries.add("   fisk college rankings");
+        queries.add("   blos adolescent separation");
+        queries.add("   jfk international airport");
+        queries.add("   cozumel mexico hurricane");
+        queries.add("   why is city ripping up 40 million dollar trolley line");
+        queries.add("   mother mousse bakery staten island");
+        queries.add("   rising stars dance academy in saddle brook new jersey");
+        queries.add("   how to reupholster");
+        queries.add("   las vegas airport");
+        queries.add("   harrison county board of education");
+        queries.add("   digital x-ray machines");
+        queries.add("   auggie 9 myspace");
+        queries.add("   buick dealer inventory");
+        queries.add("   sharpie 500 tickets");
+        queries.add("   churchill downs race track");
+        queries.add("   adult world in little falls");
+        queries.add("   material safety data sheet");
+        queries.add("   the biggest loser");
+        queries.add("   prime rib cooking recipes");
+        queries.add("   prednisone withdrawal rapid pulse high blood pressure");
+        queries.add("   anna maria island vacation rentals");
+        queries.add("   fobus glock stock");
+        queries.add("   the n game");
+        queries.add("   missouri squirrel habitat");
+        queries.add("   ellis school of nursing");
+        queries.add("   allegheny district attorney office");
+        queries.add("   weather paris france");
+        queries.add("   where can i get a catalog on lighting");
+        queries.add("   family sports center driving range");
+        queries.add("   orlando pd crime rate");
+        queries.add("   credit cards for credit score 555");
+        queries.add("   bradshaw pit bulls");
+        queries.add("   kuno becker myspace picture");
+        queries.add("   jim rau dog shows");
+        queries.add("   is there a term for face pickers");
+        queries.add("   baked asparagus recipe");
+        queries.add("   blue book for motorhomes");
+        queries.add("   roxbury road races");
+        queries.add("   las vegas exotic car rentals");
+        queries.add("   irs refund status");
+        queries.add("   anatomy and physiology");
+        queries.add("   corey young dallas texas");
+        queries.add("   food for the elaphe guttata guttata");
+        queries.add("   welding leaky rivets");
+        queries.add("   ring to it lyrics");
+        queries.add("   how do i get florida homeowners insurance");
+        queries.add("   painting artist cubie");
+        queries.add("   interpret a dream within a dream by edgar allan poe");
+        queries.add("   time travelers 1956");
+        queries.add("   football training for kids");
+        queries.add("   hot rides and hounds");
+        queries.add("   alsace region of france");
+        queries.add("   pau france airport");
+        queries.add("   display in home childcare for mobile online");
+        queries.add("   holt science and technology astronomy");
+        queries.add("   bowling halls westchester county ny");
+        queries.add("   myspace html codes");
+        queries.add("   jills consignment boutique");
+        queries.add("   house of representatives washington dc");
+        queries.add("   hyatt regency irvine california");
+        queries.add("   cem feast sites");
+        queries.add("   healing depression in jewish people");
+        queries.add("   fl tri rail");
+        queries.add("   sonic the hedgehog rom sega genesis");
+        queries.add("   fishing cabins in sedona az");
+        queries.add("   how disable dell support");
+        queries.add("   pet scan on lungs");
+        queries.add("   budget rent a car auto sales");
+        queries.add("   the children's place");
+        queries.add("   university of louisville basketball memorabilia");
+        queries.add("   time warner western ohio bill payment");
+        queries.add("   kennebec county maine");
+        queries.add("   blair field connie mack");
+        queries.add("   uhn tiss uhn tiss uhn tiss lyrics");
+        queries.add("   garden centers nj");
+        queries.add("   robbie johnson hoover");
+        queries.add("   vapor pressure mercury");
+        queries.add("   painful diseases treated with morphine");
+        queries.add("   mg mga parts");
+        queries.add("   city of reno nevada");
+        queries.add("   the melting pot texas");
+        queries.add("   listen to hip hop and rap music");
+        queries.add("   low salt hot dogs");
+        queries.add("   honey i blew up the kids");
+        queries.add("   idaho road report");
+        queries.add("   fast track speed pass");
+        queries.add("   religious contact box");
+        queries.add("   city auto wreckers");
+        queries.add("   alfred vargas coffee table");
+        queries.add("   george strait tour dates");
+        queries.add("   la weight loss");
+        queries.add("   tax preparation clark and associates boston ma");
+        queries.add("   prince henry the navigator");
+        queries.add("   bank of the west");
+        queries.add("   outer banks nc rentals");
+        queries.add("   macon cherry blossom");
+        queries.add("   arts and crafts era of today");
+        queries.add("   lyrics for southside by ashanti");
+        queries.add("   mgm grand las vegas events for may 2006");
+        queries.add("   season two ghost hunters dvd");
+        queries.add("   lesson plan and multicultural");
+        queries.add("   raisin in the sun");
+        queries.add("   new bethel ame church in pennsylvania");
+        queries.add("   small step learning center");
+        queries.add("   cities for zip code");
+        queries.add("   curriculum reviews keystone");
+        queries.add("   true refrigeration equipment");
+        queries.add("   mercer county giant scale rc");
+        queries.add("   florida county courts");
+        queries.add("   pussy cat dolls");
+        queries.add("   geico motorcycle insurance");
+        queries.add("   find value of old lp albums");
+        queries.add("   create a new screen name");
+        queries.add("   private tours of italy");
+        queries.add("   oklahoma senate of appropriations");
+        queries.add("   discount calculator stores");
+        queries.add("   birth certificate nj centrastate medical center nj");
+        queries.add("   fayette county kentucky");
+        queries.add("   read customer comments marriott");
+        queries.add("   concord schools nh");
+        queries.add("   new york state teacher certification examination");
+        queries.add("   rutgers eco complex");
+        queries.add("   irs 1020-s 2005 form");
+        queries.add("   d and p auto sales");
+        queries.add("   la quinta resort");
+        queries.add("   new generation homes colorado");
+        queries.add("   email address finder");
+        queries.add("   why should i stay song");
+        queries.add("   crude oil prices");
+        queries.add("   hard time hustlin");
+        queries.add("   umassfive college federal credit union");
+        queries.add("   house rentals sebastian florida");
+        queries.add("   cinco de mayo celebrations");
+        queries.add("   military pewter mother child pendant");
+        queries.add("   travel to copper canyon");
+        queries.add("   mcmahan's furniture eureka ca");
+        queries.add("   ford auto parts");
+        queries.add("   how do you get into rental assistance");
+        queries.add("   the whale and the squid");
+        queries.add("   kingdom hearts extreme");
+        queries.add("   why stem cells");
+        queries.add("   george washington carver");
+        queries.add("   stanislaus county office of education");
+        queries.add("   owner of an address");
+        queries.add("   paramount hotel dublin ireland");
+        queries.add("   how to convert a traditional ira to a roth ira");
+        queries.add("   the drudge report");
+        queries.add("   pacific business news");
+        queries.add("   pot roast pressure cooker recipe");
+        queries.add("   fujifilm finepix viewer software update");
+        queries.add("   pinelands sports center");
+        queries.add("   natuzzi leather sectional couches");
+        queries.add("   social security insurance");
+        queries.add("   cycle shorts and bib shorts");
+        queries.add("   best treatment for proteinuria");
+        queries.add("   five star alliance");
+        queries.add("   senior high school quotes we may be growing older");
+        queries.add("   texas music charts");
+        queries.add("   does global warming even exist");
+        queries.add("   renaissance family practice");
+        queries.add("   duggar family tator tot casserole");
+        queries.add("   black female singer who dated nba player");
+        queries.add("   eating kinky pussy");
+        queries.add("   ruby mac radio pillows");
+        queries.add("   august 2005 living environment regent");
+        queries.add("   do not call registry");
+        queries.add("   ofna rc cars");
+        queries.add("   trainers for unleashx");
+        queries.add("   reviews on total gym");
+        queries.add("   american classic kz900");
+        queries.add("   map of amu darya river");
+        queries.add("   types of racism in san gabriel valley");
+        queries.add("   disneyland tickets one day");
+        queries.add("   house plans for plantation homes");
+        queries.add("   eastland disaster chicago il");
+        queries.add("   del frisco steakhouse");
+        queries.add("   xxx adult videos");
+        queries.add("   motels cherokee north carolina");
+        queries.add("   consumer counsel group");
+        queries.add("   leon county court");
+        queries.add("   palette of king narmer");
+        queries.add("   jack browne diving mask");
+        queries.add("   road racing magazine");
+        queries.add("   country village english made china pattern");
+        queries.add("   myrtle beach rental");
+        queries.add("   2005 prevailing wage rate and fringe benefits");
+        queries.add("   dept. of birth certificates");
+        queries.add("   how to micro braid hair");
+        queries.add("   quit claim deeds");
+        queries.add("   first holy communion dresses");
+        queries.add("   converted allis-chalmers g");
+        queries.add("   fireworks for maumee perryburg 2006");
+        queries.add("   michigan bulb company");
+        queries.add("   ways to have dreams while sleeping");
+        queries.add("   student aid calculator");
+        queries.add("   two bedroom suite panama city fl");
+        queries.add("   taste of home consultant");
+        queries.add("   explosive parts of speech");
+        queries.add("   kd tools 2222");
+        queries.add("   2006 tropical storm amy");
+        queries.add("   the clash lyrics should i stay or should i go");
+        queries.add("   joint purchasing of paper products");
+        queries.add("   montreal international airport");
+        queries.add("   top country music songs");
+        queries.add("   fairfield sapphire valley resort nc");
+        queries.add("   type of bad fishes");
+        queries.add("   harrisburg new york");
+        queries.add("   lawyer kendra davis");
+        queries.add("   lamb biryani recipe");
+        queries.add("   early intervention program in st. lucie county");
+        queries.add("   lake orion newspaper");
+        queries.add("   kentucky derby results 2006");
+        queries.add("   hoof thrush photos");
+        queries.add("   memorial day parade indiana");
+        queries.add("   history of aircraft crash test");
+        queries.add("   acing the interview");
+        queries.add("   big bouncers and jumpers for sale");
+        queries.add("   silver screen of pensacola");
+        queries.add("   photos of paris hilton");
+        queries.add("   smtp mail host");
+        queries.add("   swishmax trial version for mac");
+        queries.add("   yorkshire terrier rescue");
+        queries.add("   william harold delancey");
+        queries.add("   franklin township schools");
+        queries.add("   state of oklahoma");
+        queries.add("   fort wayne amusements");
+        queries.add("   physics spoon benders");
+        queries.add("   dutchess community college bookstore");
+        queries.add("   orange county performing arts center");
+        queries.add("   wine and acid");
+        queries.add("   lasd inmate information");
+        queries.add("   clarion autumn leaf festival");
+        queries.add("   university of scranton");
+        queries.add("   pickaway ohio cemeteries");
+        queries.add("   south seas plantation");
+        queries.add("   wide width women dress shoes");
+        queries.add("   potomac yard theatre");
+        queries.add("   palmdale florida stanton homes");
+        queries.add("   the legend of dragoon cheats");
+        queries.add("   tom green texas sheriff jail records");
+        queries.add("   strawberry shortcake printouts");
+        queries.add("   picture of gargoyle");
+        queries.add("   crown cruise lines");
+        queries.add("   channel 13 news in las vegas");
+        queries.add("   golden state warriors celebrity basketball game");
+        queries.add("   uaw millwrights union michigan");
+        queries.add("   river travel in mo");
+        queries.add("   stained glass plastic inserts");
+        queries.add("   100 greatest novels");
+        queries.add("   broward county revenue collector");
+        queries.add("   laser eye surgery in 30349");
+        queries.add("   outdoor dining dc metro");
+        queries.add("   business support services for physicians");
+        queries.add("   refilling water bottles");
+        queries.add("   all inclusive hawaii");
+        queries.add("   savannah haunted tours");
+        queries.add("   restaurants in royal oak michigan");
+        queries.add("   disney channel hits");
+        queries.add("   what to wear to cancun mexico");
+        queries.add("   emblematic jewelry companies");
+        queries.add("   build a bear workshop franchise");
+        queries.add("   zip codes hawaii");
+        queries.add("   elvis albums and 45s");
+        queries.add("   dawns discount lingerie");
+        queries.add("   kansas cooperative extension");
+        queries.add("   marlin 6 princess");
+        queries.add("   adidas dazzle shorts");
+        queries.add("   french christian religion");
+        queries.add("   mmsa spring conference");
+        queries.add("   hair silkener technique from curves salon");
+        queries.add("   cheap places to stay in key west");
+        queries.add("   cake decorating baseball");
+        queries.add("   fashions of the s");
+        queries.add("   rules of fight club");
+        queries.add("   shelby county tennessee rita clark property assessor");
+        queries.add("   car seat riser gray");
+        queries.add("   gel wrist rest and mouse pad");
+        queries.add("   physical therapy assistant degree ohio");
+        queries.add("   how to reload rifle ammo");
+        queries.add("   sk-sanctuary in san diego");
+        queries.add("   guilford courthouse battle");
+        queries.add("   washing machine lint traps");
+        queries.add("   sheraton inns and suites");
+        queries.add("   nags head north carolina");
+        queries.add("   franklin realty tenn");
+        queries.add("   mayo clinic post-laryngectomy questionnaire");
+        queries.add("   north shore mall directory");
+        queries.add("   clark county records");
+        queries.add("   medical savings insurance");
+        queries.add("   national parks passes disabled");
+        queries.add("   lyrics to ridin");
+        queries.add("   channel islands surf shop");
+        queries.add("   small wooden pails");
+        queries.add("   boston area temporary housing");
+        queries.add("   elca baptism records");
+        queries.add("   best western jamaica bay inn");
+        queries.add("   xr 125cc dirt bike");
+        queries.add("   cheap rental cars");
+        queries.add("   monkey super bowl commercial");
+        queries.add("   xxx inside cum shot");
+        queries.add("   old attic porcelain insulators");
+        queries.add("   lyrics by t-pain");
+        queries.add("   ironwood ridge high school");
+        queries.add("   american patriotic bedspread california king");
+        queries.add("   eagles guitar tabs");
+        queries.add("   find out what kind of dog i have");
+        queries.add("   florist in margate florida");
+        queries.add("   chevrolet starter heat shield");
+        queries.add("   nick jr. kids games");
+        queries.add("   adult megaplex video store");
+        queries.add("   suicide made easy");
+        queries.add("   kentucky registry of election finance");
+        queries.add("   it sounds like i have water in my ear");
+        queries.add("   university of kentucky wildcats");
+        queries.add("   naval station everett washington");
+        queries.add("   southwest united comets");
+        queries.add("   is holland house furniture solid wood");
+        queries.add("   hedges nine mile point");
+        queries.add("   wheel dealers jacksonville florida");
+        queries.add("   lyrics for hank williams the 3");
+        queries.add("   map of bahamas");
+        queries.add("   justice league of america");
+        queries.add("   hyundai elantra certified pre-owned");
+        queries.add("   vbulletin status icon");
+        queries.add("   pop a top again");
+        queries.add("   alive and well alcoholism program");
+        queries.add("   city of mount vernon ny");
+        queries.add("   rose napkin rings");
+        queries.add("   mileagers in racine");
+        queries.add("   southern union state community college");
+        queries.add("   saugus massachusetts pet store");
+        queries.add("   fox 4 news");
+        queries.add("   theater development fund");
+        queries.add("   madison high school class of 76");
+        queries.add("   how to film your own music video");
+        queries.add("   can you see results in 5 weeks from exercise");
+        queries.add("   big rivers trailers");
+        queries.add("   american junior golf association");
+        queries.add("   knecht's auto parts");
+        queries.add("   eton 90r 2006");
+        queries.add("   was grand rapids once called paris");
+        queries.add("   tool kill yourself");
+        queries.add("   state employment north carolina");
+        queries.add("   los angeles county jail");
+        queries.add("   docuteam copier homepage");
+        queries.add("   women's cycling tops");
+        queries.add("   garlic sauce for fish");
+        queries.add("   west one auto");
+        queries.add("   california beachside suite");
+        queries.add("   division 2 soccer schools in florida");
+        queries.add("   cargo aircraft only for aerosols flammable");
+        queries.add("   how to remove door panel from a honda civic");
+        queries.add("   convert to pdf");
+        queries.add("   rio tinto minerals");
+        queries.add("   what american idol is singing tonight");
+        queries.add("   dianne feinstein email address");
+        queries.add("   jack plates for boats");
+        queries.add("   dom perignon champagne");
+        queries.add("   toronto sport teams mlb");
+        queries.add("   drew vincent potter");
+        queries.add("   dissection kit in wal-mart");
+        queries.add("   paul maguire chevrolet");
+        queries.add("   hobby freight tools");
+        queries.add("   four wheeler racing");
+        queries.add("   adam plus eve");
+        queries.add("   18 pillow inserts");
+        queries.add("   dayton daily new");
+        queries.add("   event scoring now");
+        queries.add("   topless crystal bernard");
+        queries.add("   sloths mystery dinner show orlando");
+        queries.add("   eagle peak mining co.");
+        queries.add("   lodging in mt. pleasant michigan");
+        queries.add("   how to use a malco circle cutter");
+        queries.add("   raymond weil watch");
+        queries.add("   how to play roulette");
+        queries.add("   alternative medicine atenolol");
+        queries.add("   tico times costa rica newspaper");
+        queries.add("   westgate myrtle beach");
+        queries.add("   i can let go now michael mcdonald lyrics");
+        queries.add("   help your child learn times tables");
+        queries.add("   reupholstering a vintage carved wood sofa");
+        queries.add("   cheap things for sale");
+        queries.add("   at home america");
+        queries.add("   homemade detergent for clothes");
+        queries.add("   photos of white lighters on charmed");
+        queries.add("   guy hitting his football helmet");
+        queries.add("   flsa versus collective bargaining agreements");
+        queries.add("   italian prepaid cell phones");
+        queries.add("   baseball bus trips from syracuse ny");
+        queries.add("   ny wedding planners");
+        queries.add("   sears and roebuck");
+        queries.add("   true religion jeans");
+        queries.add("   kentucky fried chicken restaurants");
+        queries.add("   what is botox");
+        queries.add("   alpine design sandal for sale");
+        queries.add("   tacoma wa greyhound bus station fare and schedule");
+        queries.add("   find a song you don't know the name of");
+        queries.add("   hector of troy");
+        queries.add("   vanguard realty orange park florida");
+        queries.add("   storage at your site in chesapeake va");
+        queries.add("   limericks about spring");
+        queries.add("   sell my eggs for money");
+        queries.add("   munster indiana apartments");
+        queries.add("   soldier roc army");
+        queries.add("   the fauquier bank");
+        queries.add("   used golf clubs");
+        queries.add("   vein clinics of america");
+        queries.add("   crime addicting games");
+        queries.add("   how do you tie-dye");
+        queries.add("   martin rv rental");
+        queries.add("   pioneer soccer referees chapter");
+        queries.add("   ashlee simpson giving it all away");
+        queries.add("   myspace black and white square backgrounds");
+        queries.add("   iowa acupuncture clinic");
+        queries.add("   after dark salon");
+        queries.add("   flying attendant school");
+        queries.add("   best color for my hair");
+        queries.add("   carville hotel south carolina");
+        queries.add("   teaching hospital affiliations");
+        queries.add("   the thomas point light");
+        queries.add("   yen to dollars");
+        queries.add("   world language translation");
+        queries.add("   heroes of the pacific");
+        queries.add("   pete wentz green shirt");
+        queries.add("   networking contact calling cards");
+        queries.add("   cabela's trail tuff cover");
+        queries.add("   personalized baby clothes");
+        queries.add("   traditional irish music");
+        queries.add("   shanghai spring aviation travel news");
+        queries.add("   how do i use a portable hard drive");
+        queries.add("   a fire in dover nj");
+        queries.add("   mustangs for sale in northfield center oh");
+        queries.add("   camping on the florida coast");
+        queries.add("   2005 money purchase maximum contribution");
+        queries.add("   crabtree's on jericho turnpike");
+        queries.add("   san gabriel paranormal bittle");
+        queries.add("   carpet tiles residential");
+        queries.add("   north american lobster restaurant");
+        queries.add("   cheap paintball guns part");
+        queries.add("   first time homeowners grant");
+        queries.add("   dat truck finder");
+        queries.add("   bay village florist");
+        queries.add("   shows tonight on channel e");
+        queries.add("   good morning new york");
+        queries.add("   amelia virginia genealogy");
+        queries.add("   west bend little league");
+        queries.add("   patchington store locations");
+        queries.add("   9news tips for gardening");
+        queries.add("   journalism regarding darfur and pulitzer prize");
+        queries.add("   crescent heights building los angeles in 1966");
+        queries.add("   symptoms of pregnancy");
+        queries.add("   kurt cobain death");
+        queries.add("   delete a screen name");
+        queries.add("   pistachio nuts and health");
+        queries.add("   cocinas de new mexico");
+        queries.add("   mulch and your house foundation");
+        queries.add("   time capsule 11974");
+        queries.add("   rival crock-pot replacement parts");
+        queries.add("   elizabeth sappington from ireland");
+        queries.add("   fuschia california species");
+        queries.add("   timberline ski resort and west virginia");
+        queries.add("   franklin county in");
+        queries.add("   erie county surrogate's court");
+        queries.add("   making products at home");
+        queries.add("   grayson county texas");
+        queries.add("   mercury insurance company");
+        queries.add("   group x flash johnny");
+        queries.add("   giaimo real estate");
+        queries.add("   nine west shoes");
+        queries.add("   elite gym & fitness of longview tx");
+        queries.add("   louisiana credit card laws on suing");
+        queries.add("   long beach island nj");
+        queries.add("   point pleasant realtor");
+        queries.add("   morgan horses for sale");
+        queries.add("   texas state university");
+        queries.add("   ranch community center");
+        queries.add("   cbs rock star");
+        queries.add("   alzheimer's treatment facilities in schuylkill county pennsylvania");
+        queries.add("   oregon state games");
+        queries.add("   st. paul's nh concord summer session 2007");
+        queries.add("   topical phenergan gel for morning sickness");
+        queries.add("   crossgates golf course");
+        queries.add("   fallen skateboard shoes");
+        queries.add("   boy meets world");
+        queries.add("   queens of the stone age");
+        queries.add("   mad about you soundtrack");
+        queries.add("   social security card replacement");
+        queries.add("   private bus company in montego bay");
+        queries.add("   pickles and ice cream maternity");
+        queries.add("   nataani coming soon");
+        queries.add("   does deodorant cause breast cancer");
+        queries.add("   jeep swenson bane");
+        queries.add("   jack nicklaus secrets to golf article in golf magazine");
+        queries.add("   boston warehouse trading company");
+        queries.add("   let you just fall on me song");
+        queries.add("   driving school on steinway");
+        queries.add("   salt water and metal");
+        queries.add("   cedar city utah");
+        queries.add("   car audio install");
+        queries.add("   coby mp3 128mb memory");
+        queries.add("   christine rosamond art");
+        queries.add("   generic drug list");
+        queries.add("   morgan motor cars usa");
+        queries.add("   aol at school");
+        queries.add("   traffic on i-4");
+        queries.add("   wwii veterans search");
+        queries.add("   chicago ridgemoor chapel");
+        queries.add("   wrought iron table");
+        queries.add("   modutec bl-100-102 voltmeter connections");
+        queries.add("   hidalgo students killed in car accident");
+        queries.add("   new college sarasota florida");
+        queries.add("   fall of berlin wall");
+        queries.add("   orlando florida time");
+        queries.add("   video poker accessories for gifts");
+        queries.add("   frangipani how to grow and types");
+        queries.add("   state of florida");
+        queries.add("   rungo dance academy");
+        queries.add("   left handed scholarships");
+        queries.add("   green glass base lamp");
+        queries.add("   monrovia city council");
+        queries.add("   rabbi mordechai gafni");
+        queries.add("   history of madrid spain");
+        queries.add("   insurance for homes");
+        queries.add("   mclaughlin school of irish dance");
+        queries.add("   how to grow wisteria seed");
+        queries.add("   always and forever lyrics");
+        queries.add("   myocet taxotere side effect");
+        queries.add("   marriages wichita falls tx");
+        queries.add("   united kingdom postal codes");
+        queries.add("   contractors in eugene oregon");
+        queries.add("   homeschooling pros and cons");
+        queries.add("   chopper motorcycles for sale");
+        queries.add("   best western corbin ky");
+        queries.add("   january 21 1981");
+        queries.add("   men's white mesh panel jeans");
+        queries.add("   golf myrtle beach sc");
+        queries.add("   wells fargo bank in green bay wi");
+        queries.add("   heritage hilton head");
+        queries.add("   what led to the space race");
+        queries.add("   spanish iraq troop withdrawal");
+        queries.add("   homemade ice cream in a bag");
+        queries.add("   westchester real estate");
+        queries.add("   favorite cat names");
+        queries.add("   max and laurie clip art");
+        queries.add("   six flags rides");
+        queries.add("   eagles henley walsh discography");
+        queries.add("   the search movie");
+        queries.add("   how to create layout on myspace");
+        queries.add("   chan portrayer nais");
+        queries.add("   nys business law section 1503");
+        queries.add("   secrets capri cancun photos");
+        queries.add("   laporte indiana light store");
+        queries.add("   chase reward points");
+        queries.add("   boxers or bikini");
+        queries.add("   silica fibers that reacts to heat and oxygen");
+        queries.add("   hip hop cartoons");
+        queries.add("   animal cruelty elephant ivory");
+        queries.add("   japan asia airways cargo tracking");
+        queries.add("   bethesda row movie theatre");
+        queries.add("   chloe paddington bag");
+        queries.add("   motor vehicle licensing bureau mississippi");
+        queries.add("   obituary to a father");
+        queries.add("   chihuahua in honolulu");
+        queries.add("   hotels near mont saint-michel");
+        queries.add("   commercial driver's license centers in minnesota");
+        queries.add("   needle removal of lung edema");
+        queries.add("   dance dance im");
+        queries.add("   elliott's pet emporium");
+        queries.add("   can loan officers also be real estate agents");
+        queries.add("   mississippi burn bans");
+        queries.add("   forged by fire");
+        queries.add("   mustang ford 2006 racing stripes");
+        queries.add("   new boston pilot rhinos");
+        queries.add("   one night cruises");
+        queries.add("   suffolk county cornell");
+        queries.add("   ct dept. of labor");
+        queries.add("   compound pharmacies in palm beach county");
+        queries.add("   lyrica and weight gain");
+        queries.add("   conrad muhammad split with nation of islam");
+        queries.add("   direct flight from lax to boston");
+        queries.add("   district of columbia liquor license");
+        queries.add("   kat and american idol");
+        queries.add("   revere ware factory outlet store");
+        queries.add("   property to build a home in il");
+        queries.add("   trotwood-madison high school");
+        queries.add("   gold maker midas");
+        queries.add("   cheap air travel");
+        queries.add("   whitestrips by crest");
+        queries.add("   kings park high school");
+        queries.add("   bel air movie theater");
+        queries.add("   stonehedge adult mobile home park tarpon springs");
+        queries.add("   c. w. clarke in gloucester city");
+        queries.add("   aol keyword safety rom");
+        queries.add("   ocean sea hotel miami");
+        queries.add("   hinder guitar chords");
+        queries.add("   decorative dresser knobs");
+        queries.add("   love is a wonderful thing lyrics");
+        queries.add("   the wiggle ben murray");
+        queries.add("   home auctions kit");
+        queries.add("   parenting skills workshops for older adults in philadelphia");
+        queries.add("   kansas city used trampoline");
+        queries.add("   immigration york pa");
+        queries.add("   cheerleader nation on lifetime");
+        queries.add("   nyc justice of the peace");
+        queries.add("   computer aided design");
+        queries.add("   pa dept. of revenue");
+        queries.add("   montgomery county sheriff foreclosures");
+        queries.add("   kansas and city and missouri");
+        queries.add("   movie trailer voice");
+        queries.add("   grocery warehouses in la county ca");
+        queries.add("   whiskeytown recreation area");
+        queries.add("   fayetteville nc directory car wash");
+        queries.add("   prayers for eternal life susan tassone");
+        queries.add("   van halen best of both worlds video");
+        queries.add("   sovereign bank arena nj");
+        queries.add("   i was hungry and you fed me");
+        queries.add("   hopedale ohio real estate for sale");
+        queries.add("   what is the population count of america in 1957");
+        queries.add("   white pages ely minnesota");
+        queries.add("   ap chemistry multiple choice answers");
+        queries.add("   pensacola singles club");
+        queries.add("   kane to return with mask");
+        queries.add("   elayne james salon");
+        queries.add("   thirty three lyrics");
+        queries.add("   awnings for your home");
+        queries.add("   large decorative house plaques");
+        queries.add("   white mountain express transportation arizona");
+        queries.add("   battlefield vietnam update");
+        queries.add("   re/max realtor residential property louisville kentucky 40222");
+        queries.add("   new paltz high school");
+        queries.add("   tooth and nail alternative stage");
+        queries.add("   p. c. richard and son");
+        queries.add("   re/max listings in chambersburg pa");
+        queries.add("   nick left zappos");
+        queries.add("   new york city doc");
+        queries.add("   pressure behind eyeballs");
+        queries.add("   bonsai waterfalls outhouses");
+        queries.add("   wic in florida");
+        queries.add("   how to levitate");
+        queries.add("   rawlings logo and t-shirt");
+        queries.add("   lamar bickers east orange high school");
+        queries.add("   locate buddy on aol account");
+        queries.add("   adairsville georgia country western");
+        queries.add("   national truck seats");
+        queries.add("   la verde nursery");
+        queries.add("   leave love bleeding in my hands");
+        queries.add("   build a dinosaur");
+        queries.add("   helping a narcissist");
+        queries.add("   tomay bhalobashi songs");
+        queries.add("   american express preferred");
+        queries.add("   autauga county football");
+        queries.add("   death metal vocals how to");
+        queries.add("   kid games to play on the computer right now");
+        queries.add("   fighter aces korean war");
+        queries.add("   where is lugia");
+        queries.add("   annual trade deficit percentages");
+        queries.add("   apartments for rent in venice fl");
+        queries.add("   century 21 realtors in franklin county va");
+        queries.add("   safety training videos");
+        queries.add("   massapequa train parking permits");
+        queries.add("   cross lutheran michigan church");
+        queries.add("   savoir vivres dishes");
+        queries.add("   rt 106 racepark");
+        queries.add("   top names for ferrets");
+        queries.add("   duncans gun casts");
+        queries.add("   qwerty style keyboard");
+        queries.add("   zazzaro vs maier");
+        queries.add("   chaise outdoor all weather cushions");
+        queries.add("   hawaii rock climbing");
+        queries.add("   california dreaming lyrics");
+        queries.add("   lowry genealogy forum");
+        queries.add("   similarities between pluto and kbos");
+        queries.add("   harvard law school website");
+        queries.add("   forest hills memorial gardens cemetery");
+        queries.add("   minimum sewer line slope honolulu");
+        queries.add("   jon b. they don't know");
+        queries.add("   bratz instant messenger");
+        queries.add("   mary pompano west palm beach fl");
+        queries.add("   shrewsbury credit union");
+        queries.add("   portland autism conference march 2006");
+        queries.add("   east sayan siberia");
+        queries.add("   adult computer adventure games");
+        queries.add("   new york film academy");
+        queries.add("   crct testing scores in covington georgia");
+        queries.add("   northeastern jr./sr. high school");
+        queries.add("   country music stations");
+        queries.add("   streator times press");
+        queries.add("   asl clip art");
+        queries.add("   springfield presbyterian stepping stones");
+        queries.add("   pre-cut lucite sheets");
+        queries.add("   magnolia bakery ny ny");
+        queries.add("   vision perception and learning difficulties");
+        queries.add("   brendon montessori school");
+        queries.add("   homewood art exhibit abiola");
+        queries.add("   split rock quarry explosion 1918");
+        queries.add("   swimming pool chemicals");
+        queries.add("   youth kids swf");
+        queries.add("   abc daytime soaps");
+        queries.add("   ct attorney general's office");
+        queries.add("   long beach ice dogs");
+        queries.add("   punish the deed not the breed");
+        queries.add("   videos march in new york city");
+        queries.add("   hotels saint louis");
+        queries.add("   recipe funeral potatoes");
+        queries.add("   relief from gas");
+        queries.add("   beer before liquor never sicker");
+        queries.add("   north carolina zoo");
+        queries.add("   pontiac torrent interior");
+        queries.add("   ludwig van beethoven");
+        queries.add("   what does imao");
+        queries.add("   tiered plant stand");
+        queries.add("   insouth bank atoka tn");
+        queries.add("   mid-range nursing theorists");
+        queries.add("   pet carriers giant breed");
+        queries.add("   want to see a beagle and poodle mix");
+        queries.add("   knife display case");
+        queries.add("   miami beach real estate");
+        queries.add("   music from noah's arc");
+        queries.add("   indian headdress made of beads craft");
+        queries.add("   contact lens blurring");
+        queries.add("   king bio products applied topically");
+        queries.add("   driving schools in canton ohio");
+        queries.add("   indian river county board of realtors");
+        queries.add("   cheer elite allstars");
+        queries.add("   ravenna municipal court");
+        queries.add("   this is my life by fefe dobson lyrics");
+        queries.add("   meet the press");
+        queries.add("   anjali gives head");
+        queries.add("   congestive heart failure digitalis use");
+        queries.add("   my dad is hulk hogan");
+        queries.add("   colorado driving instructors");
+        queries.add("   verizon high speed");
+        queries.add("   valparaiso chile map");
+        queries.add("   graco baby products");
+        queries.add("   edward lankow real estate");
+        queries.add("   washington dc male strippers");
+        queries.add("   continental kennel club");
+        queries.add("   starved rock lodge utica il");
+        queries.add("   subwoofer enclosures for toyota tacomas");
+        queries.add("   red lense sunglasses");
+        queries.add("   clubs in san diego");
+        queries.add("   picture of la ciudadela in navarra wall");
+        queries.add("   tropical plant ideas for filling outdoor terra cotta pots");
+        queries.add("   wide complex arrhythmia");
+        queries.add("   maxim nursing florida");
+        queries.add("   malibu high school");
+        queries.add("   where did trimingham come from");
+        queries.add("   new gas mopeds");
+        queries.add("   arizona department of real estate");
+        queries.add("   rr-us350 ic panasonic");
+        queries.add("   fishing guides on kentucky lake");
+        queries.add("   big sisters of nc");
+        queries.add("   the truth about lending");
+        queries.add("   haircuts for females with long hair");
+        queries.add("   infrared digital cameras");
+        queries.add("   bob sharp automotive");
+        queries.add("   mosaic table 84 round");
+        queries.add("   new world editor");
+        queries.add("   air filter 24x24x1");
+        queries.add("   spin master sesame street sofa");
+        queries.add("   bank teller duties");
+        queries.add("   adecco employment services");
+        queries.add("   got jakrapun arbkornburi");
+        queries.add("   mohican park ohio");
+        queries.add("   sherry fischer nj");
+        queries.add("   committee to elect gerry leone");
+        queries.add("   protein in blood is there a problem");
+        queries.add("   road rippers rescue truck 34551");
+        queries.add("   house of ruth");
+        queries.add("   college scholarships for smart black males");
+        queries.add("   mount st. augustine");
+        queries.add("   warez microsoft word");
+        queries.add("   bausch and lomb");
+        queries.add("   clark county nv");
+        queries.add("   texas state board of cosmetology");
+        queries.add("   metroid hunters walkthrough");
+        queries.add("   black culture recipes for cod fish cakes");
+        queries.add("   travel host magazine");
+        queries.add("   cosco alpha omega elite car seat");
+        queries.add("   allied van lines");
+        queries.add("   motley crue shirts");
+        queries.add("   city of new bedford");
+        queries.add("   st. george high school washington");
+        queries.add("   bad credit dental financing");
+        queries.add("   three tier server");
+        queries.add("   things for kids to do in buenos aires");
+        queries.add("   government grants and personal use");
+        queries.add("   movie theater palladium");
+        queries.add("   edit my profile");
+        queries.add("   jack roush worth");
+        queries.add("   50 inch waist cat");
+        queries.add("   dr. waters debugger mortification");
+        queries.add("   english to spanish dictionary");
+        queries.add("   women of the navajos");
+        queries.add("   healing time of groin pull");
+        queries.add("   ovfl football ohio");
+        queries.add("   united states aerial photo");
+        queries.add("   famous california women");
+        queries.add("   fire department maltese cross");
+        queries.add("   how to get a gruen watch fixed");
+        queries.add("   mario's beachwood ohio");
+        queries.add("   andrea jovine daisy");
+        queries.add("   pools in arizona");
+        queries.add("   address of easterns auto sales temple hills md");
+        queries.add("   christina milian lyrics");
+        queries.add("   blockbuster employment millville nj");
+        queries.add("   commonwealth of virginia official website");
+        queries.add("   wage withholding affidavit texas");
+        queries.add("   polaris atv accessories");
+        queries.add("   children's boxing gloves");
+        queries.add("   northern star financial inc.");
+        queries.add("   what is this chunk of metal");
+        queries.add("   darla lester paden ok");
+        queries.add("   get a home mortgage with bad credit");
+        queries.add("   model t ford parts");
+        queries.add("   hub insurance cdl");
+        queries.add("   death records in pueblo colorado");
+        queries.add("   donald beemer homes");
+        queries.add("   names for rats psychology");
+        queries.add("   state wildflower coreopsis");
+        queries.add("   heat rash in children");
+        queries.add("   astrophel and stella by philip sidney book");
+        queries.add("   customer service phone number");
+        queries.add("   how much weight is lost on a 1200 calorie diet");
+        queries.add("   pet blooming virginia");
+        queries.add("   codes for cute layouts for myspace");
+        queries.add("   loan broker courses on dvd");
+        queries.add("   animal spirit guides");
+        queries.add("   nicolas cage wife");
+        queries.add("   venice municipal beach florida");
+        queries.add("   how to say i am sorry");
+        queries.add("   orlando police officer photos");
+        queries.add("   mccrea mary ellen nj");
+        queries.add("   failure to thrive");
+        queries.add("   el paso times");
+        queries.add("   spacing rite aid ra class 4 full 4q maine servermode");
+        queries.add("   agriculture in ohio");
+        queries.add("   bamboo steamer recipe");
+        queries.add("   marine forecast for charlotte harbor punta gorda fl");
+        queries.add("   stillwater and criminals");
+        queries.add("   leather tooling motorcycle seats");
+        queries.add("   mackinaw city mi");
+        queries.add("   surgical removal of the thymus");
+        queries.add("   indiana primary election 2006");
+        queries.add("   the poseidon 1972");
+        queries.add("   information about conservation camps in poe valley state park");
+        queries.add("   blue cross blue shield of tn");
+        queries.add("   roosevelt los angeles");
+        queries.add("   ayso region 275");
+        queries.add("   twisted transistor lyrics");
+        queries.add("   illustrations of the monitor");
+        queries.add("   aol kw rate limit");
+        queries.add("   museum of science");
+        queries.add("   econo lodge airport phoenix az");
+        queries.add("   north carolina standard course of study");
+        queries.add("   anaheim vagabond inn executive");
+        queries.add("   harvard community credit union");
+        queries.add("   cathedral basilica of the assumption");
+        queries.add("   the dog whisperer");
+        queries.add("   christian home organization");
+        queries.add("   effects of pneumoperitoneum");
+        queries.add("   geri halliwell classic it's raining");
+        queries.add("   dj bomb squad");
+        queries.add("   team illinois hockey");
+        queries.add("   behavioural health services of arizona");
+        queries.add("   dialysis patients with alcohol");
+        queries.add("   how to tell if someone is addicted to steroids");
+        queries.add("   rental homes san antonio");
+        queries.add("   i would like to climate noise from my steam radiator");
+        queries.add("   ask the head");
+        queries.add("   do people shrink");
+        queries.add("   japanese green beans seed");
+        queries.add("   naruto episode guide");
+        queries.add("   florida track and field results");
+        queries.add("   all buick cars from 2003 to 2006");
+        queries.add("   ancient india map");
+        queries.add("   kansas city and ford and escape hybrid");
+        queries.add("   abdominal x-ray sperm");
+        queries.add("   rose gold jewelry");
+        queries.add("   kids having fight matches");
+        queries.add("   astoria federal bank");
+        queries.add("   chantilly youth baseball");
+        queries.add("   bocelli pasta products");
+        queries.add("   report loss discover credit card");
+        queries.add("   hedy lamarr paper dolls");
+        queries.add("   passright for the railroad");
+        queries.add("   century 21 laurens sc");
+        queries.add("   english taught schools in granada");
+        queries.add("   long beach cruise ships california");
+        queries.add("   planting grass seed mixture with peat moss");
+        queries.add("   national audubon society");
+        queries.add("   toyota corolla 2006");
+        queries.add("   alexis y fido lyrics");
+        queries.add("   rebuilt engines florida broward");
+        queries.add("   dunedin brewing company");
+        queries.add("   pine ridge raleigh");
+        queries.add("   junaluska cherokee indian");
+        queries.add("   nutrena horse feed");
+        queries.add("   antique trade show list");
+        queries.add("   what did huygens discovered about the universe");
+        queries.add("   mystery case files prime suspect");
+        queries.add("   blackriver electric cooperative");
+        queries.add("   great wolf lodge poconos pa");
+        queries.add("   college teacher salaries");
+        queries.add("   pruning fruit trees");
+        queries.add("   glitter comments for friends on myspace");
         return queries;
-    }
-
-    public static void main(String[] args) {
-
-        MassivFedRecQueryTest m = new MassivFedRecQueryTest(
-                "http://eexcess-demo.know-center.tugraz.at/eexcess-federated-recommender-web-service-1.0-SNAPSHOT/recommender/recommend");
-        try {
-            m.submitQueryToFedRec("test");
-        } catch (SAXNotRecognizedException e) {
-            LOGGER.log(Level.INFO, "Could not send warming query to federated recommender", e);
-        }
-        Integer simThreads = 10;
-        Integer threadTimeout = 10;
-
-        m.logResult(simThreads, threadTimeout, m.testPartnersWithSimulatnousThreads(simThreads, threadTimeout));
-        simThreads = 30;
-        threadTimeout = 50;
-        m.logResult(simThreads, threadTimeout, m.testPartnersWithSimulatnousThreads(simThreads, threadTimeout));
-        simThreads = 35;
-        threadTimeout = 50;
-        m.logResult(simThreads, threadTimeout, m.testPartnersWithSimulatnousThreads(simThreads, threadTimeout));
-        simThreads = 40;
-        threadTimeout = 50;
-        m.logResult(simThreads, threadTimeout, m.testPartnersWithSimulatnousThreads(simThreads, threadTimeout));
-        simThreads = 50;
-        threadTimeout = 50;
-        m.logResult(simThreads, threadTimeout, m.testPartnersWithSimulatnousThreads(simThreads, threadTimeout));
-        simThreads = 80;
-        threadTimeout = 50;
-        m.logResult(simThreads, threadTimeout, m.testPartnersWithSimulatnousThreads(simThreads, threadTimeout));
-        simThreads = 100;
-        threadTimeout = 50;
-        m.logResult(simThreads, threadTimeout, m.testPartnersWithSimulatnousThreads(simThreads, threadTimeout));
-        simThreads = 150;
-        threadTimeout = 50;
-        m.logResult(simThreads, threadTimeout, m.testPartnersWithSimulatnousThreads(simThreads, threadTimeout));
-    }
-
-    private void logResult(Integer simThreads, Integer threadTimeout, Results results) {
-        LOGGER.log(Level.INFO, "Simultainous Threads: " + simThreads + " Time between calls: " + threadTimeout + " Time to get all results: " + results.getTime() + " Failure: "
-                + results.getFailure());
-    }
-
-    class Results {
-        private long time = 0;
-        private Integer failure = 0;
-
-        public long getTime() {
-            return time;
-        }
-
-        public void setTime(long time) {
-            this.time = time;
-        }
-
-        public Integer getFailure() {
-            return failure;
-        }
-
-        public void setFailure(Integer failure) {
-            this.failure = failure;
-        }
     }
 }
