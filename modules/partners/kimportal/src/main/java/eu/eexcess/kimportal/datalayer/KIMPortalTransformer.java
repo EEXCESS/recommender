@@ -44,6 +44,8 @@ public class KIMPortalTransformer extends Transformer{
 			result.previewImage = result.previewImage.replace("kgapi.bl.ch/edm/", "kgapi.bl.ch/");
 			result.mediaType ="IMAGE";
 		}
+		if (result.mediaType == null || result.mediaType.trim().isEmpty() || result.mediaType.equalsIgnoreCase(EEXCESS_FACETS_VALUE_UNKNOWN))
+			result.mediaType = EEXCESS_MEDIATYPE_TEXT;
 		return result;
 	}
 	

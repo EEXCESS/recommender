@@ -46,6 +46,8 @@ public class MendeleyTransformer extends Transformer implements ITransformer{
 	@Override
 	protected Result postProcessResult(Document orgPartnerResult, Result result, QuerySolution querySol) {
 		result.licence = "https://creativecommons.org/licenses/by/3.0/legalcode";
+		if (result.mediaType == null || result.mediaType.trim().isEmpty() || result.mediaType.equalsIgnoreCase(EEXCESS_FACETS_VALUE_UNKNOWN))
+			result.mediaType = EEXCESS_MEDIATYPE_TEXT;
 		return result;
 	}
 
