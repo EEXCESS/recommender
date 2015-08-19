@@ -172,10 +172,10 @@ public class PartnerBadge implements Serializable {
         return this.getShortTimeStats().lastQueries;
     }
 
-    public void addLastQueries(ResultStats lastQuerie) {
-        this.getShortTimeStats().lastQueries.addLast(lastQuerie);
-        if (this.getShortTimeStats().lastQueries.size() > 50)
-            this.getShortTimeStats().lastQueries.removeFirst();
+    synchronized public void addLastQueries(ResultStats lastQuerie) {
+        this.getShortTimeStats().lastQueries.add(lastQuerie);
+        if (this.getShortTimeStats().lastQueries.size() > 30)
+            this.getShortTimeStats().lastQueries.remove(0);
     }
 
     public String getFavIconURI() {

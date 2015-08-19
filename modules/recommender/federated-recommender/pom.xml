@@ -143,6 +143,12 @@
 			<artifactId>extjwnl</artifactId>
 			<version>1.7.1</version>
 		</dependency>
+	<!-- 	<dependency>
+			<groupId>com.twitter</groupId>
+			<artifactId>cassovary_2.10</artifactId>
+			<version>4.0.0</version>
+		</dependency> -->
+
 	</dependencies>
 </project>
 

@@ -31,10 +31,6 @@ public enum DatabaseQueryStats implements DatabasePreparedQuery {
         getQuery = get;
     }
 
-    private DatabaseQueryStats() {
-
-    }
-
     @Override
     public String getInternName() {
         return internName;

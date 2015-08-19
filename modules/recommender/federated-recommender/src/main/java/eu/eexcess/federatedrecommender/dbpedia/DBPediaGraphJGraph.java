@@ -22,6 +22,10 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 package eu.eexcess.federatedrecommender.dbpedia;
 
+
+import org.jgrapht.graph.SimpleWeightedGraph;
+import org.jgrapht.graph.DefaultEdge;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -34,9 +38,6 @@ import java.util.concurrent.Future;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import org.jgraph.graph.DefaultEdge;
-import org.jgrapht.graph.SimpleWeightedGraph;
-
 import eu.eexcess.dataformats.userprofile.ContextKeyword;
 import eu.eexcess.federatedrecommender.utils.FederatedRecommenderException;
 
@@ -45,54 +46,18 @@ import eu.eexcess.federatedrecommender.utils.FederatedRecommenderException;
  * @author hziak
  *
  */
-public class DbPediaGraph {
+public class DBPediaGraphJGraph implements DBPediaGraphInterface<SimpleWeightedGraph<String,DefaultEdge>> {
 	private static final String DBPEDIAFAILURE = "DBPedia index could not be searched for keyword";
-    private static final Logger logger = Logger.getLogger(DbPediaGraph.class.getName());
+    private static final Logger logger = Logger.getLogger(DBPediaGraphJGraph.class.getName());
 	private DbPediaSolrIndex dbPediaIndex = null; 
     private ExecutorService threadPool;
 	
-	public DbPediaGraph(DbPediaSolrIndex dbPediaSolrIndex) {
+	public DBPediaGraphJGraph(DbPediaSolrIndex dbPediaSolrIndex) {
 		 threadPool = Executors.newFixedThreadPool(10); //TODO: value in the config file
 			this.dbPediaIndex  =dbPediaSolrIndex;
 	}
 	
-	/**
-	 * Builds a new graph of related keywords according to dbPedia - multiple keywords
-	 * @throws FederatedRecommenderException 
-	 * 
-	 */
-	public SimpleWeightedGraph<String,DefaultEdge> getFromKeywords (List<ContextKeyword> profileKeywords, final List<String> keynodes, final int hitsLimit, final int depthLimit) throws FederatedRecommenderException
-	{
-		final  SimpleWeightedGraph<String, DefaultEdge> g = new SimpleWeightedGraph<String, DefaultEdge>(DefaultEdge.class);
-		
-		final List<String> visitedNodes = new ArrayList<String>();
-		Map<String,Future<Void>> futures= new HashMap<String, Future<Void>>();
-		for (final ContextKeyword keyword : profileKeywords) {
-		    Future<Void> future = threadPool.submit(new Callable<Void>() {
-                @Override
-                public Void call() throws Exception {
-                	try {
-        				searchKeyNodes(g, keyword.text, keynodes, visitedNodes, hitsLimit, depthLimit);
-        			} catch (FederatedRecommenderException e) {
-        				logger.log(Level.SEVERE,DBPEDIAFAILURE);
-        				throw new FederatedRecommenderException(DBPEDIAFAILURE, e);
-        			}                        
-                     return null;
-                }
-            });
-            futures.put(keyword.text, future);
-			
-		}
-		for (Entry<String, Future<Void>> entry : futures.entrySet()) {
-		    try {
-                entry.getValue().get();
-            } catch (Exception e) {
-                logger.log(Level.SEVERE, "Failed to the graph for keywords: "+profileKeywords, e);
-            }
-		}
-		return g;
-		
-	}
+	
 	public  void searchKeyNodes(SimpleWeightedGraph<String, DefaultEdge> g, String keyword, List<String> keynodes,List<String> vistedNodes, int hitsLimit, int depthLimit) throws FederatedRecommenderException{
 		List<DbPediaIndexBean> results = null;
 		try {
@@ -170,5 +135,40 @@ public class DbPediaGraph {
         	}
         }
     }
-	
+
+
+	@Override
+	public SimpleWeightedGraph<String, DefaultEdge> getGraphFromKeywords(
+			List<ContextKeyword> profileKeywords, List<String> keynodes,
+			int hitsLimit, int depthLimit) throws FederatedRecommenderException {
+final  SimpleWeightedGraph<String, DefaultEdge> g = new SimpleWeightedGraph<String, DefaultEdge>(DefaultEdge.class);
+		
+		final List<String> visitedNodes = new ArrayList<String>();
+		Map<String,Future<Void>> futures= new HashMap<String, Future<Void>>();
+		for (final ContextKeyword keyword : profileKeywords) {
+		    Future<Void> future = threadPool.submit(new Callable<Void>() {
+                @Override
+                public Void call() throws Exception {
+                	try {
+        				searchKeyNodes(g, keyword.text, keynodes, visitedNodes, hitsLimit, depthLimit);
+        			} catch (FederatedRecommenderException e) {
+        				logger.log(Level.SEVERE,DBPEDIAFAILURE);
+        				throw new FederatedRecommenderException(DBPEDIAFAILURE, e);
+        			}                        
+                     return null;
+                }
+            });
+            futures.put(keyword.text, future);
+			
+		}
+		for (Entry<String, Future<Void>> entry : futures.entrySet()) {
+		    try {
+                entry.getValue().get();
+            } catch (Exception e) {
+                logger.log(Level.SEVERE, "Failed to get the graph for keywords: "+profileKeywords, e);
+            }
+		}
+		return g;
+	}
+
 }

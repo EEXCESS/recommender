@@ -217,6 +217,17 @@ public class FederatedRecommenderService {
     }
 
     @GET
+    @Path("/getPartnerFavIcon")
+    @Produces("image/png")
+    public Response getPartnerFavIcon(@QueryParam("partnerId") String partnerId) throws IOException {
+        byte[] resourceAsStream = null;
+        resourceAsStream = fRC.getPartnerFavIcon(partnerId);
+        if (resourceAsStream != null)
+            return Response.ok(resourceAsStream).build();
+        return Response.serverError().build();
+    }
+
+    @GET
     @Path("/getPreviewImage")
     @Produces("image/png")
     public Response getPreviewImage(@QueryParam("type") String type) throws IOException {

@@ -35,7 +35,6 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
-import java.util.NoSuchElementException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -55,7 +54,7 @@ import eu.eexcess.dataformats.userprofile.SecureUserProfileEvaluation;
  *
  */
 public class EvaluationManager {
-    private static final Logger logger = Logger.getLogger(EvaluationResultLists.class.getName());
+    private static final Logger LOGGER = Logger.getLogger(EvaluationResultLists.class.getName());
     private EvaluationQueries evalQueries = null;
     private boolean cacheWarmed = false;
     private HashMap<Integer, Iterator<SecureUserProfileEvaluation>> userQueryIteratorMap = new HashMap<Integer, Iterator<SecureUserProfileEvaluation>>();
@@ -72,7 +71,7 @@ public class EvaluationManager {
             br = new BufferedReader(new FileReader(evaluationQueriesFile));
             this.evalQueries = gson.fromJson(br, EvaluationQueries.class);
         } catch (FileNotFoundException e) {
-            logger.log(Level.WARNING, "Could not load EvaluationQueriesFile", e);
+            LOGGER.log(Level.WARNING, "Could not load EvaluationQueriesFile", e);
         }
         if (this.evalQueries == null) {
             this.evalQueries = new EvaluationQueries();
@@ -94,7 +93,7 @@ public class EvaluationManager {
 
             query = userQueryIteratorMap.get(id).next();
         } catch (Exception e) {
-            logger.log(Level.WARNING, "No query left", e);
+            LOGGER.log(Level.WARNING, "No query left", e);
         }
         return query;
     }
@@ -106,7 +105,7 @@ public class EvaluationManager {
      *            false if there is a query left else true
      * @return
      */
-    public boolean addQueryResult(Integer uID, EvaluationResultLists result) throws NoSuchElementException {
+    public boolean addQueryResult(Integer uID, EvaluationResultLists result) {
         if (!userResultMap.containsKey(uID)) {
             HashMap<String, EvaluationResultLists> value = new HashMap<>();
             userResultMap.put(uID, value);
@@ -131,9 +130,9 @@ public class EvaluationManager {
                 writer = new FileWriter("userResults" + uID + " " + dateFormat.format(date) + ".json");
                 writer.write(json);
                 writer.close();
-                logger.log(Level.INFO, "Write query log for user " + uID);
+                LOGGER.log(Level.INFO, "Write query log for user " + uID);
             } catch (IOException e) {
-                logger.log(Level.WARNING, "Could not write query log for user " + uID, e);
+                LOGGER.log(Level.WARNING, "Could not write query log for user " + uID, e);
             } finally {
                 userResultMap.remove(uID);
             }
@@ -173,31 +172,13 @@ public class EvaluationManager {
         if (resultSaved)
             queryCache.put(query, evaluationResultLists);
         else {
-            logger.log(Level.INFO, "Query " + query + ". Result not saved, at least one partner returned zero results. Query removed from pool");
+            LOGGER.log(Level.INFO, "Query " + query + ". Result not saved, at least one partner returned zero results. Query removed from pool");
             removeList.add(query);
         }
 
         if (queryCache.size() + removeList.size() == evalQueries.getQueries().size()) {
             cacheWarmed = true;
 
-        }
-    }
-
-    /**
-     * write query file when cache is warmed and all queries that returned zero
-     * results for one of the partners are removed
-     */
-    @SuppressWarnings("unused")
-    private void writeNewQueryFile() {
-        String jsonString = gson.toJson(evalQueries);
-
-        FileWriter writer = null;
-        try {
-            writer = new FileWriter(evaluationQueriesFile);
-            writer.write(jsonString);
-            writer.close();
-        } catch (Exception e) {
-            logger.log(Level.WARNING, "Queries couldn't be written back to queries file:" + evaluationQueriesFile, e);
         }
     }
 
@@ -215,18 +196,17 @@ public class EvaluationManager {
     public EvaluationResultLists getNextResultsForQuery(Integer uID) {
         SecureUserProfile nextQuery = getNextQuery(uID);
         if (cacheWarmed) {
-            if (removeList.size() > 0) {
+            if (!removeList.isEmpty()) {
                 evalQueries.getQueries().removeAll(removeList);
                 removeList.clear();
                 // writeNewQueryFile();
             }
             EvaluationResultLists evaluationResultLists = queryCache.get(nextQuery);
-            if (evaluationResultLists != null)
-                if (evaluationResultLists.results != null)
-                    Collections.shuffle(evaluationResultLists.results);
+            if (evaluationResultLists != null && evaluationResultLists.results != null)
+                Collections.shuffle(evaluationResultLists.results);
             return evaluationResultLists;
         } else
             return null;
     }
 
-};
+}

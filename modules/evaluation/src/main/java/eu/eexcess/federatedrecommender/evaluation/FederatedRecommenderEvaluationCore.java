@@ -48,7 +48,8 @@ import eu.eexcess.dataformats.userprofile.SecureUserProfile;
 import eu.eexcess.dataformats.userprofile.SecureUserProfileEvaluation;
 import eu.eexcess.federatedrecommender.FederatedRecommenderCore;
 import eu.eexcess.federatedrecommender.dataformats.D3GraphDocument;
-import eu.eexcess.federatedrecommender.dbpedia.DbPediaGraph;
+import eu.eexcess.federatedrecommender.dbpedia.DBPediaGraphInterface;
+import eu.eexcess.federatedrecommender.dbpedia.DBPediaGraphJGraph;
 import eu.eexcess.federatedrecommender.dbpedia.DbPediaSolrIndex;
 import eu.eexcess.federatedrecommender.evaluation.evaluation.EvaluationManager;
 import eu.eexcess.federatedrecommender.evaluation.picker.BlockPicker;
@@ -428,16 +429,17 @@ public class FederatedRecommenderEvaluationCore {
      * @return
      * @throws FederatedRecommenderException
      */
-    public D3GraphDocument getGraph(SecureUserProfile userProfile) throws FederatedRecommenderException {
+    @SuppressWarnings("unchecked")//Just using one implementation here, quite sure it works
+	public D3GraphDocument getGraph(SecureUserProfile userProfile) throws FederatedRecommenderException {
 
-        DbPediaGraph dbPediaGraph = new DbPediaGraph(new DbPediaSolrIndex(federatedRecommenderConfiguration));
+        DBPediaGraphInterface dbPediaGraph = new DBPediaGraphJGraph(new DbPediaSolrIndex(federatedRecommenderConfiguration));
         List<String> keynodes = new ArrayList<String>();
         int hitsLimit = federatedRecommenderConfiguration.getGraphHitsLimitPerQuery();
         int depthLimit = federatedRecommenderConfiguration.getGraphQueryDepthLimit();
         SimpleWeightedGraph<String, DefaultEdge> graph = null;
 
         try {
-            graph = dbPediaGraph.getFromKeywords(userProfile.contextKeywords, keynodes, hitsLimit, depthLimit);
+            graph = (SimpleWeightedGraph<String, DefaultEdge>) dbPediaGraph.getGraphFromKeywords(userProfile.contextKeywords, keynodes, hitsLimit, depthLimit);
 
         } catch (Exception e) {
             LOGGER.log(Level.SEVERE, "There was an error while building the graph", e);

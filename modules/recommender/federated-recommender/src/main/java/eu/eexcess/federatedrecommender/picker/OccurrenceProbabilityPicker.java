@@ -53,7 +53,7 @@ import eu.eexcess.federatedrecommender.interfaces.PartnersFederatedRecommendatio
  */
 public class OccurrenceProbabilityPicker extends PartnersFederatedRecommendationsPicker {
 
-    private static final Logger logger = Logger.getLogger(OccurrenceProbabilityPicker.class.getName());
+    private static final Logger LOGGER = Logger.getLogger(OccurrenceProbabilityPicker.class.getName());
 
     public OccurrenceProbabilityPicker() {
         super();
@@ -154,7 +154,7 @@ public class OccurrenceProbabilityPicker extends PartnersFederatedRecommendation
                 resultList.getResults().get(partner).results.remove(0);
 
             } catch (Exception e) {
-                logger.log(Level.INFO, "Picker leaving out " + partner.getSystemId() + ", no results left");
+                LOGGER.log(Level.INFO, "Picker leaving out " + partner.getSystemId() + ", no results left");
                 removeList.add(partner);
             }
         }

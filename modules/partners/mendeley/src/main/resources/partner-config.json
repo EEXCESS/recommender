@@ -8,6 +8,7 @@
    "isTransformedNative": "false",
   "userName": "",
   "password": "",
+  "favIconURI":"https://d3fildg3jlcvty.cloudfront.net/4f8209ead635af1611d51e4f3159812cc355e1ce/graphics/favicon.ico",
   "mappingListTransformationFile":"mapperResultList.xsl",
   "mappingObjectTransformationFile":"mapperObject.xsl",
   "partnerDataRequestsTrace":"false",

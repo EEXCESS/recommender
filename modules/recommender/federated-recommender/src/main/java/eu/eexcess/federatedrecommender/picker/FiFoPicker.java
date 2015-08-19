@@ -66,10 +66,10 @@ public class FiFoPicker extends PartnersFederatedRecommendationsPicker {
                 break;
             for (PartnerBadge partnerBadge : partners) {
                 if (resultList.getResults().get(partnerBadge) != null)
-                    if (resultList.getResults().get(partnerBadge).results.size() == 0) {
+                    if (resultList.getResults().get(partnerBadge).results.isEmpty()) {
                         partnerTmp.add(partnerBadge);
                         break;
-                    } else if (resultList.getResults().get(partnerBadge).results.size() > 0 && result.results.size() < numResults) {
+                    } else if (!resultList.getResults().get(partnerBadge).results.isEmpty() && result.results.size() < numResults) {
                         Result resultToAdd = resultList.getResults().get(partnerBadge).results.get(0);
                         if (resultToAdd == null)
                             break;

@@ -7,6 +7,7 @@
   "detailEndpoint": "http://europeana.eu/api/v2/record/${detailQuery}.json?wskey=${apiKey}",
   "isTransformedNative": "false",
   "apiKey": "",
+  "favIconURI":"http://www.europeana.eu/portal/favicon.ico",
   "mappingListTransformationFile":"mapperResultList.xsl",
   "mappingObjectTransformationFile":"mapperObject.xsl",
   "partnerDataRequestsTrace":"false",
