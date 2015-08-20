@@ -61,7 +61,8 @@ import eu.eexcess.partnerdata.api.ITransformer;
 public class Transformer implements ITransformer {
 
     private static final String EEXCESS_FACETS_VALUE_DEFAULT_LICENCE = "restricted";
-    private static final String EEXCESS_FACETS_VALUE_UNKNOWN = "unknown";
+    protected static final String EEXCESS_FACETS_VALUE_UNKNOWN = "unknown";
+    protected static final String EEXCESS_MEDIATYPE_TEXT = "TEXT";
     protected PartnerConfiguration partnerConfig;
     protected String resultListTransformationFilename;
 
@@ -69,7 +70,6 @@ public class Transformer implements ITransformer {
 
     protected javax.xml.transform.Transformer transformerResultList;
     protected javax.xml.transform.Transformer transformerResultObject;
-    // protected OntModel model;
 
     protected Document transformationResultList;
     protected Document transformationResultObject;

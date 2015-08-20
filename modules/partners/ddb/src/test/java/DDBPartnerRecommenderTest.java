@@ -62,6 +62,19 @@ public class DDBPartnerRecommenderTest {
 
 	}
 
+	@Test
+	public void singleQueryRosa() {
+		ArrayList<String> keywords = new ArrayList<String>();
+		keywords.add("Hexelschneider");
+        ResultList resultList = PartnerRecommenderTestHelper.getRecommendations(DEPLOYMENT_CONTEXT,	
+        		port, 
+        		PartnerRecommenderTestHelper.createParamsForPartnerRecommender(20,keywords ));
+	    
+        assertNotNull(resultList);
+        assertTrue(resultList.results.size() > 0 );
+        assertEquals(20, resultList.results.size());
+
+	}
 	
 	@Test
 	public void detailCall() {
@@ -80,6 +93,8 @@ public class DDBPartnerRecommenderTest {
         assertEquals(2, documentDetails.documentBadges.size());
 
 	}
+	
+	
 	
 	@Test
 	public void detailCallrdfRDFProblem() {
