@@ -25,6 +25,7 @@ package eu.eexcess.federatedrecommender;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.InputStream;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.sql.PreparedStatement;
@@ -103,6 +104,7 @@ public class FederatedRecommenderCore implements ProbeResultChanged {
 
     private FederatedRecommenderCore(FederatedRecommenderConfiguration federatedRecConfiguration) {
         threadPool = Executors.newFixedThreadPool(federatedRecConfiguration.getNumRecommenderThreads());
+
         this.federatedRecConfiguration = federatedRecConfiguration;
         this.recommenderStats = new RecommenderStats();
         instanciateSourceSelectors(this.federatedRecConfiguration);
@@ -222,43 +224,51 @@ public class FederatedRecommenderCore implements ProbeResultChanged {
                 timeout = timeout - (System.currentTimeMillis() - startT);
 
             } catch (TimeoutException e) {
-                entry.getKey().getShortTimeStats().failedRequestCount++;
-                entry.getKey().getShortTimeStats().failedRequestTimeoutCount++;
-                entry.getValue().cancel(true);
-
-                timeout -= System.currentTimeMillis() - startT;
-                String msg = "Waited too long for partner system '" + entry.getKey().getSystemId() + "' to respond " + (federatedRecConfiguration.getPartnersTimeout() - timeout)
-                        + " ms ";
-                ResultList rL = new ResultList();
-                PartnerResponseState responseState = new PartnerResponseState();
-                responseState.errorMessage = msg;
-                responseState.success = false;
-                responseState.systemID = entry.getKey().getSystemId();
-                rL.partnerResponseState.add(responseState);
-                partnersFederatedResults.getResults().put(entry.getKey(), rL);
-                LOGGER.log(Level.WARNING, msg, e);
+                timeout = reportTimeOutOfPartner(partnersFederatedResults, timeout, entry, startT, e);
             } catch (Exception e) {
                 if (entry.getKey() != null) {
                     entry.getKey().getShortTimeStats().failedRequestCount++;
                     entry.getValue().cancel(true);
                     timeout -= System.currentTimeMillis() - startT;
                 }
-                String msg = "Failed to retrieve results from a parter system '" + entry.getKey().getSystemId();
-                PartnerResponseState responseState = new PartnerResponseState();
-                responseState.errorMessage = msg;
-                responseState.success = false;
-                responseState.systemID = entry.getKey().getSystemId();
-                ResultList rL = new ResultList();
-                rL.partnerResponseState.add(responseState);
-                LOGGER.log(Level.SEVERE, msg, e);
+                reportErrorOfPartner(entry, e);
             }
             entry.setValue(null);
 
         }
         long end = System.currentTimeMillis();
         LOGGER.log(Level.INFO, "Federated Recommender took " + (end - start) + "ms for query '" + secureUserProfile.contextKeywords + "'");
-
         return partnersFederatedResults;
+    }
+
+    private void reportErrorOfPartner(Entry<PartnerBadge, Future<ResultList>> entry, Exception e) {
+        String msg = "Failed to retrieve results from a parter system '" + entry.getKey().getSystemId();
+        PartnerResponseState responseState = new PartnerResponseState();
+        responseState.errorMessage = msg;
+        responseState.success = false;
+        responseState.systemID = entry.getKey().getSystemId();
+        ResultList rL = new ResultList();
+        rL.partnerResponseState.add(responseState);
+        LOGGER.log(Level.SEVERE, msg, e);
+    }
+
+    private long reportTimeOutOfPartner(final PartnersFederatedRecommendations partnersFederatedResults, long timeout, Entry<PartnerBadge, Future<ResultList>> entry, long startT,
+            TimeoutException e) {
+        entry.getKey().getShortTimeStats().failedRequestCount++;
+        entry.getKey().getShortTimeStats().failedRequestTimeoutCount++;
+        entry.getValue().cancel(true);
+
+        timeout -= System.currentTimeMillis() - startT;
+        String msg = "Waited too long for partner system '" + entry.getKey().getSystemId() + "' to respond " + (federatedRecConfiguration.getPartnersTimeout() - timeout) + " ms ";
+        ResultList rL = new ResultList();
+        PartnerResponseState responseState = new PartnerResponseState();
+        responseState.errorMessage = msg;
+        responseState.success = false;
+        responseState.systemID = entry.getKey().getSystemId();
+        rL.partnerResponseState.add(responseState);
+        partnersFederatedResults.getResults().put(entry.getKey(), rL);
+        LOGGER.log(Level.WARNING, msg, e);
+        return timeout;
     }
 
     /**
@@ -815,6 +825,17 @@ public class FederatedRecommenderCore implements ProbeResultChanged {
             throw e;
         }
         return resultList;
+    }
+
+    /**
+     * Returns the partner favIcon as input stream out of the favIcon cache
+     * 
+     * @param partnerId
+     * @return {@link InputStream}
+     */
+    public byte[] getPartnerFavIcon(String partnerId) {
+        LOGGER.log(Level.INFO, "Trying to get FavIcon for partner " + partnerId);
+        return partnerRegister.getFavIconCache().get(partnerId);
     }
 
 }

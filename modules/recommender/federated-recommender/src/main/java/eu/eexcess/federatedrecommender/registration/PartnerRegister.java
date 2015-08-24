@@ -22,15 +22,22 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 package eu.eexcess.federatedrecommender.registration;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 
+import org.apache.commons.io.IOUtils;
+
 import com.sun.jersey.api.client.Client;
+import com.sun.jersey.api.client.WebResource;
 import com.sun.jersey.api.client.config.DefaultClientConfig;
 
 import eu.eexcess.dataformats.PartnerBadge;
@@ -43,10 +50,11 @@ import eu.eexcess.dataformats.PartnerBadge;
  */
 @XmlRootElement(name = "eexcess-registered-partners")
 public class PartnerRegister {
-
+    private static final Logger LOGGER = Logger.getLogger(PartnerRegister.class.getName());
     @XmlElement(name = "partners")
     private List<PartnerBadge> partners = new ArrayList<PartnerBadge>();
     private Map<String, Client> partnerToClient = new HashMap<String, Client>();
+    private Map<String, byte[]> favIconCache = new HashMap<String, byte[]>();
 
     public List<PartnerBadge> getPartners() {
         synchronized (partners) {
@@ -57,6 +65,7 @@ public class PartnerRegister {
 
     public void addPartner(PartnerBadge badge) {
         synchronized (partners) {
+            checkAndFetchFavIcon(badge);
             partners.add(badge);
             DefaultClientConfig config = new DefaultClientConfig();
             Client client = Client.create(config); // new Client(null, config);
@@ -64,15 +73,49 @@ public class PartnerRegister {
         }
     }
 
+    /**
+     * Checks if the favicon url is avaiable and it was allready fetched before
+     * 
+     * @param badge
+     */
+
+    private void checkAndFetchFavIcon(PartnerBadge badge) {
+        if (badge.getFavIconURI() != null && favIconCache.get(badge.getFavIconURI()) == null) {
+            DefaultClientConfig config = new DefaultClientConfig();
+            Client favClient = Client.create(config);
+            WebResource resource = favClient.resource(badge.getFavIconURI());
+            InputStream favIconInputStream = resource.get(InputStream.class);
+
+            try {
+                favIconCache.put(badge.getSystemId(), IOUtils.toByteArray(favIconInputStream));
+                favIconInputStream.close();
+
+            } catch (IOException e) {
+                LOGGER.log(Level.INFO, "could not retrieve favicon from partner", e);
+            }
+        }
+    }
+
     public synchronized void removePartner(PartnerBadge badge) {
         synchronized (partners) {
             partners.remove(badge);
+            favIconCache.remove(badge.getSystemId());
         }
     }
 
     public synchronized Client getClient(String systemID) {
         return partnerToClient.get(systemID);
 
+    }
+
+    /**
+     * returns the favIconChache that hold the inputStream of the partners
+     * favIcons
+     * 
+     * @return
+     */
+    public Map<String, byte[]> getFavIconCache() {
+        return favIconCache;
     }
 
 }

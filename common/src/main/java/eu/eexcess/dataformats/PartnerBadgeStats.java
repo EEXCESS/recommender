@@ -18,8 +18,9 @@ package eu.eexcess.dataformats;
 
 import java.io.Serializable;
 import java.util.ArrayDeque;
+import java.util.ArrayList;
 import java.util.Deque;
-import java.util.LinkedList;
+import java.util.List;
 
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlTransient;
@@ -33,25 +34,25 @@ import eu.eexcess.dataformats.result.ResultStats;
 @JsonSerialize(include = JsonSerialize.Inclusion.NON_NULL)
 public class PartnerBadgeStats implements Serializable {
 
-    private static final long      serialVersionUID          = -227986625685031717L;
+    private static final long serialVersionUID = -227986625685031717L;
 
     @XmlElement(name = "requestCount")
-    public Integer                 requestCount              = 0;
+    public Integer requestCount = 0;
 
     @XmlElement(name = "failedRequestCount")
-    public Integer                 failedRequestCount        = 0;
+    public Integer failedRequestCount = 0;
 
     @XmlElement(name = "failedRequestTimeoutCount")
-    public Integer                 failedRequestTimeoutCount = 0;
+    public Integer failedRequestTimeoutCount = 0;
 
     @XmlElement(name = "lastQueries")
-    public LinkedList<ResultStats> lastQueries               = new LinkedList<ResultStats>();
+    public List<ResultStats> lastQueries = new ArrayList<ResultStats>();
 
     // Begin response time
     @XmlTransient
-    public Deque<Long>             lastResponseTimes         = new ArrayDeque<Long>();
+    public Deque<Long> lastResponseTimes = new ArrayDeque<Long>();
     @XmlElement(name = "shortTimeResponseTimes")
-    public Long                    shortTimeResponseTime;
+    public Long shortTimeResponseTime;
 
     @Override
     public int hashCode() {
@@ -110,9 +111,8 @@ public class PartnerBadgeStats implements Serializable {
 
     @Override
     public String toString() {
-        return "PartnerBadgeStats [requestCount=" + requestCount + ", failedRequestCount=" + failedRequestCount + ", failedRequestTimeoutCount="
-                + failedRequestTimeoutCount + ", lastQueries=" + lastQueries + ", lastResponseTimes=" + lastResponseTimes + ", shortTimeResponseTime="
-                + shortTimeResponseTime + "]";
+        return "PartnerBadgeStats [requestCount=" + requestCount + ", failedRequestCount=" + failedRequestCount + ", failedRequestTimeoutCount=" + failedRequestTimeoutCount
+                + ", lastQueries=" + lastQueries + ", lastResponseTimes=" + lastResponseTimes + ", shortTimeResponseTime=" + shortTimeResponseTime + "]";
     }
 
     // End response time

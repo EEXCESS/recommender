@@ -1,6 +1,6 @@
 	{
   "systemId": "Opensearch",
- 
+   "favIconURI":"https://de.wikipedia.org/static/favicon/wikipedia.ico",
   "queryGeneratorClass": "eu.eexcess.opensearch.querygenerator.OpensearchQueryGenerator",
   "partnerConnectorClass": "eu.eexcess.opensearch.recommender.PartnerConnector",
   "isTransformedNative": "true",

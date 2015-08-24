@@ -129,7 +129,6 @@ public class DBPediaDecomposerEvaluation {
                     keywordsGroupBuilder.append(contextKeyword.text + " ");
                 }
                 LOGGER.log(Level.INFO, keywordsGroupBuilder.toString());
-
             }
             
         }
