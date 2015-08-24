@@ -36,8 +36,10 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.apache.commons.lang.SerializationUtils;
-import org.jgraph.graph.DefaultEdge;
+
+import org.jgrapht.graph.DefaultEdge;
 import org.jgrapht.graph.SimpleWeightedGraph;
+
 
 import eu.eexcess.config.FederatedRecommenderConfiguration;
 import eu.eexcess.dataformats.PartnerBadge;
@@ -425,7 +427,7 @@ public class FederatedRecommenderEvaluationCore {
     /**
      * returns a graph as object to convert to json for d3
      * 
-     * @param userProfile
+     * @param userProfileDefaultEdge
      * @return
      * @throws FederatedRecommenderException
      */
@@ -436,7 +438,7 @@ public class FederatedRecommenderEvaluationCore {
         List<String> keynodes = new ArrayList<String>();
         int hitsLimit = federatedRecommenderConfiguration.getGraphHitsLimitPerQuery();
         int depthLimit = federatedRecommenderConfiguration.getGraphQueryDepthLimit();
-        SimpleWeightedGraph<String, DefaultEdge> graph = null;
+        SimpleWeightedGraph<String, DefaultEdge> graph = new SimpleWeightedGraph<String, DefaultEdge>(DefaultEdge.class);
 
         try {
             graph = (SimpleWeightedGraph<String, DefaultEdge>) dbPediaGraph.getGraphFromKeywords(userProfile.contextKeywords, keynodes, hitsLimit, depthLimit);

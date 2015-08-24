@@ -29,8 +29,9 @@ import java.util.List;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlElementWrapper;
 
-import org.jgraph.graph.DefaultEdge;
+import org.jgrapht.graph.DefaultEdge;
 import org.jgrapht.graph.SimpleWeightedGraph;
+
 
 import eu.eexcess.federatedrecommender.utils.FederatedRecommenderException;
 
@@ -54,10 +55,11 @@ public class D3GraphDocument implements Serializable {
     public D3GraphDocument(SimpleWeightedGraph<String, DefaultEdge> graph) throws FederatedRecommenderException {
         if (graph == null || graph.vertexSet() == null || graph.edgeSet() == null)
             throw new FederatedRecommenderException("graph was null");
-
+       
         nodes = new ArrayList<String>(graph.vertexSet());
         edges = new ArrayList<D3GraphDocumentEdge>();
-        for (DefaultEdge currentEdge : graph.edgeSet()) {
+        for (Object edge :  graph.edgeSet()) {
+        	DefaultEdge currentEdge = (DefaultEdge) edge;
             edges.add(new D3GraphDocumentEdge(graph.getEdgeSource(currentEdge), graph.getEdgeTarget(currentEdge)));
         }
     }
