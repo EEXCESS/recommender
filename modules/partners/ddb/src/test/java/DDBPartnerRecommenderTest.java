@@ -72,7 +72,7 @@ public class DDBPartnerRecommenderTest {
 	    
         assertNotNull(resultList);
         assertTrue(resultList.results.size() > 0 );
-        assertEquals(20, resultList.results.size());
+        assertEquals(8, resultList.results.size());
 
 	}
 	
