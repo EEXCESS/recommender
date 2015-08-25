@@ -25,10 +25,10 @@ import eu.eexcess.dataformats.result.ResultList;
 import eu.eexcess.dataformats.userprofile.ContextKeyword;
 import eu.eexcess.dataformats.userprofile.SecureUserProfile;
 
-public class MassivFedRecQueryTest {
+public class FederatedRecommenderStressTest {
     // private static final String searchRequest =
     // "http://eexcess.joanneum.at/eexcess-federated-recommender-web-service-1.0-SNAPSHOT/recommender/recommend";
-    private final static Logger LOGGER = Logger.getLogger(MassivFedRecQueryTest.class.getName());
+    private final static Logger LOGGER = Logger.getLogger(FederatedRecommenderStressTest.class.getName());
     private static String searchRequest;
     // =
     // "http://eexcess-dev.joanneum.at/eexcess-federated-recommender-web-service-1.0-SNAPSHOT/recommender/recommend";
@@ -40,7 +40,7 @@ public class MassivFedRecQueryTest {
     // "http://eexcess-demo.know-center.tugraz.at/eexcess-federated-recommender-web-service-evaluation-1.0-SNAPSHOT/evaluation/recommend";
     private ExecutorService threadPool;
 
-    public MassivFedRecQueryTest(String serverUri) {
+    public FederatedRecommenderStressTest(String serverUri) {
         searchRequest = serverUri;
     }
 
@@ -122,10 +122,10 @@ public class MassivFedRecQueryTest {
 
     public static void main(String[] args) {
 
-        MassivFedRecQueryTest m = null;
+        FederatedRecommenderStressTest m = null;
         // m = new
         // MassivFedRecQueryTest("http://eexcess-demo.know-center.tugraz.at/eexcess-federated-recommender-web-service-1.0-SNAPSHOT/recommender/recommend");
-        m = new MassivFedRecQueryTest("http://localhost/eexcess-federated-recommender-web-service-1.0-SNAPSHOT/recommender/recommend");
+        m = new FederatedRecommenderStressTest("http://localhost/eexcess-federated-recommender-web-service-1.0-SNAPSHOT/recommender/recommend");
 
         try {
             m.submitQueryToFedRec("test");
@@ -133,7 +133,7 @@ public class MassivFedRecQueryTest {
             LOGGER.log(Level.INFO, "Could not send warming query to federated recommender", e);
         }
         // Integer threadTimeout = 30000;
-        Integer threadTimeout = 10000;
+        Integer threadTimeout = 100;
         Integer simThreads = 10;
         m.logResult(simThreads, threadTimeout, m.testPartnersWithSimulatnousThreads(simThreads, threadTimeout));
         simThreads = 30;
