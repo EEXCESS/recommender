@@ -30,6 +30,7 @@ import java.io.OutputStreamWriter;
 import java.io.StringReader;
 import java.io.UnsupportedEncodingException;
 import java.io.Writer;
+import java.net.URLEncoder;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
@@ -141,7 +142,7 @@ public class PartnerConnectorBase implements PartnerConnectorApi {
             queryGenerator = PartnerConfigurationCache.CONFIG.getQueryGenerator(partnerConfiguration.getQueryGeneratorClass());
 
             String query = getQueryGenerator().toQuery(userProfile);
-
+            query = URLEncoder.encode(query, "UTF-8");
             Map<String, String> valuesMap = new HashMap<String, String>();
             valuesMap.put("query", query);
             Integer numResults = 10;

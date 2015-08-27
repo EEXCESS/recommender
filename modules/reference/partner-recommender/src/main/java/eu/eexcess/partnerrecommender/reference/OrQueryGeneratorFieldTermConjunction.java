@@ -39,7 +39,7 @@ import eu.eexcess.partnerrecommender.api.QueryGeneratorApi;
  *
  */
 public class OrQueryGeneratorFieldTermConjunction implements QueryGeneratorApi {
-    private static final String REGEXP = "(?<=\\w)\\s(?=\\w)";
+    private static final String REGEXP = "(?<=\\w)\\s+(?=\\w)";
 
     @Override
     public String toQuery(SecureUserProfile userProfile) {

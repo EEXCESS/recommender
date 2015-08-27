@@ -20,7 +20,7 @@ import eu.eexcess.partnerrecommender.api.QueryGeneratorApi;
  */
 public class LuceneQueryGeneratorFieldTermConjunction implements QueryGeneratorApi {
 
-    private static final String REGEXP = "(?<=\\w)\\s(?=\\w)";
+    private static final String REGEXP = "(?<=\\w)\\s+(?=\\w)";
 
     @Override
     public String toQuery(SecureUserProfile userProfile) {
@@ -31,7 +31,9 @@ public class LuceneQueryGeneratorFieldTermConjunction implements QueryGeneratorA
         for (ContextKeyword key : userProfile.contextKeywords) {
             String keyword = key.text;
             Matcher matcher2 = replace.matcher(keyword);
-            keyword = matcher2.replaceAll(" AND ");
+            if (matcher2.find()) {
+                keyword = "(" + matcher2.replaceAll(" AND ") + ")";
+            }
 
             if (key.expansion != null && (key.expansion == ExpansionType.PSEUDORELEVANCEWP || key.expansion == ExpansionType.SERENDIPITY)) {
                 if (PartnerConfigurationCache.CONFIG.getPartnerConfiguration().isQueryExpansionEnabled()) {

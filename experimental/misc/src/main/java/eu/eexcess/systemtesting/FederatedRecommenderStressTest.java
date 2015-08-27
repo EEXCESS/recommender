@@ -52,7 +52,7 @@ public class FederatedRecommenderStressTest {
         threadPool = Executors.newFixedThreadPool(threadAmount);
         Long start = System.currentTimeMillis();
         int counter = 0;
-        HashMap<String, Future<Integer>> futures = new HashMap<String, Future<Integer>>();
+        HashMap<String, Future<ResultList>> futures = new HashMap<String, Future<ResultList>>();
         for (final String string : queryList) {
 
             if (counter % threadAmount == 0 && counter != 0) {
@@ -64,13 +64,13 @@ public class FederatedRecommenderStressTest {
 
             }
             counter++;
-            Future<Integer> future = threadPool.submit(new Callable<Integer>() {
+            Future<ResultList> future = threadPool.submit(new Callable<ResultList>() {
                 @Override
-                public Integer call() throws Exception {
+                public ResultList call() throws Exception {
                     long start = System.currentTimeMillis();
                     ResultList resList = submitQueryToFedRec(string);
                     long end = System.currentTimeMillis();
-                    return resList.totalResults;
+                    return resList;
                 }
             });
 
@@ -80,10 +80,9 @@ public class FederatedRecommenderStressTest {
         for (String string : futures.keySet()) {
 
             try {
-                // futures.get(string).get(7000, TimeUnit.MILLISECONDS);
-                if (futures.get(string).get(7000, TimeUnit.MILLISECONDS) < 1)
-                    result.setFailure(result.getFailure() + 1);
-
+                ResultList res = futures.get(string).get(7000, TimeUnit.MILLISECONDS);
+                if (res.partnerResponseState.size() > 0 && res.partnerResponseState.get(0).errorMessage != null)
+                    result.setTimeout(result.getTimeout() + 1);
             } catch (Exception e) {
                 futures.get(string).cancel(true);
                 result.setFailure(result.getFailure() + 1);
@@ -132,8 +131,8 @@ public class FederatedRecommenderStressTest {
         } catch (SAXNotRecognizedException e) {
             LOGGER.log(Level.INFO, "Could not send warming query to federated recommender", e);
         }
-        // Integer threadTimeout = 30000;
-        Integer threadTimeout = 100;
+        Integer threadTimeout = 10000;
+        // Integer threadTimeout = 100;
         Integer simThreads = 10;
         m.logResult(simThreads, threadTimeout, m.testPartnersWithSimulatnousThreads(simThreads, threadTimeout));
         simThreads = 30;
@@ -153,15 +152,25 @@ public class FederatedRecommenderStressTest {
 
     private void logResult(Integer simThreads, Integer threadTimeout, Results results) {
         LOGGER.log(Level.INFO, "Simultainous Threads: " + simThreads + " Time between calls: " + threadTimeout + " Time to get all results: " + results.getTime() + " Failure: "
-                + results.getFailure());
+                + results.getFailure() + " TimeoutPartner: " + results.getTimeout());
     }
 
     class Results {
         private long time = 0;
         private Integer failure = 0;
+        private int timeout;
 
         public long getTime() {
             return time;
+        }
+
+        public void setTimeout(int i) {
+            this.timeout = i;
+
+        }
+
+        public int getTimeout() {
+            return this.timeout;
         }
 
         public void setTime(long time) {
