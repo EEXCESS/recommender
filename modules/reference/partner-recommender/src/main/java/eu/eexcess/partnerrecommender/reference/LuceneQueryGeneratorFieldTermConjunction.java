@@ -20,7 +20,7 @@ import eu.eexcess.partnerrecommender.api.QueryGeneratorApi;
  */
 public class LuceneQueryGeneratorFieldTermConjunction implements QueryGeneratorApi {
 
-    private static final String REGEXP = "(?<=\\w)\\s+(?=\\w)";
+    private static final String REGEXP = "(?<=\\S)\\s+(?=\\S)";
 
     @Override
     public String toQuery(SecureUserProfile userProfile) {
