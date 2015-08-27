@@ -77,6 +77,21 @@ public class KIMPortalPartnerRecommenderTest {
 	}
 	
 	@Test
+	public void singleQueryNapoleon() {
+		ArrayList<String> keywords = new ArrayList<String>();
+		keywords.add("Napoleon");
+        ResultList resultList = PartnerRecommenderTestHelper.getRecommendations(DEPLOYMENT_CONTEXT,	
+        		port, 
+        		PartnerRecommenderTestHelper.createParamsForPartnerRecommender(20,keywords ));
+	    
+        assertNotNull(resultList);
+        assertTrue(resultList.results.size() > 0 );
+        assertEquals(20, resultList.results.size());
+
+	}
+	
+	
+	@Test
 	public void singleQueryHuelftenschanz() {
 		ArrayList<String> keywords = new ArrayList<String>();
 		keywords.add("Hülftenschanz");

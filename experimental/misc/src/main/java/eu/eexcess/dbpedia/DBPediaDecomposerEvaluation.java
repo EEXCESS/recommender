@@ -43,6 +43,7 @@ public class DBPediaDecomposerEvaluation {
             LOGGER.log(Level.WARNING, "Could not read File ", e1);
         }
         try {
+        	
             String line = bR.readLine();
             while (line != null) {
                 line = bR.readLine();
@@ -59,6 +60,7 @@ public class DBPediaDecomposerEvaluation {
             String tmpLine = line.replaceAll("http.*", "");
             String contextKeywordsOneLine = tmpLine.replaceAll("\"", "");
             SecureUserProfileEvaluation profile = new SecureUserProfileEvaluation();
+            profile.firstName=line;
             for (String contextKeyword : contextKeywordsOneLine.split(" ")) {
                 if (!contextKeyword.trim().isEmpty())
                     profile.contextKeywords.add(new ContextKeyword(contextKeyword.trim()));
@@ -97,7 +99,8 @@ public class DBPediaDecomposerEvaluation {
         String fileName = "/home/hziak/Dokumente/QuerySegmentation/segments.greater4.train";
         dbPediaDecomposerEvaluation.readProfilesFromFile(fileName);
 
-        for (SecureUserProfileEvaluation profileEvaluation : dbPediaDecomposerEvaluation.getProfiles()) {
+        List<SecureUserProfileEvaluation> jGraphProfiles = dbPediaDecomposerEvaluation.getProfiles();
+		for (SecureUserProfileEvaluation profileEvaluation : jGraphProfiles) {
             SecureUserProfileEvaluation tmpProfile = new SecureUserProfileEvaluation();
             tmpProfile.contextKeywords = profileEvaluation.contextKeywords;
 
@@ -108,15 +111,16 @@ public class DBPediaDecomposerEvaluation {
                     keywordsBuilder.append(contextKeyword.text + " ");
 
                 }
-                LOGGER.log(Level.INFO, keywordsBuilder.toString());
+                LOGGER.log(Level.INFO, "Returned Groups" +keywordsBuilder.toString());
 
             }
-            LOGGER.log(Level.INFO, "Keywords:");
-            StringBuilder keywordsBuilder = new StringBuilder();
-            for (ContextKeyword string : profileEvaluation.contextKeywords) {
-                keywordsBuilder.append(string.text + " ");
-            }
-            LOGGER.log(Level.INFO, keywordsBuilder.toString());
+            LOGGER.log(Level.INFO,profileEvaluation.firstName);
+//            LOGGER.log(Level.INFO, "Keywords:");
+//            StringBuilder keywordsBuilder = new StringBuilder();
+//            for (ContextKeyword string : profileEvaluation.contextKeywords) {
+//                keywordsBuilder.append(string.text + " ");
+//            }
+//            LOGGER.log(Level.INFO, keywordsBuilder.toString());
             LOGGER.log(Level.INFO, "KeywordGroups:");
 
             for (ArrayList<ContextKeyword> string : profileEvaluation.getContextKeywordsGroups()) {
@@ -126,7 +130,7 @@ public class DBPediaDecomposerEvaluation {
                 }
                 LOGGER.log(Level.INFO, keywordsGroupBuilder.toString());
             }
-
+            
         }
     }
 
