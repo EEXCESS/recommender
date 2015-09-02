@@ -155,7 +155,7 @@ public class PartnerBadge implements Serializable {
      * @param partner
      * @param respTime
      */
-    public void updatePartnerResponseTime(long respTime) {
+    synchronized public void updatePartnerResponseTime(long respTime) {
         pushLastResponseTimes(respTime);
         boolean first = true;
         for (Long tmpTime : getLastResponseTimes()) {
