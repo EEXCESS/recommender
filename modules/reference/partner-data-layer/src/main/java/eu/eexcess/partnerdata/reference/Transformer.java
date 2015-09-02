@@ -62,7 +62,7 @@ public class Transformer implements ITransformer {
 
     private static final String EEXCESS_FACETS_VALUE_DEFAULT_LICENCE = "restricted";
     protected static final String EEXCESS_FACETS_VALUE_UNKNOWN = "unknown";
-    protected static final String EEXCESS_MEDIATYPE_TEXT = "TEXT";
+    protected static final String EEXCESS_MEDIATYPE_TEXT = "text";
     protected PartnerConfiguration partnerConfig;
     protected String resultListTransformationFilename;
 
