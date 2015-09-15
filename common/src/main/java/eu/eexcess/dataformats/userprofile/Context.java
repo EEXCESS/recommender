@@ -39,7 +39,7 @@ public class Context implements Serializable {
     public String reason;
     @XmlElement(name = "value")
     public String value;
-
+    
     @Override
     public String toString() {
         return "Context [reason=" + reason + ", value=" + value + "]";

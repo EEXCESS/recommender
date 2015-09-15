@@ -309,7 +309,7 @@ public class FederatedRecommenderService {
         secureUserProfile.timeRange.setEnd("2000");
         List<History> history = new ArrayList<History>();
         history.add(new History(new Date(), "history title", 4, 4, "http://1234.com"));
-        secureUserProfile.history = history;
+       
         Address address = new Address("austria", 8010, "Graz", "nothing", "to add");
         address.city = "testcity";
         address.country = "testcountry";
@@ -368,7 +368,6 @@ public class FederatedRecommenderService {
         ContextNamedEntitiesElement top2 = new ContextNamedEntitiesElement("Animal", 0.1, 0.1, dbPediaUrl);
         contextNamedEntitie.topics.add(top2);
 
-        secureUserProfile.contextNamedEntities = contextNamedEntitie;
         Language language1 = new Language("de", 0.1);
         Language language2 = new Language("en", 0.1);
 
@@ -378,8 +377,7 @@ public class FederatedRecommenderService {
         List<UserLocation> locationsList = new ArrayList<UserLocation>();
         locationsList.add(new UserLocation(33.123123, -127.123123, 4.5, new Date()));
         locationsList.add(new UserLocation(20.123123, -130.123123, 4.5, new Date()));
-        secureUserProfile.userLocations = locationsList;
-
+      
         return secureUserProfile;
     }
 

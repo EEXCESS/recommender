@@ -64,17 +64,17 @@ public class SecureUserProfile implements Serializable {
     @XmlElement(name = "languages")
     public List<Language> languages = new ArrayList<Language>();
 
-    @XmlElementWrapper(name = "userLocations")
-    @XmlElement(name = "userLocations")
-    public List<UserLocation> userLocations = new ArrayList<UserLocation>();
+    //@XmlElementWrapper(name = "userLocations")
+    //@XmlElement(name = "userLocations")
+    //public List<UserLocation> userLocations = new ArrayList<UserLocation>();
 
     @XmlElementWrapper(name = "userCredentials")
     @XmlElement(name = "userCredentials")
     public List<UserCredentials> userCredentials = new ArrayList<UserCredentials>();
 
-    @XmlElementWrapper(name = "history")
-    @XmlElement(name = "history")
-    public List<History> history = new ArrayList<History>();
+    //@XmlElementWrapper(name = "history")
+    //@XmlElement(name = "history")
+   // public List<History> history = new ArrayList<History>();
 
     @XmlElementWrapper(name = "interests")
     @XmlElement(name = "interests")
@@ -87,15 +87,15 @@ public class SecureUserProfile implements Serializable {
     @XmlElement(name = "context")
     public Context context = new Context();
 
-    @XmlElement(name = "contextNamedEntities")
-    public ContextNamedEntity contextNamedEntities;
+   // @XmlElement(name = "contextNamedEntities")
+   // public ContextNamedEntity contextNamedEntities;
 
     @Override
     public String toString() {
         return "SecureUserProfile [partnerList=" + partnerList + ", protectedPartnerList=" + protectedPartnerList + ", queryID=" + queryID + ", firstName=" + firstName
                 + ", lastName=" + lastName + ", birthDate=" + birthDate + ", numResults=" + numResults + ", gender=" + gender + ", address=" + address + ", timeRange=" + timeRange
-                + ", languages=" + languages + ", userLocations=" + userLocations + ", userCredentials=" + userCredentials + ", history=" + history + ", interestList="
-                + interestList + ", contextKeywords=" + contextKeywords + ", context=" + context + ", contextNamedEntities=" + contextNamedEntities + "]";
+                + ", languages=" + languages + ",  userCredentials=" + userCredentials  + ", interestList="
+                + interestList + ", contextKeywords=" + contextKeywords + ", context=" + context +  "]";
     }
 
     @Override
@@ -106,10 +106,8 @@ public class SecureUserProfile implements Serializable {
         result = prime * result + ((birthDate == null) ? 0 : birthDate.hashCode());
         result = prime * result + ((context == null) ? 0 : context.hashCode());
         result = prime * result + ((contextKeywords == null) ? 0 : contextKeywords.hashCode());
-        result = prime * result + ((contextNamedEntities == null) ? 0 : contextNamedEntities.hashCode());
         result = prime * result + ((firstName == null) ? 0 : firstName.hashCode());
         result = prime * result + ((gender == null) ? 0 : gender.hashCode());
-        result = prime * result + ((history == null) ? 0 : history.hashCode());
         result = prime * result + ((interestList == null) ? 0 : interestList.hashCode());
         result = prime * result + ((languages == null) ? 0 : languages.hashCode());
         result = prime * result + ((lastName == null) ? 0 : lastName.hashCode());
@@ -119,7 +117,6 @@ public class SecureUserProfile implements Serializable {
         result = prime * result + ((queryID == null) ? 0 : queryID.hashCode());
         result = prime * result + ((timeRange == null) ? 0 : timeRange.hashCode());
         result = prime * result + ((userCredentials == null) ? 0 : userCredentials.hashCode());
-        result = prime * result + ((userLocations == null) ? 0 : userLocations.hashCode());
         return result;
     }
 
@@ -152,11 +149,6 @@ public class SecureUserProfile implements Serializable {
                 return false;
         } else if (!contextKeywords.equals(other.contextKeywords))
             return false;
-        if (contextNamedEntities == null) {
-            if (other.contextNamedEntities != null)
-                return false;
-        } else if (!contextNamedEntities.equals(other.contextNamedEntities))
-            return false;
         if (firstName == null) {
             if (other.firstName != null)
                 return false;
@@ -166,11 +158,6 @@ public class SecureUserProfile implements Serializable {
             if (other.gender != null)
                 return false;
         } else if (!gender.equals(other.gender))
-            return false;
-        if (history == null) {
-            if (other.history != null)
-                return false;
-        } else if (!history.equals(other.history))
             return false;
         if (interestList == null) {
             if (other.interestList != null)
@@ -216,11 +203,6 @@ public class SecureUserProfile implements Serializable {
             if (other.userCredentials != null)
                 return false;
         } else if (!userCredentials.equals(other.userCredentials))
-            return false;
-        if (userLocations == null) {
-            if (other.userLocations != null)
-                return false;
-        } else if (!userLocations.equals(other.userLocations))
             return false;
         return true;
     }
