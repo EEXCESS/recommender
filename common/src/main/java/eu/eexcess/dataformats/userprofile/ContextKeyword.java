@@ -30,11 +30,8 @@ import javax.xml.bind.annotation.XmlElement;
 public class ContextKeyword implements Serializable {
 
     private static final long serialVersionUID = -4047662119669146571L;
-    @XmlElement(name = "entityType")
-	private String entityType;
-    @XmlElement(name = "entityUri")
+    private String entityType;
     private String entityUri;
-    @XmlElement(name = "isMainTopic")
     private Boolean isMainTopic=false;
     
  // Is used for query expansion
