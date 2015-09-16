@@ -1,9 +1,14 @@
 package eu.eexcess.partnerrecommender.reference;
 
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Level;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
+import java.util.logging.*;
 
 import eu.eexcess.dataformats.result.DocumentBadge;
 import eu.eexcess.dataformats.userprofile.ContextKeyword;
@@ -21,7 +26,7 @@ import eu.eexcess.partnerrecommender.api.QueryGeneratorApi;
  *
  */
 public class LuceneQueryGeneratorFieldTermConjunctionMainTopic implements QueryGeneratorApi {
-
+	private static final Logger LOGGER = Logger.getLogger(LuceneQueryGeneratorFieldTermConjunctionMainTopic.class.getCanonicalName());
     private static final String REGEXP = "(?<=\\S)\\s+(?=\\S)";
 
     @Override
@@ -67,7 +72,12 @@ public class LuceneQueryGeneratorFieldTermConjunctionMainTopic implements QueryG
 
         if(!mainKeywords.isEmpty())
         	result.append(")");
-        return result.toString();
+        try {
+			return URLEncoder.encode(result.toString(), "UTF-8");
+		} catch (UnsupportedEncodingException e) {
+			LOGGER.log(Level.SEVERE, "Could not URLEncode query");
+			return result.toString();
+		}
     }
 
     private boolean addQueryTerm(StringBuilder result, boolean exp, String keyword) {
