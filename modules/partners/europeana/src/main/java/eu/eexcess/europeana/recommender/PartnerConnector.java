@@ -17,6 +17,7 @@ limitations under the License.
 package eu.eexcess.europeana.recommender;
 
 import java.io.IOException;
+import java.net.URLEncoder;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.Callable;
@@ -83,7 +84,7 @@ public class PartnerConnector extends PartnerConnectorBase implements PartnerCon
         long start = System.currentTimeMillis();
 
         Map<String, String> valuesMap = new HashMap<String, String>();
-        valuesMap.put("query", URLParamEncoder.encode(query));
+        valuesMap.put("query", URLEncoder.encode(query,"UTF-8"));
         valuesMap.put("apiKey", partnerConfiguration.getApiKey()); // add API
                                                                    // key
         // searchEndpoint:
@@ -93,7 +94,7 @@ public class PartnerConnector extends PartnerConnectorBase implements PartnerCon
             numResultsRequest = userProfile.numResults;
         valuesMap.put("numResults", numResultsRequest.toString());
         String searchRequest = StrSubstitutor.replace(partnerConfiguration.getSearchEndpoint(), valuesMap);
-
+        LOGGER.log(Level.INFO,"SEARCHREQUEST: " +searchRequest);
         WebResource service = client.resource(searchRequest);
         ObjectMapper mapper = new ObjectMapper();
         Builder builder = service.accept(MediaType.APPLICATION_JSON);

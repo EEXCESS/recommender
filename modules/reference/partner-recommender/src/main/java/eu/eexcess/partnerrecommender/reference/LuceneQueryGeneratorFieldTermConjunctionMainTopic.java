@@ -31,10 +31,13 @@ public class LuceneQueryGeneratorFieldTermConjunctionMainTopic implements QueryG
 
     @Override
     public String toQuery(SecureUserProfile userProfile) {
+    	
         StringBuilder result = new StringBuilder();
         boolean expansion = false;
         Pattern replace = Pattern.compile(REGEXP);
         List<ContextKeyword> mainKeywords = new ArrayList<ContextKeyword>();
+        List<ContextKeyword> otherKeywords = new ArrayList<ContextKeyword>();
+       
         userProfile.contextKeywords.forEach(kw -> {
         	if(kw.getIsMainTopic()){
         		if(result.length()==0){
@@ -44,14 +47,15 @@ public class LuceneQueryGeneratorFieldTermConjunctionMainTopic implements QueryG
         			result.append(" AND " +kw.text);
         		}
         		mainKeywords.add(kw);
-        	};
+        	}
+        	else
+        		otherKeywords.add(kw);
         	});
-        userProfile.contextKeywords.removeAll(mainKeywords);
-        if(!mainKeywords.isEmpty())
+       if(!mainKeywords.isEmpty())
         	result.append(") AND (");
         
         StringBuilder tmpResult= new StringBuilder();
-        for (ContextKeyword key : userProfile.contextKeywords) {
+        for (ContextKeyword key : otherKeywords) {
             String keyword = key.text;
             Matcher matcher2 = replace.matcher(keyword);
             if (matcher2.find()) {
@@ -72,12 +76,7 @@ public class LuceneQueryGeneratorFieldTermConjunctionMainTopic implements QueryG
 
         if(!mainKeywords.isEmpty())
         	result.append(")");
-        try {
-			return URLEncoder.encode(result.toString(), "UTF-8");
-		} catch (UnsupportedEncodingException e) {
-			LOGGER.log(Level.SEVERE, "Could not URLEncode query");
-			return result.toString();
-		}
+		return result.toString();
     }
 
     private boolean addQueryTerm(StringBuilder result, boolean exp, String keyword) {
