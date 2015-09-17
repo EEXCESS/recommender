@@ -553,7 +553,7 @@ public class FederatedRecommenderCore implements ProbeResultChanged {
 
     /**
      * Reads domain(s) information of the respective partner from database and
-     * stores it back to {@link PartnerBadge}.
+     * restores it back to {@link PartnerBadge}.
      * 
      * @param partnerConfig
      *            supplies the {@link PartnerBadge#getSystemId()} and where to

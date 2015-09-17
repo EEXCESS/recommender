@@ -99,7 +99,7 @@ public class DBPediaDecomposerEvaluation {
         String fileName = "/home/hziak/Dokumente/QuerySegmentation/segments.greater4.train";
         dbPediaDecomposerEvaluation.readProfilesFromFile(fileName);
 
-        List<SecureUserProfileEvaluation> jGraphProfiles = dbPediaDecomposerEvaluation.getProfiles();
+        List<SecureUserProfileEvaluation> jGraphProfiles = DBPediaDecomposerEvaluation.getProfiles();
 		for (SecureUserProfileEvaluation profileEvaluation : jGraphProfiles) {
             SecureUserProfileEvaluation tmpProfile = new SecureUserProfileEvaluation();
             tmpProfile.contextKeywords = profileEvaluation.contextKeywords;
