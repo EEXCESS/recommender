@@ -41,7 +41,7 @@ public class AsyncPartnerDomainsProbeMonitor implements ProbeDoneCallback {
 
     public static interface ProbeResultChanged {
         /**
-         * passes all probes after changes hat occurred
+         * passes a copy of all available probes on eache change occurred
          * 
          * @param updatedProbes
          *            all probes including changes
@@ -140,7 +140,7 @@ public class AsyncPartnerDomainsProbeMonitor implements ProbeDoneCallback {
                 Set<PartnerDomain> newEntrySet = new HashSet<PartnerDomain>(entry.getValue().size());
 
                 for (PartnerDomain domain : entry.getValue()) {
-                    newEntrySet.add(new PartnerDomain(domain.domainName, domain.weight));
+                    newEntrySet.add(new PartnerDomain(domain.getDomainName(), domain.getWeight()));
                 }
                 newMap.put(entry.getKey(), newEntrySet);
             }

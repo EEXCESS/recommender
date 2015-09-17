@@ -256,14 +256,14 @@ public class WndomainSourceSelector implements PartnerSelector {
                 // domains have a tree structure, utilizing a simple string
                 // comparison is a weak matching method. Instead a
                 // "is X sub domain of Y" comparison should be performed.
-                AtomicInteger timesSeen = seenDomains.get(partnerContentDomain.domainName.toLowerCase());
+                AtomicInteger timesSeen = seenDomains.get(partnerContentDomain.getDomainName().toLowerCase());
                 if (null == timesSeen) {
                     continue;
                 } else {
                     if (!matchingPartners.containsKey(partner)) {
                         matchingPartners.put(partner, new TreeSet<>());
                     }
-                    DomainWeight domain = new DomainWeight(partnerContentDomain.domainName, timesSeen.doubleValue());
+                    DomainWeight domain = new DomainWeight(partnerContentDomain.getDomainName(), timesSeen.doubleValue());
                     matchingPartners.get(partner).add(domain);
                     totalWeight += domain.weight;
                 }

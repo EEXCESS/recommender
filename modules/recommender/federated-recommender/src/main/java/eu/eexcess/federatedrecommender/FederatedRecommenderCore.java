@@ -153,7 +153,8 @@ public class FederatedRecommenderCore implements ProbeResultChanged {
      * @return
      * @throws FederatedRecommenderException
      */
-    public static FederatedRecommenderCore getInstance(FederatedRecommenderConfiguration federatedRecommenderConfiguration) throws FederatedRecommenderException {
+    public static FederatedRecommenderCore getInstance(FederatedRecommenderConfiguration federatedRecommenderConfiguration)
+            throws FederatedRecommenderException {
         if (instance == null) {
             synchronized (FederatedRecommenderCore.class) {
                 // Double check
@@ -252,14 +253,15 @@ public class FederatedRecommenderCore implements ProbeResultChanged {
         LOGGER.log(Level.SEVERE, msg, e);
     }
 
-    private long reportTimeOutOfPartner(final PartnersFederatedRecommendations partnersFederatedResults, long timeout, Entry<PartnerBadge, Future<ResultList>> entry, long startT,
-            TimeoutException e) {
+    private long reportTimeOutOfPartner(final PartnersFederatedRecommendations partnersFederatedResults, long timeout,
+            Entry<PartnerBadge, Future<ResultList>> entry, long startT, TimeoutException e) {
         entry.getKey().getShortTimeStats().failedRequestCount++;
         entry.getKey().getShortTimeStats().failedRequestTimeoutCount++;
         entry.getValue().cancel(true);
 
         timeout -= System.currentTimeMillis() - startT;
-        String msg = "Waited too long for partner system '" + entry.getKey().getSystemId() + "' to respond " + (federatedRecConfiguration.getPartnersTimeout() - timeout) + " ms ";
+        String msg = "Waited too long for partner system '" + entry.getKey().getSystemId() + "' to respond "
+                + (federatedRecConfiguration.getPartnersTimeout() - timeout) + " ms ";
         ResultList rL = new ResultList();
         PartnerResponseState responseState = new PartnerResponseState();
         responseState.errorMessage = msg;
@@ -462,7 +464,8 @@ public class FederatedRecommenderCore implements ProbeResultChanged {
             LOGGER.log(Level.INFO, "Could not write into query statistics database");
     }
 
-    private String writeRequestStatsToDb(Database<DatabaseQueryStats> db, PartnerBadge partner, PartnerBadgeStats longStats, PartnerBadgeStats shortStats, String dbErrorMsg) {
+    private String writeRequestStatsToDb(Database<DatabaseQueryStats> db, PartnerBadge partner, PartnerBadgeStats longStats, PartnerBadgeStats shortStats,
+            String dbErrorMsg) {
         PreparedStatement updateS = db.getPreparedUpdateStatement(DatabaseQueryStats.REQUESTLOG);
         // Database Entry Style
         // ('SYSTEM_ID','REQUESTCOUNT','FAILEDREQUESTCOUNT','FAILEDREQUESTTIMEOUTCOUNT')
@@ -561,7 +564,8 @@ public class FederatedRecommenderCore implements ProbeResultChanged {
     private boolean restoreDomainsFromDatabase(PartnerBadge partnerConfig) {
         synchronized (partnerRegister) {
             boolean hasDomainsRestored = false;
-            Database<PartnersDomainsTableQuery> db = new Database<PartnersDomainsTableQuery>(federatedRecConfiguration.getStatsLogDatabase(), PartnersDomainsTableQuery.values());
+            Database<PartnersDomainsTableQuery> db = new Database<PartnersDomainsTableQuery>(federatedRecConfiguration.getStatsLogDatabase(),
+                    PartnersDomainsTableQuery.values());
             PreparedStatement selectStatement = db.getPreparedSelectStatement(PartnersDomainsTableQuery.PARTNER_DOMAINS_TABLE_QUERY);
 
             try {
@@ -577,16 +581,16 @@ public class FederatedRecommenderCore implements ProbeResultChanged {
                     while (results.next()) {
                         restoredDomainsCount++;
                         PartnerDomain domain = new PartnerDomain();
-                        domain.domainName = results.getString(PartnersDomainsTableQuery.Tables.PartnerProbes.Domains.DOMAIN_NAME.row_number);
-                        domain.weight = results.getDouble(PartnersDomainsTableQuery.Tables.PartnerProbes.Domains.DOMAIN_WEIGHT.row_number);
+                        domain.setDomainName(results.getString(PartnersDomainsTableQuery.Tables.PartnerProbes.Domains.DOMAIN_NAME.columnIndex));
+                        domain.setWeight(results.getDouble(PartnersDomainsTableQuery.Tables.PartnerProbes.Domains.DOMAIN_WEIGHT.columnIndex));
                         hasDomainsRestored = true;
                         partnerConfig.getDomainContent().add(domain);
                     }
                     LOGGER.info("restored [" + restoredDomainsCount + "] domain(s) of partner [" + partnerConfig.getSystemId() + "] from database");
                 }
             } catch (SQLException sqe) {
-                LOGGER.log(Level.SEVERE, "failed to retrieve partner's domain information from database [" + PartnersDomainsTableQuery.PARTNER_DOMAINS_TABLE_QUERY.getInternName()
-                        + "]", sqe);
+                LOGGER.log(Level.SEVERE, "failed to retrieve partner's domain information from database ["
+                        + PartnersDomainsTableQuery.PARTNER_DOMAINS_TABLE_QUERY.getInternName() + "]", sqe);
             } finally {
                 try {
                     db.close();
@@ -639,8 +643,8 @@ public class FederatedRecommenderCore implements ProbeResultChanged {
         long timeToPickResults = end - start;
         recommenderStats.setAverageGlobalTime(timeToGetPartners);
         recommenderStats.setAverageAggregationTime(timeToPickResults);
-        LOGGER.log(Level.INFO, " Time to get " + resultList.results.size() + " Results from the Partners: " + timeToGetPartners + "ms. Time to pick the best results: "
-                + timeToPickResults + "ms");
+        LOGGER.log(Level.INFO, " Time to get " + resultList.results.size() + " Results from the Partners: " + timeToGetPartners
+                + "ms. Time to pick the best results: " + timeToPickResults + "ms");
         resultList.totalResults = resultList.results.size();
         resultList.provider = "federated";
         resultList.partnerResponseState = partnerResponseState;
@@ -736,7 +740,8 @@ public class FederatedRecommenderCore implements ProbeResultChanged {
     @Override
     public void onProbeResultsChanged(Map<String, Set<PartnerDomain>> updatedProbes) {
         synchronized (partnerRegister) {
-            Database<PartnersDomainsTableQuery> db = new Database<PartnersDomainsTableQuery>(federatedRecConfiguration.getStatsLogDatabase(), PartnersDomainsTableQuery.values());
+            Database<PartnersDomainsTableQuery> db = new Database<PartnersDomainsTableQuery>(federatedRecConfiguration.getStatsLogDatabase(),
+                    PartnersDomainsTableQuery.values());
             PreparedStatement deleteStatement = db.getPreparedDeleStatement(PartnersDomainsTableQuery.PARTNER_DOMAINS_TABLE_QUERY);
             PreparedStatement insertStatement = db.getPreparedInsertStatement(PartnersDomainsTableQuery.PARTNER_DOMAINS_TABLE_QUERY);
 
@@ -759,8 +764,8 @@ public class FederatedRecommenderCore implements ProbeResultChanged {
                                 for (PartnerDomain domain : partnerDomains) {
                                     insertStatement.setString(1, partner.getSystemId());
                                     insertStatement.setLong(2, System.currentTimeMillis());
-                                    insertStatement.setString(3, domain.domainName);
-                                    insertStatement.setDouble(4, domain.weight);
+                                    insertStatement.setString(3, domain.getDomainName());
+                                    insertStatement.setDouble(4, domain.getWeight());
                                     insertStatement.addBatch();
                                 }
                                 insertStatement.executeBatch();
@@ -771,19 +776,19 @@ public class FederatedRecommenderCore implements ProbeResultChanged {
                                 int numFailed = 0;
                                 for (Integer resultStatus : insertStatement.executeBatch()) {
                                     if (PreparedStatement.EXECUTE_FAILED == resultStatus) {
-                                        LOGGER.warning("failed to execute batch [" + index + "/" + partnerDomains.size() + "] of partner [" + partner.getSystemId() + "]");
+                                        LOGGER.warning("failed to execute batch [" + index + "/" + partnerDomains.size() + "] of partner ["
+                                                + partner.getSystemId() + "]");
                                         numFailed++;
                                     }
                                     index++;
                                 }
-                                LOGGER.info("stored [" + (partnerDomains.size() - numFailed) + "/" + partnerDomains.size() + "] domains of partner [" + partner.getSystemId()
-                                        + "] to database");
+                                LOGGER.info("stored [" + (partnerDomains.size() - numFailed) + "/" + partnerDomains.size() + "] domains of partner ["
+                                        + partner.getSystemId() + "] to database");
 
                             } catch (SQLException e) {
-                                LOGGER.log(Level.SEVERE, "failed storing partners domains do database [" + PartnersDomainsTableQuery.PARTNER_DOMAINS_TABLE_QUERY.getInternName()
-                                        + "]", e);
+                                LOGGER.log(Level.SEVERE, "failed storing partners domains do database ["
+                                        + PartnersDomainsTableQuery.PARTNER_DOMAINS_TABLE_QUERY.getInternName() + "]", e);
                             }
-
                         } else {
                             LOGGER.log(Level.WARNING, "failed retrieving an expected prepared statement of [" + PartnersDomainsTableQuery.class.getName() + "]");
                         }

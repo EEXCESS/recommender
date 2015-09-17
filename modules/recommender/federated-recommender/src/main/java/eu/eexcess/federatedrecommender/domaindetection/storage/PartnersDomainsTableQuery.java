@@ -29,12 +29,12 @@ public enum PartnersDomainsTableQuery implements DatabasePreparedQuery {
 
     public static class Domain {
         public final String name;
-        public final String sql_type;
+        public final String sqlType;
         /**
-         * provides information about the row position i.e. for "SELECT *"
+         * provides information about the column position i.e. for "SELECT *"
          * queries
          */
-        public final int row_number;
+        public final int columnIndex;
 
         /**
          * 
@@ -42,14 +42,14 @@ public enum PartnersDomainsTableQuery implements DatabasePreparedQuery {
          *            the column's name
          * @param domainSqlType
          *            the type of the column
-         * @param rowNumber
-         *            the position of the column beginning with 1, useful for
-         *            "SELECT *" queries
+         * @param columnIndex
+         *            the position of the column; first column begins at 1; used for
+         *            "SELECT" queries
          */
-        public Domain(String domainName, String domainSqlType, int rowNumber) {
+        public Domain(String domainName, String domainSqlType, int columnIndex) {
             this.name = domainName;
-            this.sql_type = domainSqlType;
-            this.row_number = rowNumber;
+            this.sqlType = domainSqlType;
+            this.columnIndex = columnIndex;
         }
     }
 
@@ -69,11 +69,11 @@ public enum PartnersDomainsTableQuery implements DatabasePreparedQuery {
             private static final String NAME = "PartnerDomainProbes";
 
             private static final String CREATE_TABLE = "CREATE TABLE IF NOT EXISTS " + NAME + " (" + PartnerProbes.Domains.ID_PRIMARY_KEY.name + " "
-                    + PartnerProbes.Domains.ID_PRIMARY_KEY.sql_type + " PRIMARY KEY NOT NULL, " + PartnerProbes.Domains.PROBE_TIMESTAMP.name + " "
-                    + PartnerProbes.Domains.PROBE_TIMESTAMP.sql_type + " NOT NULL, " + PartnerProbes.Domains.PARTNER_NAME.name + " "
-                    + PartnerProbes.Domains.PARTNER_NAME.sql_type + " NOT NULL, " + PartnerProbes.Domains.DOMAIN_NAME.name + " "
-                    + PartnerProbes.Domains.DOMAIN_NAME.sql_type + " NOT NULL, " + PartnerProbes.Domains.DOMAIN_WEIGHT.name + " "
-                    + PartnerProbes.Domains.DOMAIN_WEIGHT.sql_type + " NOT NULL)";
+                    + PartnerProbes.Domains.ID_PRIMARY_KEY.sqlType + " PRIMARY KEY NOT NULL, " + PartnerProbes.Domains.PROBE_TIMESTAMP.name + " "
+                    + PartnerProbes.Domains.PROBE_TIMESTAMP.sqlType + " NOT NULL, " + PartnerProbes.Domains.PARTNER_NAME.name + " "
+                    + PartnerProbes.Domains.PARTNER_NAME.sqlType + " NOT NULL, " + PartnerProbes.Domains.DOMAIN_NAME.name + " "
+                    + PartnerProbes.Domains.DOMAIN_NAME.sqlType + " NOT NULL, " + PartnerProbes.Domains.DOMAIN_WEIGHT.name + " "
+                    + PartnerProbes.Domains.DOMAIN_WEIGHT.sqlType + " NOT NULL)";
             /**
              * 1st ?: table name @see {@link PartnerProbes#NAME}
              */
