@@ -49,27 +49,59 @@ public class AsyncPartnerDomainsProbeMonitor implements ProbeDoneCallback {
         public void onProbeResultsChanged(Map<String, Set<PartnerDomain>> updatedProbes);
     }
 
-    private DomainDetector domainDetector;
+    private DomainDetector domainDetector = null;
     private PartnerDomainsProbe probeTemplate;
     private long probeTimeout = 0;
     private static final Logger LOGGER = Logger.getLogger(AsyncPartnerDomainsProbeMonitor.class.getName());
     protected Map<String, AsyncPartnerDomainsProbe> runningProbes = new HashMap<String, AsyncPartnerDomainsProbe>();
     private Map<String, Set<PartnerDomain>> partnersDomains = new HashMap<String, Set<PartnerDomain>>();
     private ProbeResultChanged onDomainsChangedCallback;
+    private int considerNumPartnerResults;
+    private int numRandomPhrases;
 
+    /**
+     * Since drawing random phrases out of {@link WordnetDomainsDetector} is
+     * very time expensive, the initialization of the part requesting random
+     * words, {@link PartnerDomainsProbe}, is lazy. First call of
+     * {@link #newAsyncPartnerDomainsProbe(PartnerBadge, Client)} may take
+     * longer as expected.
+     * 
+     * @param wordnetDir
+     *            see {@link DomainDetector}
+     * @param wordNetFile
+     *            see {@link DomainDetector}
+     * @param numRandomPhrases
+     *            see {@link PartnerDomainsProbe}
+     * @param considerNumPartnerResults
+     *            see {@link PartnerDomainsProbe}
+     * @param probeDurationTimeout
+     *            see {@link AsyncPartnerDomainsProbe}
+     */
     public AsyncPartnerDomainsProbeMonitor(File wordnetDir, File wordNetFile, int numRandomPhrases, int considerNumPartnerResults, long probeDurationTimeout) {
         probeTimeout = probeDurationTimeout;
         try {
             domainDetector = new WordnetDomainsDetector(wordnetDir, wordNetFile, true);
-            probeTemplate = new PartnerDomainsProbe(domainDetector, numRandomPhrases, considerNumPartnerResults);
+            // probeTemplate = new PartnerDomainsProbe(domainDetector,
+            // numRandomPhrases, considerNumPartnerResults);
+            this.numRandomPhrases = numRandomPhrases;
+            this.considerNumPartnerResults = considerNumPartnerResults;
         } catch (Exception e) {
             LOGGER.log(Level.SEVERE, "failed to instanciate domain detection resources", e);
         }
     }
 
     private AsyncPartnerDomainsProbe newAsyncPartnerDomainsProbe(PartnerBadge partnerConfig, Client partnerClient) {
+
+        // lazy initialization of probe
+        try {
+            probeTemplate = new PartnerDomainsProbe(domainDetector, numRandomPhrases, considerNumPartnerResults);
+        } catch (RuntimeException rte) {
+            LOGGER.log(Level.SEVERE, "failed to generate random words", rte);
+            return null;
+        }
+
         if (probeTemplate == null) {
-            LOGGER.severe("failed to instanciate domain detection resources");
+            LOGGER.severe("fatal error: failed to instanciate domain detection resources");
             return null;
         }
         try {

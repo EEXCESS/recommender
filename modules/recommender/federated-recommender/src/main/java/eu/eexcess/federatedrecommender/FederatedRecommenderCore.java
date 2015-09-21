@@ -115,9 +115,10 @@ public class FederatedRecommenderCore implements ProbeResultChanged {
         String domainSelectorName = WndomainSourceSelector.class.getCanonicalName();
         if (sourceSelectors != null && Arrays.asList(sourceSelectors).contains(domainSelectorName)) {
             LOGGER.info("activating partner domaindetection since [" + domainSelectorName + "] is requested to be applied");
+            
+            int numRandomPhrases = 50, numConsideringPartnerResults=10;
             partnersDomainsDetectors = new AsyncPartnerDomainsProbeMonitor(new File(this.federatedRecConfiguration.getWordnetPath()), new File(
-                    this.federatedRecConfiguration.getWordnetDomainFilePath()), 50, 10, PARTNERPROBINGTIMEOUT);
-
+                    this.federatedRecConfiguration.getWordnetDomainFilePath()), numRandomPhrases, numConsideringPartnerResults, PARTNERPROBINGTIMEOUT);
             partnersDomainsDetectors.setCallback(this);
         } else {
             LOGGER.info("refused to activate partner domaindetection since [" + domainSelectorName + "] is not requested to be applied");
