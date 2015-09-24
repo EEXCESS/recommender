@@ -1,5 +1,6 @@
 package eu.eexcess.federatedrecommender.decomposer;
 
+import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -23,13 +24,13 @@ public class SerendiptiyDecomposer implements
 	@Override
 	public SecureUserProfileEvaluation decompose(
 			SecureUserProfileEvaluation inputSecureUserProfile) {
-		java.util.List<History> historyList= inputSecureUserProfile.history;
+		List<History> historyList= inputSecureUserProfile.getHistory();
 		for (History history : historyList) {
-			inputSecureUserProfile.contextKeywords.add(new ContextKeyword(history.title,0.2,ExpansionType.SERENDIPITY));
+			inputSecureUserProfile.getContextKeywords().add(new ContextKeyword(history.title,0.2,ExpansionType.SERENDIPITY));
 		}
-		java.util.List<Interest> interestList= inputSecureUserProfile.interestList;
+		java.util.List<Interest> interestList= inputSecureUserProfile.getInterestList();
 		for (Interest interest : interestList) {
-			inputSecureUserProfile.contextKeywords.add(new ContextKeyword(interest.text,0.4,ExpansionType.SERENDIPITY));
+			inputSecureUserProfile.getContextKeywords().add(new ContextKeyword(interest.getText(),0.4,ExpansionType.SERENDIPITY));
 			//inputSecureUserProfile.contextKeywords.add(new ContextKeyword(interest.text,interest.competenceLevel,true));
 		}
 		return inputSecureUserProfile;

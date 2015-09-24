@@ -82,9 +82,9 @@ public class PartnerConnector extends PartnerConnectorBase implements PartnerCon
         } catch (ParseException e) {
             LOGGER.log(Level.SEVERE, "could not parse input query", e);
         }
-        if (userProfile.numResults == null)
-            userProfile.numResults = 10;
-        TopDocs topDocs = indexSearcher.search(query, userProfile.numResults);
+        if (userProfile.getNumResults() == null)
+            userProfile.setNumResults(10);
+        TopDocs topDocs = indexSearcher.search(query, userProfile.getNumResults());
         for (ScoreDoc sDocs : topDocs.scoreDocs) {
             Result result = new Result();
             result.documentBadge = new DocumentBadge("", "", PartnerConfigurationCache.CONFIG.getBadge().getSystemId());

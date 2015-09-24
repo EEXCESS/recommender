@@ -24,6 +24,7 @@ package eu.eexcess.dataformats.userprofile;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.List;
 
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
@@ -38,17 +39,17 @@ public class SecureUserProfileEvaluation extends SecureUserProfile implements Se
     private ArrayList<PartnerBadge> queryExpansionSourcePartner = new ArrayList<PartnerBadge>();
     @XmlTransient
     private ArrayList<ArrayList<ContextKeyword>> contextKeywordsGroups = new ArrayList<ArrayList<ContextKeyword>>();
-
     private String picker;
     private String decomposer;
     private String sourceSelect;
     private String description;
+    private List<History> history = new ArrayList<History>();
 
     @XmlTransient
     public String getContextKeywordConcatenation() {
         StringBuilder builder = new StringBuilder();
-        for (ContextKeyword contextKeyword : contextKeywords) {
-            builder.append(contextKeyword.text);
+        for (ContextKeyword contextKeyword : getContextKeywords()) {
+            builder.append(contextKeyword.getText());
             builder.append(" ");
         }
         return builder.toString();
@@ -166,6 +167,14 @@ public class SecureUserProfileEvaluation extends SecureUserProfile implements Se
         } else if (!sourceSelect.equals(other.sourceSelect))
             return false;
         return true;
+    }
+
+    public List<History> getHistory() {
+        return history;
+    }
+
+    public void setHistory(List<History> history) {
+        this.history = history;
     }
 
 }

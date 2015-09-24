@@ -21,8 +21,6 @@ import java.util.List;
 
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
-import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlElementWrapper;
 import javax.xml.bind.annotation.XmlRootElement;
 
 import org.codehaus.jackson.annotate.JsonIgnoreProperties;
@@ -37,49 +35,26 @@ import eu.eexcess.dataformats.result.ResultStats;
 public class PartnerBadge implements Serializable {
 
     private static final long serialVersionUID = -6411801334911587483L;
-
-    @XmlElement(name = "description")
     private String description;
-    @XmlElement(name = "favIconURI")
     private String favIconURI;
-    @XmlElement(name = "partnerConnectorEndpoint")
     private String partnerConnectorEndpoint;
-
-    @XmlElement(name = "lowerAgeLimit")
     private Integer lowerAgeLimit;
-
-    @XmlElement(name = "tag")
-    @XmlElementWrapper(name = "tags")
+    private Integer upperAgeLimit;
+    private String lowerDateLimit;
+    private String upperDateLimit;
     private List<String> tags;
-
-    @XmlElement(name = "domainContent")
     private List<PartnerDomain> domainContent = new ArrayList<PartnerDomain>();
-    @XmlElement(name = "languageContent")
     private List<String> languageContent = new ArrayList<String>();
-
-    @XmlElement(name = "systemId")
     private String systemId;
-
-    @XmlElement(name = "queryGeneratorClass")
     private String queryGeneratorClass;
-
-    @XmlElement(name = "isQueryExpansionEnabled")
     private Boolean isQueryExpansionEnabled;
-
-    @XmlElement(name = "isQuerySplitingEnabled")
     private Boolean isQuerySplittingEnabled;
-
-    @XmlElement(name = "partnerKey")
-    // has to be the same value than in SecureUserProfile
     private String partnerKey;
-
-    @XmlElement(name = "shortTimeStats", required = false)
     private PartnerBadgeStats shortTimeStats = new PartnerBadgeStats();
 
     // TODO: Statistics should be moved somewere else! (Specially the logic for
     // it)
 
-    @XmlElement(name = "longTimeStats", required = false)
     public PartnerBadgeStats longTimeStats = new PartnerBadgeStats();
 
     public Long getShortTimeResponseTime() {
@@ -155,7 +130,7 @@ public class PartnerBadge implements Serializable {
      * @param partner
      * @param respTime
      */
-    synchronized public void updatePartnerResponseTime(long respTime) {
+    public synchronized void updatePartnerResponseTime(long respTime) {
         pushLastResponseTimes(respTime);
         boolean first = true;
         for (Long tmpTime : getLastResponseTimes()) {
@@ -172,7 +147,7 @@ public class PartnerBadge implements Serializable {
         return this.getShortTimeStats().lastQueries;
     }
 
-    synchronized public void addLastQueries(ResultStats lastQuerie) {
+    public synchronized void addLastQueries(ResultStats lastQuerie) {
         this.getShortTimeStats().lastQueries.add(lastQuerie);
         if (this.getShortTimeStats().lastQueries.size() > 30)
             this.getShortTimeStats().lastQueries.remove(0);
@@ -264,6 +239,30 @@ public class PartnerBadge implements Serializable {
 
     public void setIsQuerySplittingEnabled(Boolean isQuerySplittingEnabled) {
         this.isQuerySplittingEnabled = isQuerySplittingEnabled;
+    }
+
+    public Integer getUpperAgeLimit() {
+        return upperAgeLimit;
+    }
+
+    public void setUpperAgeLimit(Integer upperAgeLimit) {
+        this.upperAgeLimit = upperAgeLimit;
+    }
+
+    public String getLowerDateLimit() {
+        return lowerDateLimit;
+    }
+
+    public void setLowerDateLimit(String lowerDateLimit) {
+        this.lowerDateLimit = lowerDateLimit;
+    }
+
+    public String getUpperDateLimit() {
+        return upperDateLimit;
+    }
+
+    public void setUpperDateLimit(String upperDateLimit) {
+        this.upperDateLimit = upperDateLimit;
     }
 
 }

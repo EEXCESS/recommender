@@ -35,7 +35,7 @@ public class SecureUserProfileEvaluationTest {
         }
 
         SecureUserProfileEvaluation evalProfile = new SecureUserProfileEvaluation();
-        evalProfile.contextKeywords.add(new ContextKeyword("Test"));
+        evalProfile.getContextKeywords().add(new ContextKeyword("Test"));
         try {
             m.marshal(evalProfile, System.out);
         } catch (JAXBException e) {

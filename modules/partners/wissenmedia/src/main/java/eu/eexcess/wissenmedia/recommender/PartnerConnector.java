@@ -66,8 +66,8 @@ public class PartnerConnector extends PartnerConnectorBase implements PartnerCon
         Map<String, String> valuesMap = new HashMap<String, String>();
         valuesMap.put("query", URLParamEncoder.encode(query));
         int numResults = 10;
-        if (userProfile.numResults!=null && userProfile.numResults != 0)
-        	numResults  = userProfile.numResults;
+        if (userProfile.getNumResults()!=null && userProfile.getNumResults() != 0)
+        	numResults  = userProfile.getNumResults();
         valuesMap.put("numResults", numResults+"");
 
         String searchRequest = StrSubstitutor.replace(partnerConfiguration.getSearchEndpoint(), valuesMap);

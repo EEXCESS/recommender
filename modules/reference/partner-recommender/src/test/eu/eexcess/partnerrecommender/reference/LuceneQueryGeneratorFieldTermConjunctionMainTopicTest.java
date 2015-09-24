@@ -8,13 +8,14 @@ import eu.eexcess.dataformats.userprofile.ContextKeyword;
 import eu.eexcess.dataformats.userprofile.ExpansionType;
 import eu.eexcess.dataformats.userprofile.SecureUserProfile;
 import eu.eexcess.partnerrecommender.api.PartnerConfigurationCache;
+import eu.eexcess.partnerrecommender.reference.LuceneQueryGeneratorFieldTermConjunctionMainTopic;
 
-public class LuceneQueryGeneratorFieldTermConjunctionTest {
+public class LuceneQueryGeneratorFieldTermConjunctionMainTopicTest {
 
     @Test
     public void multibleExpansionsTest() {
 
-        LuceneQueryGeneratorFieldTermConjunction gen = new LuceneQueryGeneratorFieldTermConjunction();
+        LuceneQueryGeneratorFieldTermConjunctionMainTopic gen = new LuceneQueryGeneratorFieldTermConjunctionMainTopic();
         SecureUserProfile userProfile = new SecureUserProfile();
         ContextKeyword keyword1 = new ContextKeyword("k1");
         userProfile.getContextKeywords().add(keyword1);
@@ -22,6 +23,12 @@ public class LuceneQueryGeneratorFieldTermConjunctionTest {
         userProfile.getContextKeywords().add(keyword2);
         ContextKeyword keyword3 = new ContextKeyword("k3");
         userProfile.getContextKeywords().add(keyword3);
+        ContextKeyword keyword8 = new ContextKeyword("k8");
+        keyword8.setIsMainTopic(true);
+        userProfile.getContextKeywords().add(keyword8);
+        ContextKeyword keyword9 = new ContextKeyword("k9");
+        keyword9.setIsMainTopic(true);
+        userProfile.getContextKeywords().add(keyword9);
         ContextKeyword keyword4 = new ContextKeyword("k4");
         userProfile.getContextKeywords().add(keyword4);
         ContextKeyword keyword5 = new ContextKeyword("k5");
@@ -33,19 +40,19 @@ public class LuceneQueryGeneratorFieldTermConjunctionTest {
         ContextKeyword keyword7 = new ContextKeyword("k7");
         keyword7.setExpansion(ExpansionType.PSEUDORELEVANCEWP);
         userProfile.getContextKeywords().add(keyword7);
-        synchronized (PartnerConfigurationCache.CONFIG.getPartnerConfiguration().isQueryExpansionEnabled()) {
-            PartnerConfigurationCache.CONFIG.getPartnerConfiguration().setIsQueryExpansionEnabled(true);
+//        synchronized (PartnerConfigurationCache.CONFIG.getPartnerConfiguration().isQueryExpansionEnabled()) {
+//            PartnerConfigurationCache.CONFIG.getPartnerConfiguration().setIsQueryExpansionEnabled(true);
             String result = gen.toQuery(userProfile);
             System.out.println(result);
-            assertTrue(result.equals("k1 OR k2 OR k3 OR k4 OR (k5 OR k6 OR k7)"));
+            assertTrue(result.equals("(k8 AND k9) AND (k1 OR k2 OR k3 OR k4 OR (k5 OR k6 OR k7))"));
             // assertTrue(result.equals("k1 OR k2 OR k3 OR k4 OR (k5 OR k6 OR k7)"));
-        }
+//        }
     }
 
     @Test
     public void singleExpansionsTest() {
 
-        LuceneQueryGeneratorFieldTermConjunction gen = new LuceneQueryGeneratorFieldTermConjunction();
+        LuceneQueryGeneratorFieldTermConjunctionMainTopic gen = new LuceneQueryGeneratorFieldTermConjunctionMainTopic();
         SecureUserProfile userProfile = new SecureUserProfile();
         ContextKeyword keyword1 = new ContextKeyword("k1");
         userProfile.getContextKeywords().add(keyword1);
@@ -64,7 +71,7 @@ public class LuceneQueryGeneratorFieldTermConjunctionTest {
     @Test
     public void multibleExpansionsBetweenTwoTest() {
 
-        LuceneQueryGeneratorFieldTermConjunction gen = new LuceneQueryGeneratorFieldTermConjunction();
+        LuceneQueryGeneratorFieldTermConjunctionMainTopic gen = new LuceneQueryGeneratorFieldTermConjunctionMainTopic();
         SecureUserProfile userProfile = new SecureUserProfile();
         ContextKeyword keyword1 = new ContextKeyword("k1");
         userProfile.getContextKeywords().add(keyword1);
@@ -97,7 +104,7 @@ public class LuceneQueryGeneratorFieldTermConjunctionTest {
     @Test
     public void multibleExpansionsBetweenTest() {
 
-        LuceneQueryGeneratorFieldTermConjunction gen = new LuceneQueryGeneratorFieldTermConjunction();
+        LuceneQueryGeneratorFieldTermConjunctionMainTopic gen = new LuceneQueryGeneratorFieldTermConjunctionMainTopic();
         SecureUserProfile userProfile = new SecureUserProfile();
         ContextKeyword keyword1 = new ContextKeyword("k1");
         userProfile.getContextKeywords().add(keyword1);
@@ -130,7 +137,7 @@ public class LuceneQueryGeneratorFieldTermConjunctionTest {
     @Test
     public void multibleExpansionsStartTest() {
 
-        LuceneQueryGeneratorFieldTermConjunction gen = new LuceneQueryGeneratorFieldTermConjunction();
+        LuceneQueryGeneratorFieldTermConjunctionMainTopic gen = new LuceneQueryGeneratorFieldTermConjunctionMainTopic();
         SecureUserProfile userProfile = new SecureUserProfile();
         ContextKeyword keyword1 = new ContextKeyword("k1");
         keyword1.setExpansion(ExpansionType.PSEUDORELEVANCEWP);
@@ -163,7 +170,7 @@ public class LuceneQueryGeneratorFieldTermConjunctionTest {
     @Test
     public void multibleSerendipityStartTest() {
 
-        LuceneQueryGeneratorFieldTermConjunction gen = new LuceneQueryGeneratorFieldTermConjunction();
+        LuceneQueryGeneratorFieldTermConjunctionMainTopic gen = new LuceneQueryGeneratorFieldTermConjunctionMainTopic();
         SecureUserProfile userProfile = new SecureUserProfile();
         ContextKeyword keyword1 = new ContextKeyword("k1");
         keyword1.setExpansion(ExpansionType.SERENDIPITY);
@@ -196,7 +203,7 @@ public class LuceneQueryGeneratorFieldTermConjunctionTest {
     @Test
     public void multibleExpansionsConjunctionTestBrackets() {
 
-        LuceneQueryGeneratorFieldTermConjunction gen = new LuceneQueryGeneratorFieldTermConjunction();
+        LuceneQueryGeneratorFieldTermConjunctionMainTopic gen = new LuceneQueryGeneratorFieldTermConjunctionMainTopic();
         SecureUserProfile userProfile = new SecureUserProfile();
         ContextKeyword keyword1 = new ContextKeyword("k1 (K5 K9)");
         userProfile.getContextKeywords().add(keyword1);
@@ -226,7 +233,7 @@ public class LuceneQueryGeneratorFieldTermConjunctionTest {
     @Test
     public void multibleExpansionsConjunctionTest() {
 
-        LuceneQueryGeneratorFieldTermConjunction gen = new LuceneQueryGeneratorFieldTermConjunction();
+        LuceneQueryGeneratorFieldTermConjunctionMainTopic gen = new LuceneQueryGeneratorFieldTermConjunctionMainTopic();
         SecureUserProfile userProfile = new SecureUserProfile();
         ContextKeyword keyword1 = new ContextKeyword("k1 K5");
         userProfile.getContextKeywords().add(keyword1);
@@ -256,7 +263,7 @@ public class LuceneQueryGeneratorFieldTermConjunctionTest {
     @Test
     public void multibleExpansionsConjunctionTestMultipleSpaces() {
 
-        LuceneQueryGeneratorFieldTermConjunction gen = new LuceneQueryGeneratorFieldTermConjunction();
+        LuceneQueryGeneratorFieldTermConjunctionMainTopic gen = new LuceneQueryGeneratorFieldTermConjunctionMainTopic();
         SecureUserProfile userProfile = new SecureUserProfile();
         ContextKeyword keyword1 = new ContextKeyword("k1  K5");
         userProfile.getContextKeywords().add(keyword1);
@@ -286,7 +293,7 @@ public class LuceneQueryGeneratorFieldTermConjunctionTest {
     @Test
     public void multibleExpansionsConjunctionTestDisabled() {
 
-        LuceneQueryGeneratorFieldTermConjunction gen = new LuceneQueryGeneratorFieldTermConjunction();
+        LuceneQueryGeneratorFieldTermConjunctionMainTopic gen = new LuceneQueryGeneratorFieldTermConjunctionMainTopic();
         SecureUserProfile userProfile = new SecureUserProfile();
         ContextKeyword keyword1 = new ContextKeyword("k1 K5");
         userProfile.getContextKeywords().add(keyword1);

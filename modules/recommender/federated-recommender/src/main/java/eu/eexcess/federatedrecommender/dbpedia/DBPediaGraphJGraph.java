@@ -66,7 +66,7 @@ public class DBPediaGraphJGraph implements
 		List<DbPediaIndexBean> results = null;
 		try {
 
-			String query = "entity_en:\"" + keyword.text + "\""; // \" AND edge:\"http://xmlns.com/foaf/0.1/name\"";
+			String query = "entity_en:\"" + keyword.getText() + "\""; // \" AND edge:\"http://xmlns.com/foaf/0.1/name\"";
 			// logger.log(Level.INFO,"Query:_"+query);
 			results = dbPediaIndex.search(hitsLimit, query);
 		} catch (FederatedRecommenderException e) {
@@ -76,16 +76,16 @@ public class DBPediaGraphJGraph implements
 
 		// logger.log(Level.INFO,"Result:" +results.toString());
 		synchronized (g) {
-			g.addVertex(keyword.text);
+			g.addVertex(keyword.getText());
 			for (DbPediaIndexBean item : results) {
 				try {
 					if (item.entity_en.replace(",.*", "").toLowerCase().equals(
-							keyword.text.toLowerCase().trim())) {
-						keyword.reason = "unique";
-						logger.log(Level.INFO, item.entity_en +" "+ keyword.text);
+							keyword.getText().toLowerCase().trim())) {
+						keyword.setReason("unique");
+						logger.log(Level.INFO, item.entity_en +" "+ keyword.getText());
 					}
 					g.addVertex(item.parentNode);
-					g.addEdge(keyword.text, item.parentNode);
+					g.addEdge(keyword.getText(), item.parentNode);
 					buildFromKeyword(g, item.parentNode, vistedNodes,
 							hitsLimit, depthLimit);
 				} catch (FederatedRecommenderException e) {
@@ -95,7 +95,7 @@ public class DBPediaGraphJGraph implements
 			}
 			
 			// g.removeVertex(keyword);
-			keynodes.add(keyword.text);
+			keynodes.add(keyword.getText());
 		}
 		return keyword;
 
@@ -162,9 +162,9 @@ public class DBPediaGraphJGraph implements
 		List<ContextKeyword> tmpKeywords = new ArrayList<ContextKeyword>();
 		for(int i = 0; i < profileKeywords.size(); i++){
 			if(i+1<profileKeywords.size())
-				tmpKeywords.add(new ContextKeyword(profileKeywords.get(i).text+ " "+profileKeywords.get(i+1).text));
+				tmpKeywords.add(new ContextKeyword(profileKeywords.get(i).getText()+ " "+profileKeywords.get(i+1).getText()));
 			if(i+2<profileKeywords.size())
-				tmpKeywords.add(new ContextKeyword(profileKeywords.get(i).text+ " "+profileKeywords.get(i+1).text+ " "+profileKeywords.get(i+2).text));
+				tmpKeywords.add(new ContextKeyword(profileKeywords.get(i).getText()+ " "+profileKeywords.get(i+1).getText()+ " "+profileKeywords.get(i+2).getText()));
 		}
 		profileKeywords.addAll(tmpKeywords);
 		Map<String, Future<ContextKeyword>> futures = new HashMap<String, Future<ContextKeyword>>();
@@ -184,7 +184,7 @@ public class DBPediaGraphJGraph implements
 					return result;
 				}
 			});
-			futures.put(keyword.text, future);
+			futures.put(keyword.getText(), future);
 
 		}
 		for (Entry<String, Future<ContextKeyword>> entry : futures.entrySet()) {

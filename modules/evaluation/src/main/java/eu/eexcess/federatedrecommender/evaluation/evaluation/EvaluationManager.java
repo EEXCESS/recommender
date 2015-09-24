@@ -77,7 +77,7 @@ public class EvaluationManager {
             this.evalQueries = new EvaluationQueries();
             SecureUserProfileEvaluation query = new SecureUserProfileEvaluation();
             ContextKeyword keyword = new ContextKeyword("Test");
-            query.contextKeywords.add(keyword);
+            query.getContextKeywords().add(keyword);
             this.evalQueries.getQueries().add(query);
 
         }

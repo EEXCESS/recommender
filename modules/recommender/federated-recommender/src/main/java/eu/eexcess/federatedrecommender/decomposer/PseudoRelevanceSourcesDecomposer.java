@@ -89,17 +89,17 @@ public class PseudoRelevanceSourcesDecomposer implements SecureUserProfileDecomp
             logger.log(Level.SEVERE, "Error getting FederatedRecommenderCore,was perhabs not initialized correctly", e);
         }
         Set<String> keywords = new HashSet<String>();
-        for (ContextKeyword cKeyword : inputSecureUserProfile.contextKeywords) {
-            keywords.add(cKeyword.text);
+        for (ContextKeyword cKeyword : inputSecureUserProfile.getContextKeywords()) {
+            keywords.add(cKeyword.getText());
         }
 
         List<PartnerBadge> tmpPartnerList = new ArrayList<PartnerBadge>();
-        for (PartnerBadge partnerBadge : inputSecureUserProfile.partnerList) {
+        for (PartnerBadge partnerBadge : inputSecureUserProfile.getPartnerList()) {
             tmpPartnerList.add(partnerBadge);
         }
-        inputSecureUserProfile.partnerList = inputSecureUserProfile.getQueryExpansionSourcePartner();
+        inputSecureUserProfile.setPartnerList(inputSecureUserProfile.getQueryExpansionSourcePartner());
         PartnersFederatedRecommendations pFR = fCore.getPartnersRecommendations(inputSecureUserProfile);
-        inputSecureUserProfile.partnerList = tmpPartnerList;
+        inputSecureUserProfile.setPartnerList(tmpPartnerList);
 
         Directory directory = new RAMDirectory();
 
@@ -132,7 +132,7 @@ public class PseudoRelevanceSourcesDecomposer implements SecureUserProfileDecomp
                     String utf8String = termStats.termtext.utf8ToString();
                     if (utf8String.length() > 4 && !checkHighFreqTermsQuery(utf8String.toLowerCase(), keywords))
                         if (keywords.add(utf8String.toLowerCase())) {
-                            inputSecureUserProfile.contextKeywords.add(new ContextKeyword(utf8String, termStats.docFreq / 100.0, ExpansionType.PSEUDORELEVANCEWP));
+                            inputSecureUserProfile.getContextKeywords().add(new ContextKeyword(utf8String, termStats.docFreq / 100.0, ExpansionType.PSEUDORELEVANCEWP));
                         }
                 }
             } else

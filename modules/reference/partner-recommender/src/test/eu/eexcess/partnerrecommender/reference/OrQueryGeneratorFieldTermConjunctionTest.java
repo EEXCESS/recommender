@@ -18,22 +18,22 @@ public class OrQueryGeneratorFieldTermConjunctionTest {
 
         SecureUserProfile userProfile = new SecureUserProfile();
         ContextKeyword keyword1 = new ContextKeyword("k1");
-        userProfile.contextKeywords.add(keyword1);
+        userProfile.getContextKeywords().add(keyword1);
         ContextKeyword keyword2 = new ContextKeyword("k2");
-        userProfile.contextKeywords.add(keyword2);
+        userProfile.getContextKeywords().add(keyword2);
         ContextKeyword keyword3 = new ContextKeyword("k3");
-        userProfile.contextKeywords.add(keyword3);
+        userProfile.getContextKeywords().add(keyword3);
         ContextKeyword keyword4 = new ContextKeyword("k4");
-        userProfile.contextKeywords.add(keyword4);
+        userProfile.getContextKeywords().add(keyword4);
         ContextKeyword keyword5 = new ContextKeyword("k5");
-        keyword5.expansion = ExpansionType.PSEUDORELEVANCEWP;
-        userProfile.contextKeywords.add(keyword5);
+        keyword5.setExpansion(ExpansionType.PSEUDORELEVANCEWP);
+        userProfile.getContextKeywords().add(keyword5);
         ContextKeyword keyword6 = new ContextKeyword("k6");
-        keyword6.expansion = ExpansionType.PSEUDORELEVANCEWP;
-        userProfile.contextKeywords.add(keyword6);
+        keyword6.setExpansion(ExpansionType.PSEUDORELEVANCEWP);
+        userProfile.getContextKeywords().add(keyword6);
         ContextKeyword keyword7 = new ContextKeyword("k7");
-        keyword7.expansion = ExpansionType.PSEUDORELEVANCEWP;
-        userProfile.contextKeywords.add(keyword7);
+        keyword7.setExpansion(ExpansionType.PSEUDORELEVANCEWP);
+        userProfile.getContextKeywords().add(keyword7);
         synchronized (PartnerConfigurationCache.CONFIG.getPartnerConfiguration().isQueryExpansionEnabled()) {
             PartnerConfigurationCache.CONFIG.getPartnerConfiguration().setIsQueryExpansionEnabled(true);
             String result = gen.toQuery(userProfile);
@@ -47,22 +47,22 @@ public class OrQueryGeneratorFieldTermConjunctionTest {
 
         SecureUserProfile userProfile = new SecureUserProfile();
         ContextKeyword keyword1 = new ContextKeyword("k1 k5");
-        userProfile.contextKeywords.add(keyword1);
+        userProfile.getContextKeywords().add(keyword1);
         ContextKeyword keyword2 = new ContextKeyword(" k2 k5 k6 ");
-        userProfile.contextKeywords.add(keyword2);
+        userProfile.getContextKeywords().add(keyword2);
         ContextKeyword keyword3 = new ContextKeyword("k3");
-        userProfile.contextKeywords.add(keyword3);
+        userProfile.getContextKeywords().add(keyword3);
         ContextKeyword keyword4 = new ContextKeyword("k4");
-        userProfile.contextKeywords.add(keyword4);
+        userProfile.getContextKeywords().add(keyword4);
         ContextKeyword keyword5 = new ContextKeyword("k5");
-        keyword5.expansion = ExpansionType.PSEUDORELEVANCEWP;
-        userProfile.contextKeywords.add(keyword5);
+        keyword5.setExpansion(ExpansionType.PSEUDORELEVANCEWP);
+        userProfile.getContextKeywords().add(keyword5);
         ContextKeyword keyword6 = new ContextKeyword("k6");
-        keyword6.expansion = ExpansionType.PSEUDORELEVANCEWP;
-        userProfile.contextKeywords.add(keyword6);
+        keyword6.setExpansion(ExpansionType.PSEUDORELEVANCEWP);
+        userProfile.getContextKeywords().add(keyword6);
         ContextKeyword keyword7 = new ContextKeyword("k7");
-        keyword7.expansion = ExpansionType.PSEUDORELEVANCEWP;
-        userProfile.contextKeywords.add(keyword7);
+        keyword7.setExpansion(ExpansionType.PSEUDORELEVANCEWP);
+        userProfile.getContextKeywords().add(keyword7);
         synchronized (PartnerConfigurationCache.CONFIG.getPartnerConfiguration().isQueryExpansionEnabled()) {
             PartnerConfigurationCache.CONFIG.getPartnerConfiguration().setIsQueryExpansionEnabled(true);
             String result = gen.toQuery(userProfile);
@@ -76,22 +76,22 @@ public class OrQueryGeneratorFieldTermConjunctionTest {
 
         SecureUserProfile userProfile = new SecureUserProfile();
         ContextKeyword keyword1 = new ContextKeyword("k1");
-        userProfile.contextKeywords.add(keyword1);
+        userProfile.getContextKeywords().add(keyword1);
         ContextKeyword keyword2 = new ContextKeyword("k2");
-        userProfile.contextKeywords.add(keyword2);
+        userProfile.getContextKeywords().add(keyword2);
         ContextKeyword keyword3 = new ContextKeyword("k3");
-        userProfile.contextKeywords.add(keyword3);
+        userProfile.getContextKeywords().add(keyword3);
         ContextKeyword keyword4 = new ContextKeyword("k4");
-        userProfile.contextKeywords.add(keyword4);
+        userProfile.getContextKeywords().add(keyword4);
         ContextKeyword keyword5 = new ContextKeyword("k5");
-        keyword5.expansion = ExpansionType.PSEUDORELEVANCEWP;
-        userProfile.contextKeywords.add(keyword5);
+        keyword5.setExpansion(ExpansionType.PSEUDORELEVANCEWP);
+        userProfile.getContextKeywords().add(keyword5);
         ContextKeyword keyword6 = new ContextKeyword("k6");
-        keyword6.expansion = ExpansionType.PSEUDORELEVANCEWP;
-        userProfile.contextKeywords.add(keyword6);
+        keyword6.setExpansion(ExpansionType.PSEUDORELEVANCEWP);
+        userProfile.getContextKeywords().add(keyword6);
         ContextKeyword keyword7 = new ContextKeyword("k7");
-        keyword7.expansion = ExpansionType.PSEUDORELEVANCEWP;
-        userProfile.contextKeywords.add(keyword7);
+        keyword7.setExpansion(ExpansionType.PSEUDORELEVANCEWP);
+        userProfile.getContextKeywords().add(keyword7);
         synchronized (PartnerConfigurationCache.CONFIG.getPartnerConfiguration().isQueryExpansionEnabled()) {
             PartnerConfigurationCache.CONFIG.getPartnerConfiguration().setIsQueryExpansionEnabled(false);
             String result = gen.toQuery(userProfile);

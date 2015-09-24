@@ -126,8 +126,8 @@ public class PartnerConnector extends PartnerConnectorBase implements PartnerCon
 			logger.log(Level.WARNING,"Mendeley returned an empty result list");
 
         int numResults=100;
-        if(userProfile.numResults!=null)
-            numResults=userProfile.numResults;
+        if(userProfile.getNumResults()!=null)
+            numResults=userProfile.getNumResults();
 
         jsonResponse.limitNumDocuments(numResults);
 

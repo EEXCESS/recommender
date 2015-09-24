@@ -24,8 +24,6 @@ package eu.eexcess.dataformats.userprofile;
 
 import java.io.Serializable;
 
-import javax.xml.bind.annotation.XmlElement;
-
 /**
  * Context Class of the Secure User Profil
  * 
@@ -35,22 +33,20 @@ import javax.xml.bind.annotation.XmlElement;
 public class Context implements Serializable {
 
     private static final long serialVersionUID = 7196796361889005448L;
-    @XmlElement(name = "reason")
-    public String reason;
-    @XmlElement(name = "value")
-    public String value;
+    private String reason;
+    private String value;
 
     @Override
     public String toString() {
-        return "Context [reason=" + reason + ", value=" + value + "]";
+        return "Context [reason=" + getReason() + ", value=" + getValue() + "]";
     }
 
     @Override
     public int hashCode() {
         final int prime = 31;
         int result = 1;
-        result = prime * result + ((reason == null) ? 0 : reason.hashCode());
-        result = prime * result + ((value == null) ? 0 : value.hashCode());
+        result = prime * result + ((getReason() == null) ? 0 : getReason().hashCode());
+        result = prime * result + ((getValue() == null) ? 0 : getValue().hashCode());
         return result;
     }
 
@@ -63,17 +59,33 @@ public class Context implements Serializable {
         if (getClass() != obj.getClass())
             return false;
         Context other = (Context) obj;
-        if (reason == null) {
-            if (other.reason != null)
+        if (getReason() == null) {
+            if (other.getReason() != null)
                 return false;
-        } else if (!reason.equals(other.reason))
+        } else if (!getReason().equals(other.getReason()))
             return false;
-        if (value == null) {
-            if (other.value != null)
+        if (getValue() == null) {
+            if (other.getValue() != null)
                 return false;
-        } else if (!value.equals(other.value))
+        } else if (!getValue().equals(other.getValue()))
             return false;
         return true;
+    }
+
+    public String getReason() {
+        return reason;
+    }
+
+    public void setReason(String reason) {
+        this.reason = reason;
+    }
+
+    public String getValue() {
+        return value;
+    }
+
+    public void setValue(String value) {
+        this.value = value;
     }
 
 }

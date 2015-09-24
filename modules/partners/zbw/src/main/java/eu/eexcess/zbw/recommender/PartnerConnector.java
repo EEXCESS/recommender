@@ -83,8 +83,8 @@ public class PartnerConnector extends PartnerConnectorBase implements PartnerCon
             query = URLEncoder.encode(query, "UTF-8");
             Map<String, String> valuesMap = new HashMap<String, String>();
             valuesMap.put("query", query);
-            if (userProfile.numResults != null)
-                valuesMap.put("size", userProfile.numResults.toString());
+            if (userProfile.getNumResults() != null)
+                valuesMap.put("size", userProfile.getNumResults().toString());
             else
                 valuesMap.put("size", "10");
             String searchRequest = StrSubstitutor.replace(partnerConfiguration.getSearchEndpoint(), valuesMap);

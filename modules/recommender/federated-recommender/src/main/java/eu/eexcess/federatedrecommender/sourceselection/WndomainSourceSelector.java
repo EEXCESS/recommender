@@ -153,18 +153,18 @@ public class WndomainSourceSelector implements PartnerSelector {
         seenDomains.clear();
 
         // don't touch if already selected
-        if (userProfile.partnerList.isEmpty()) {
+        if (userProfile.getPartnerList().isEmpty()) {
             // match partners and user profile languages
-            matchKeywordDomainsOnParterDomains(userProfile.contextKeywords, partners);
-            selectPartners(partners, userProfile.partnerList);
+            matchKeywordDomainsOnParterDomains(userProfile.getContextKeywords(), partners);
+            selectPartners(partners, userProfile.getPartnerList());
         } else {
-            LOGGER.info("refusing to select partners due to [" + userProfile.partnerList.size() + "] prevoiously selected partners");
+            LOGGER.info("refusing to select partners due to [" + userProfile.getPartnerList().size() + "] prevoiously selected partners");
             return userProfile;
         }
 
-        if (!userProfile.partnerList.isEmpty()) {
+        if (!userProfile.getPartnerList().isEmpty()) {
             StringBuilder info = new StringBuilder("partners: ");
-            for (PartnerBadge entry : userProfile.partnerList) {
+            for (PartnerBadge entry : userProfile.getPartnerList()) {
                 info.append("[" + entry.getSystemId() + "] ");
             }
             LOGGER.info("WordnetDomain-based source selection selected: " + info.toString());
@@ -293,12 +293,12 @@ public class WndomainSourceSelector implements PartnerSelector {
         if (isKeywordGroupingEnabled) {
             StringBuilder joinedKeywords = new StringBuilder();
             for (ContextKeyword contextKeyword : contextKeywords) {
-                joinedKeywords.append(contextKeyword.text.toLowerCase() + " ");
+                joinedKeywords.append(contextKeyword.getText().toLowerCase() + " ");
             }
             keywords.add(joinedKeywords.toString().trim());
         } else {
             for (ContextKeyword contextKeyword : contextKeywords) {
-                keywords.add(contextKeyword.text.toLowerCase());
+                keywords.add(contextKeyword.getText().toLowerCase());
             }
         }
         return keywords;

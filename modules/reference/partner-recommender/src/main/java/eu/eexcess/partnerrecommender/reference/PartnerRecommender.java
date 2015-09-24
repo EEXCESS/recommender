@@ -100,8 +100,8 @@ public class PartnerRecommender implements PartnerRecommenderApi {
              * Call remote API from partner
              */
             PartnerConfiguration currentPartnerConfiguration = (PartnerConfiguration) SerializationUtils.clone(partnerConfiguration);
-            if (userProfile.partnerList != null && !userProfile.partnerList.isEmpty())
-                for (PartnerBadge pC : userProfile.partnerList) {
+            if (userProfile.getPartnerList() != null && !userProfile.getPartnerList().isEmpty())
+                for (PartnerBadge pC : userProfile.getPartnerList()) {
                     if (pC.getSystemId().equals(partnerConfiguration.getSystemId())) {
                         currentPartnerConfiguration.setQueryGeneratorClass(pC.getQueryGeneratorClass());
                     }

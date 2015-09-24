@@ -144,7 +144,7 @@ public class PartnerDomainsProbe implements Cloneable {
                 break;
             }
             SecureUserProfile ambiguousQuery = new SecureUserProfile();
-            ambiguousQuery.contextKeywords = Arrays.asList(new ContextKeyword(ambiguousPhrase));
+            ambiguousQuery.setContextKeywords(Arrays.asList(new ContextKeyword(ambiguousPhrase)));
 
             ResultList partnerResult = getPartnerResult(partnerClient, partner, ambiguousQuery);
             Set<String> seenResults = new HashSet<String>();
