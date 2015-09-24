@@ -92,6 +92,7 @@
 		<pluginManagement>
 			<plugins>
 				<!-- addition for Sonarqube, comment out if build fails -->
+				<!--
 				<plugin>
 					<groupId>org.jacoco</groupId>
 					<artifactId>jacoco-maven-plugin</artifactId>
@@ -103,7 +104,13 @@
 							</goals>
 						</execution>
 					</executions>
+				</plugin> 
+					<plugin>
+					<groupId>org.codehaus.sonar</groupId>
+					<artifactId>sonar-maven-plugin</artifactId>
+					<version>5.1.1</version>
 				</plugin>
+				-->
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-dependency-plugin</artifactId>
@@ -113,11 +120,7 @@
 					<groupId>org.mortbay.jetty</groupId>
 					<artifactId>maven-jetty-plugin</artifactId>
 				</plugin>
-				<plugin>
-					<groupId>org.codehaus.sonar</groupId>
-					<artifactId>sonar-maven-plugin</artifactId>
-					<version>5.1.1</version>
-				</plugin>
+			
 
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
