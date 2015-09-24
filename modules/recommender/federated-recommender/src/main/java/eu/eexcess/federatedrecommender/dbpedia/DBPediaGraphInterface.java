@@ -2,9 +2,6 @@ package eu.eexcess.federatedrecommender.dbpedia;
 
 import java.util.List;
 
-import org.jgraph.graph.DefaultEdge;
-import org.jgrapht.graph.SimpleWeightedGraph;
-
 import eu.eexcess.dataformats.userprofile.ContextKeyword;
 import eu.eexcess.federatedrecommender.utils.FederatedRecommenderException;
 

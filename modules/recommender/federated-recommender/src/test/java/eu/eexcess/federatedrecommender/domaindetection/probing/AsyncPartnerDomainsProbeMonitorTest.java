@@ -159,7 +159,7 @@ public class AsyncPartnerDomainsProbeMonitorTest implements ProbeResultChanged {
             for (Map.Entry<String, Set<PartnerDomain>> entry : resultMap.entrySet()) {
                 StringBuilder info = new StringBuilder("result [" + n + "] [" + entry.getKey() + "] => {");
                 for (PartnerDomain domain : entry.getValue()) {
-                    info.append("[" + domain.domainName + "=" + domain.weight + "] ");
+                    info.append("[" + domain.getDomainName() + "=" + domain.getWeight() + "] ");
                 }
                 System.out.println(info + "}");
             }

@@ -108,7 +108,7 @@ public class PartnerDomainsProbe implements Cloneable {
      * @param domainDetector
      *            detector to be invoked
      * @param numProbePhrases
-     *            number of random phrases to generate for later probing
+     *            number of random phrases to generate for later probing (~50 phrases take ~15 seconds)
      * @param considerNumResults
      *            number of partner results to consider for domain detection
      * @throws RuntimeException

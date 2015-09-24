@@ -63,7 +63,7 @@ public class Database<T extends DatabasePreparedQuery> implements Closeable {
 
     public Database(String dBName, T[] preparedStatementsDefinitions) {
         this.dBName = dBName;
-        LOGGER.log(Level.INFO, "Trying to open DB:" + this.dBName);
+        LOGGER.log(Level.INFO, "Trying to open DB: " + this.dBName);
         try {
             Class.forName(JDBC_DRIVER);
         } catch (ClassNotFoundException e) {

@@ -25,8 +25,6 @@ package eu.eexcess.federatedrecommender.dbpedia;
 import org.jgrapht.graph.SimpleWeightedGraph;
 import org.jgrapht.graph.DefaultEdge;
 
-import com.sun.tools.internal.xjc.generator.bean.ImplStructureStrategy.Result;
-
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -39,7 +37,6 @@ import java.util.concurrent.Future;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import jena.rdfcat;
 import eu.eexcess.dataformats.userprofile.ContextKeyword;
 import eu.eexcess.federatedrecommender.utils.FederatedRecommenderException;
 

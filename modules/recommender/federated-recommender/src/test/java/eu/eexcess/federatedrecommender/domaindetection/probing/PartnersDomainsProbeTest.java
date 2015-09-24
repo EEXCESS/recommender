@@ -90,7 +90,7 @@ public class PartnersDomainsProbeTest {
             Set<PartnerDomain> partnerToDomain = probe.probePartner(partnerRegister.getClient(partner.getSystemId()), partner);
             System.out.println("domains for partner [" + partner.getSystemId() + "]");
             for (PartnerDomain domain : partnerToDomain) {
-                System.out.println("name: " + domain.domainName + " weight: " + domain.weight);
+                System.out.println("name: " + domain.getDomainName() + " weight: " + domain.getWeight());
             }
 
             if (partnerToDomain.size() <= 0) {
