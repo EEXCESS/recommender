@@ -29,11 +29,11 @@ public class ZBWQueryGenerator implements QueryGeneratorApi {
     @Override
     public String toQuery(SecureUserProfile userProfile) {
         StringBuilder builder = new StringBuilder();
-        for (ContextKeyword context : userProfile.contextKeywords) {
+        for (ContextKeyword context : userProfile.getContextKeywords()) {
             if (builder.length() > 0) { 
             	builder.append(" OR "); 
             }
-            builder.append(context.text);
+            builder.append(context.getText());
         }
         return URLEncoder.encode( "\""+builder.toString()+"\"");
     }

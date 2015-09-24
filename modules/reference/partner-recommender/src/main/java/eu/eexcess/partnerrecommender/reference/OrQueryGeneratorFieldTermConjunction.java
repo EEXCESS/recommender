@@ -46,10 +46,10 @@ public class OrQueryGeneratorFieldTermConjunction implements QueryGeneratorApi {
         StringBuilder builder = new StringBuilder();
         Pattern replace = Pattern.compile(REGEXP);
 
-        for (ContextKeyword context : userProfile.contextKeywords) {
-            if (context.expansion != null && (context.expansion == ExpansionType.PSEUDORELEVANCEWP || context.expansion == ExpansionType.SERENDIPITY)) {
+        for (ContextKeyword context : userProfile.getContextKeywords()) {
+            if (context.getExpansion() != null && (context.getExpansion() == ExpansionType.PSEUDORELEVANCEWP || context.getExpansion() == ExpansionType.SERENDIPITY)) {
                 if (PartnerConfigurationCache.CONFIG.getPartnerConfiguration().isQueryExpansionEnabled()) {
-                    String keyword = context.text;
+                    String keyword = context.getText();
                     Matcher matcher2 = replace.matcher(keyword);
                     keyword = matcher2.replaceAll(" AND ");
 
@@ -60,7 +60,7 @@ public class OrQueryGeneratorFieldTermConjunction implements QueryGeneratorApi {
                     builder.append(keyword);
                 }
             } else {
-                String keyword = context.text;
+                String keyword = context.getText();
                 Matcher matcher2 = replace.matcher(keyword);
                 keyword = matcher2.replaceAll(" AND ");
 

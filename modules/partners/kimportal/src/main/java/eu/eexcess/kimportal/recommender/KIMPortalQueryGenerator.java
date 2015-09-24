@@ -29,10 +29,10 @@ public class KIMPortalQueryGenerator implements QueryGeneratorApi {
     @Override
     public String toQuery(SecureUserProfile userProfile) {
         StringBuilder builder = new StringBuilder();
-        for (ContextKeyword context : userProfile.contextKeywords) {
+        for (ContextKeyword context : userProfile.getContextKeywords()) {
             if (builder.length() > 0) { builder.append("%20OR%20"); }
             try {
-				builder.append(URLEncoder.encode(context.text,"UTF-8"));
+				builder.append(URLEncoder.encode(context.getText(),"UTF-8"));
 			} catch (UnsupportedEncodingException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();

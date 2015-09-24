@@ -177,7 +177,7 @@ public class FederatedRecommenderService {
     public ResultList recommend(SecureUserProfile userProfile) throws IOException {
         ResultList resultList = new ResultList();
         resultList = fRC.generateFederatedRecommendation(userProfile);
-        resultList.queryID = userProfile.queryID;
+        resultList.queryID = userProfile.getQueryID();
         return resultList;
     }
 
@@ -275,7 +275,7 @@ public class FederatedRecommenderService {
     public ResultList testRecommend(@QueryParam("context") String context) throws IOException {
         SecureUserProfile userProfile = new SecureUserProfile();
         for (String text : Arrays.asList(context)) {
-            userProfile.contextKeywords.add(new ContextKeyword(text, 0.1));
+            userProfile.getContextKeywords().add(new ContextKeyword(text, 0.1));
         }
         return fRC.generateFederatedRecommendation(userProfile);
     }
@@ -299,38 +299,38 @@ public class FederatedRecommenderService {
     @Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
     public SecureUserProfile testSUP() {
         SecureUserProfile secureUserProfile = new SecureUserProfile();
-        secureUserProfile.queryID = "QueryID01234567";
-        secureUserProfile.firstName = "Max";
-        secureUserProfile.lastName = "Musterman";
-        secureUserProfile.birthDate = new Date();
-        secureUserProfile.gender = "male";
-        secureUserProfile.timeRange = new TimeRange();
-        secureUserProfile.timeRange.setStart("1980");
-        secureUserProfile.timeRange.setEnd("2000");
+        secureUserProfile.setQueryID("QueryID01234567");
+        secureUserProfile.setFirstName("Max");
+        secureUserProfile.setLastName("Musterman");
+        secureUserProfile.setBirthDate(new Date());
+        secureUserProfile.setGender("male");
+        secureUserProfile.setTimeRange(new TimeRange());
+        secureUserProfile.getTimeRange().setStart("1980");
+        secureUserProfile.getTimeRange().setEnd("2000");
         List<History> history = new ArrayList<History>();
         history.add(new History(new Date(), "history title", 4, 4, "http://1234.com"));
        
         Address address = new Address("austria", 8010, "Graz", "nothing", "to add");
-        address.city = "testcity";
-        address.country = "testcountry";
-        address.zipCode = 1213345;
-        secureUserProfile.address = address;
-        secureUserProfile.context = new Context();
-        secureUserProfile.context.reason = "manual";
-        secureUserProfile.context.value = "www.wikipedia.at";
-        secureUserProfile.queryID = "1234COFFEE";
+        address.setCity("testcity");
+        address.setCountry("testcountry");
+        address.setZipCode(1213345);
+        secureUserProfile.setAddress(address);
+        secureUserProfile.setContext(new Context());
+        secureUserProfile.getContext().setReason("manual");
+        secureUserProfile.getContext().setValue("www.wikipedia.at");
+        secureUserProfile.setQueryID("1234COFFEE");
         List<ContextKeyword> contextList = new ArrayList<ContextKeyword>();
         contextList.add(new ContextKeyword("women", 0.5));
         contextList.add(new ContextKeyword("labour", 0.5));
-        secureUserProfile.contextKeywords = contextList;
+        secureUserProfile.setContextKeywords(contextList);
         PartnerBadge pB = new PartnerBadge();
         pB.setSystemId("Europeana");
-        secureUserProfile.partnerList.add(pB);
+        secureUserProfile.getPartnerList().add(pB);
 
         List<Interest> interestList = new ArrayList<Interest>();
         interestList.add(new Interest("text", 0.1, 0.1, 0.1, "source", "http://dsjkdjas.de"));
         interestList.add(new Interest("text2", 0.2, 0.2, 0.2, "source2", "http://google.de"));
-        secureUserProfile.interestList = interestList;
+        secureUserProfile.setInterestList(interestList);
 
         List<PartnerBadge> protectedPartnerList = new ArrayList<PartnerBadge>();
         PartnerBadge badge = new PartnerBadge();
@@ -340,12 +340,12 @@ public class FederatedRecommenderService {
 
         List<UserCredentials> userCredentials = new ArrayList<UserCredentials>();
         eu.eexcess.dataformats.userprofile.UserCredentials cred = new UserCredentials();
-        cred.login = "me@partner.x";
-        cred.securityToken = "sdjalkej21!#";
-        cred.systemId = "Wissenmedia";
+        cred.setLogin("me@partner.x");
+        cred.setSecurityToken("sdjalkej21!#");
+        cred.setSystemId("Wissenmedia");
 
         userCredentials.add(cred);
-        secureUserProfile.userCredentials = userCredentials;
+        secureUserProfile.setUserCredentials(userCredentials);
 
         ContextNamedEntity contextNamedEntitie = new ContextNamedEntity();
         final String dbPediaUrl = "http://dbpedia.url.org";
@@ -371,8 +371,8 @@ public class FederatedRecommenderService {
         Language language1 = new Language("de", 0.1);
         Language language2 = new Language("en", 0.1);
 
-        secureUserProfile.languages.add(language1);
-        secureUserProfile.languages.add(language2);
+        secureUserProfile.getLanguages().add(language1);
+        secureUserProfile.getLanguages().add(language2);
 
         List<UserLocation> locationsList = new ArrayList<UserLocation>();
         locationsList.add(new UserLocation(33.123123, -127.123123, 4.5, new Date()));

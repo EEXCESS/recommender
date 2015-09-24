@@ -118,19 +118,19 @@ public class PartnerRecommenderService {
     @Produces(value = MediaType.APPLICATION_XML)
     public SecureUserProfile debugDumpProfile() {
         SecureUserProfile profile = new SecureUserProfile();
-        profile.firstName = "Hugo";
-        profile.lastName = "Boss";
-        profile.birthDate = new Date(System.currentTimeMillis() - 30 * 365 * 24 * 60 * 60 * 1000);
-        profile.interestList.add(new Interest("Machine Learning"));
-        profile.interestList.add(new Interest("Information Retrieval"));
-        profile.interestList.add(new Interest("Natural Language Processing"));
-        profile.contextKeywords.add(new ContextKeyword("higgs"));
-        profile.contextKeywords.add(new ContextKeyword("boson"));
+        profile.setFirstName("Hugo");
+        profile.setLastName("Boss");
+        profile.setBirthDate(new Date(System.currentTimeMillis() - 30 * 365 * 24 * 60 * 60 * 1000));
+        profile.getInterestList().add(new Interest("Machine Learning"));
+        profile.getInterestList().add(new Interest("Information Retrieval"));
+        profile.getInterestList().add(new Interest("Natural Language Processing"));
+        profile.getContextKeywords().add(new ContextKeyword("higgs"));
+        profile.getContextKeywords().add(new ContextKeyword("boson"));
 
-        profile.contextKeywords.add(new ContextKeyword("loom"));
-        profile.contextKeywords.add(new ContextKeyword("Economy"));
-        profile.contextKeywords.add(new ContextKeyword("Switzerland"));
-        profile.contextKeywords.add(new ContextKeyword("19th Century"));
+        profile.getContextKeywords().add(new ContextKeyword("loom"));
+        profile.getContextKeywords().add(new ContextKeyword("Economy"));
+        profile.getContextKeywords().add(new ContextKeyword("Switzerland"));
+        profile.getContextKeywords().add(new ContextKeyword("19th Century"));
         return profile;
     }
 

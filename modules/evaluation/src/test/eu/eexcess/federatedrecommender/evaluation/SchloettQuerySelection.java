@@ -46,7 +46,7 @@ public class SchloettQuerySelection {
 		for (EvaluationQuery evaluationQuery :upqueries) {
 			for (Interest interest : evaluationQuery.interests) {
 
-				 LanguageIdentifier identifier = new LanguageIdentifier(interest.text);
+				 LanguageIdentifier identifier = new LanguageIdentifier(interest.getText());
 			      String language = identifier.getLanguage();
 			      
 			      if(language.equals("en")){
@@ -59,7 +59,7 @@ public class SchloettQuerySelection {
 		List<Interest> interestList= new ArrayList<Interest>();
 		for (Interest key : countedWorksMap.keySet()) {
 			if(countedWorksMap.get(key)<300){
-			System.out.println(key.text +" " + countedWorksMap.get(key));
+			System.out.println(key.getText() +" " + countedWorksMap.get(key));
 			interestList.add(key);
 			}
 		}

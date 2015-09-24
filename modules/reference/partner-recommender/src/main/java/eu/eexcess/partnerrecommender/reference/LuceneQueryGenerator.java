@@ -49,12 +49,12 @@ public class LuceneQueryGenerator implements QueryGeneratorApi {
         boolean expansion = false;
         Pattern replace = Pattern.compile(REGEXP);
 
-        for (ContextKeyword key : userProfile.contextKeywords) {
-            String keyword = key.text;
+        for (ContextKeyword key : userProfile.getContextKeywords()) {
+            String keyword = key.getText();
             Matcher matcher2 = replace.matcher(keyword);
             keyword = matcher2.replaceAll(" OR ");
 
-            if (key.expansion != null && (key.expansion == ExpansionType.PSEUDORELEVANCEWP || key.expansion == ExpansionType.SERENDIPITY)) {
+            if (key.getExpansion() != null && (key.getExpansion() == ExpansionType.PSEUDORELEVANCEWP || key.getExpansion() == ExpansionType.SERENDIPITY)) {
                 if (PartnerConfigurationCache.CONFIG.getPartnerConfiguration().isQueryExpansionEnabled() != null
                         && PartnerConfigurationCache.CONFIG.getPartnerConfiguration().isQueryExpansionEnabled()) {
                     expansion = addExpansionTerm(result, expansion, key, keyword);
@@ -86,7 +86,7 @@ public class LuceneQueryGenerator implements QueryGeneratorApi {
         if (!expansion) {
             expansion = true;
             if (result.length() > 0) {
-                if (key.expansion == ExpansionType.PSEUDORELEVANCEWP)
+                if (key.getExpansion() == ExpansionType.PSEUDORELEVANCEWP)
                     result.append(" OR (" + keyword + "");
                 else
                     // result.append(" AND (" + keyword + "");

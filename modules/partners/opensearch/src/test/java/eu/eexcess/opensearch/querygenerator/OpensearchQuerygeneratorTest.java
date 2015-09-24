@@ -43,8 +43,8 @@ public class OpensearchQuerygeneratorTest {
 		SecureUserProfile userProfile = new SecureUserProfile();
 
 		String keywordText = "some Text with special characters ¹²³¼½¬{[]}\\¸";
-		userProfile.numResults = 0;
-		userProfile.contextKeywords = newDummyContextKeywords(7, keywordText);
+		userProfile.setNumResults(0);
+		userProfile.setContextKeywords(newDummyContextKeywords(7, keywordText));
 
 		OpensearchQueryGenerator generator = new OpensearchQueryGenerator();
 		String query = generator.toQuery(userProfile);
@@ -72,8 +72,8 @@ public class OpensearchQuerygeneratorTest {
 		SecureUserProfile userProfile = new SecureUserProfile();
 
 		String keywordText = "some Text with special characters ¹²³¼½¬{[]}\\¸";
-		userProfile.numResults = 123;
-		userProfile.contextKeywords = newDummyContextKeywords(7, keywordText);
+		userProfile.setNumResults(123);
+		userProfile.setContextKeywords(newDummyContextKeywords(7, keywordText));
 
 		OpensearchQueryGenerator generator = new OpensearchQueryGenerator();
 		String query = generator.toQuery(userProfile);
@@ -87,7 +87,7 @@ public class OpensearchQuerygeneratorTest {
 					CharEncoding.UTF_8)));
 			assertFalse(query.contains(URLEncoder.encode(keywordText + "[7]",
 					CharEncoding.UTF_8)));
-			assertTrue(query.contains("&limit=" + userProfile.numResults));
+			assertTrue(query.contains("&limit=" + userProfile.getNumResults()));
 		} catch (UnsupportedEncodingException e) {
 			assertTrue(false);
 		}
@@ -97,13 +97,13 @@ public class OpensearchQuerygeneratorTest {
 	public void toQuery_withNoSecureUserProfileButLimit_expectsPass() {
 
 		SecureUserProfile userProfile = new SecureUserProfile();
-		userProfile.numResults = 123;
-		userProfile.contextKeywords = new ArrayList<ContextKeyword>();
+		userProfile.setNumResults(123);
+		userProfile.setContextKeywords(new ArrayList<ContextKeyword>());
 
 		OpensearchQueryGenerator generator = new OpensearchQueryGenerator();
 		String query = generator.toQuery(userProfile);
 
-		assertTrue(query.contains("&limit=" + userProfile.numResults));
+		assertTrue(query.contains("&limit=" + userProfile.getNumResults()));
 	}
 
 	private List<ContextKeyword> newDummyContextKeywords(int amount,

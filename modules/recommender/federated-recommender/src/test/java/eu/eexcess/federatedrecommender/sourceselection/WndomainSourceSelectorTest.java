@@ -98,15 +98,15 @@ public class WndomainSourceSelectorTest {
         partners.add(allroundPartner);
 
         SecureUserProfile userProfile = new SecureUserProfile();
-        userProfile.contextKeywords.addAll(Arrays.asList(new ContextKeyword[] { new ContextKeyword("health") }));
+        userProfile.getContextKeywords().addAll(Arrays.asList(new ContextKeyword[] { new ContextKeyword("health") }));
 
         SecureUserProfile refinedUserProfile = selector.sourceSelect(userProfile, partners);
-        assertEquals(1, userProfile.partnerList.size());
+        assertEquals(1, userProfile.getPartnerList().size());
         assertSame(userProfile, refinedUserProfile);
-        assertTrue(userProfile.partnerList.get(0) == allroundPartner);
+        assertTrue(userProfile.getPartnerList().get(0) == allroundPartner);
 
         // assert domain weights are as expected
-        Iterator<DomainWeight> iterator = selector.getMatchingPartners().get(refinedUserProfile.partnerList.get(0)).iterator();
+        Iterator<DomainWeight> iterator = selector.getMatchingPartners().get(refinedUserProfile.getPartnerList().get(0)).iterator();
         assertEquals(1, iterator.next().weight, 0.0001);
         assertEquals(false, iterator.hasNext());
     }
@@ -144,15 +144,15 @@ public class WndomainSourceSelectorTest {
         partners.add(allroundPartner);
 
         SecureUserProfile userProfile = new SecureUserProfile();
-        userProfile.contextKeywords.addAll(Arrays.asList(new ContextKeyword[] { new ContextKeyword("transport") }));
+        userProfile.getContextKeywords().addAll(Arrays.asList(new ContextKeyword[] { new ContextKeyword("transport") }));
 
         SecureUserProfile refinedUserProfile = selector.sourceSelect(userProfile, partners);
-        assertEquals(1, userProfile.partnerList.size());
+        assertEquals(1, userProfile.getPartnerList().size());
         assertSame(userProfile, refinedUserProfile);
-        assertTrue(userProfile.partnerList.get(0) == allroundPartner);
+        assertTrue(userProfile.getPartnerList().get(0) == allroundPartner);
 
         // assert domain weights are as expected
-        Iterator<DomainWeight> iterator = selector.getMatchingPartners().get(refinedUserProfile.partnerList.get(0)).iterator();
+        Iterator<DomainWeight> iterator = selector.getMatchingPartners().get(refinedUserProfile.getPartnerList().get(0)).iterator();
         assertEquals(0.5, iterator.next().weight, 0.0001);
         assertEquals(0.5, iterator.next().weight, 0.0001);
         assertEquals(false, iterator.hasNext());
@@ -191,20 +191,20 @@ public class WndomainSourceSelectorTest {
         partners.add(allroundPartner);
 
         SecureUserProfile userProfile = new SecureUserProfile();
-        userProfile.contextKeywords.addAll(Arrays.asList(new ContextKeyword[] { new ContextKeyword("transport") }));
+        userProfile.getContextKeywords().addAll(Arrays.asList(new ContextKeyword[] { new ContextKeyword("transport") }));
 
         SecureUserProfile refinedUserProfile = selector.sourceSelect(userProfile, partners);
-        assertEquals(2, userProfile.partnerList.size());
+        assertEquals(2, userProfile.getPartnerList().size());
         assertSame(userProfile, refinedUserProfile);
-        assertTrue(userProfile.partnerList.get(0) == telecommPartner);
-        assertTrue(userProfile.partnerList.get(1) == allroundPartner);
+        assertTrue(userProfile.getPartnerList().get(0) == telecommPartner);
+        assertTrue(userProfile.getPartnerList().get(1) == allroundPartner);
 
         // assert domain weights are as expected
-        Iterator<DomainWeight> iterator = selector.getMatchingPartners().get(refinedUserProfile.partnerList.get(0)).iterator();
+        Iterator<DomainWeight> iterator = selector.getMatchingPartners().get(refinedUserProfile.getPartnerList().get(0)).iterator();
         assertEquals(0.3333, iterator.next().weight, 0.0001);
         assertEquals(false, iterator.hasNext());
 
-        iterator = selector.getMatchingPartners().get(refinedUserProfile.partnerList.get(1)).iterator();
+        iterator = selector.getMatchingPartners().get(refinedUserProfile.getPartnerList().get(1)).iterator();
         assertEquals(0.3333, iterator.next().weight, 0.0001);
         assertEquals(0.3333, iterator.next().weight, 0.0001);
         assertEquals(false, iterator.hasNext());
@@ -243,20 +243,20 @@ public class WndomainSourceSelectorTest {
         partners.add(allroundPartner);
 
         SecureUserProfile userProfile = new SecureUserProfile();
-        userProfile.contextKeywords.addAll(Arrays.asList(new ContextKeyword[] { new ContextKeyword("transport") }));
+        userProfile.getContextKeywords().addAll(Arrays.asList(new ContextKeyword[] { new ContextKeyword("transport") }));
 
         SecureUserProfile refinedUserProfile = selector.sourceSelect(userProfile, partners);
-        assertEquals(2, userProfile.partnerList.size());
+        assertEquals(2, userProfile.getPartnerList().size());
         assertSame(userProfile, refinedUserProfile);
-        assertTrue(userProfile.partnerList.get(1) == allroundPartner);
-        assertTrue(userProfile.partnerList.get(0) == telecommPartner);
+        assertTrue(userProfile.getPartnerList().get(1) == allroundPartner);
+        assertTrue(userProfile.getPartnerList().get(0) == telecommPartner);
 
         // assert domain weights are as expected
-        Iterator<DomainWeight> iterator = selector.getMatchingPartners().get(refinedUserProfile.partnerList.get(0)).iterator();
+        Iterator<DomainWeight> iterator = selector.getMatchingPartners().get(refinedUserProfile.getPartnerList().get(0)).iterator();
         assertEquals(0.5, iterator.next().weight, 0.0001);
         assertEquals(false, iterator.hasNext());
 
-        iterator = selector.getMatchingPartners().get(refinedUserProfile.partnerList.get(1)).iterator();
+        iterator = selector.getMatchingPartners().get(refinedUserProfile.getPartnerList().get(1)).iterator();
         assertEquals(0.5, iterator.next().weight, 0.0001);
         assertEquals(false, iterator.hasNext());
     }

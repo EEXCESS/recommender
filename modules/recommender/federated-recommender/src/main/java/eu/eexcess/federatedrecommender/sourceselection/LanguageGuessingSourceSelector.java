@@ -55,18 +55,18 @@ public class LanguageGuessingSourceSelector implements PartnerSelector {
         selectedPartners.clear();
 
         // don't touch if already selected
-        if (userProfile.partnerList.isEmpty()) {
+        if (userProfile.getPartnerList().isEmpty()) {
             // no query language(s) are specified; try to guess
-            if (userProfile.languages.isEmpty()) {
-                String textFragment = joinContextKeywords(userProfile.contextKeywords);
+            if (userProfile.getLanguages().isEmpty()) {
+                String textFragment = joinContextKeywords(userProfile.getContextKeywords());
                 String userLanguage = LanguageGuesser.getInstance().guessLanguage(textFragment);
-                collectPartnersOnLanguageMatch(userLanguage, partners, userProfile.partnerList);
+                collectPartnersOnLanguageMatch(userLanguage, partners, userProfile.getPartnerList());
             } else {
-                LOGGER.info("refusing to guess languages due to [" + userProfile.languages.size() + "] already specified languages");
+                LOGGER.info("refusing to guess languages due to [" + userProfile.getLanguages().size() + "] already specified languages");
                 return userProfile;
             }
         } else {
-            LOGGER.info("refusing to select partners due to [" + userProfile.partnerList.size() + "] prevoiously selected partners");
+            LOGGER.info("refusing to select partners due to [" + userProfile.getPartnerList().size() + "] prevoiously selected partners");
             return userProfile;
         }
 
@@ -91,7 +91,7 @@ public class LanguageGuessingSourceSelector implements PartnerSelector {
         StringBuilder builder = new StringBuilder();
 
         for (ContextKeyword keyword : contextKeywords) {
-            builder.append(keyword.text + " ");
+            builder.append(keyword.getText() + " ");
         }
 
         return builder.toString().trim();

@@ -1,14 +1,10 @@
 package eu.eexcess.partnerrecommender.reference;
 
-import java.io.UnsupportedEncodingException;
-import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.logging.Level;
+import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
-import java.util.logging.*;
 
 import eu.eexcess.dataformats.result.DocumentBadge;
 import eu.eexcess.dataformats.userprofile.ContextKeyword;
@@ -25,45 +21,44 @@ import eu.eexcess.partnerrecommender.api.QueryGeneratorApi;
  * @author hziak
  *
  */
+
 public class LuceneQueryGeneratorFieldTermConjunctionMainTopic implements QueryGeneratorApi {
-	private static final Logger LOGGER = Logger.getLogger(LuceneQueryGeneratorFieldTermConjunctionMainTopic.class.getCanonicalName());
+    private static final Logger LOGGER = Logger.getLogger(LuceneQueryGeneratorFieldTermConjunctionMainTopic.class.getCanonicalName());
     private static final String REGEXP = "(?<=\\S)\\s+(?=\\S)";
 
     @Override
     public String toQuery(SecureUserProfile userProfile) {
-    	
+
         StringBuilder result = new StringBuilder();
         boolean expansion = false;
         Pattern replace = Pattern.compile(REGEXP);
         List<ContextKeyword> mainKeywords = new ArrayList<ContextKeyword>();
         List<ContextKeyword> otherKeywords = new ArrayList<ContextKeyword>();
-       
-        userProfile.contextKeywords.forEach(kw -> {
-        	if(kw.getIsMainTopic()){
-        		if(result.length()==0){
-        			result.append("("+kw.text);
-        		}
-        		else{
-        			result.append(" AND " +kw.text);
-        		}
-        		mainKeywords.add(kw);
-        	}
-        	else
-        		otherKeywords.add(kw);
-        	});
-       if(!mainKeywords.isEmpty())
-        	result.append(") AND (");
-        
-        StringBuilder tmpResult= new StringBuilder();
+
+        userProfile.getContextKeywords().forEach(kw -> {
+            if (kw.getIsMainTopic()) {
+                if (result.length() == 0) {
+                    result.append("(" + kw.getText());
+                } else {
+                    result.append(" AND " + kw.getText());
+                }
+                mainKeywords.add(kw);
+            } else
+                otherKeywords.add(kw);
+        });
+        if (!mainKeywords.isEmpty())
+            result.append(") AND (");
+
+        StringBuilder tmpResult = new StringBuilder();
         for (ContextKeyword key : otherKeywords) {
-            String keyword = key.text;
+            String keyword = key.getText();
             Matcher matcher2 = replace.matcher(keyword);
             if (matcher2.find()) {
                 keyword = "(" + matcher2.replaceAll(" AND ") + ")";
             }
 
-            if (key.expansion != null && (key.expansion == ExpansionType.PSEUDORELEVANCEWP || key.expansion == ExpansionType.SERENDIPITY)) {
-              if (PartnerConfigurationCache.CONFIG.getPartnerConfiguration().isQueryExpansionEnabled()) {
+            if (key.getExpansion() != null && (key.getExpansion() == ExpansionType.PSEUDORELEVANCEWP || key.getExpansion() == ExpansionType.SERENDIPITY)) {
+                if (PartnerConfigurationCache.CONFIG.getPartnerConfiguration().isQueryExpansionEnabled()) {
                     expansion = addExpansionTerm(tmpResult, expansion, key, keyword);
                 }
             } else {
@@ -74,9 +69,9 @@ public class LuceneQueryGeneratorFieldTermConjunctionMainTopic implements QueryG
         if (expansion)
             result.append(")");
 
-        if(!mainKeywords.isEmpty())
-        	result.append(")");
-		return result.toString();
+        if (!mainKeywords.isEmpty())
+            result.append(")");
+        return result.toString();
     }
 
     private boolean addQueryTerm(StringBuilder result, boolean exp, String keyword) {
@@ -96,7 +91,7 @@ public class LuceneQueryGeneratorFieldTermConjunctionMainTopic implements QueryG
         if (!expansion) {
             expansion = true;
             if (result.length() > 0) {
-                if (key.expansion == ExpansionType.PSEUDORELEVANCEWP)
+                if (key.getExpansion() == ExpansionType.PSEUDORELEVANCEWP)
                     result.append(" OR (" + keyword + "");
                 else
                     result.append(" AND (" + keyword + "");

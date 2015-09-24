@@ -81,17 +81,17 @@ public class PseudoRelevanceWikipediaDecomposer implements SecureUserProfileDeco
 		TermSet<TypedTerm> terms = new TermSet<TypedTerm>(new TypedTerm.AddingWeightTermMerger());
 		StringBuilder builder = new StringBuilder();
 	
-		for (ContextKeyword keyword : inputSecureUserProfile.contextKeywords) {
+		for (ContextKeyword keyword : inputSecureUserProfile.getContextKeywords()) {
 			if (builder.length() > 0) { builder.append(" "); }
-			builder.append(keyword.text);
-			terms.add(new TypedTerm(keyword.text, null, 1));
+			builder.append(keyword.getText());
+			terms.add(new TypedTerm(keyword.getText(), null, 1));
 		}
 		String query = builder.toString();
 		
 		String localeName = null;
 		// first, pick up the language specified by the user
-		if (inputSecureUserProfile.languages != null && !inputSecureUserProfile.languages.isEmpty()) {
-			Language firstLanguage = inputSecureUserProfile.languages.iterator().next();
+		if (inputSecureUserProfile.getLanguages() != null && !inputSecureUserProfile.getLanguages().isEmpty()) {
+			Language firstLanguage = inputSecureUserProfile.getLanguages().iterator().next();
 			localeName = firstLanguage.getIso2();
 		} else {
 			// then try to detect the language from the query
@@ -119,7 +119,7 @@ public class PseudoRelevanceWikipediaDecomposer implements SecureUserProfileDeco
 		for (TypedTerm typedTerm : terms.getTopTerms(numTermsToExpand)) {
 			newContextKeywords.add(new ContextKeyword(typedTerm.getText(),ExpansionType.PSEUDORELEVANCEWP));
 		}
-		inputSecureUserProfile.contextKeywords.addAll(newContextKeywords);
+		inputSecureUserProfile.getContextKeywords().addAll(newContextKeywords);
 		logger.log(Level.INFO, "Wikipedia Expansion: " + newContextKeywords.toString());
 		return inputSecureUserProfile;
 	}

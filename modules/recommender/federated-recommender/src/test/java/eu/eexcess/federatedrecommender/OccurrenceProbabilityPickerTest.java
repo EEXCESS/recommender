@@ -51,9 +51,9 @@ public class OccurrenceProbabilityPickerTest {
         try {
             SecureUserProfile profile = new SecureUserProfile();
             ContextKeyword keyword = new ContextKeyword("robberi");
-            profile.contextKeywords.add(keyword);
+            profile.getContextKeywords().add(keyword);
             ContextKeyword keyword2 = new ContextKeyword("Gardner");
-            profile.contextKeywords.add(keyword2);
+            profile.getContextKeywords().add(keyword2);
             evalList = picker.pickResults(profile, resultList, partners, numResults);
         } catch (Exception e) {
             e.printStackTrace();
@@ -119,9 +119,9 @@ public class OccurrenceProbabilityPickerTest {
 
             SecureUserProfile profile = new SecureUserProfile();
             ContextKeyword keyword = new ContextKeyword("robberi");
-            profile.contextKeywords.add(keyword);
+            profile.getContextKeywords().add(keyword);
             ContextKeyword keyword2 = new ContextKeyword("Gardner");
-            profile.contextKeywords.add(keyword2);
+            profile.getContextKeywords().add(keyword2);
             evalList = picker.pickResults(profile, resultList, partners, numResults);
         } catch (Exception e) {
             e.printStackTrace();
@@ -192,9 +192,9 @@ public class OccurrenceProbabilityPickerTest {
         try {
             SecureUserProfile profile = new SecureUserProfile();
             ContextKeyword keyword = new ContextKeyword("robberi");
-            profile.contextKeywords.add(keyword);
+            profile.getContextKeywords().add(keyword);
             ContextKeyword keyword2 = new ContextKeyword("Gardner");
-            profile.contextKeywords.add(keyword2);
+            profile.getContextKeywords().add(keyword2);
             evalList = picker.pickResults(profile, resultList, partners, numResults);
         } catch (Exception e) {
             e.printStackTrace();

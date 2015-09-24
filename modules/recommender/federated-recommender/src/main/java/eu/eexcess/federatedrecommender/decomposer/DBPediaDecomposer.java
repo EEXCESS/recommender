@@ -95,7 +95,7 @@ public class DBPediaDecomposer implements SecureUserProfileDecomposer<SecureUser
     @Override
     public SecureUserProfileEvaluation decompose(SecureUserProfileEvaluation inputSecureUserProfile) {
 
-        List<ContextKeyword> profileKeywords = inputSecureUserProfile.contextKeywords; // Keywords
+        List<ContextKeyword> profileKeywords = inputSecureUserProfile.getContextKeywords(); // Keywords
         // consist (for now) in context keywords
         // keywordList.addAll(inputSecureUserProfile.interestList);
         // Return inputSecureUserProfile if no further combinations are

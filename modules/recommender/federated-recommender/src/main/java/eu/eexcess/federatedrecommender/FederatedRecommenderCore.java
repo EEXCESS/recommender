@@ -237,7 +237,7 @@ public class FederatedRecommenderCore implements ProbeResultChanged {
 
         }
         long end = System.currentTimeMillis();
-        LOGGER.log(Level.INFO, "Federated Recommender took " + (end - start) + "ms for query '" + secureUserProfile.contextKeywords + "'");
+        LOGGER.log(Level.INFO, "Federated Recommender took " + (end - start) + "ms for query '" + secureUserProfile.getContextKeywords() + "'");
         return partnersFederatedResults;
     }
 
@@ -632,8 +632,8 @@ public class FederatedRecommenderCore implements ProbeResultChanged {
         long timeToGetPartners = end - start;
         start = System.currentTimeMillis();
         int numResults = 10;
-        if (userProfile.numResults != null)
-            numResults = userProfile.numResults;
+        if (userProfile.getNumResults() != null)
+            numResults = userProfile.getNumResults();
         resultList = pFRPicker.pickResults(userProfile, pFR, partnerRegister.getPartners(), numResults);
         end = System.currentTimeMillis();
         long timeToPickResults = end - start;
@@ -656,20 +656,20 @@ public class FederatedRecommenderCore implements ProbeResultChanged {
      * @return true/false
      */
     private boolean checkUserSelectedPartners(SecureUserProfile secureUserProfile, PartnerBadge partner) {
-        if (secureUserProfile.partnerList != null) { // if the list is null then
+        if (secureUserProfile.getPartnerList() != null) { // if the list is null then
                                                      // we query every
                                                      // partner
-            if (!secureUserProfile.partnerList.isEmpty()) {
+            if (!secureUserProfile.getPartnerList().isEmpty()) {
                 boolean withKey = false;
                 if (partner.getPartnerKey() != null && !partner.getPartnerKey().isEmpty())
                     withKey = true;
                 if (!withKey)
-                    for (PartnerBadge uBadge : secureUserProfile.partnerList) {
+                    for (PartnerBadge uBadge : secureUserProfile.getPartnerList()) {
                         if (uBadge.getSystemId().equals(partner.getSystemId()))
                             return true;
                     }
                 else
-                    for (PartnerBadge uBadge : secureUserProfile.protectedPartnerList) {
+                    for (PartnerBadge uBadge : secureUserProfile.getProtectedPartnerList()) {
                         if (uBadge.getPartnerKey() != null && !uBadge.getPartnerKey().isEmpty() && partner.getPartnerKey().equals(uBadge.getPartnerKey())
                                 && uBadge.getSystemId().equals(partner.getSystemId()))
                             return true;

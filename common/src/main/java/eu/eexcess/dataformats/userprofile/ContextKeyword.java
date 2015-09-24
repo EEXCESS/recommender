@@ -32,81 +32,117 @@ public class ContextKeyword implements Serializable {
     private static final long serialVersionUID = -4047662119669146571L;
     private String type;
     private String uri;
-    private Boolean isMainTopic=false;
-    
- // Is used for query expansion
-    @XmlElement(name = "expansion", required = false)
-    public ExpansionType expansion;
-//    @XmlElement(name = "reason")
-//    public String reason;
-    @XmlElement(name = "text")
-    public String text;
-    
+    private Boolean isMainTopic = false;
+
+    // Is used for query expansion
+
+    private ExpansionType expansion;
+    private String text;
     @Deprecated
-    public Double weight;
+    /**
+     * @deprecated
+     */
+    private Double weight;
     @Deprecated
-	public String reason;
-    
-    
- 
+    /**
+     * @deprecated
+     */
+    private String reason;
+
     public ContextKeyword() {
 
     }
 
-     public ContextKeyword(String reason, String text, Double weight) {
-     super();
-     this.text = text;
-     this.weight = weight;
-     this.expansion=ExpansionType.NONE;
-     }
-
     public ContextKeyword(String text) {
-        this.text = text;
+        this.setText(text);
     }
 
     public ContextKeyword(String text, Double weight) {
-        this.text = text;
-        this.weight = weight;
+        this.setText(text);
+        this.setWeight(weight);
     }
 
     public ContextKeyword(String text, ExpansionType expansion) {
-        this.text = text;
-        this.expansion = expansion;
+        this.setText(text);
+        this.setExpansion(expansion);
     }
 
     public ContextKeyword(String text, Double weight, ExpansionType expansion) {
-        this.text = text;
-        this.weight = weight;
-        this.expansion = expansion;
+        this.setText(text);
+        this.setWeight(weight);
+        this.setExpansion(expansion);
 
     }
 
+    public Boolean getIsMainTopic() {
+        return isMainTopic;
+    }
 
-	public Boolean getIsMainTopic() {
-		return isMainTopic;
-	}
+    public void setIsMainTopic(Boolean isMainTopic) {
+        this.isMainTopic = isMainTopic;
+    }
 
-	public void setIsMainTopic(Boolean isMainTopic) {
-		this.isMainTopic = isMainTopic;
-	}
+    public String getType() {
+        return type;
+    }
 
-	public String getType() {
-		return type;
-	}
+    public void setType(String type) {
+        this.type = type;
+    }
 
-	public void setType(String type) {
-		this.type = type;
-	}
+    public String getUri() {
+        return uri;
+    }
 
-	public String getUri() {
-		return uri;
-	}
+    public void setUri(String uri) {
+        this.uri = uri;
+    }
 
-	public void setUri(String uri) {
-		this.uri = uri;
-	}
+    /**
+     * @deprecated
+     * @return
+     */
+    public Double getWeight() {
+        return weight;
+    }
 
+    /**
+     * @deprecated
+     */
+    public void setWeight(Double weight) {
+        this.weight = weight;
+    }
 
-	
+    /**
+     * @deprecated
+     * @return
+     */
+    public String getReason() {
+        return reason;
+    }
+
+    /**
+     * @deprecated
+     */
+    public void setReason(String reason) {
+        this.reason = reason;
+    }
+
+    public String getText() {
+        return text;
+    }
+
+    public void setText(String text) {
+        this.text = text;
+    }
+
+    @XmlElement(name = "expansion", required = false)
+    public ExpansionType getExpansion() {
+        return expansion;
+    }
+
+    public void setExpansion(ExpansionType expansion) {
+        this.expansion = expansion;
+    }
 
 }

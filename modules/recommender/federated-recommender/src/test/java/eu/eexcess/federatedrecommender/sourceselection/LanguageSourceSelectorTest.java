@@ -43,7 +43,7 @@ public class LanguageSourceSelectorTest {
         PartnerSelector selector = new LanguageSourceSelector(null);
 
         SecureUserProfile userProfile = new SecureUserProfile();
-        userProfile.languages = Arrays.asList(new Language[] { new Language("de", 1.0), new Language("en", 1.0) });
+        userProfile.setLanguages(Arrays.asList(new Language[] { new Language("de", 1.0), new Language("en", 1.0) }));
 
         List<PartnerBadge> partners = new ArrayList<>();
         PartnerBadge pb = new PartnerBadge();
@@ -54,8 +54,8 @@ public class LanguageSourceSelectorTest {
         SecureUserProfile refinedUserProfile = selector.sourceSelect(userProfile, partners);
 
         assertSame(userProfile, refinedUserProfile);
-        assertTrue(userProfile.partnerList.contains(pb));
-        assertEquals(1, userProfile.partnerList.size());
+        assertTrue(userProfile.getPartnerList().contains(pb));
+        assertEquals(1, userProfile.getPartnerList().size());
     }
 
     @Test
@@ -63,7 +63,7 @@ public class LanguageSourceSelectorTest {
         PartnerSelector selector = new LanguageSourceSelector(null);
 
         SecureUserProfile userProfile = new SecureUserProfile();
-        userProfile.languages = Arrays.asList(new Language[] { new Language("de", 1.0), new Language("en", 1.0) });
+        userProfile.setLanguages(Arrays.asList(new Language[] { new Language("de", 1.0), new Language("en", 1.0) }));
 
         List<PartnerBadge> partners = new ArrayList<>();
         PartnerBadge pb_deenfr = new PartnerBadge();
@@ -109,10 +109,10 @@ public class LanguageSourceSelectorTest {
         SecureUserProfile refinedUserProfile = selector.sourceSelect(userProfile, partners);
 
         assertSame(userProfile, refinedUserProfile);
-        assertTrue(userProfile.partnerList.contains(pb_en));
-        assertTrue(userProfile.partnerList.contains(pb_de));
-        assertTrue(userProfile.partnerList.contains(pb_deenfr));
-        assertEquals(3, userProfile.partnerList.size());
+        assertTrue(userProfile.getPartnerList().contains(pb_en));
+        assertTrue(userProfile.getPartnerList().contains(pb_de));
+        assertTrue(userProfile.getPartnerList().contains(pb_deenfr));
+        assertEquals(3, userProfile.getPartnerList().size());
         assertEquals(8, partners.size());
     }
 
@@ -121,7 +121,7 @@ public class LanguageSourceSelectorTest {
         PartnerSelector selector = new LanguageSourceSelector(null);
 
         SecureUserProfile userProfile = new SecureUserProfile();
-        userProfile.languages = Arrays.asList(new Language[] { new Language("de", 1.0) });
+        userProfile.setLanguages(Arrays.asList(new Language[] { new Language("de", 1.0) }));
 
         List<PartnerBadge> partners = new ArrayList<>();
         PartnerBadge pb = new PartnerBadge();
@@ -137,9 +137,9 @@ public class LanguageSourceSelectorTest {
         assertEquals(2, partners.size());
         SecureUserProfile refinedUserProfile = selector.sourceSelect(userProfile, partners);
 
-        assertEquals(1, userProfile.partnerList.size());
+        assertEquals(1, userProfile.getPartnerList().size());
         assertSame(userProfile, refinedUserProfile);
-        assertTrue(userProfile.partnerList.contains(pb));
+        assertTrue(userProfile.getPartnerList().contains(pb));
     }
 
     @Test
@@ -147,15 +147,15 @@ public class LanguageSourceSelectorTest {
         PartnerSelector selector = new LanguageSourceSelector(null);
 
         SecureUserProfile userProfile = new SecureUserProfile();
-        userProfile.languages = Arrays.asList(new Language[] { new Language("de", 1.0) });
+        userProfile.setLanguages(Arrays.asList(new Language[] { new Language("de", 1.0) }));
 
         List<PartnerBadge> partners = new ArrayList<>();
         PartnerBadge pb = new PartnerBadge();
         pb.setLanguageContent(Arrays.asList(new String[] { "de", "en", "fr" }));
         pb.setSystemId(StringUtils.join(pb.getLanguageContent().toArray()));
 
-        userProfile.partnerList.add(pb);
-        assertEquals(1, userProfile.partnerList.size());
+        userProfile.getPartnerList().add(pb);
+        assertEquals(1, userProfile.getPartnerList().size());
 
         PartnerBadge pb2 = new PartnerBadge();
         pb2.setLanguageContent(Arrays.asList(new String[] { "de", "am", "ar" }));
@@ -166,8 +166,8 @@ public class LanguageSourceSelectorTest {
 
         SecureUserProfile refinedUserProfile = selector.sourceSelect(userProfile, partners);
 
-        assertEquals(1, userProfile.partnerList.size());
+        assertEquals(1, userProfile.getPartnerList().size());
         assertSame(userProfile, refinedUserProfile);
-        assertTrue(userProfile.partnerList.contains(pb));
+        assertTrue(userProfile.getPartnerList().contains(pb));
     }
 }
