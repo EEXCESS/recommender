@@ -63,6 +63,20 @@ public class KIMPortalPartnerRecommenderTest {
 	}
 
 	@Test
+	public void singleQueryBasel() {
+		ArrayList<String> keywords = new ArrayList<String>();
+		keywords.add("basel");
+        ResultList resultList = PartnerRecommenderTestHelper.getRecommendations(DEPLOYMENT_CONTEXT,	
+        		port, 
+        		PartnerRecommenderTestHelper.createParamsForPartnerRecommender(20,keywords ));
+	    
+        assertNotNull(resultList);
+        assertTrue(resultList.results.size() > 0 );
+        assertEquals(20, resultList.results.size());
+
+	}
+
+	@Test
 	public void singleQueryZiegelhof() {
 		ArrayList<String> keywords = new ArrayList<String>();
 		keywords.add("ziegelhof");
@@ -166,9 +180,9 @@ public class KIMPortalPartnerRecommenderTest {
 	public void detailCall() {
         ArrayList<String> ids = new ArrayList<String>();
 		ArrayList<String> uris = new ArrayList<String>();
-        ids.add("E1.6882");
+        ids.add("f19e71ca-4dc6-48b8-858c-60a1710066f0");
         uris.add("https://www.kgportal.bl.ch/sammlungen#f19e71ca-4dc6-48b8-858c-60a1710066f0");
-        ids.add("E1.6880");
+        ids.add("f04ae6c5-45fd-ff40-333c-f3b50dffbe3d");
         uris.add("https://www.kgportal.bl.ch/sammlungen#f04ae6c5-45fd-ff40-333c-f3b50dffbe3d");
         DocumentBadgeList documentDetails = PartnerRecommenderTestHelper.getDetails(DEPLOYMENT_CONTEXT,	
         		port, 
@@ -184,7 +198,7 @@ public class KIMPortalPartnerRecommenderTest {
 	public void detailCallWithCountry() {
         ArrayList<String> ids = new ArrayList<String>();
 		ArrayList<String> uris = new ArrayList<String>();
-        ids.add("E1.6889");
+        ids.add("7c627767-4511-144e-8c29-c8a475aca2ac");
         uris.add("https://www.kgportal.bl.ch/sammlungen#7c627767-4511-144e-8c29-c8a475aca2ac");
         DocumentBadgeList documentDetails = PartnerRecommenderTestHelper.getDetails(DEPLOYMENT_CONTEXT,	
         		port, 
@@ -200,7 +214,7 @@ public class KIMPortalPartnerRecommenderTest {
 	public void detailCallForEnrichmentSingleObject() {
         ArrayList<String> ids = new ArrayList<String>();
 		ArrayList<String> uris = new ArrayList<String>();
-        ids.add("Mz 000068");
+        ids.add("aa0b5559-6e86-46db-9785-0329ab800956");
         uris.add("https://www.kgportal.bl.ch/sammlungen#aa0b5559-6e86-46db-9785-0329ab800956");
         DocumentBadgeList documentDetails = PartnerRecommenderTestHelper.getDetails(DEPLOYMENT_CONTEXT,	
         		port, 
@@ -216,7 +230,7 @@ public class KIMPortalPartnerRecommenderTest {
 	public void detailCallForEnrichmentSingleObjectJSON() {
         ArrayList<String> ids = new ArrayList<String>();
 		ArrayList<String> uris = new ArrayList<String>();
-        ids.add("Mz 000068");
+        ids.add("aa0b5559-6e86-46db-9785-0329ab800956");
         uris.add("https://www.kgportal.bl.ch/sammlungen#aa0b5559-6e86-46db-9785-0329ab800956");
         DocumentBadgeList documentDetails = PartnerRecommenderTestHelper.getDetailsJSON(DEPLOYMENT_CONTEXT,	
         		port, 
