@@ -21,6 +21,10 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.StringReader;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Date;
 import java.util.LinkedList;
 import java.util.logging.Logger;
 
@@ -348,6 +352,8 @@ public class Transformer implements ITransformer {
             }
             if (result.date == null || result.date.isEmpty() || result.date.trim().isEmpty()) {
                 result.date = EEXCESS_FACETS_VALUE_UNKNOWN;
+            } else {
+            	result.date = parseDate(result.date);
             }
 
             result = postProcessResult(input, result, querySol);
@@ -359,7 +365,35 @@ public class Transformer implements ITransformer {
         return returnList;
     }
 
-    /*
+    
+	private String parseDate(String strDate) {
+		SimpleDateFormat outputFormat = new SimpleDateFormat("yyyy-MM-dd");
+		boolean dateFormatDetected = false;
+		ArrayList<String> inputFormatList = new ArrayList<String>();
+		inputFormatList.add("yyyy-MM-dd");
+		inputFormatList.add("yyyy-MM");
+		inputFormatList.add("yyyy");
+		Date javaDate = null;
+		
+		for (int i = 0; i < inputFormatList.size(); i++) {
+			SimpleDateFormat inputFormat = new SimpleDateFormat(inputFormatList.get(i));
+			inputFormat.setLenient(true);
+			try {
+				javaDate = inputFormat.parse(strDate);
+				dateFormatDetected = true;
+				break;
+			}
+			catch (ParseException e) {
+				dateFormatDetected = false;
+			}
+		}
+		String output=strDate;
+		if (dateFormatDetected) 
+			output = outputFormat.format(javaDate);
+		return output;
+	}
+
+	/*
      * private Object extractRDFForOneObject(Result result, String inputString)
      * {
      * 
