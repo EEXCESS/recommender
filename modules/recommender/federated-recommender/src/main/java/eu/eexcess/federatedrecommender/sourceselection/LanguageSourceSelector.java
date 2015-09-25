@@ -56,20 +56,20 @@ public class LanguageSourceSelector implements PartnerSelector {
     public SecureUserProfile sourceSelect(SecureUserProfile userProfile, List<PartnerBadge> partners) {
         selectedPartners.clear();
         // don't touch if already selected
-        if (userProfile.partnerList.isEmpty()) {
+        if (userProfile.getPartnerList().isEmpty()) {
             // query language(s) are specified in user profile
-            if (!userProfile.languages.isEmpty()) {
-                // match partners' and user profile languages
-                for (Language userLangDetails : userProfile.languages) {
+            if (!userProfile.getLanguages().isEmpty()) {
+                // match partners and user profile languages
+                for (Language userLangDetails : userProfile.getLanguages()) {
                     String userLanguage = userLangDetails.getIso2();
-                    collectPartnersOnLanguageMatch(userLanguage, partners, userProfile.partnerList);
+                    collectPartnersOnLanguageMatch(userLanguage, partners, userProfile.getPartnerList());
                 }
             } else {
                 LOGGER.info("refusing to select partners due to no specified languages");
                 return userProfile;
             }
         } else {
-            LOGGER.info("refusing to select partners due to [" + userProfile.partnerList.size() + "] prevoiously selected partners");
+            LOGGER.info("refusing to select partners due to [" + userProfile.getPartnerList().size() + "] prevoiously selected partners");
             return userProfile;
         }
 

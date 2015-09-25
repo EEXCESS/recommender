@@ -145,13 +145,13 @@ public class FederatedRecommenderEvaluationCore {
             }
         if (userProfileEvaluation == null) {
             userProfileEvaluation = userProfile;
-            userProfileEvaluation.numResults = 10;
-            if (userProfile.numResults != null)
-                userProfileEvaluation.numResults = userProfile.numResults;
+            userProfileEvaluation.setNumResults(10);
+            if (userProfile.getNumResults() != null)
+                userProfileEvaluation.setNumResults(userProfile.getNumResults());
         } else {
-            userProfileEvaluation.numResults = 10;
-            if (userProfile.numResults != null)
-                userProfileEvaluation.numResults = userProfile.numResults;
+            userProfileEvaluation.setNumResults(10);
+            if (userProfile.getNumResults() != null)
+                userProfileEvaluation.setNumResults(userProfile.getNumResults());
         }
 
         EvaluationResultList resultList = null;
@@ -328,7 +328,7 @@ public class FederatedRecommenderEvaluationCore {
 
         BlockPicker bP = new BlockPicker();
         try {
-            results.results.add(bP.pickBlockResults(blockTmpResults, evalProfil.numResults));
+            results.results.add(bP.pickBlockResults(blockTmpResults, evalProfil.getNumResults()));
         } catch (Exception e) {
             LOGGER.log(Level.WARNING, "", e);
         }
@@ -362,7 +362,7 @@ public class FederatedRecommenderEvaluationCore {
         evalProfil.setPicker("FiFoPicker");
 
         final SecureUserProfileEvaluation wikipediaProfile = (SecureUserProfileEvaluation) SerializationUtils.clone(evalProfil);
-        wikipediaProfile.partnerList = queryPartner;
+        wikipediaProfile.setPartnerList(queryPartner);
         Future<Void> wikipedia = threadPool.submit(new Callable<Void>() {
             @Override
             public Void call() throws Exception {
@@ -383,7 +383,7 @@ public class FederatedRecommenderEvaluationCore {
         });
 
         final SecureUserProfileEvaluation sourceProfile = (SecureUserProfileEvaluation) SerializationUtils.clone(evalProfil);
-        sourceProfile.partnerList = queryPartner;
+        sourceProfile.setPartnerList(queryPartner);
         Future<Void> source = threadPool.submit(new Callable<Void>() {
             @Override
             public Void call() throws Exception {
@@ -393,7 +393,7 @@ public class FederatedRecommenderEvaluationCore {
             }
         });
         final SecureUserProfileEvaluation sourceProfile2 = (SecureUserProfileEvaluation) SerializationUtils.clone(evalProfil);
-        sourceProfile2.partnerList = queryPartner;
+        sourceProfile2.setPartnerList(queryPartner);
         sourceProfile2.setQueryExpansionSourcePartner(sourceExpansionPartners);
         Future<Void> source2 = threadPool.submit(new Callable<Void>() {
             @Override
@@ -441,7 +441,7 @@ public class FederatedRecommenderEvaluationCore {
         SimpleWeightedGraph<String, DefaultEdge> graph = new SimpleWeightedGraph<String, DefaultEdge>(DefaultEdge.class);
 
         try {
-            graph = (SimpleWeightedGraph<String, DefaultEdge>) dbPediaGraph.getGraphFromKeywords(userProfile.contextKeywords, keynodes, hitsLimit, depthLimit);
+            graph = (SimpleWeightedGraph<String, DefaultEdge>) dbPediaGraph.getGraphFromKeywords(userProfile.getContextKeywords(), keynodes, hitsLimit, depthLimit);
 
         } catch (Exception e) {
             LOGGER.log(Level.SEVERE, "There was an error while building the graph", e);

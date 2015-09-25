@@ -28,7 +28,6 @@ import org.junit.Test;
 import eu.eexcess.dataformats.result.DocumentBadgeList;
 import eu.eexcess.dataformats.result.ResultList;
 import eu.eexcess.partnerrecommender.test.PartnerRecommenderTestHelper;
-import eu.eexcess.zbw.webservice.tool.PartnerStandaloneServer;
 
 public class ZBWPartnerRecommenderTest {
 

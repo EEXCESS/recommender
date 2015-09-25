@@ -59,17 +59,17 @@ public class LanguageGuessingSourceSelectorTest {
         partners.add(englishPartner);
 
         SecureUserProfile userProfile = new SecureUserProfile();
-        userProfile.contextKeywords.addAll(Arrays.asList(new ContextKeyword[] { new ContextKeyword("das"), new ContextKeyword("ist"), new ContextKeyword("ein"),
+        userProfile.getContextKeywords().addAll(Arrays.asList(new ContextKeyword[] { new ContextKeyword("das"), new ContextKeyword("ist"), new ContextKeyword("ein"),
                 new ContextKeyword("auto") }));
 
         PartnerSelector selector = new LanguageGuessingSourceSelector(null);
         SecureUserProfile refinedUserProfile = selector.sourceSelect(userProfile, partners);
 
-        assertEquals(1, userProfile.partnerList.size());
+        assertEquals(1, userProfile.getPartnerList().size());
         assertSame(userProfile, refinedUserProfile);
-        assertTrue(userProfile.partnerList.get(0) == germanPartner);
-        assertTrue(userProfile.partnerList.get(0) != englishPartner);
-        assertTrue(userProfile.partnerList.get(0) != frenchPartner);
+        assertTrue(userProfile.getPartnerList().get(0) == germanPartner);
+        assertTrue(userProfile.getPartnerList().get(0) != englishPartner);
+        assertTrue(userProfile.getPartnerList().get(0) != frenchPartner);
     }
 
     @Test
@@ -93,18 +93,18 @@ public class LanguageGuessingSourceSelectorTest {
         partners.add(englishPartner);
 
         SecureUserProfile userProfile = new SecureUserProfile();
-        userProfile.contextKeywords.addAll(Arrays.asList(new ContextKeyword[] { new ContextKeyword("this"), new ContextKeyword("is"), new ContextKeyword("a"),
+        userProfile.getContextKeywords().addAll(Arrays.asList(new ContextKeyword[] { new ContextKeyword("this"), new ContextKeyword("is"), new ContextKeyword("a"),
                 new ContextKeyword("car") }));
 
         PartnerSelector selector = new LanguageGuessingSourceSelector(null);
         SecureUserProfile refinedUserProfile = selector.sourceSelect(userProfile, partners);
 
-        assertEquals(1, userProfile.partnerList.size());
+        assertEquals(1, userProfile.getPartnerList().size());
         assertSame(userProfile, refinedUserProfile);
 
-        assertTrue(userProfile.partnerList.get(0) != germanPartner);
-        assertTrue(userProfile.partnerList.get(0) == englishPartner);
-        assertTrue(userProfile.partnerList.get(0) != frenchPartner);
+        assertTrue(userProfile.getPartnerList().get(0) != germanPartner);
+        assertTrue(userProfile.getPartnerList().get(0) == englishPartner);
+        assertTrue(userProfile.getPartnerList().get(0) != frenchPartner);
 
     }
 

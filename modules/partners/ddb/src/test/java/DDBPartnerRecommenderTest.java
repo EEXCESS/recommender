@@ -113,6 +113,23 @@ public class DDBPartnerRecommenderTest {
         assertEquals(2, documentDetails.documentBadges.size());
 
 	}
+
+	@Test
+	public void detailCallEnrichment() {
+        ArrayList<String> ids = new ArrayList<String>();
+		ArrayList<String> uris = new ArrayList<String>();
+        ids.add("FQOUN2TQHRXHXG2LKASNZ3VD432AFUIJ");
+        uris.add("https://www.deutsche-digitale-bibliothek.de/item/FQOUN2TQHRXHXG2LKASNZ3VD432AFUIJ");
+        DocumentBadgeList documentDetails = PartnerRecommenderTestHelper.getDetails(DEPLOYMENT_CONTEXT,	
+        		port, 
+        		PartnerRecommenderTestHelper.createParamsForPartnerRecommenderDetailCall(ids, uris, DATAPROVIDER));
+	    
+        assertNotNull(documentDetails);
+        assertTrue(documentDetails.documentBadges.size() > 0 );
+        assertEquals(1, documentDetails.documentBadges.size());
+
+	}
+
 	@Test
 	public void singleGoetheWithDetails() {
 		ArrayList<String> keywords = new ArrayList<String>();

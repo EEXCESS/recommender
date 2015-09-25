@@ -18,9 +18,6 @@ package eu.eexcess.dataformats.userprofile;
 
 import java.io.Serializable;
 
-import javax.xml.bind.annotation.XmlAttribute;
-import javax.xml.bind.annotation.XmlElement;
-
 /**
  * The Users Credentials to lock into partner systems
  * 
@@ -30,25 +27,22 @@ import javax.xml.bind.annotation.XmlElement;
 public class UserCredentials implements Serializable {
 
     private static final long serialVersionUID = -8327953285762134337L;
-    @XmlElement(name = "systemId")
-    public String systemId;
-    @XmlAttribute(name = "login")
-    public String login;
-    @XmlAttribute(name = "securityToken")
-    public String securityToken;
+    private String systemId;
+    private String login;
+    private String securityToken;
 
     @Override
     public String toString() {
-        return "UserCredentials [systemId=" + systemId + ", login=" + login + ", securityToken=" + securityToken + "]";
+        return "UserCredentials [systemId=" + getSystemId() + ", login=" + getLogin() + ", securityToken=" + getSecurityToken() + "]";
     }
 
     @Override
     public int hashCode() {
         final int prime = 31;
         int result = 1;
-        result = prime * result + ((login == null) ? 0 : login.hashCode());
-        result = prime * result + ((securityToken == null) ? 0 : securityToken.hashCode());
-        result = prime * result + ((systemId == null) ? 0 : systemId.hashCode());
+        result = prime * result + ((getLogin() == null) ? 0 : getLogin().hashCode());
+        result = prime * result + ((getSecurityToken() == null) ? 0 : getSecurityToken().hashCode());
+        result = prime * result + ((getSystemId() == null) ? 0 : getSystemId().hashCode());
         return result;
     }
 
@@ -61,22 +55,46 @@ public class UserCredentials implements Serializable {
         if (getClass() != obj.getClass())
             return false;
         UserCredentials other = (UserCredentials) obj;
-        if (login == null) {
-            if (other.login != null)
+        if (getLogin() == null) {
+            if (other.getLogin() != null)
                 return false;
-        } else if (!login.equals(other.login))
+        } else if (!getLogin().equals(other.getLogin()))
             return false;
-        if (securityToken == null) {
-            if (other.securityToken != null)
+        if (getSecurityToken() == null) {
+            if (other.getSecurityToken() != null)
                 return false;
-        } else if (!securityToken.equals(other.securityToken))
+        } else if (!getSecurityToken().equals(other.getSecurityToken()))
             return false;
-        if (systemId == null) {
-            if (other.systemId != null)
+        if (getSystemId() == null) {
+            if (other.getSystemId() != null)
                 return false;
-        } else if (!systemId.equals(other.systemId))
+        } else if (!getSystemId().equals(other.getSystemId()))
             return false;
         return true;
+    }
+
+    public String getSecurityToken() {
+        return securityToken;
+    }
+
+    public void setSecurityToken(String securityToken) {
+        this.securityToken = securityToken;
+    }
+
+    public String getLogin() {
+        return login;
+    }
+
+    public void setLogin(String login) {
+        this.login = login;
+    }
+
+    public String getSystemId() {
+        return systemId;
+    }
+
+    public void setSystemId(String systemId) {
+        this.systemId = systemId;
     }
 
 }

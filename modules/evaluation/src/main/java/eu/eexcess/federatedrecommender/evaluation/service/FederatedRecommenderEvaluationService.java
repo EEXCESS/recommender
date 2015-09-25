@@ -102,18 +102,18 @@ public class FederatedRecommenderEvaluationService extends FederatedRecommenderS
     public SecureUserProfileEvaluation testSUPE() {
         SecureUserProfileEvaluation secureUserProfile = new SecureUserProfileEvaluation();
 
-        secureUserProfile.firstName = "Max";
-        secureUserProfile.lastName = "Musterman";
-        secureUserProfile.birthDate = new Date();
-        secureUserProfile.gender = "male";
+        secureUserProfile.setFirstName("Max");
+        secureUserProfile.setLastName("Musterman");
+        secureUserProfile.setBirthDate(new Date());
+        secureUserProfile.setGender("male");
 
         List<ContextKeyword> contextList = new ArrayList<ContextKeyword>();
         contextList.add(new ContextKeyword("graz", 0.5));
         contextList.add(new ContextKeyword("vienna", 0.5));
-        secureUserProfile.contextKeywords = contextList;
+        secureUserProfile.setContextKeywords(contextList);
         PartnerBadge pB = new PartnerBadge();
         pB.setSystemId("Europeana");
-        secureUserProfile.partnerList.add(pB);
+        secureUserProfile.getPartnerList().add(pB);
 
         List<PartnerBadge> protectedPartnerList = new ArrayList<PartnerBadge>();
         PartnerBadge badge = new PartnerBadge();
@@ -121,16 +121,16 @@ public class FederatedRecommenderEvaluationService extends FederatedRecommenderS
         badge.setPartnerKey("dsajln22sadjkl!");
         protectedPartnerList.add(badge);
 
-        secureUserProfile.protectedPartnerList = protectedPartnerList;
+        secureUserProfile.setProtectedPartnerList(protectedPartnerList);
 
         List<UserCredentials> userCredentials = new ArrayList<UserCredentials>();
         eu.eexcess.dataformats.userprofile.UserCredentials cred = new UserCredentials();
-        cred.login = "me@partner.x";
-        cred.securityToken = "sdjalkej21!#";
-        cred.systemId = "Wissenmedia";
+        cred.setLogin("me@partner.x");
+        cred.setSecurityToken("sdjalkej21!#");
+        cred.setSystemId("Wissenmedia");
         userCredentials.add(cred);
-        secureUserProfile.userCredentials = userCredentials;
-        secureUserProfile.setQueryExpansionSourcePartner((ArrayList<PartnerBadge>) secureUserProfile.partnerList);
+        secureUserProfile.setUserCredentials(userCredentials);
+        secureUserProfile.setQueryExpansionSourcePartner((ArrayList<PartnerBadge>) secureUserProfile.getPartnerList());
         return secureUserProfile;
     }
 
@@ -158,7 +158,7 @@ public class FederatedRecommenderEvaluationService extends FederatedRecommenderS
     @Produces({ MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON })
     public EvaluationResultLists blockEvaluation(SecureUserProfileEvaluation userProfile) {
         EvaluationResultLists resultList = fREC.getblockResult(userProfile);
-        resultList.queryID = userProfile.queryID;
+        resultList.queryID = userProfile.getQueryID();
         return resultList;
     }
 

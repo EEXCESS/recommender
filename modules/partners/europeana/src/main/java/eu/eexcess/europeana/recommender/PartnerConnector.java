@@ -17,6 +17,7 @@ limitations under the License.
 package eu.eexcess.europeana.recommender;
 
 import java.io.IOException;
+import java.net.URLEncoder;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.Callable;
@@ -51,7 +52,6 @@ import eu.eexcess.partnerdata.reference.PartnerdataTracer;
 import eu.eexcess.partnerrecommender.api.PartnerConfigurationCache;
 import eu.eexcess.partnerrecommender.api.PartnerConnectorApi;
 import eu.eexcess.partnerrecommender.reference.PartnerConnectorBase;
-import eu.eexcess.utils.URLParamEncoder;
 
 /**
  * Query generator for Europeana.
@@ -83,17 +83,17 @@ public class PartnerConnector extends PartnerConnectorBase implements PartnerCon
         long start = System.currentTimeMillis();
 
         Map<String, String> valuesMap = new HashMap<String, String>();
-        valuesMap.put("query", URLParamEncoder.encode(query));
+        valuesMap.put("query", URLEncoder.encode(query, "UTF-8"));
         valuesMap.put("apiKey", partnerConfiguration.getApiKey()); // add API
                                                                    // key
         // searchEndpoint:
         // "http://www.europeana.eu/api/v2/search.json?wskey=${apiKey}&query=${query}"
         Integer numResultsRequest = 10;
-        if (userProfile.numResults != null && userProfile.numResults != 0)
-            numResultsRequest = userProfile.numResults;
+        if (userProfile.getNumResults() != null && userProfile.getNumResults() != 0)
+            numResultsRequest = userProfile.getNumResults();
         valuesMap.put("numResults", numResultsRequest.toString());
         String searchRequest = StrSubstitutor.replace(partnerConfiguration.getSearchEndpoint(), valuesMap);
-
+        LOGGER.log(Level.INFO, "SEARCHREQUEST: " + searchRequest);
         WebResource service = client.resource(searchRequest);
         ObjectMapper mapper = new ObjectMapper();
         Builder builder = service.accept(MediaType.APPLICATION_JSON);

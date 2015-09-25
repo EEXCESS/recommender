@@ -117,8 +117,8 @@ public class PartnerConnector extends PartnerConnectorBase implements PartnerCon
         Map<String, String> valuesMap = new HashMap<String, String>();
         valuesMap.put("query", URLParamEncoder.encode(query));
         Integer numResultsRequest = 10;
-        if (userProfile.numResults != null && userProfile.numResults != 0)
-            numResultsRequest = userProfile.numResults;
+        if (userProfile.getNumResults() != null && userProfile.getNumResults() != 0)
+            numResultsRequest = userProfile.getNumResults();
         valuesMap.put("numResults", numResultsRequest.toString() + "");
         String searchRequest = StrSubstitutor.replace(partnerConfiguration.getSearchEndpoint(), valuesMap);
         String httpJSONResult = callDDBAPI(key, searchRequest, "application/json"); // print

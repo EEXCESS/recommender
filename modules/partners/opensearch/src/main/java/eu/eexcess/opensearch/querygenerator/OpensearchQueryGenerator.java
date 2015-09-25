@@ -51,8 +51,8 @@ public class OpensearchQueryGenerator implements QueryGeneratorApi {
 
         StringBuilder stringBuilder = new StringBuilder();
 
-        for (ContextKeyword keyword : userProfile.contextKeywords) {
-            stringBuilder.append(keyword.text + " ");
+        for (ContextKeyword keyword : userProfile.getContextKeywords()) {
+            stringBuilder.append(keyword.getText() + " ");
         }
 
         if (stringBuilder.length() > 0) {
@@ -63,8 +63,8 @@ public class OpensearchQueryGenerator implements QueryGeneratorApi {
         try {
             urlEncodedKeywords = URLEncoder.encode(stringBuilder.toString(), MDEFAULT_URL_ENCONDING);
 
-            if (userProfile.numResults != null && userProfile.numResults > 0) {
-                return urlEncodedKeywords + "&limit=" + userProfile.numResults;
+            if (userProfile.getNumResults() != null && userProfile.getNumResults() > 0) {
+                return urlEncodedKeywords + "&limit=" + userProfile.getNumResults();
             }
 
         } catch (UnsupportedEncodingException e) {

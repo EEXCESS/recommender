@@ -152,29 +152,29 @@ public class QueryExpansionEvaluation {
     static String toQuery(SecureUserProfile userProfile) {
         StringBuilder result = new StringBuilder();
         boolean expansion = false;
-        for (ContextKeyword key : userProfile.contextKeywords) {
+        for (ContextKeyword key : userProfile.getContextKeywords()) {
 
-            if (key.expansion != null && (key.expansion == ExpansionType.PSEUDORELEVANCEWP || key.expansion == ExpansionType.SERENDIPITY)) {
+            if (key.getExpansion() != null && (key.getExpansion() == ExpansionType.PSEUDORELEVANCEWP || key.getExpansion() == ExpansionType.SERENDIPITY)) {
                 if (!expansion) {
                     expansion = true;
                     if (result.length() > 0) {
-                        if (key.expansion == ExpansionType.PSEUDORELEVANCEWP)
-                            result.append(" OR (\"" + key.text + "\"");
+                        if (key.getExpansion() == ExpansionType.PSEUDORELEVANCEWP)
+                            result.append(" OR (\"" + key.getText() + "\"");
                         else
-                            result.append(" AND (\"" + key.text + "\"");
+                            result.append(" AND (\"" + key.getText() + "\"");
                     } else
-                        result.append("(\"" + key.text + "\"");
+                        result.append("(\"" + key.getText() + "\"");
                 } else {
-                    result.append(" OR \"" + key.text + "\"");
+                    result.append(" OR \"" + key.getText() + "\"");
                 }
             } else {
                 if (expansion) {
-                    result.append(") OR \"" + key.text + "\"");
+                    result.append(") OR \"" + key.getText() + "\"");
                     expansion = false;
                 } else if (result.length() > 0)
-                    result.append(" \"" + key.text + "\"");
+                    result.append(" \"" + key.getText() + "\"");
                 else
-                    result.append("\"" + key.text + "\"");
+                    result.append("\"" + key.getText() + "\"");
             }
         }
         if (expansion)
@@ -225,7 +225,7 @@ public class QueryExpansionEvaluation {
             keywords.add(new ContextKeyword(term, ExpansionType.NONE));
         }
         SecureUserProfile userProfile = new SecureUserProfile();
-        userProfile.contextKeywords = keywords;
+        userProfile.setContextKeywords(keywords);
         return userProfile;
     }
 

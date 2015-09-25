@@ -210,7 +210,7 @@ public class CSVResultCreation {
         builder.append(",");
         for (Interest interest : evalQueries.interests) {
             builder.append("\"");
-            builder.append(interest.text);
+            builder.append(interest.getText());
             builder.append("\"");
             builder.append(",");
         }
@@ -227,25 +227,25 @@ public class CSVResultCreation {
 
     private SecureUserProfileEvaluation convertEvalQueryToSecUserProfile(EvaluationQuery query) {
         SecureUserProfileEvaluation profile = new SecureUserProfileEvaluation();
-        profile.contextKeywords.add(new ContextKeyword(query.query, 0.5));
+        profile.getContextKeywords().add(new ContextKeyword(query.query, 0.5));
         // for (String queryPart : query.query.split(" ")) {
         // if (!queryPart.trim().isEmpty())
         // profile.contextKeywords.add(new ContextKeyword(queryPart, 0.5));
         // }
         profile.setDecomposer("eu.eexcess.partnerrecommender.reference.OrQueryGeneratorFieldTermConjunction");
-        profile.queryID = "query" + profile.hashCode();
-        profile.interestList.addAll(query.interests);
+        profile.setQueryID("query" + profile.hashCode());
+        profile.getInterestList().addAll(query.interests);
         PartnerBadge mendeley = new PartnerBadge();
         mendeley.setSystemId("Mendeley");
         PartnerBadge europeana = new PartnerBadge();
         europeana.setSystemId("Europeana");
         PartnerBadge wikipedia = new PartnerBadge();
         wikipedia.setSystemId("Wikipedia-Local");
-        profile.partnerList.add(wikipedia);
+        profile.getPartnerList().add(wikipedia);
         // profile.partnerList.add(mendeley);
         // profile.partnerList.add(europeana);
         profile.setPicker("FiFoPicker");
-        profile.numResults = 10;
+        profile.setNumResults(10);
         return profile;
     }
 
@@ -253,7 +253,7 @@ public class CSVResultCreation {
     private static String getQueryResultCSV(WebResource wresource, SecureUserProfileEvaluation secureUserProfileEvaluation, boolean interchanged) {
         StringBuilder builder = new StringBuilder();
         EvaluationResultLists resp = null;
-        secureUserProfileEvaluation.numResults = 10;
+        secureUserProfileEvaluation.setNumResults(10);
         resp = wresource.accept(MediaType.APPLICATION_JSON).type(MediaType.APPLICATION_JSON).post(EvaluationResultLists.class, secureUserProfileEvaluation);
 
         // if (resp.results.get(0).results.size() < 10) {
@@ -282,7 +282,7 @@ public class CSVResultCreation {
         }
         if (isValidBlock && isValidBasic) {
             try {
-                File file = new File(DIRECTORYPATH + "results/" + secureUserProfileEvaluation.queryID + "#" + Long.toBinaryString(Math.round(Math.random())) + ".json");
+                File file = new File(DIRECTORYPATH + "results/" + secureUserProfileEvaluation.getQueryID() + "#" + Long.toBinaryString(Math.round(Math.random())) + ".json");
                 mapper.defaultPrettyPrintingWriter().writeValue(file, resp);
                 // System.out.println("Writing to file:" +
                 // file.getAbsolutePath());

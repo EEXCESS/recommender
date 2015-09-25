@@ -47,13 +47,13 @@ public class DBPediaDecomposerTest {
 		SecureUserProfileEvaluation inputSecureUserProfile = new SecureUserProfileEvaluation();
 //		inputSecureUserProfile.contextKeywords.add(new ContextKeyword(OBAMA));
 //		inputSecureUserProfile.contextKeywords.add(new ContextKeyword(CLINTON));
-		inputSecureUserProfile.contextKeywords.add(new ContextKeyword(SCHWARZENEGGER));
-		inputSecureUserProfile.contextKeywords.add(new ContextKeyword(TERMINATOR));
-		inputSecureUserProfile.contextKeywords.add(new ContextKeyword(CONAN));
-		inputSecureUserProfile.contextKeywords.add(new ContextKeyword(FRANCE));
-		inputSecureUserProfile.contextKeywords.add(new ContextKeyword(CHINA));
-		inputSecureUserProfile.contextKeywords.add(new ContextKeyword(BOMB));
-		inputSecureUserProfile.contextKeywords.add(new ContextKeyword(GIBRALTAR));
+		inputSecureUserProfile.getContextKeywords().add(new ContextKeyword(SCHWARZENEGGER));
+		inputSecureUserProfile.getContextKeywords().add(new ContextKeyword(TERMINATOR));
+		inputSecureUserProfile.getContextKeywords().add(new ContextKeyword(CONAN));
+		inputSecureUserProfile.getContextKeywords().add(new ContextKeyword(FRANCE));
+		inputSecureUserProfile.getContextKeywords().add(new ContextKeyword(CHINA));
+		inputSecureUserProfile.getContextKeywords().add(new ContextKeyword(BOMB));
+		inputSecureUserProfile.getContextKeywords().add(new ContextKeyword(GIBRALTAR));
 		
 		SecureUserProfileEvaluation eval =dbPediaDecomposer.decompose(inputSecureUserProfile);
 		for (ArrayList<ContextKeyword> iterable_element : eval.getContextKeywordsGroups()) {

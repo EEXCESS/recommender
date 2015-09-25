@@ -176,17 +176,17 @@ public class OccurrenceProbabilityPicker extends PartnersFederatedRecommendation
         double maxDescriptionEntries = 0;
         // TODO: use stemmed versions and preprocess the hole contented in a
         // better way
-        for (ContextKeyword context : secureUserProfile.contextKeywords) {
-            if (result.title != null && result.title.toLowerCase().contains(context.text.toLowerCase()))
+        for (ContextKeyword context : secureUserProfile.getContextKeywords()) {
+            if (result.title != null && result.title.toLowerCase().contains(context.getText().toLowerCase()))
                 maxTitleEntries++;
         }
-        for (Interest interest : secureUserProfile.interestList) {
-            if (result.title != null && result.title.toLowerCase().contains(interest.text.toLowerCase()))
+        for (Interest interest : secureUserProfile.getInterestList()) {
+            if (result.title != null && result.title.toLowerCase().contains(interest.getText().toLowerCase()))
                 maxTitleEntries++;
         }
         double queryWeight = 0;
-        if (secureUserProfile.contextKeywords.size() + secureUserProfile.interestList.size() > 0)
-            queryWeight = ((maxDescriptionEntries + maxTitleEntries) / 2) / (double) (secureUserProfile.contextKeywords.size() + secureUserProfile.interestList.size());
+        if (secureUserProfile.getContextKeywords().size() + secureUserProfile.getInterestList().size() > 0)
+            queryWeight = ((maxDescriptionEntries + maxTitleEntries) / 2) / (double) (secureUserProfile.getContextKeywords().size() + secureUserProfile.getInterestList().size());
         return queryWeight;
     }
 

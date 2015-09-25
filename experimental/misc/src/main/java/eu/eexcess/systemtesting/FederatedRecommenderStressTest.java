@@ -110,12 +110,12 @@ public class FederatedRecommenderStressTest {
 
     private SecureUserProfile createSecureUserProfileFromString(String string) {
         SecureUserProfile sUserProfile = new SecureUserProfile();
-        sUserProfile.numResults = 10;
-        sUserProfile.contextKeywords.add(new ContextKeyword(string));
+        sUserProfile.setNumResults(10);
+        sUserProfile.getContextKeywords().add(new ContextKeyword(string));
         PartnerBadge badge = new PartnerBadge();
         badge.setSystemId("Wikipedia-Local");
         // badge.setSystemId("Mendeley");
-        sUserProfile.partnerList.add(badge);
+        sUserProfile.getPartnerList().add(badge);
         return sUserProfile;
     }
 

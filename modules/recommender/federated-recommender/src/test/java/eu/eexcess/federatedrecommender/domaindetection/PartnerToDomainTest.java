@@ -253,7 +253,7 @@ public class PartnerToDomainTest {
             wordsToIgnore.add(ambiguousPhrase);
 
             SecureUserProfile sup = new SecureUserProfile();
-            sup.contextKeywords = Arrays.asList(new ContextKeyword(ambiguousPhrase));
+            sup.setContextKeywords(Arrays.asList(new ContextKeyword(ambiguousPhrase)));
 
             for (PartnerBadge partner : partners) {
                 System.out.println("Searching partner '" + partner.getSystemId() + "'");

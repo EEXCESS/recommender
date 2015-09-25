@@ -30,94 +30,119 @@ import javax.xml.bind.annotation.XmlElement;
 public class ContextKeyword implements Serializable {
 
     private static final long serialVersionUID = -4047662119669146571L;
+    private String type;
+    private String uri;
+    private Boolean isMainTopic = false;
+
     // Is used for query expansion
-    @XmlElement(name = "expansion", required = false)
-    public ExpansionType expansion;
-    @XmlElement(name = "reason")
-    public String reason;
-    @XmlElement(name = "text")
-    public String text;
-    @XmlElement(name = "weight")
-    public Double weight;
+
+    private ExpansionType expansion;
+    private String text;
+    @Deprecated
+    /**
+     * @deprecated
+     */
+    private Double weight;
+    @Deprecated
+    /**
+     * @deprecated
+     */
+    private String reason;
 
     public ContextKeyword() {
 
     }
 
-    // public ContextKeyword(String reason, String text, Double weight) {
-    // super();
-    // this.text = text;
-    // this.weight = weight;
-    // this.expansion=ExpansionType.NONE;
-    // }
-
     public ContextKeyword(String text) {
-        this.text = text;
+        this.setText(text);
     }
 
     public ContextKeyword(String text, Double weight) {
-        this.text = text;
-        this.weight = weight;
+        this.setText(text);
+        this.setWeight(weight);
     }
 
     public ContextKeyword(String text, ExpansionType expansion) {
-        this.text = text;
-        this.expansion = expansion;
+        this.setText(text);
+        this.setExpansion(expansion);
     }
 
     public ContextKeyword(String text, Double weight, ExpansionType expansion) {
-        this.text = text;
+        this.setText(text);
+        this.setWeight(weight);
+        this.setExpansion(expansion);
+
+    }
+
+    public Boolean getIsMainTopic() {
+        return isMainTopic;
+    }
+
+    public void setIsMainTopic(Boolean isMainTopic) {
+        this.isMainTopic = isMainTopic;
+    }
+
+    public String getType() {
+        return type;
+    }
+
+    public void setType(String type) {
+        this.type = type;
+    }
+
+    public String getUri() {
+        return uri;
+    }
+
+    public void setUri(String uri) {
+        this.uri = uri;
+    }
+
+    /**
+     * @deprecated
+     * @return
+     */
+    public Double getWeight() {
+        return weight;
+    }
+
+    /**
+     * @deprecated
+     */
+    public void setWeight(Double weight) {
         this.weight = weight;
+    }
+
+    /**
+     * @deprecated
+     * @return
+     */
+    public String getReason() {
+        return reason;
+    }
+
+    /**
+     * @deprecated
+     */
+    public void setReason(String reason) {
+        this.reason = reason;
+    }
+
+    public String getText() {
+        return text;
+    }
+
+    public void setText(String text) {
+        this.text = text;
+    }
+
+    @XmlElement(name = "expansion", required = false)
+    public ExpansionType getExpansion() {
+        return expansion;
+    }
+
+    public void setExpansion(ExpansionType expansion) {
         this.expansion = expansion;
-
-    }
-
-    @Override
-    public String toString() {
-        return "ContextKeyword [expansion=" + expansion + ", reason=" + reason + ", text=" + text + ", weight=" + weight + "]";
-    }
-
-    @Override
-    public int hashCode() {
-        final int prime = 31;
-        int result = 1;
-        result = prime * result + ((expansion == null) ? 0 : expansion.hashCode());
-        result = prime * result + ((reason == null) ? 0 : reason.hashCode());
-        result = prime * result + ((text == null) ? 0 : text.hashCode());
-        result = prime * result + ((weight == null) ? 0 : weight.hashCode());
-        return result;
-    }
-
-    @Override
-    public boolean equals(Object obj) {
-        if (this == obj)
-            return true;
-        if (obj == null)
-            return false;
-        if (getClass() != obj.getClass())
-            return false;
-        ContextKeyword other = (ContextKeyword) obj;
-        if (expansion == null) {
-            if (other.expansion != null)
-                return false;
-        } else if (!expansion.equals(other.expansion))
-            return false;
-        if (reason == null) {
-            if (other.reason != null)
-                return false;
-        } else if (!reason.equals(other.reason))
-            return false;
-        if (text == null) {
-            if (other.text != null)
-                return false;
-        } else if (!text.equals(other.text))
-            return false;
-        if (weight == null) {
-            if (other.weight != null)
-                return false;
-        } else if (!weight.equals(other.weight))
-            return false;
-        return true;
     }
 
 }

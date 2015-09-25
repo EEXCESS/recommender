@@ -38,7 +38,7 @@ public class PartnerConnectorTest {
         PartnerConfiguration configuration = PartnerConfigurationCache.CONFIG.getPartnerConfiguration();
         ContextKeyword schroedinger = new ContextKeyword("Erwin Schrödinger");
         SecureUserProfile userProfile = new SecureUserProfile();
-        userProfile.contextKeywords.add(schroedinger);
+        userProfile.getContextKeywords().add(schroedinger);
         PartnerConnector connector = new PartnerConnector();
 
         ResultList firstTryResults = null;

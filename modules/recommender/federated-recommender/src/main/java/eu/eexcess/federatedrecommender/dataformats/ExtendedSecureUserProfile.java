@@ -36,8 +36,8 @@ public class ExtendedSecureUserProfile extends SecureUserProfile {
     private List<ESUPPair> extendedContextList = new ArrayList<ESUPPair>();
 
     public ExtendedSecureUserProfile(SecureUserProfile secureUserProfile) {
-        this.contextKeywords = secureUserProfile.contextKeywords;
-        this.interestList = secureUserProfile.interestList;
+        this.setContextKeywords(secureUserProfile.getContextKeywords());
+        this.setInterestList(secureUserProfile.getInterestList());
     }
 
     public void addInterestClass(String interest, List<ESUPSource> sourceClasses) {
