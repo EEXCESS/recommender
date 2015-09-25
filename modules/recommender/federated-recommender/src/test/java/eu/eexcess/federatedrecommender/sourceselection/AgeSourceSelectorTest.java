@@ -212,4 +212,33 @@ public class AgeSourceSelectorTest {
         } else
             throw new AssertionError();
     }
+
+    @Test
+    public void testSourceSelectionBadgesHaveNoAgeGiven() throws Exception {
+
+        AgeSourceSelector ageSourceSelector = new AgeSourceSelector();
+        List<PartnerBadge> partners = new ArrayList<PartnerBadge>();
+        PartnerBadge p1 = new PartnerBadge();
+        p1.setSystemId("P1");
+        partners.add(p1);
+        PartnerBadge p2 = new PartnerBadge();
+        p2.setSystemId("P2");
+        partners.add(p2);
+        PartnerBadge p3 = new PartnerBadge();
+        p3.setSystemId("P3");
+        partners.add(p3);
+        PartnerBadge p4 = new PartnerBadge();
+        p4.setSystemId("P4");
+        partners.add(p4);
+        SecureUserProfile userProfile = new SecureUserProfile();
+        Date userBirthDay = new Date();
+        userBirthDay.setYear(50);
+        userProfile.setBirthDate(userBirthDay);
+        ageSourceSelector.sourceSelect(userProfile, partners);
+        if (userProfile.getPartnerList().contains(p1) && userProfile.getPartnerList().contains(p2) && userProfile.getPartnerList().contains(p3)
+                && userProfile.getPartnerList().contains(p4)) {
+            assert (true);
+        } else
+            throw new AssertionError();
+    }
 }
