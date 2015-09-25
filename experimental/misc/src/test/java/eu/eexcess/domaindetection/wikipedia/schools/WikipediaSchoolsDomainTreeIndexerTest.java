@@ -20,6 +20,9 @@
 
 package eu.eexcess.domaindetection.wikipedia.schools;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
@@ -32,7 +35,7 @@ import eu.eexcess.sourceselection.redde.tree.ValueTreeNode;
 public class WikipediaSchoolsDomainTreeIndexerTest {
 
     @Test
-    public void parseDomainFilesToTree_expectCorrectTree() {
+    public void parseDomainFilesToTree_expectCorrectTreeTraversal() {
 
         List<File> domainFiles = new ArrayList<File>();
         domainFiles.add(new File("root.htm"));
@@ -45,9 +48,21 @@ public class WikipediaSchoolsDomainTreeIndexerTest {
 
         ValueTreeNode<String> tree = WikipediaSchoolsDomainTreeIndexer.parseDomainFilesToTree(domainFiles);
 
+        List<String> domains = new ArrayList<String>();
+        domains.add("factotum");
+        domains.add("cars");
+        domains.add("wheels");
+        domains.add("porsche");
+        domains.add("helicopter");
+        domains.add("black_hawk");
+        domains.add("planes");
         BaseTreeNode.depthFirstTraverser(tree, n -> {
             System.out.println(n.getName());
+            assertEquals(domains.get(0), n.getName());
+            domains.remove(0);
             return false;
         });
+
+        assertTrue(domains.isEmpty());
     }
 }
