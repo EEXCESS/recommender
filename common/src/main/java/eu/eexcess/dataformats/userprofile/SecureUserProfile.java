@@ -54,10 +54,11 @@ public class SecureUserProfile implements Serializable {
 
     @Override
     public String toString() {
-        return "SecureUserProfile [partnerList=" + getPartnerList() + ", protectedPartnerList=" + getProtectedPartnerList() + ", queryID=" + getQueryID() + ", firstName="
-                + getFirstName() + ", lastName=" + getLastName() + ", birthDate=" + getBirthDate() + ", numResults=" + getNumResults() + ", gender=" + getGender() + ", address="
-                + getAddress() + ", timeRange=" + getTimeRange() + ", languages=" + getLanguages() + ",  userCredentials=" + getUserCredentials() + ", interestList="
-                + getInterestList() + ", contextKeywords=" + getContextKeywords() + ", context=" + getContext() + "]";
+        return "SecureUserProfile [partnerList=" + getPartnerList() + ", protectedPartnerList=" + getProtectedPartnerList() + ", queryID=" + getQueryID()
+                + ", firstName=" + getFirstName() + ", lastName=" + getLastName() + ", birthDate=" + getBirthDate() + ", numResults=" + getNumResults()
+                + ", gender=" + getGender() + ", address=" + getAddress() + ", timeRange=" + getTimeRange() + ", languages=" + getLanguages()
+                + ",  userCredentials=" + getUserCredentials() + ", interestList=" + getInterestList() + ", contextKeywords=" + getContextKeywords()
+                + ", context=" + getContext() + "]";
     }
 
     @Override

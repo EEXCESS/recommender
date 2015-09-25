@@ -115,8 +115,8 @@ public class FederatedRecommenderCore implements ProbeResultChanged {
         String domainSelectorName = WndomainSourceSelector.class.getCanonicalName();
         if (sourceSelectors != null && Arrays.asList(sourceSelectors).contains(domainSelectorName)) {
             LOGGER.info("activating partner domaindetection since [" + domainSelectorName + "] is requested to be applied");
-            
-            int numRandomPhrases = 50, numConsideringPartnerResults=10;
+
+            int numRandomPhrases = 50, numConsideringPartnerResults = 10;
             partnersDomainsDetectors = new AsyncPartnerDomainsProbeMonitor(new File(this.federatedRecConfiguration.getWordnetPath()), new File(
                     this.federatedRecConfiguration.getWordnetDomainFilePath()), numRandomPhrases, numConsideringPartnerResults, PARTNERPROBINGTIMEOUT);
             partnersDomainsDetectors.setCallback(this);
@@ -582,7 +582,7 @@ public class FederatedRecommenderCore implements ProbeResultChanged {
                     while (results.next()) {
                         restoredDomainsCount++;
                         PartnerDomain domain = new PartnerDomain();
-                        domain.setDomainName(results.getString(PartnersDomainsTableQuery.Tables.PartnerProbes.Domains.DOMAIN_NAME.columnIndex));
+                        domain.setName(results.getString(PartnersDomainsTableQuery.Tables.PartnerProbes.Domains.DOMAIN_NAME.columnIndex));
                         domain.setWeight(results.getDouble(PartnersDomainsTableQuery.Tables.PartnerProbes.Domains.DOMAIN_WEIGHT.columnIndex));
                         hasDomainsRestored = true;
                         partnerConfig.getDomainContent().add(domain);
@@ -661,9 +661,10 @@ public class FederatedRecommenderCore implements ProbeResultChanged {
      * @return true/false
      */
     private boolean checkUserSelectedPartners(SecureUserProfile secureUserProfile, PartnerBadge partner) {
-        if (secureUserProfile.getPartnerList() != null) { // if the list is null then
-                                                     // we query every
-                                                     // partner
+        if (secureUserProfile.getPartnerList() != null) { // if the list is null
+                                                          // then
+            // we query every
+            // partner
             if (!secureUserProfile.getPartnerList().isEmpty()) {
                 boolean withKey = false;
                 if (partner.getPartnerKey() != null && !partner.getPartnerKey().isEmpty())
@@ -765,7 +766,7 @@ public class FederatedRecommenderCore implements ProbeResultChanged {
                                 for (PartnerDomain domain : partnerDomains) {
                                     insertStatement.setString(1, partner.getSystemId());
                                     insertStatement.setLong(2, System.currentTimeMillis());
-                                    insertStatement.setString(3, domain.getDomainName());
+                                    insertStatement.setString(3, domain.getName());
                                     insertStatement.setDouble(4, domain.getWeight());
                                     insertStatement.addBatch();
                                 }

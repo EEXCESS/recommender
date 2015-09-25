@@ -106,7 +106,7 @@ public class WndomainSourceSelector implements PartnerSelector {
      * A map of domain matching partners mapping to a descent sorted set of
      * {@link DomainWeight}s
      */
-    protected Map<PartnerBadge, TreeSet<DomainWeight>> matchingPartners = new HashMap<>();
+    protected Map<PartnerBadge, TreeSet<DomainWeight>> matchingPartners = new HashMap<PartnerBadge, TreeSet<DomainWeight>>();
 
     private static final Logger LOGGER = Logger.getLogger(WndomainSourceSelector.class.getName());
 
@@ -227,7 +227,7 @@ public class WndomainSourceSelector implements PartnerSelector {
      */
     private void matchKeywordDomainsOnParterDomains(List<ContextKeyword> contextKeywords, List<PartnerBadge> partners) {
 
-        // detect keywords' domains
+        // detect keywords' domains and store seen domains and domain count
         List<String> keywords = getQueryTerms(contextKeywords);
         for (String keyword : keywords) {
             try {
@@ -256,14 +256,14 @@ public class WndomainSourceSelector implements PartnerSelector {
                 // domains have a tree structure, utilizing a simple string
                 // comparison is a weak matching method. Instead a
                 // "is X sub domain of Y" comparison should be performed.
-                AtomicInteger timesSeen = seenDomains.get(partnerContentDomain.getDomainName().toLowerCase());
+                AtomicInteger timesSeen = seenDomains.get(partnerContentDomain.getName().toLowerCase());
                 if (null == timesSeen) {
                     continue;
                 } else {
                     if (!matchingPartners.containsKey(partner)) {
-                        matchingPartners.put(partner, new TreeSet<>());
+                        matchingPartners.put(partner, new TreeSet<DomainWeight>());
                     }
-                    DomainWeight domain = new DomainWeight(partnerContentDomain.getDomainName(), timesSeen.doubleValue());
+                    DomainWeight domain = new DomainWeight(partnerContentDomain.getName(), timesSeen.doubleValue());
                     matchingPartners.get(partner).add(domain);
                     totalWeight += domain.weight;
                 }
@@ -290,12 +290,14 @@ public class WndomainSourceSelector implements PartnerSelector {
     private List<String> getQueryTerms(List<ContextKeyword> contextKeywords) {
         ArrayList<String> keywords = new ArrayList<>(contextKeywords.size());
 
+        // grouping: concatenate all keywords to one string
         if (isKeywordGroupingEnabled) {
             StringBuilder joinedKeywords = new StringBuilder();
             for (ContextKeyword contextKeyword : contextKeywords) {
                 joinedKeywords.append(contextKeyword.getText().toLowerCase() + " ");
             }
             keywords.add(joinedKeywords.toString().trim());
+            // not grouping
         } else {
             for (ContextKeyword contextKeyword : contextKeywords) {
                 keywords.add(contextKeyword.getText().toLowerCase());

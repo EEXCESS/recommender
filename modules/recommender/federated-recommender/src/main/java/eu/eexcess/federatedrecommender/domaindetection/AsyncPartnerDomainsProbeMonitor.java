@@ -172,7 +172,7 @@ public class AsyncPartnerDomainsProbeMonitor implements ProbeDoneCallback {
                 Set<PartnerDomain> newEntrySet = new HashSet<PartnerDomain>(entry.getValue().size());
 
                 for (PartnerDomain domain : entry.getValue()) {
-                    newEntrySet.add(new PartnerDomain(domain.getDomainName(), domain.getWeight()));
+                    newEntrySet.add(new PartnerDomain(domain.getName(), domain.getWeight()));
                 }
                 newMap.put(entry.getKey(), newEntrySet);
             }
