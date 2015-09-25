@@ -22,6 +22,8 @@ package eu.eexcess.dataformats;
 
 import java.io.Serializable;
 
+import javax.xml.bind.annotation.XmlElement;
+
 /**
  * Reflects a partner domain given in partner-configuration.
  * 
@@ -32,16 +34,18 @@ public class PartnerDomain implements Serializable {
 
     private static final long serialVersionUID = -3022570752393633726L;
 
-    private String domainName;
+    @XmlElement(name = "domainName")
+    private String name;
 
+    @XmlElement(name = "weight")
     private Double weight;
 
-    public String getDomainName() {
-        return domainName;
+    public String getName() {
+        return name;
     }
 
-    public void setDomainName(String domainName) {
-        this.domainName = domainName;
+    public void setName(String domainName) {
+        this.name = domainName;
     }
 
     public Double getWeight() {
@@ -52,9 +56,9 @@ public class PartnerDomain implements Serializable {
         this.weight = weight;
     }
 
-    public PartnerDomain(String domainName, double weight) {
-        this.domainName = domainName;
-        this.weight = weight;
+    public PartnerDomain(String domainName, double domainWeight) {
+        this.name = domainName;
+        this.weight = domainWeight;
     }
 
     public PartnerDomain() {
@@ -64,7 +68,7 @@ public class PartnerDomain implements Serializable {
     public int hashCode() {
         final int prime = 31;
         int result = 1;
-        result = prime * result + ((domainName == null) ? 0 : domainName.hashCode());
+        result = prime * result + ((name == null) ? 0 : name.hashCode());
         result = prime * result + ((weight == null) ? 0 : weight.hashCode());
         return result;
     }
@@ -78,10 +82,10 @@ public class PartnerDomain implements Serializable {
         if (getClass() != obj.getClass())
             return false;
         PartnerDomain other = (PartnerDomain) obj;
-        if (domainName == null) {
-            if (other.domainName != null)
+        if (name == null) {
+            if (other.name != null)
                 return false;
-        } else if (!domainName.equals(other.domainName))
+        } else if (!name.equals(other.name))
             return false;
         if (weight == null) {
             if (other.weight != null)
@@ -93,7 +97,7 @@ public class PartnerDomain implements Serializable {
 
     @Override
     public String toString() {
-        return "PartnerDomain [domainName=" + domainName + ", weight=" + weight + "]";
+        return "PartnerDomain [domainName=" + name + ", weight=" + weight + "]";
     }
 
 }

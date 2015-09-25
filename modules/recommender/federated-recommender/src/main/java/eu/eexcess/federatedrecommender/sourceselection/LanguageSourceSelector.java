@@ -59,7 +59,7 @@ public class LanguageSourceSelector implements PartnerSelector {
         if (userProfile.partnerList.isEmpty()) {
             // query language(s) are specified in user profile
             if (!userProfile.languages.isEmpty()) {
-                // match partners and user profile languages
+                // match partners' and user profile languages
                 for (Language userLangDetails : userProfile.languages) {
                     String userLanguage = userLangDetails.getIso2();
                     collectPartnersOnLanguageMatch(userLanguage, partners, userProfile.partnerList);
