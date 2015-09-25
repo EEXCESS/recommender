@@ -1,0 +1,24 @@
+{
+  "systemId": "Wikipedia4Schools",
+ 
+  "queryGeneratorClass": "eu.eexcess.partnerrecommender.reference.LuceneQueryGenerator",
+  "partnerConnectorClass": "eu.eexcess.wikipediaforschools.recommender.PartnerConnector",
+  "isTransformedNative": "true",
+  "transformerClass": "eu.eexcess.wikipediaforschools.datalayer.WikipediaTransformer",
+  "searchEndpoint" : "/opt/datasets/EExcess/wikipedia4Schools/paragraph-index/wikipedia-schools-paragraph-index/" ,
+  "userName": "",
+  "password": "",
+  "favIconURI":"https://de.wikipedia.org/static/favicon/wikipedia.ico",
+  "mappingListTransformationFile":"mapperResultList.xsl",
+  "mappingObjectTransformationFile":"mapperObject.xsl",
+  "partnerDataRequestsTrace":"false",
+  "enableEnriching":"false",
+  "makeCleanupBeforeTransformation":"false",
+  "isQueryExpansionEnabled":"true",
+  "isQuerySplitingEnabled":"true",
+  "partnerConnectorEndpoint": "http://127.0.0.1/eexcess-partner-reference-wikipediaforschools-local-1.0-SNAPSHOT/partner/",
+  "federatedRecommenderURI":  "http://127.0.0.1/eexcess-federated-recommender-web-service-1.0-SNAPSHOT/recommender/",
+  "languageContent" : ["en"],
+  "lowerAgeLimit" : 0,
+  "upperAgeLimit" : 15
+}
