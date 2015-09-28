@@ -22,8 +22,6 @@ package eu.eexcess.dataformats;
 
 import java.io.Serializable;
 
-import javax.xml.bind.annotation.XmlElement;
-
 /**
  * Reflects a partner domain given in partner-configuration.
  * 
@@ -34,11 +32,9 @@ public class PartnerDomain implements Serializable {
 
     private static final long serialVersionUID = -3022570752393633726L;
 
-    @XmlElement(name = "domainName")
-    private String name;
+    private String            name;
 
-    @XmlElement(name = "weight")
-    private Double weight;
+    private Double            weight;
 
     public String getName() {
         return name;
