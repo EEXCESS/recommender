@@ -29,12 +29,12 @@ import java.util.concurrent.atomic.AtomicInteger;
 import org.junit.Ignore;
 import org.junit.Test;
 
+import eu.eexcess.federatedrecommender.utils.tree.NodeInspector;
+import eu.eexcess.federatedrecommender.utils.tree.TreeNode;
+import eu.eexcess.federatedrecommender.utils.tree.ValueTreeNode;
 import eu.eexcess.sourceselection.redde.config.Settings;
 import eu.eexcess.sourceselection.redde.indexer.topterm.DBDomainSampler.SampleArguments;
 import eu.eexcess.sourceselection.redde.indexer.topterm.DBDomainSampler.WordNetArguments;
-import eu.eexcess.sourceselection.redde.tree.NodeInspector;
-import eu.eexcess.sourceselection.redde.tree.TreeNode;
-import eu.eexcess.sourceselection.redde.tree.ValueTreeNode;
 
 public class DBDomainSamplerTest {
 

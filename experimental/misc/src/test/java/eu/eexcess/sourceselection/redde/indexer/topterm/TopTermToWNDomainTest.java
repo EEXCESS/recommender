@@ -24,31 +24,22 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 import java.io.File;
-import java.io.IOException;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
-
-import net.sf.extjwnl.JWNLException;
 
 import org.junit.Test;
 
 import eu.eexcess.federatedrecommender.domaindetection.probing.Domain;
 import eu.eexcess.federatedrecommender.domaindetection.probing.DomainDetectorException;
 import eu.eexcess.federatedrecommender.domaindetection.wordnet.WordnetDomainsDetector;
+import eu.eexcess.federatedrecommender.utils.tree.NodeInspector;
+import eu.eexcess.federatedrecommender.utils.tree.TreeNode;
+import eu.eexcess.federatedrecommender.utils.tree.ValueTreeNode;
 import eu.eexcess.sourceselection.redde.config.Settings;
-import eu.eexcess.sourceselection.redde.tree.NodeInspector;
-import eu.eexcess.sourceselection.redde.tree.TreeNode;
-import eu.eexcess.sourceselection.redde.tree.ValueTreeNode;
 
 public class TopTermToWNDomainTest {
-
-    private int nodeCount;
-    private NodeInspector<String> nodeCounter = (n) -> {
-        TopTermToWNDomainTest.this.nodeCount++;
-        return false;
-    };
 
     private int termCount;
     private NodeInspector<String> termCounter = (n) -> {
@@ -72,64 +63,6 @@ public class TopTermToWNDomainTest {
         return false;
     };
 
-    // private NodeInspector printer = (n) -> System.out.println(n.toString());
-
-    @Test
-    public void inflateDomainTree_readTree_exptectCorrectNodeCountInTree() {
-
-        if (Settings.isResourceAvailable(Settings.BaseIndex) && Settings.isWordNet20ResourceAvailable() && Settings.isWordNetDomainsResourceAvailable()) {
-            try {
-                TopTermToWNDomain mapper = new TopTermToWNDomain(Settings.BaseIndex.baseIndexPath, Settings.WordNet.Path_2_0, Settings.WordnetDomains.Path,
-                        Settings.WordnetDomains.CSVDomainPath);
-
-                ValueTreeNode<String> domainTree = TopTermToWNDomain.inflateDomainTree(mapper.getTreeFile());
-                mapper.close();
-
-                nodeCount = 0;
-                ValueTreeNode.depthFirstTraverser(domainTree, nodeCounter);
-                assertEquals(168 + 1, nodeCount);
-            } catch (JWNLException | IOException e) {
-                e.printStackTrace();
-                assertTrue(false);
-            }
-        }
-    }
-
-    @Test
-    public void inflateDomainTree_readTree_exptectCorrectDomainsAtDepth2and4() {
-
-        if (Settings.isResourceAvailable(Settings.BaseIndex) && Settings.isWordNet20ResourceAvailable() && Settings.isWordNetDomainsResourceAvailable()) {
-            try {
-                TopTermToWNDomain mapper = new TopTermToWNDomain(Settings.BaseIndex.baseIndexPath, Settings.WordNet.Path_2_0, Settings.WordnetDomains.Path,
-                        Settings.WordnetDomains.CSVDomainPath);
-                TreeNode<String> domainTree = TopTermToWNDomain.inflateDomainTree(mapper.getTreeFile());
-                mapper.close();
-
-                // count level 2
-                int subdomainsCount = 0;
-                for (TreeNode<String> node : domainTree.getChildren()) {
-                    subdomainsCount += node.getChildren().size();
-                }
-                assertEquals(45, subdomainsCount);
-
-                // count level 4
-                subdomainsCount = 0;
-                for (TreeNode<String> level1 : domainTree.getChildren()) {
-                    for (TreeNode<String> level2 : level1.getChildren()) {
-                        for (TreeNode<String> level3 : level2.getChildren()) {
-                            subdomainsCount += level3.getChildren().size();
-                        }
-                    }
-                }
-                assertEquals(12, subdomainsCount);
-
-            } catch (JWNLException | IOException e) {
-                e.printStackTrace();
-                assertTrue(false);
-            }
-        }
-    }
-
     @Test
     public void allignToDomains_allignTermsToDotmains_expectNotExceptional() {
 
@@ -138,7 +71,6 @@ public class TopTermToWNDomainTest {
             try {
                 mapper = new TopTermToWNDomain(Settings.BaseIndex.baseIndexPath, Settings.WordNet.Path_2_0, Settings.WordnetDomains.Path,
                         Settings.WordnetDomains.CSVDomainPath);
-                nodeCount = 0;
 
                 TreeNode<String> domainsToTermsTree = mapper.assignToDomains(0, 99);
                 mapper.close();
@@ -163,7 +95,6 @@ public class TopTermToWNDomainTest {
             try {
                 mapper = new TopTermToWNDomain(Settings.BaseIndex.baseIndexPath, Settings.WordNet.Path_2_0, Settings.WordnetDomains.Path,
                         Settings.WordnetDomains.CSVDomainPath);
-                nodeCount = 0;
 
                 // TERM -> DOMAIN
                 // parent -> person

@@ -29,8 +29,8 @@ import java.util.List;
 
 import org.junit.Test;
 
-import eu.eexcess.sourceselection.redde.tree.BaseTreeNode;
-import eu.eexcess.sourceselection.redde.tree.ValueTreeNode;
+import eu.eexcess.federatedrecommender.utils.tree.BaseTreeNode;
+import eu.eexcess.federatedrecommender.utils.tree.ValueTreeNode;
 
 public class WikipediaSchoolsDomainTreeIndexerTest {
 

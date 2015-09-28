@@ -14,26 +14,22 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
- * @author Raoul Rubien
  */
 
-package eu.eexcess.sourceselection.redde.tree;
+package eu.eexcess.federatedrecommender.utils.tree;
 
-import java.util.Iterator;
-import java.util.Set;
-
-public interface TreeNode<T> extends Iterable<TreeNode<T>> {
-
-    public abstract boolean addChild(TreeNode<T> n);
-
-    public abstract Set<? extends TreeNode<T>> getChildren();
-
-    @Override
-    public abstract Iterator<TreeNode<T>> iterator();
-
-    public abstract void setName(String name);
-
-    public abstract String getName();
-
+/**
+ * TreeNode visitor class.
+ * 
+ * @author Raoul Rubien
+ *
+ * @param <E>
+ */
+public interface NodeInspector<E> {
+    /**
+     * @param n
+     *            the node to be inspected
+     * @return true if inspection should be aborted after the invocation
+     */
+    boolean invoke(TreeNode<E> n);
 }

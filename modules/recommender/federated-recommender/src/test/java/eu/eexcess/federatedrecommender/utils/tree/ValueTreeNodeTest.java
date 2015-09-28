@@ -18,7 +18,7 @@
  * @author Raoul Rubien
  */
 
-package eu.eexcess.sourceselection.redde.indexer.topterm;
+package eu.eexcess.federatedrecommender.utils.tree;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
@@ -29,8 +29,8 @@ import java.util.Set;
 
 import org.junit.Test;
 
-import eu.eexcess.sourceselection.redde.tree.TreeNode;
-import eu.eexcess.sourceselection.redde.tree.ValueTreeNode;
+import eu.eexcess.federatedrecommender.utils.tree.TreeNode;
+import eu.eexcess.federatedrecommender.utils.tree.ValueTreeNode;
 
 public class ValueTreeNodeTest {
 

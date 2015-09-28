@@ -33,9 +33,9 @@ import org.apache.lucene.search.IndexSearcher;
 import org.apache.lucene.search.Query;
 import org.apache.lucene.search.TopScoreDocCollector;
 
-import eu.eexcess.sourceselection.redde.tree.BaseTreeNode;
-import eu.eexcess.sourceselection.redde.tree.NodeInspector;
-import eu.eexcess.sourceselection.redde.tree.ValueTreeNode;
+import eu.eexcess.federatedrecommender.utils.tree.BaseTreeNode;
+import eu.eexcess.federatedrecommender.utils.tree.NodeInspector;
+import eu.eexcess.federatedrecommender.utils.tree.ValueTreeNode;
 
 public class DBDomainSampler extends TopTermToWNDomain {
 

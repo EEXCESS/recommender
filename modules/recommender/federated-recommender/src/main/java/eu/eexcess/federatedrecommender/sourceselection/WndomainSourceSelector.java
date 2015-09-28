@@ -106,7 +106,7 @@ public class WndomainSourceSelector implements PartnerSelector {
      * A map of domain matching partners mapping to a descent sorted set of
      * {@link DomainWeight}s
      */
-    protected Map<PartnerBadge, TreeSet<DomainWeight>> matchingPartners = new HashMap<PartnerBadge, TreeSet<DomainWeight>>();
+    protected Map<PartnerBadge, TreeSet<DomainWeight>> selectedPartners = new HashMap<PartnerBadge, TreeSet<DomainWeight>>();
 
     private static final Logger LOGGER = Logger.getLogger(WndomainSourceSelector.class.getName());
 
@@ -117,9 +117,14 @@ public class WndomainSourceSelector implements PartnerSelector {
      * <code>ecureUserProfile</code> at one a call of
      * {@link #sourceSelect(SecureUserProfile, List)} and how many times
      */
-    private Map<String, AtomicInteger> seenDomains = new TreeMap<>();
+    private Map<String, AtomicInteger> seenKeywordsDomains = new TreeMap<String, AtomicInteger>();
 
     private boolean isKeywordGroupingEnabled = true;
+
+    private FederatedRecommenderConfiguration federatedRecommenderConfiguration = null;
+
+    // TODO
+    // private String wordnetDomainStructureCsvFile = "wn-domains-3.2-tree.csv";
 
     /**
      * Constructs an intance of this class and a needed instance interfacing
@@ -133,14 +138,16 @@ public class WndomainSourceSelector implements PartnerSelector {
     public WndomainSourceSelector(FederatedRecommenderConfiguration configuration) {
         try {
             domainDetector = new WordnetDomainsDetector(new File(configuration.getWordnetPath()), new File(configuration.getWordnetDomainFilePath()), true);
+            federatedRecommenderConfiguration = configuration;
         } catch (DomainDetectorException e) {
             LOGGER.log(Level.SEVERE, "unable to instanciate [" + WordnetDomainsDetector.class.getSimpleName() + "]", e);
         }
     }
 
     // TODO: Domain detection does not consider weights and ordering of domains
-    // now. Therefore source selection is based only on domain hits, regardless
-    // of their weights or partner domain weights.
+    // now. Therefore source selection is based only on at least one domain hit,
+    // regardless
+    // of keyword domain weight or partner domain weight.
     @Override
     public SecureUserProfile sourceSelect(SecureUserProfile userProfile, List<PartnerBadge> partners) {
 
@@ -148,9 +155,6 @@ public class WndomainSourceSelector implements PartnerSelector {
             LOGGER.severe("failed to select sources due to missing domain detector: skipping source selection");
             return userProfile;
         }
-
-        matchingPartners.clear();
-        seenDomains.clear();
 
         // don't touch if already selected
         if (userProfile.getPartnerList().isEmpty()) {
@@ -199,7 +203,7 @@ public class WndomainSourceSelector implements PartnerSelector {
     }
 
     /**
-     * Picks partners from {@link #matchingPartners} and adds their references
+     * Picks partners from {@link #selectedPartners} and adds their references
      * the partner list.
      * 
      * @param partnerList
@@ -209,7 +213,7 @@ public class WndomainSourceSelector implements PartnerSelector {
         // TODO: This a straight forward implementation not considering domain
         // weights specified in partners' configuration or detected domains.
         for (PartnerBadge partner : partners) {
-            if (matchingPartners.containsKey(partner)) {
+            if (selectedPartners.containsKey(partner)) {
                 partnerList.add(partner);
             }
         }
@@ -218,7 +222,7 @@ public class WndomainSourceSelector implements PartnerSelector {
     /**
      * Matches parter domains with detected domains of context keywords.
      * Considers the amount of domain occurrences and normalizes their weight in
-     * {@link #matchingPartners}.
+     * {@link #selectedPartners}.
      * 
      * @param contextKeywords
      *            context keywords
@@ -226,6 +230,8 @@ public class WndomainSourceSelector implements PartnerSelector {
      * @param partnersConnector
      */
     private void matchKeywordDomainsOnParterDomains(List<ContextKeyword> contextKeywords, List<PartnerBadge> partners) {
+        selectedPartners.clear();
+        seenKeywordsDomains.clear();
 
         // detect keywords' domains and store seen domains and domain count
         List<String> keywords = getQueryTerms(contextKeywords);
@@ -233,9 +239,9 @@ public class WndomainSourceSelector implements PartnerSelector {
             try {
                 synchronized (domainDetector) {
                     for (Domain domain : domainDetector.detect(keyword)) {
-                        AtomicInteger timesSeen = seenDomains.get(domain.getName());
+                        AtomicInteger timesSeen = seenKeywordsDomains.get(domain.getName());
                         if (null == timesSeen) {
-                            seenDomains.put(domain.getName().toLowerCase(), new AtomicInteger(1));
+                            seenKeywordsDomains.put(domain.getName().toLowerCase(), new AtomicInteger(1));
                         } else {
                             timesSeen.incrementAndGet();
                         }
@@ -247,8 +253,14 @@ public class WndomainSourceSelector implements PartnerSelector {
             }
         }
 
+        /*
+         * this should be: get wn domain tree, for each partner domain identify
+         * the node in wn-domain tree for each keyword domain if is a subset of
+         * a partner-domain select partner else skip
+         */
         // match keywords' domains with partners' domains
         Double totalWeight = 0.0;
+
         for (PartnerBadge partner : partners) {
             for (PartnerDomain partnerContentDomain : partner.getDomainContent()) {
 
@@ -256,26 +268,30 @@ public class WndomainSourceSelector implements PartnerSelector {
                 // domains have a tree structure, utilizing a simple string
                 // comparison is a weak matching method. Instead a
                 // "is X sub domain of Y" comparison should be performed.
-                AtomicInteger timesSeen = seenDomains.get(partnerContentDomain.getName().toLowerCase());
+                AtomicInteger timesSeen = seenKeywordsDomains.get(partnerContentDomain.getName().toLowerCase());
                 if (null == timesSeen) {
                     continue;
                 } else {
-                    if (!matchingPartners.containsKey(partner)) {
-                        matchingPartners.put(partner, new TreeSet<DomainWeight>());
+                    if (!selectedPartners.containsKey(partner)) {
+                        selectedPartners.put(partner, new TreeSet<DomainWeight>());
                     }
                     DomainWeight domain = new DomainWeight(partnerContentDomain.getName(), timesSeen.doubleValue());
-                    matchingPartners.get(partner).add(domain);
+                    selectedPartners.get(partner).add(domain);
                     totalWeight += domain.weight;
                 }
             }
         }
 
         // normalize domain weights to {weight ∈ [0.0;1.0]}
-        for (Map.Entry<PartnerBadge, TreeSet<DomainWeight>> entry : matchingPartners.entrySet()) {
+        for (Map.Entry<PartnerBadge, TreeSet<DomainWeight>> entry : selectedPartners.entrySet()) {
             for (DomainWeight domainWeight : entry.getValue()) {
                 domainWeight.weight = domainWeight.weight / totalWeight;
             }
         }
+    }
+
+    private static void inflateWordnetDomainTree() {
+        // TODO
     }
 
     /**

@@ -30,8 +30,8 @@ import java.util.logging.Logger;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.index.IndexableField;
 
-import eu.eexcess.sourceselection.redde.tree.BaseTreeNode;
-import eu.eexcess.sourceselection.redde.tree.TreeNode;
+import eu.eexcess.federatedrecommender.utils.tree.BaseTreeNode;
+import eu.eexcess.federatedrecommender.utils.tree.TreeNode;
 
 public class WikiediaSchoolsDomainTreeInflator extends IndexReaderRessource {
 

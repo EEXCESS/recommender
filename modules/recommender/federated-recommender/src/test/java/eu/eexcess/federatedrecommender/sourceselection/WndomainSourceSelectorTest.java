@@ -50,7 +50,7 @@ public class WndomainSourceSelectorTest {
         }
 
         Map<PartnerBadge, TreeSet<DomainWeight>> getMatchingPartners() {
-            return matchingPartners;
+            return selectedPartners;
         }
     }
 

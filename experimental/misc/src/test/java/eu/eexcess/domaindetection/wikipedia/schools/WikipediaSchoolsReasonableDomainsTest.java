@@ -37,8 +37,8 @@ import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
+import eu.eexcess.federatedrecommender.utils.tree.TreeNode;
 import eu.eexcess.logger.PianoLogger;
-import eu.eexcess.sourceselection.redde.tree.TreeNode;
 
 /**
  * Check every indexed domain of {@link WikipediaSchoolsDomainTreeIndexer} and

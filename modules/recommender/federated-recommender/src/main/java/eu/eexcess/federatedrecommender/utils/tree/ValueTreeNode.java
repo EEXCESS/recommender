@@ -18,7 +18,7 @@
  * @author Raoul Rubien
  */
 
-package eu.eexcess.sourceselection.redde.tree;
+package eu.eexcess.federatedrecommender.utils.tree;
 
 import java.util.HashSet;
 import java.util.Iterator;

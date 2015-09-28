@@ -37,11 +37,11 @@ import org.apache.lucene.document.Document;
 import org.apache.lucene.document.Field;
 import org.apache.lucene.document.TextField;
 
+import eu.eexcess.federatedrecommender.utils.tree.BaseTreeNode;
+import eu.eexcess.federatedrecommender.utils.tree.NodeInspector;
+import eu.eexcess.federatedrecommender.utils.tree.TreeNode;
+import eu.eexcess.federatedrecommender.utils.tree.ValueTreeNode;
 import eu.eexcess.logger.PianoLogger;
-import eu.eexcess.sourceselection.redde.tree.BaseTreeNode;
-import eu.eexcess.sourceselection.redde.tree.NodeInspector;
-import eu.eexcess.sourceselection.redde.tree.TreeNode;
-import eu.eexcess.sourceselection.redde.tree.ValueTreeNode;
 
 /**
  * This class parses the Wikipedia for Schools subjects and the their hierarchy.
