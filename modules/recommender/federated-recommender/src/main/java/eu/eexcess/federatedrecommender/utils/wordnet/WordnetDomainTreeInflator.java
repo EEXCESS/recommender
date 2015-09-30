@@ -31,10 +31,12 @@ import org.apache.commons.io.LineIterator;
 import eu.eexcess.federatedrecommender.utils.tree.BaseTreeNode;
 import eu.eexcess.federatedrecommender.utils.tree.TreeNode;
 import eu.eexcess.federatedrecommender.utils.tree.ValueTreeNode;
+import eu.eexcess.federatedrecommender.utils.tree.factory.StringBaseTreeNodeFactory;
+import eu.eexcess.federatedrecommender.utils.tree.factory.StringValueTreeNodeFactory;
 import eu.eexcess.federatedrecommender.utils.tree.factory.TreeNodeFactory;
 
 /**
- * This class takes a wordnet domain csv and builda a
+ * This class takes a WordNet domain csv and builds a domain tree structure
  * 
  * @author rrubien
  *
@@ -50,13 +52,20 @@ public class WordnetDomainTreeInflator {
     }
 
     /**
-     * instantiate objects extending {@link BaseTreeNode}
-     * 
-     * @param template
-     *            the class to be instanced
-     * @return an instance
-     * @throws ReflectiveOperationException
+     * @return instance of {@link WordnetDomainTreeInflator} creating instances
+     *         of type {@link BaseTreeNode}&lt;String&gt;
      */
+    public static WordnetDomainTreeInflator newBaseTreeNodeInflator() {
+        return new WordnetDomainTreeInflator(new StringBaseTreeNodeFactory());
+    }
+
+    /**
+     * @return instance of {@link WordnetDomainTreeInflator} creating instances
+     *         of type {@link ValueTreeNode}&lt;String&gt;
+     */
+    public static WordnetDomainTreeInflator newValueTreeNodeInflator() {
+        return new WordnetDomainTreeInflator(new StringValueTreeNodeFactory());
+    }
 
     /**
      * 
@@ -64,13 +73,13 @@ public class WordnetDomainTreeInflator {
      * @return
      * @throws FileNotFoundException
      */
-    public ValueTreeNode<String> inflateDomainTree(File wordnetCSVTreeFile) throws FileNotFoundException {
+    public TreeNode<String> inflateDomainTree(File wordnetCSVTreeFile) throws FileNotFoundException {
         LineIterator iterator = new LineIterator(new FileReader(wordnetCSVTreeFile));
         String[] currentBranch = new String[5];
         currentBranch[0] = ROOT_NODE_NAME;
 
         // ValueTreeNode<String> treeRootNode = new ValueTreeNode<String>();
-        ValueTreeNode<String> treeRootNode = (ValueTreeNode<String>) nodeFactory.createTreeNode(ROOT_NODE_NAME);
+        TreeNode<String> treeRootNode = nodeFactory.createTreeNode(ROOT_NODE_NAME);
 
         while (iterator.hasNext()) {
 
@@ -93,7 +102,7 @@ public class WordnetDomainTreeInflator {
 
             // reconstruct and append the missing branch according to the
             // current tree
-            BaseTreeNode<String> branch = null;
+            TreeNode<String> branch = null;
             for (int branchDepth = currentBranch.length; branchDepth > 0; branchDepth--) {
                 String nodeName = currentBranch[branchDepth - 1];
                 if (nodeName == null) {
@@ -102,7 +111,7 @@ public class WordnetDomainTreeInflator {
 
                 Set<TreeNode<String>> result = new HashSet<TreeNode<String>>();
 
-                ValueTreeNode<String> node = (ValueTreeNode<String>) nodeFactory.createTreeNode(nodeName);
+                TreeNode<String> node = nodeFactory.createTreeNode(nodeName);
                 BaseTreeNode.findFirstNode(node, treeRootNode, result);
                 TreeNode<String> nodeInTree = null;
                 if (result.iterator().hasNext()) {
@@ -119,7 +128,7 @@ public class WordnetDomainTreeInflator {
                     // if node !∈ tree -> reconstruct the branch until the mount
                     // point is clear
                 } else {
-                    BaseTreeNode<String> newParent = (ValueTreeNode<String>) nodeFactory.createTreeNode(nodeName);
+                    TreeNode<String> newParent = nodeFactory.createTreeNode(nodeName);
 
                     if (branch != null) {
                         newParent.addChild(branch);

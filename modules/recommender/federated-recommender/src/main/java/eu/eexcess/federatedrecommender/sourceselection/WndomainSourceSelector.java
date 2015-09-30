@@ -121,10 +121,14 @@ public class WndomainSourceSelector implements PartnerSelector {
 
     private boolean isKeywordGroupingEnabled = true;
 
-    private FederatedRecommenderConfiguration federatedRecommenderConfiguration = null;
-
-    // TODO
-    // private String wordnetDomainStructureCsvFile = "wn-domains-3.2-tree.csv";
+    //private FederatedRecommenderConfiguration federatedRecommenderConfiguration = null;
+    /**
+     * TODO: externalize string to {@link FederatedRecommenderConfiguration} if
+     * possible<br>
+     * configures the file where the domain tree can be found as csv
+    private String wordnetDomainStructureCsvFile = "wn-domains-3.2-tree.csv";
+    private WordnetDomainTreeInflator treeInflator;
+     */
 
     /**
      * Constructs an intance of this class and a needed instance interfacing
@@ -138,10 +142,12 @@ public class WndomainSourceSelector implements PartnerSelector {
     public WndomainSourceSelector(FederatedRecommenderConfiguration configuration) {
         try {
             domainDetector = new WordnetDomainsDetector(new File(configuration.getWordnetPath()), new File(configuration.getWordnetDomainFilePath()), true);
-            federatedRecommenderConfiguration = configuration;
+            //federatedRecommenderConfiguration = configuration;
         } catch (DomainDetectorException e) {
             LOGGER.log(Level.SEVERE, "unable to instanciate [" + WordnetDomainsDetector.class.getSimpleName() + "]", e);
         }
+
+        //treeInflator = WordnetDomainTreeInflator.newBaseTreeNodeInflator();
     }
 
     // TODO: Domain detection does not consider weights and ordering of domains
@@ -253,14 +259,7 @@ public class WndomainSourceSelector implements PartnerSelector {
             }
         }
 
-        /*
-         * this should be: get wn domain tree, for each partner domain identify
-         * the node in wn-domain tree for each keyword domain if is a subset of
-         * a partner-domain select partner else skip
-         */
-        // match keywords' domains with partners' domains
         Double totalWeight = 0.0;
-
         for (PartnerBadge partner : partners) {
             for (PartnerDomain partnerContentDomain : partner.getDomainContent()) {
 
@@ -290,9 +289,23 @@ public class WndomainSourceSelector implements PartnerSelector {
         }
     }
 
-    private static void inflateWordnetDomainTree() {
-        // TODO
+    /**
+     * Inflates the WordNet domain tree from a csv file to an
+     * {@link ValueTreeNode} tree.
+     * 
+     * @return
+    private ValueTreeNode<String> inflateWordnetDomainTree() {
+        ValueTreeNode<String> domainTree = null;
+        try {
+            File wordnetDomainStructure = new File(new File(federatedRecommenderConfiguration.getWordnetDomainFilePath()).getParent() + "/"
+                    + wordnetDomainStructureCsvFile);
+            domainTree = (ValueTreeNode<String>) treeInflator.inflateDomainTree(wordnetDomainStructure);
+        } catch (IOException ioe) {
+            LOGGER.log(Level.WARNING, "failed to infalte domain tree", ioe);
+        }
+        return domainTree;
     }
+     */
 
     /**
      * Takes the query text form context keywords. When

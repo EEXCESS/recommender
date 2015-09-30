@@ -29,10 +29,9 @@ import java.io.IOException;
 import org.junit.Test;
 
 import eu.eexcess.federatedrecommender.config.Settings;
+import eu.eexcess.federatedrecommender.utils.tree.BaseTreeNode;
 import eu.eexcess.federatedrecommender.utils.tree.NodeInspector;
 import eu.eexcess.federatedrecommender.utils.tree.TreeNode;
-import eu.eexcess.federatedrecommender.utils.tree.ValueTreeNode;
-import eu.eexcess.federatedrecommender.utils.tree.factory.BaseStringValueTreeNodeFactory;
 
 public class WordnetDomainTreeInflatorTest {
 
@@ -42,17 +41,17 @@ public class WordnetDomainTreeInflatorTest {
         return false;
     };
 
-    private static final WordnetDomainTreeInflator treeInflator = new WordnetDomainTreeInflator(new BaseStringValueTreeNodeFactory());
+    private static final WordnetDomainTreeInflator treeInflator = WordnetDomainTreeInflator.newBaseTreeNodeInflator();
 
     @Test
     public void inflateDomainTree_readTree_exptectCorrectNodeCountInTree() {
 
         if (Settings.isResourceAvailable(Settings.BaseIndex) && Settings.isWordNet20ResourceAvailable() && Settings.isWordNetDomainsResourceAvailable()) {
             try {
-                ValueTreeNode<String> domainTree = (ValueTreeNode<String>) treeInflator.inflateDomainTree(new File(Settings.WordnetDomains.CSVDomainPath));
+                BaseTreeNode<String> domainTree = (BaseTreeNode<String>) treeInflator.inflateDomainTree(new File(Settings.WordnetDomains.CSVDomainPath));
 
                 nodeCount = 0;
-                ValueTreeNode.depthFirstTraverser(domainTree, nodeCounter);
+                BaseTreeNode.depthFirstTraverser(domainTree, nodeCounter);
                 assertEquals(168 + 1, nodeCount);
             } catch (IOException e) {
                 e.printStackTrace();
@@ -66,7 +65,7 @@ public class WordnetDomainTreeInflatorTest {
 
         if (Settings.isResourceAvailable(Settings.BaseIndex) && Settings.isWordNet20ResourceAvailable() && Settings.isWordNetDomainsResourceAvailable()) {
             try {
-                TreeNode<String> domainTree = (ValueTreeNode<String>) treeInflator.inflateDomainTree(new File(Settings.WordnetDomains.CSVDomainPath));
+                TreeNode<String> domainTree = treeInflator.inflateDomainTree(new File(Settings.WordnetDomains.CSVDomainPath));
 
                 // count level 2
                 int subdomainsCount = 0;

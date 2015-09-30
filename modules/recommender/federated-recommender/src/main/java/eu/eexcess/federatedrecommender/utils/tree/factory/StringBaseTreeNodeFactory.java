@@ -26,7 +26,7 @@ import eu.eexcess.federatedrecommender.utils.tree.TreeNode;
 /*
  * a {@link BaseTreeNode}&lt;String&gt; factory implementation
  */
-public class BaseStringTreeNodeFactory implements TreeNodeFactory<String> {
+public class StringBaseTreeNodeFactory implements TreeNodeFactory<String> {
 
     @Override
     public TreeNode<String> createTreeNode() {

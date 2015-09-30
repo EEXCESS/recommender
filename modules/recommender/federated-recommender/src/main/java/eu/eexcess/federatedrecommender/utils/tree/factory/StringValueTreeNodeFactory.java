@@ -29,7 +29,7 @@ import eu.eexcess.federatedrecommender.utils.tree.ValueTreeNode;
  * @author Raoul Rubien
  *
  */
-public class BaseStringValueTreeNodeFactory implements TreeNodeFactory<String> {
+public class StringValueTreeNodeFactory implements TreeNodeFactory<String> {
 
     @Override
     public TreeNode<String> createTreeNode() {
