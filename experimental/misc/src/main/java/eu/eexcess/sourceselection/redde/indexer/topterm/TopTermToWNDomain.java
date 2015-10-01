@@ -38,10 +38,11 @@ public class TopTermToWNDomain extends Resources {
 
     private File wordnetCSVTreeFile;
 
-    private ValueTreeNode<String> wnDomainTree = null;
+    private ValueTreeNode<String> wnDomainTree;
     private String[] topTerms;
     private File wordnetDomainDetectorFile;
     private File wordnetDomainsPath;
+    private WordnetDomainTreeInflator treeInflator;
 
     /**
      * Constructs an instance of this class.
@@ -64,6 +65,7 @@ public class TopTermToWNDomain extends Resources {
         this.wordnetDomainDetectorFile = new File(wordnet20Path);
         this.wordnetCSVTreeFile = new File(wordnetDomainCsvTreePath);
         this.wordnetDomainsPath = new File(wordnetDomainsPath);
+        this.treeInflator = WordnetDomainTreeInflator.newBaseTreeNodeInflator();
     }
 
     /**
@@ -90,7 +92,7 @@ public class TopTermToWNDomain extends Resources {
     ValueTreeNode<String> assignToDomains(String[] terms) throws Exception {
         this.topTerms = terms;
         WordnetDomainsDetector wdt = new WordnetDomainsDetector(wordnetDomainDetectorFile, wordnetDomainsPath, true);
-        wnDomainTree = WordnetDomainTreeInflator.inflateDomainTree(wordnetCSVTreeFile);
+        wnDomainTree = (ValueTreeNode<String>) treeInflator.inflateDomainTree(wordnetCSVTreeFile);
 
         // construct a domain map containing terms
         IdentityHashMap<String, HashSet<String>> domainToTerms = new IdentityHashMap<String, HashSet<String>>();
