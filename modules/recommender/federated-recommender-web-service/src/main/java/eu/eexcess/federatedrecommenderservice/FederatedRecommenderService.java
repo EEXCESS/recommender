@@ -138,7 +138,7 @@ public class FederatedRecommenderService {
      */
     @POST
     @Path("/register")
-    @Consumes({ MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON })
+    @Consumes({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
     @Produces({ MediaType.WILDCARD })
     public Response registerPartner(PartnerBadge badge) throws IOException {
         LOGGER.log(Level.INFO, "Registering Partner: " + badge.getSystemId());
@@ -156,8 +156,8 @@ public class FederatedRecommenderService {
      */
     @POST
     @Path("/unregister")
-    @Consumes({ MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON })
-    @Produces({ MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON })
+    @Consumes({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
+    @Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
     public void unregisterPartner(PartnerBadge badge) throws IOException {
         LOGGER.log(Level.INFO, "Unregistering Partner: " + badge.getSystemId());
         fRC.unregisterPartner(badge);
@@ -172,8 +172,8 @@ public class FederatedRecommenderService {
      */
     @POST
     @Path("/recommend")
-    @Consumes({ MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON })
-    @Produces({ MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON })
+    @Consumes({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
+    @Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
     public ResultList recommend(SecureUserProfile userProfile) throws IOException {
         ResultList resultList = new ResultList();
         resultList = fRC.generateFederatedRecommendation(userProfile);
@@ -190,15 +190,15 @@ public class FederatedRecommenderService {
      */
     @POST
     @Path("/getDetails")
-    @Consumes({ MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON })
-    @Produces({ MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON })
+    @Consumes({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
+    @Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
     public DocumentBadgeList getDetails(DocumentBadgeList documents) throws IOException {
         return fRC.getDocumentDetails(documents);
     }
 
     @GET
     @Path("/getRegisteredPartners")
-    @Produces({ MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON })
+    @Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
     public PartnerBadgeList getRegisteredPartners() throws IOException {
 
         PartnerBadgeList partners = new PartnerBadgeList();
@@ -211,7 +211,7 @@ public class FederatedRecommenderService {
 
     @GET
     @Path("/getRecommenderStats")
-    @Produces({ MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON })
+    @Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
     public RecommenderStats getRecommenderStats() throws IOException {
         return fRC.getRecommenderStats();
     }
@@ -271,7 +271,7 @@ public class FederatedRecommenderService {
 
     @GET
     @Path("/testRecommend")
-    @Produces({ MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON })
+    @Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
     public ResultList testRecommend(@QueryParam("context") String context) throws IOException {
         SecureUserProfile userProfile = new SecureUserProfile();
         for (String text : Arrays.asList(context)) {
@@ -282,7 +282,7 @@ public class FederatedRecommenderService {
 
     @GET
     @Path("/testBadge")
-    @Produces({ MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON })
+    @Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
     public PartnerBadge testBadge() {
 
         PartnerBadge pb = new PartnerBadge();
@@ -309,7 +309,7 @@ public class FederatedRecommenderService {
         secureUserProfile.getTimeRange().setEnd("2000");
         List<History> history = new ArrayList<History>();
         history.add(new History(new Date(), "history title", 4, 4, "http://1234.com"));
-       
+
         Address address = new Address("austria", 8010, "Graz", "nothing", "to add");
         address.setCity("testcity");
         address.setCountry("testcountry");
@@ -377,7 +377,7 @@ public class FederatedRecommenderService {
         List<UserLocation> locationsList = new ArrayList<UserLocation>();
         locationsList.add(new UserLocation(33.123123, -127.123123, 4.5, new Date()));
         locationsList.add(new UserLocation(20.123123, -130.123123, 4.5, new Date()));
-      
+
         return secureUserProfile;
     }
 

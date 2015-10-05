@@ -35,7 +35,7 @@ import eu.eexcess.federatedrecommender.dataformats.PFRChronicle;
 import eu.eexcess.federatedrecommender.dataformats.PartnersFederatedRecommendations;
 
 public abstract class PartnersFederatedRecommendationsPicker {
-    final private ModifiableSolrParams params = new ModifiableSolrParams();
+    private final ModifiableSolrParams params = new ModifiableSolrParams();
 
     protected PartnersFederatedRecommendationsPicker() {
         params.set("quantRate", (int) 0.02f);
@@ -61,8 +61,7 @@ public abstract class PartnersFederatedRecommendationsPicker {
      * @param partners
      * @param numResults
      */
-    public abstract ResultList pickResults(SecureUserProfile secureUserProfile, PartnersFederatedRecommendations resultList, List<PartnerBadge> partners,
-            int numResults);
+    public abstract ResultList pickResults(SecureUserProfile secureUserProfile, PartnersFederatedRecommendations resultList, List<PartnerBadge> partners, int numResults);
 
     /**
      * calculated the fuzzy hash for the result set

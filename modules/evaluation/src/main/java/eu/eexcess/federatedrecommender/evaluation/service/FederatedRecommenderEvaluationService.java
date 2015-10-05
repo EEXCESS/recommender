@@ -98,7 +98,7 @@ public class FederatedRecommenderEvaluationService extends FederatedRecommenderS
     // Begin Evaluation Services
     @POST
     @Path("/testSUPE")
-    @Produces({ MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON })
+    @Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
     public SecureUserProfileEvaluation testSUPE() {
         SecureUserProfileEvaluation secureUserProfile = new SecureUserProfileEvaluation();
 
@@ -143,8 +143,8 @@ public class FederatedRecommenderEvaluationService extends FederatedRecommenderS
      */
     @POST
     @Path("/evaluation")
-    @Consumes({ MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON })
-    @Produces({ MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON })
+    @Consumes({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
+    @Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
     @Deprecated
     public EvaluationResultLists evaluation(SecureUserProfileEvaluation userProfile) throws IOException {
         EvaluationResultLists resultList = new EvaluationResultLists();
@@ -154,8 +154,8 @@ public class FederatedRecommenderEvaluationService extends FederatedRecommenderS
 
     @POST
     @Path("/blockEvaluation")
-    @Consumes({ MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON })
-    @Produces({ MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON })
+    @Consumes({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
+    @Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
     public EvaluationResultLists blockEvaluation(SecureUserProfileEvaluation userProfile) {
         EvaluationResultLists resultList = fREC.getblockResult(userProfile);
         resultList.queryID = userProfile.getQueryID();
@@ -186,7 +186,7 @@ public class FederatedRecommenderEvaluationService extends FederatedRecommenderS
      */
     @POST
     @Path("/evaluationResultUID")
-    @Consumes({ MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON, MediaType.APPLICATION_FORM_URLENCODED })
+    @Consumes({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, MediaType.APPLICATION_FORM_URLENCODED })
     public Response evaluationResultUID(@QueryParam("id") Integer id, EvaluationResultLists result) throws IOException {
         EvaluationResponse eR = new EvaluationResponse();
 
@@ -207,7 +207,7 @@ public class FederatedRecommenderEvaluationService extends FederatedRecommenderS
     @POST
     @Path("/expEvaluationWithUID")
     // @Consumes({ MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON })
-    @Produces({ MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON })
+    @Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
     public Response expEvaluationWithUID(@QueryParam("id") Integer id) throws IOException {
 
         EvaluationResultLists results = fREC.getExpansionEvaluation(id);
@@ -228,7 +228,7 @@ public class FederatedRecommenderEvaluationService extends FederatedRecommenderS
     @POST
     @Path("/blockEvaluationWithUID")
     // @Consumes({ MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON })
-    @Produces({ MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON, MediaType.APPLICATION_FORM_URLENCODED })
+    @Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, MediaType.APPLICATION_FORM_URLENCODED })
     public Response blockEvaluationWithUID(@QueryParam("id") Integer id) throws IOException {
 
         EvaluationResultLists results = fREC.getBlockEvaluation(id);
