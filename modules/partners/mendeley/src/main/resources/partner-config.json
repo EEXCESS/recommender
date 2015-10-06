@@ -1,6 +1,6 @@
 {
   "systemId": "Mendeley",
-  "queryGeneratorClass": "eu.eexcess.partnerrecommender.reference.LuceneQueryGeneratorFieldTermConjunction",
+  "queryGeneratorClass": "eu.eexcess.partnerrecommender.reference.LuceneQueryGeneratorFieldTermConjunctionMainTopic",
   "partnerConnectorClass": "eu.eexcess.mendeley.recommender.PartnerConnector",
   "transformerClass": "eu.eexcess.mendeley.datalayer.MendeleyTransformer",
   "searchEndpoint": "https://api.mendeley.com/search/catalog?limit=20&query=${query}",
