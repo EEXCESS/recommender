@@ -30,9 +30,9 @@ import org.apache.commons.io.LineIterator;
 
 import eu.eexcess.federatedrecommender.utils.tree.BaseTreeNode;
 import eu.eexcess.federatedrecommender.utils.tree.TreeNode;
-import eu.eexcess.federatedrecommender.utils.tree.ValueTreeNode;
+import eu.eexcess.federatedrecommender.utils.tree.ValueSetTreeNode;
 import eu.eexcess.federatedrecommender.utils.tree.factory.StringBaseTreeNodeFactory;
-import eu.eexcess.federatedrecommender.utils.tree.factory.StringValueTreeNodeFactory;
+import eu.eexcess.federatedrecommender.utils.tree.factory.StringValueSetTreeNodeFactory;
 import eu.eexcess.federatedrecommender.utils.tree.factory.TreeNodeFactory;
 
 /**
@@ -61,10 +61,10 @@ public class WordnetDomainTreeInflator {
 
     /**
      * @return instance of {@link WordnetDomainTreeInflator} creating instances
-     *         of type {@link ValueTreeNode}&lt;String&gt;
+     *         of type {@link ValueSetTreeNode}&lt;String&gt;
      */
-    public static WordnetDomainTreeInflator newValueTreeNodeInflator() {
-        return new WordnetDomainTreeInflator(new StringValueTreeNodeFactory());
+    public static WordnetDomainTreeInflator newValueSetTreeNodeInflator() {
+        return new WordnetDomainTreeInflator(new StringValueSetTreeNodeFactory());
     }
 
     /**

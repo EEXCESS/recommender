@@ -40,11 +40,11 @@ import eu.eexcess.dataformats.PartnerBadge;
 import eu.eexcess.dataformats.PartnerDomain;
 import eu.eexcess.dataformats.userprofile.ContextKeyword;
 import eu.eexcess.dataformats.userprofile.SecureUserProfile;
-import eu.eexcess.federatedrecommender.sourceselection.WndomainSourceSelector.DomainWeight;
+import eu.eexcess.federatedrecommender.sourceselection.WordnetDomainSourceSelector.DomainWeight;
 
-public class WndomainSourceSelectorTest {
+public class WordnetDomainSourceSelectorTest {
 
-    private static class TestableWndomainsSourceSelector extends WndomainSourceSelector {
+    private static class TestableWndomainsSourceSelector extends WordnetDomainSourceSelector {
         public TestableWndomainsSourceSelector(FederatedRecommenderConfiguration configuration) {
             super(configuration);
         }

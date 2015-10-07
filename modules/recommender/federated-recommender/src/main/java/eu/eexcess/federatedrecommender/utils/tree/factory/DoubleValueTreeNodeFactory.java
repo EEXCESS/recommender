@@ -18,29 +18,28 @@
  * @author Raoul Rubien
  */
 
-package eu.eexcess.federatedrecommender.utils.tree;
+package eu.eexcess.federatedrecommender.utils.tree.factory;
 
-import java.util.Iterator;
-import java.util.Set;
+import eu.eexcess.federatedrecommender.utils.tree.TreeNode;
+import eu.eexcess.federatedrecommender.utils.tree.ValueTreeNode;
 
 /**
- * a tree node interface
+ * a {@link ValueTreeNode}&lt;String, Double&gt; factory implementation
  * 
  * @author Raoul Rubien
  *
- * @param <T> id of the node; i.e. node's name or id
  */
-public interface TreeNode<T> extends Iterable<TreeNode<T>> {
-
-    public abstract boolean addChild(TreeNode<T> n);
-
-    public abstract Set<? extends TreeNode<T>> getChildren();
+public class DoubleValueTreeNodeFactory implements TreeNodeFactory<String> {
 
     @Override
-    public abstract Iterator<TreeNode<T>> iterator();
+    public TreeNode<String> createTreeNode() {
+        return new ValueTreeNode<String, Double>();
+    }
 
-    public abstract void setName(String name);
-
-    public abstract String getName();
-
+    @Override
+    public TreeNode<String> createTreeNode(String nodeName) {
+        TreeNode<String> tn = new ValueTreeNode<String, Double>();
+        tn.setName(nodeName);
+        return tn;
+    }
 }

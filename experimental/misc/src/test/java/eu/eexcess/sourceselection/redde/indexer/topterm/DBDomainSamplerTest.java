@@ -31,7 +31,7 @@ import org.junit.Test;
 
 import eu.eexcess.federatedrecommender.utils.tree.NodeInspector;
 import eu.eexcess.federatedrecommender.utils.tree.TreeNode;
-import eu.eexcess.federatedrecommender.utils.tree.ValueTreeNode;
+import eu.eexcess.federatedrecommender.utils.tree.ValueSetTreeNode;
 import eu.eexcess.sourceselection.redde.config.Settings;
 import eu.eexcess.sourceselection.redde.indexer.topterm.DBDomainSampler.SampleArguments;
 import eu.eexcess.sourceselection.redde.indexer.topterm.DBDomainSampler.WordNetArguments;
@@ -84,11 +84,11 @@ public class DBDomainSamplerTest {
                 final AtomicInteger numTerms = new AtomicInteger(0);
                 NodeInspector<String> counter = (n) -> {
                     numNodes.incrementAndGet();
-                    numTerms.set(numTerms.get() + ((ValueTreeNode<String>) n).getValues().size());
+                    numTerms.set(numTerms.get() + ((ValueSetTreeNode<String>) n).getValues().size());
                     return false;
                 };
 
-                ValueTreeNode.depthFirstTraverser(domainToTerms, counter);
+                ValueSetTreeNode.depthFirstTraverser(domainToTerms, counter);
                 System.out.println("num terms [" + numTerms.get() + "] num nodes [" + numNodes.get() + "] ");
                 assertTrue(numTerms.get() >= (99.0 * 0.04));
                 assertTrue(numNodes.get() > 1);
@@ -109,13 +109,13 @@ public class DBDomainSamplerTest {
                 TreeNode<String> domainToTermTree = sampler.alignTerms(0, 500);
 
                 NodeInspector<String> printer = (n) -> {
-                    if (((ValueTreeNode<String>) n).getValues().size() > 0) {
-                        System.out.print("#terms: " + ((ValueTreeNode<String>) n).getValues().size() + " ");
+                    if (((ValueSetTreeNode<String>) n).getValues().size() > 0) {
+                        System.out.print("#terms: " + ((ValueSetTreeNode<String>) n).getValues().size() + " ");
                         System.out.println(n.toString());
                     }
                     return false;
                 };
-                ValueTreeNode.depthFirstTraverser(domainToTermTree, printer);
+                ValueSetTreeNode.depthFirstTraverser(domainToTermTree, printer);
                 // TODO: wn domain alignment does not deliver expected result :/
                 sampler.sample(getDefaultSampleArguments());
                 sampler.close();

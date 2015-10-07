@@ -36,20 +36,20 @@ import eu.eexcess.federatedrecommender.domaindetection.probing.DomainDetectorExc
 import eu.eexcess.federatedrecommender.domaindetection.wordnet.WordnetDomainsDetector;
 import eu.eexcess.federatedrecommender.utils.tree.NodeInspector;
 import eu.eexcess.federatedrecommender.utils.tree.TreeNode;
-import eu.eexcess.federatedrecommender.utils.tree.ValueTreeNode;
+import eu.eexcess.federatedrecommender.utils.tree.ValueSetTreeNode;
 import eu.eexcess.sourceselection.redde.config.Settings;
 
 public class TopTermToWNDomainTest {
 
     private int termCount;
     private NodeInspector<String> termCounter = (n) -> {
-        TopTermToWNDomainTest.this.termCount += ((ValueTreeNode<String>) n).getValues().size();
+        TopTermToWNDomainTest.this.termCount += ((ValueSetTreeNode<String>) n).getValues().size();
         return false;
     };
 
     private Set<String> collectedTerms = new HashSet<String>();
     private NodeInspector<String> termCollector = (n) -> {
-        for (String term : ((ValueTreeNode<String>) n).getValues()) {
+        for (String term : ((ValueSetTreeNode<String>) n).getValues()) {
             TopTermToWNDomainTest.this.collectedTerms.add(term);
         }
         return false;
@@ -57,7 +57,7 @@ public class TopTermToWNDomainTest {
 
     private Map<String, String> termToDmain = new HashMap<String, String>();
     private NodeInspector<String> termToDomainCollector = (n) -> {
-        for (String term : ((ValueTreeNode<String>) n).getValues()) {
+        for (String term : ((ValueSetTreeNode<String>) n).getValues()) {
             TopTermToWNDomainTest.this.termToDmain.put(term, n.getName());
         }
         return false;
@@ -77,7 +77,7 @@ public class TopTermToWNDomainTest {
                 assertEquals(100, mapper.getTopTerms().length);
 
                 collectedTerms.clear();
-                ValueTreeNode.depthFirstTraverser(domainsToTermsTree, termCounter);
+                ValueSetTreeNode.depthFirstTraverser(domainsToTermsTree, termCounter);
 
                 assertTrue(termCount <= 100);
                 assertTrue(termCount <= 100 * 0.5);
@@ -122,7 +122,7 @@ public class TopTermToWNDomainTest {
                 mapper.close();
 
                 termToDmain.clear();
-                ValueTreeNode.depthFirstTraverser(domainsToTermsTree, termToDomainCollector);
+                ValueSetTreeNode.depthFirstTraverser(domainsToTermsTree, termToDomainCollector);
                 for (Map.Entry<String, String> entry : testTerms.entrySet()) {
                     String term = entry.getKey();
                     assertEquals(entry.getValue(), termToDmain.get(term));
@@ -143,18 +143,18 @@ public class TopTermToWNDomainTest {
                 mapper = new TopTermToWNDomain(Settings.BaseIndex.baseIndexPath, Settings.WordNet.Path_2_0, Settings.WordnetDomains.Path,
                         Settings.WordnetDomains.CSVDomainPath);
 
-                ValueTreeNode<String> domainsToTermsTree = mapper.assignToDomains(0, 99);
+                ValueSetTreeNode<String> domainsToTermsTree = mapper.assignToDomains(0, 99);
                 mapper.close();
 
                 Set<TreeNode<String>> resultCollector = new HashSet<TreeNode<String>>();
 
-                ValueTreeNode<String> template = new ValueTreeNode<String>();
+                ValueSetTreeNode<String> template = new ValueSetTreeNode<String>();
                 template.setName("time_period");
-                ValueTreeNode.findFirstNode(template, domainsToTermsTree, resultCollector);
-                ValueTreeNode<String> startNode = (ValueTreeNode<String>) resultCollector.iterator().next();
+                ValueSetTreeNode.findFirstNode(template, domainsToTermsTree, resultCollector);
+                ValueSetTreeNode<String> startNode = (ValueSetTreeNode<String>) resultCollector.iterator().next();
 
                 collectedTerms.clear();
-                ValueTreeNode.depthFirstTraverser(startNode, termCollector);
+                ValueSetTreeNode.depthFirstTraverser(startNode, termCollector);
                 assertEquals(2, startNode.getValues().size());
                 assertEquals(0, startNode.getChildren().size());
                 assertEquals(2, collectedTerms.size());

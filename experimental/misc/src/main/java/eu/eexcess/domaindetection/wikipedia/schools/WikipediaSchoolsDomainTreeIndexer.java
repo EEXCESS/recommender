@@ -40,7 +40,7 @@ import org.apache.lucene.document.TextField;
 import eu.eexcess.federatedrecommender.utils.tree.BaseTreeNode;
 import eu.eexcess.federatedrecommender.utils.tree.NodeInspector;
 import eu.eexcess.federatedrecommender.utils.tree.TreeNode;
-import eu.eexcess.federatedrecommender.utils.tree.ValueTreeNode;
+import eu.eexcess.federatedrecommender.utils.tree.ValueSetTreeNode;
 import eu.eexcess.logger.PianoLogger;
 
 /**
@@ -109,24 +109,24 @@ public class WikipediaSchoolsDomainTreeIndexer extends IndexWriterRessource {
         }
     }
 
-    static ValueTreeNode<String> parseDomainFilesToTree(List<File> domainFiles) {
-        ValueTreeNode<String> rootDomain = newNode(ROOT_DOMAIN_NAME);
+    static ValueSetTreeNode<String> parseDomainFilesToTree(List<File> domainFiles) {
+        ValueSetTreeNode<String> rootDomain = newNode(ROOT_DOMAIN_NAME);
 
         // expected domainFile name "subject.domain1.domain2.domainN.html"
         for (File domainFile : domainFiles) {
             List<String> domainPath = WikipediaSchoolsDumpIndexer.stripDomains(domainFile.getName());
 
-            ValueTreeNode<String> lastVisited = rootDomain;
+            ValueSetTreeNode<String> lastVisited = rootDomain;
             Set<TreeNode<String>> collector = newNodeCollector();
 
             for (Iterator<String> domainIterator = domainPath.listIterator(); domainIterator.hasNext();) {
-                ValueTreeNode<String> toBeFound = newNode(domainIterator.next());
+                ValueSetTreeNode<String> toBeFound = newNode(domainIterator.next());
                 domainIterator.remove();
-                ValueTreeNode.findFirstNode(toBeFound, lastVisited, collector);
+                ValueSetTreeNode.findFirstNode(toBeFound, lastVisited, collector);
 
                 // find path connection point: skip all already seen domains
                 if (!collector.isEmpty()) {
-                    lastVisited = (ValueTreeNode<String>) collector.iterator().next();
+                    lastVisited = (ValueSetTreeNode<String>) collector.iterator().next();
 
                     // if domain is unseen ad it and all subsequent one
                 } else {
@@ -134,7 +134,7 @@ public class WikipediaSchoolsDomainTreeIndexer extends IndexWriterRessource {
                     lastVisited = toBeFound;
                     // add all remaining domains
                     for (Iterator<String> unseenDomainsIterator = domainPath.iterator(); unseenDomainsIterator.hasNext();) {
-                        ValueTreeNode<String> newChild = newNode(unseenDomainsIterator.next());
+                        ValueSetTreeNode<String> newChild = newNode(unseenDomainsIterator.next());
                         lastVisited.addChild(newChild);
                         lastVisited = newChild;
                     }
@@ -164,7 +164,7 @@ public class WikipediaSchoolsDomainTreeIndexer extends IndexWriterRessource {
         }
     }
 
-    private static void writeTreeGraphml(ValueTreeNode<String> rootNode, File file) {
+    private static void writeTreeGraphml(ValueSetTreeNode<String> rootNode, File file) {
         file.delete();
         try {
             FileWriter writer = new FileWriter(file);
@@ -261,7 +261,7 @@ public class WikipediaSchoolsDomainTreeIndexer extends IndexWriterRessource {
         if (args.length > 0) {
             Path domainTreeRoot = FileSystems.getDefault().getPath(args[0] + DOMAIN_TREE_ENTRYPOINT_DIRECTORY);
             List<File> domainFiles = collectDomainFiles(domainTreeRoot);
-            ValueTreeNode<String> rootDomain = parseDomainFilesToTree(domainFiles);
+            ValueSetTreeNode<String> rootDomain = parseDomainFilesToTree(domainFiles);
             BaseTreeNode.depthFirstTraverser(rootDomain, n -> {
                 System.out.println(n.toString());
                 return false;
@@ -284,14 +284,14 @@ public class WikipediaSchoolsDomainTreeIndexer extends IndexWriterRessource {
      * @throws IOException
      *             if there is a low-level IO error
      */
-    private void writeTreeToIndex(ValueTreeNode<String> rootDomain) throws IOException {
+    private void writeTreeToIndex(ValueSetTreeNode<String> rootDomain) throws IOException {
         DocumentGeneratingNodeInspector nodeToDocsMapper = new DocumentGeneratingNodeInspector();
         BaseTreeNode.depthFirstTraverser(rootDomain, nodeToDocsMapper);
         outIndexWriter.addDocuments(nodeToDocsMapper.getDocuments());
     }
 
-    private static ValueTreeNode<String> newNode(String nodeName) {
-        ValueTreeNode<String> node = new ValueTreeNode<String>();
+    private static ValueSetTreeNode<String> newNode(String nodeName) {
+        ValueSetTreeNode<String> node = new ValueSetTreeNode<String>();
         node.setName(nodeName);
         return node;
     }

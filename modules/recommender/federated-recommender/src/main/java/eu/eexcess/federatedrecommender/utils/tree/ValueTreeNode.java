@@ -20,85 +20,23 @@
 
 package eu.eexcess.federatedrecommender.utils.tree;
 
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.Set;
+/**
+ * a tree node implementation that can keep a type &lt;T&gt; id and a type &lt;Value&gt; value
+ * 
+ * @author Raoul Rubien
+ *
+ * @param <T> id of the node; i.e. a String name
+ * @param <Value> node's value
+ */
+public class ValueTreeNode<T, Value> extends BaseTreeNode<T> {
 
-public class ValueTreeNode<T> extends BaseTreeNode<T> {
+    private Value value;
 
-    private Set<T> values;
-
-    public ValueTreeNode() {
-        values = new HashSet<T>();
+    public Value getValue() {
+        return value;
     }
 
-    public Set<T> getValues() {
-        return values;
+    public void setValue(Value newValue) {
+        value = newValue;
     }
-
-    public void addValue(T value) {
-        values.add(value);
-    }
-
-    public void addValues(Set<T> valueSet) {
-        values.addAll(valueSet);
-    }
-
-    @Override
-    public String toString() {
-        StringBuilder childrenString = new StringBuilder();
-        boolean isFirstChild = true;
-        Iterator<TreeNode<T>> iterator = iterator();
-
-        while (iterator.hasNext()) {
-            TreeNode<T> next = iterator.next();
-            if (!isFirstChild) {
-                childrenString.append(", ");
-            }
-            childrenString.append("name [" + next.getName() + "]");
-            isFirstChild = false;
-        }
-
-        StringBuilder valuesString = new StringBuilder();
-        boolean isFirstValue = true;
-        for (T value : values) {
-
-            if (!isFirstValue) {
-                valuesString.append(", ");
-            }
-            valuesString.append(value.toString());
-            isFirstValue = false;
-        }
-
-        return "name [" + getName() + "] values [" + valuesString + "] children [" + childrenString + "]";
-    }
-
-    /**
-     * Hash depends on super class implementation. Usually only the node name is
-     * considered.
-     */
-    @Override
-    public int hashCode() {
-        /**
-         * note: do not auto generate hashCode() and equals()
-         */
-        return super.hashCode();
-    }
-
-    /**
-     * Equality depends on super class implementation. Usually only the node
-     * name is considered.
-     */
-    @Override
-    public boolean equals(Object obj) {
-        /**
-         * note: do not auto generate hashCode() and equals()
-         */
-        if (this == obj)
-            return true;
-        if (!super.equals(obj))
-            return false;
-        return true;
-    }
-
 }

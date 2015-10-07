@@ -35,7 +35,7 @@ import org.apache.lucene.search.TopScoreDocCollector;
 
 import eu.eexcess.federatedrecommender.utils.tree.BaseTreeNode;
 import eu.eexcess.federatedrecommender.utils.tree.NodeInspector;
-import eu.eexcess.federatedrecommender.utils.tree.ValueTreeNode;
+import eu.eexcess.federatedrecommender.utils.tree.ValueSetTreeNode;
 
 public class DBDomainSampler extends TopTermToWNDomain {
 
@@ -47,7 +47,7 @@ public class DBDomainSampler extends TopTermToWNDomain {
         /**
          * terms to use for sampling
          */
-        public Set<ValueTreeNode<String>> sampleDomains;
+        public Set<ValueSetTreeNode<String>> sampleDomains;
     }
 
     public static class WordNetArguments {
@@ -56,7 +56,7 @@ public class DBDomainSampler extends TopTermToWNDomain {
         public String wordnetDomainCsvTreePath;
     }
 
-    private ValueTreeNode<String> domainToTermsTree;
+    private ValueSetTreeNode<String> domainToTermsTree;
 
     /**
      * Creates an instance of this class.
@@ -72,7 +72,7 @@ public class DBDomainSampler extends TopTermToWNDomain {
         super(baseIndexPath, wnArgs.wordnetPath, wnArgs.wordnetDomainsPath, wnArgs.wordnetDomainCsvTreePath);
     }
 
-    public ValueTreeNode<String> alignTerms(int fromTopTermIndex, int toTopTermIndex) throws Exception {
+    public ValueSetTreeNode<String> alignTerms(int fromTopTermIndex, int toTopTermIndex) throws Exception {
         domainToTermsTree = super.assignToDomains(fromTopTermIndex, toTopTermIndex);
         return domainToTermsTree;
     }
@@ -100,16 +100,16 @@ public class DBDomainSampler extends TopTermToWNDomain {
         throw new UnsupportedOperationException("not implemented yet");
     }
 
-    Set<String> distinctUnifyValues(Set<ValueTreeNode<String>> trees) {
+    Set<String> distinctUnifyValues(Set<ValueSetTreeNode<String>> trees) {
         final Set<String> unified = new HashSet<String>();
 
         NodeInspector<String> operator = (n) -> {
-            for (String value : ((ValueTreeNode<String>) n).getValues()) {
+            for (String value : ((ValueSetTreeNode<String>) n).getValues()) {
                 unified.add(value);
             }
             return false;
         };
-        for (ValueTreeNode<String> tree : trees) {
+        for (ValueSetTreeNode<String> tree : trees) {
             BaseTreeNode.depthFirstTraverser(tree, operator);
         }
         return unified;

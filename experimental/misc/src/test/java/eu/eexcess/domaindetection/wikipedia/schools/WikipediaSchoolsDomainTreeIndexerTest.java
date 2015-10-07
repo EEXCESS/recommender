@@ -30,7 +30,7 @@ import java.util.List;
 import org.junit.Test;
 
 import eu.eexcess.federatedrecommender.utils.tree.BaseTreeNode;
-import eu.eexcess.federatedrecommender.utils.tree.ValueTreeNode;
+import eu.eexcess.federatedrecommender.utils.tree.ValueSetTreeNode;
 
 public class WikipediaSchoolsDomainTreeIndexerTest {
 
@@ -46,7 +46,7 @@ public class WikipediaSchoolsDomainTreeIndexerTest {
         domainFiles.add(new File("root.helicopter.htm"));
         domainFiles.add(new File("root.helicopter.black_hawk.htm"));
 
-        ValueTreeNode<String> tree = WikipediaSchoolsDomainTreeIndexer.parseDomainFilesToTree(domainFiles);
+        ValueSetTreeNode<String> tree = WikipediaSchoolsDomainTreeIndexer.parseDomainFilesToTree(domainFiles);
 
         List<String> domains = new ArrayList<String>();
         domains.add("factotum");

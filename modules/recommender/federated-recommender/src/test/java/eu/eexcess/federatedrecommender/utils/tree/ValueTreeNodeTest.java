@@ -30,26 +30,26 @@ import java.util.Set;
 import org.junit.Test;
 
 import eu.eexcess.federatedrecommender.utils.tree.TreeNode;
-import eu.eexcess.federatedrecommender.utils.tree.ValueTreeNode;
+import eu.eexcess.federatedrecommender.utils.tree.ValueSetTreeNode;
 
 public class ValueTreeNodeTest {
 
     @Test
     public void iterator_iterate_expectDepthEquals1_nonDescentInDepth() {
-        ValueTreeNode<String> n = new ValueTreeNode<String>();
+        ValueSetTreeNode<String> n = new ValueSetTreeNode<String>();
         n.setName("root");
         n.addValue("1");
         n.addValue("2");
         n.addValue("3");
 
-        ValueTreeNode<String> c = new ValueTreeNode<String>();
+        ValueSetTreeNode<String> c = new ValueSetTreeNode<String>();
         c.setName("child0");
         c.addValue("42");
         c.addValue("43");
         c.addValue("44");
         n.addChild(c);
 
-        ValueTreeNode<String> cc = new ValueTreeNode<String>();
+        ValueSetTreeNode<String> cc = new ValueSetTreeNode<String>();
         cc.setName("child01");
         c.addChild(cc);
 
@@ -70,7 +70,7 @@ public class ValueTreeNodeTest {
         }
         assertEquals(0, count);
 
-        c = new ValueTreeNode<String>();
+        c = new ValueSetTreeNode<String>();
         c.setName("child1");
         c.addValue("12");
         c.addValue("13");
@@ -96,49 +96,49 @@ public class ValueTreeNodeTest {
 
     @Test
     public void findFirstNode_expectCorrectNode() {
-        ValueTreeNode<String> n = new ValueTreeNode<String>();
+        ValueSetTreeNode<String> n = new ValueSetTreeNode<String>();
         n.setName("root");
         n.addValue("1");
         n.addValue("2");
         n.addValue("3");
 
-        ValueTreeNode<String> c = new ValueTreeNode<String>();
+        ValueSetTreeNode<String> c = new ValueSetTreeNode<String>();
         c.setName("child0");
         c.addValue("42");
         c.addValue("43");
         c.addValue("44");
         n.addChild(c);
 
-        ValueTreeNode<String> cc = new ValueTreeNode<String>();
+        ValueSetTreeNode<String> cc = new ValueSetTreeNode<String>();
         cc.setName("child01");
         c.addChild(cc);
 
-        ValueTreeNode<String> cc1 = new ValueTreeNode<String>();
+        ValueSetTreeNode<String> cc1 = new ValueSetTreeNode<String>();
         cc1.setName("child02");
         cc.addChild(cc1);
 
-        ValueTreeNode<String> template = new ValueTreeNode<String>();
+        ValueSetTreeNode<String> template = new ValueSetTreeNode<String>();
         template.setName("root");
         Set<TreeNode<String>> resultCollector = new HashSet<TreeNode<String>>();
-        ValueTreeNode.findFirstNode(template, n, resultCollector);
+        ValueSetTreeNode.findFirstNode(template, n, resultCollector);
         assertEquals(1, resultCollector.size());
         assertTrue((Object) resultCollector.iterator().next() == (Object) n);
 
         template.setName("child0");
         resultCollector.clear();
-        ValueTreeNode.findFirstNode(template, n, resultCollector);
+        ValueSetTreeNode.findFirstNode(template, n, resultCollector);
         assertEquals(1, resultCollector.size());
         assertTrue((Object) resultCollector.iterator().next() == (Object) c);
 
         template.setName("child01");
         resultCollector.clear();
-        ValueTreeNode.findFirstNode(template, n, resultCollector);
+        ValueSetTreeNode.findFirstNode(template, n, resultCollector);
         assertEquals(1, resultCollector.size());
         assertTrue((Object) resultCollector.iterator().next() == (Object) cc);
 
         template.setName("child02");
         resultCollector.clear();
-        ValueTreeNode.findFirstNode(template, n, resultCollector);
+        ValueSetTreeNode.findFirstNode(template, n, resultCollector);
         assertEquals(1, resultCollector.size());
         assertTrue((Object) resultCollector.iterator().next() == (Object) cc1);
     }

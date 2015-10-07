@@ -31,14 +31,14 @@ import net.sf.extjwnl.JWNLException;
 import eu.eexcess.federatedrecommender.domaindetection.probing.Domain;
 import eu.eexcess.federatedrecommender.domaindetection.wordnet.WordnetDomainsDetector;
 import eu.eexcess.federatedrecommender.utils.tree.TreeNode;
-import eu.eexcess.federatedrecommender.utils.tree.ValueTreeNode;
+import eu.eexcess.federatedrecommender.utils.tree.ValueSetTreeNode;
 import eu.eexcess.federatedrecommender.utils.wordnet.WordnetDomainTreeInflator;
 
 public class TopTermToWNDomain extends Resources {
 
     private File wordnetCSVTreeFile;
 
-    private ValueTreeNode<String> wnDomainTree;
+    private ValueSetTreeNode<String> wnDomainTree;
     private String[] topTerms;
     private File wordnetDomainDetectorFile;
     private File wordnetDomainsPath;
@@ -77,7 +77,7 @@ public class TopTermToWNDomain extends Resources {
      *            last index of top term to be considered (inclusive)
      * @throws Exception
      */
-    public ValueTreeNode<String> assignToDomains(int fromTopTermIndex, int toTopTermIndex) throws Exception {
+    public ValueSetTreeNode<String> assignToDomains(int fromTopTermIndex, int toTopTermIndex) throws Exception {
         return assignToDomains(getTopTerms(fromTopTermIndex, toTopTermIndex));
     }
 
@@ -89,10 +89,10 @@ public class TopTermToWNDomain extends Resources {
      * @throws Exception
      */
 
-    ValueTreeNode<String> assignToDomains(String[] terms) throws Exception {
+    ValueSetTreeNode<String> assignToDomains(String[] terms) throws Exception {
         this.topTerms = terms;
         WordnetDomainsDetector wdt = new WordnetDomainsDetector(wordnetDomainDetectorFile, wordnetDomainsPath, true);
-        wnDomainTree = (ValueTreeNode<String>) treeInflator.inflateDomainTree(wordnetCSVTreeFile);
+        wnDomainTree = (ValueSetTreeNode<String>) treeInflator.inflateDomainTree(wordnetCSVTreeFile);
 
         // construct a domain map containing terms
         IdentityHashMap<String, HashSet<String>> domainToTerms = new IdentityHashMap<String, HashSet<String>>();
@@ -115,16 +115,16 @@ public class TopTermToWNDomain extends Resources {
             // mount the terms on the domain tree
             for (Map.Entry<String, HashSet<String>> entry : domainToTerms.entrySet()) {
                 Set<TreeNode<String>> resultCollector = new HashSet<TreeNode<String>>();
-                ValueTreeNode<String> domainNode = new ValueTreeNode<String>();
+                ValueSetTreeNode<String> domainNode = new ValueSetTreeNode<String>();
                 domainNode.setName(entry.getKey());
-                ValueTreeNode.findFirstNode(domainNode, wnDomainTree, resultCollector);
+                ValueSetTreeNode.findFirstNode(domainNode, wnDomainTree, resultCollector);
 
                 // find domain in tree
                 if (resultCollector.iterator().hasNext()) {
                     TreeNode<String> nodeInTree = resultCollector.iterator().next();
                     Set<String> domainTerms = entry.getValue();
 
-                    ((ValueTreeNode<String>) nodeInTree).addValues(domainTerms);
+                    ((ValueSetTreeNode<String>) nodeInTree).addValues(domainTerms);
                 }
             }
         }

@@ -21,24 +21,24 @@
 package eu.eexcess.federatedrecommender.utils.tree.factory;
 
 import eu.eexcess.federatedrecommender.utils.tree.TreeNode;
-import eu.eexcess.federatedrecommender.utils.tree.ValueTreeNode;
+import eu.eexcess.federatedrecommender.utils.tree.ValueSetTreeNode;
 
 /**
- * a {@link ValueTreeNode}&lt;String&gt; factory implementation
+ * a {@link ValueSetTreeNode}&lt;String&gt; factory implementation
  * 
  * @author Raoul Rubien
  *
  */
-public class StringValueTreeNodeFactory implements TreeNodeFactory<String> {
+public class StringValueSetTreeNodeFactory implements TreeNodeFactory<String> {
 
     @Override
     public TreeNode<String> createTreeNode() {
-        return new ValueTreeNode<String>();
+        return new ValueSetTreeNode<String>();
     }
 
     @Override
     public TreeNode<String> createTreeNode(String nodeName) {
-        TreeNode<String> tn = new ValueTreeNode<String>();
+        TreeNode<String> tn = new ValueSetTreeNode<String>();
         tn.setName(nodeName);
         return tn;
     }

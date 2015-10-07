@@ -24,6 +24,12 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
 
+/**
+ * A tree node implementation that can store it's name.
+ * @author Raoul Rubien
+ *
+ * @param <T> id of the node; i.e. String name 
+ */
 public class BaseTreeNode<T> implements Iterable<TreeNode<T>>, TreeNode<T> {
 
     private Set<TreeNode<T>> children;

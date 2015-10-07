@@ -77,7 +77,7 @@ import eu.eexcess.federatedrecommender.interfaces.PartnerSelector;
 import eu.eexcess.federatedrecommender.interfaces.PartnersFederatedRecommendationsPicker;
 import eu.eexcess.federatedrecommender.interfaces.SecureUserProfileDecomposer;
 import eu.eexcess.federatedrecommender.registration.PartnerRegister;
-import eu.eexcess.federatedrecommender.sourceselection.WndomainSourceSelector;
+import eu.eexcess.federatedrecommender.sourceselection.WordnetDomainSourceSelector;
 import eu.eexcess.federatedrecommender.utils.FederatedRecommenderException;
 import eu.eexcess.sqlite.Database;
 import eu.eexcess.sqlite.DatabaseQueryStats;
@@ -112,7 +112,7 @@ public class FederatedRecommenderCore implements ProbeResultChanged {
         // activate partner probing only if the respective source selector is
         // requested to be applied
         String[] sourceSelectors = this.federatedRecConfiguration.getSourceSelectors();
-        String domainSelectorName = WndomainSourceSelector.class.getCanonicalName();
+        String domainSelectorName = WordnetDomainSourceSelector.class.getCanonicalName();
         if (sourceSelectors != null && Arrays.asList(sourceSelectors).contains(domainSelectorName)) {
             LOGGER.info("activating partner domaindetection since [" + domainSelectorName + "] is requested to be applied");
 
