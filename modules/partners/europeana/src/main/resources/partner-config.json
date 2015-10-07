@@ -1,6 +1,6 @@
 {
   "systemId": "Europeana",
-  "queryGeneratorClass": "eu.eexcess.partnerrecommender.reference.OrQueryGeneratorFieldTermConjunction",
+  "queryGeneratorClass": "eu.eexcess.partnerrecommender.reference.LuceneQueryGeneratorFieldTermConjunctionMainTopic",
   "partnerConnectorClass": "eu.eexcess.europeana.recommender.PartnerConnector",
   "transformerClass": "eu.eexcess.europeana.datalayer.EuropeanaTransformer",
   "searchEndpoint": "http://www.europeana.eu/api/v2/search.json?wskey=${apiKey}&query=${query}&rows=${numResults}",
@@ -11,7 +11,7 @@
   "mappingListTransformationFile":"mapperResultList.xsl",
   "mappingObjectTransformationFile":"mapperObject.xsl",
   "partnerDataRequestsTrace":"false",
-  "enableEnriching":"false",
+  "enableEnriching":"true",
   "makeCleanupBeforeTransformation":"false",
   "partnerConnectorEndpoint": "http://127.0.0.1/eexcess-partner-europeana-1.0-SNAPSHOT/partner/",
   "federatedRecommenderURI":"http://127.0.0.1/eexcess-federated-recommender-web-service-1.0-SNAPSHOT/recommender/"

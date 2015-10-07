@@ -1,6 +1,6 @@
 {
   "systemId": "Mendeley",
-  "queryGeneratorClass": "eu.eexcess.partnerrecommender.reference.LuceneQueryGeneratorFieldTermConjunction",
+  "queryGeneratorClass": "eu.eexcess.partnerrecommender.reference.LuceneQueryGeneratorFieldTermConjunctionMainTopic",
   "partnerConnectorClass": "eu.eexcess.mendeley.recommender.PartnerConnector",
   "transformerClass": "eu.eexcess.mendeley.datalayer.MendeleyTransformer",
   "searchEndpoint": "https://api.mendeley.com/search/catalog?limit=20&query=${query}",
@@ -12,7 +12,7 @@
   "mappingListTransformationFile":"mapperResultList.xsl",
   "mappingObjectTransformationFile":"mapperObject.xsl",
   "partnerDataRequestsTrace":"false",
-  "enableEnriching":"false",
+  "enableEnriching":"true",
   "makeCleanupBeforeTransformation":"false",
   "partnerConnectorEndpoint": "http://127.0.0.1/eexcess-partner-mendeley-1.0-SNAPSHOT/partner/",
   "federatedRecommenderURI":"http://127.0.0.1/eexcess-federated-recommender-web-service-1.0-SNAPSHOT/recommender/",

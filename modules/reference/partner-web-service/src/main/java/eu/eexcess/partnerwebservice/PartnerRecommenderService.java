@@ -73,8 +73,8 @@ public class PartnerRecommenderService {
 
     @POST
     @Path("/recommend")
-    @Consumes({ MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON })
-    @Produces({ MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON })
+    @Consumes({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
+    @Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
     public ResultList recommend(SecureUserProfile userProfile) throws IOException {
         return partnerRecommender.recommend(userProfile);
     }
@@ -88,8 +88,8 @@ public class PartnerRecommenderService {
      */
     @POST
     @Path("/getDetails")
-    @Consumes({ MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON })
-    @Produces({ MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON })
+    @Consumes({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
+    @Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
     public DocumentBadgeList getDetails(DocumentBadgeList documents) throws IOException {
         return partnerRecommender.getDetails(documents);
     }
@@ -102,8 +102,8 @@ public class PartnerRecommenderService {
      */
     @POST
     @Path("/getUserProfile")
-    @Consumes({ MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON })
-    @Produces({ MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON })
+    @Consumes({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
+    @Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
     public Document getUserProfile(String userId) throws IOException {
         return partnerRecommender.getUserProfile(userId);
     }
@@ -141,7 +141,7 @@ public class PartnerRecommenderService {
      */
     @GET
     @Path("/debugDumpResult")
-    @Produces({ MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON })
+    @Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
     public Result debugDumpRecommendedItem() {
         Result recommendedItem = new Result();
         DocumentBadge db = new DocumentBadge();
@@ -168,7 +168,7 @@ public class PartnerRecommenderService {
      */
     @GET
     @Path("/debugDumpResultList")
-    @Produces({ MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON })
+    @Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
     public ResultList debugDumpResultList() {
         ResultList resultList = new ResultList();
         resultList.totalResults = 1;
