@@ -21,16 +21,36 @@
 package eu.eexcess.federatedrecommender.utils.tree;
 
 /**
- * a tree node implementation that can keep a type &lt;T&gt; id and a type &lt;Value&gt; value
+ * a tree node implementation that can keep a type &lt;T&gt; id and a type
+ * &lt;Value&gt; value
  * 
  * @author Raoul Rubien
  *
- * @param <T> id of the node; i.e. a String name
- * @param <Value> node's value
+ * @param <T>
+ *            id of the node; i.e. a String name
+ * @param <Value>
+ *            node's value
  */
-public class ValueTreeNode<T, Value> extends BaseTreeNode<T> {
+public class ValueTreeNode<Value> extends BaseTreeNode {
 
     private Value value;
+
+    public ValueTreeNode() {
+        super();
+    }
+
+    public ValueTreeNode(String name) {
+        super(name);
+    }
+
+    public ValueTreeNode(String name, Value value) {
+        super(name);
+        this.value = value;
+    }
+
+    public ValueTreeNode(ValueTreeNode<Value> other) {
+        this(other.getName(), other.getValue());
+    }
 
     public Value getValue() {
         return value;
@@ -38,5 +58,10 @@ public class ValueTreeNode<T, Value> extends BaseTreeNode<T> {
 
     public void setValue(Value newValue) {
         value = newValue;
+    }
+
+    @Override
+    public String toString() {
+        return super.toString() + " value [" + value + "]";
     }
 }

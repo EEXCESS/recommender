@@ -54,7 +54,7 @@ public class ValueTreeNodeTest {
         c.addChild(cc);
 
         int count = 0;
-        Iterator<TreeNode<String>> iterator = c.iterator();
+        Iterator<TreeNode> iterator = c.iterator();
         iterator = c.iterator();
         while (iterator.hasNext()) {
             System.out.println(iterator.next().toString());
@@ -119,7 +119,7 @@ public class ValueTreeNodeTest {
 
         ValueSetTreeNode<String> template = new ValueSetTreeNode<String>();
         template.setName("root");
-        Set<TreeNode<String>> resultCollector = new HashSet<TreeNode<String>>();
+        Set<TreeNode> resultCollector = new HashSet<TreeNode>();
         ValueSetTreeNode.findFirstNode(template, n, resultCollector);
         assertEquals(1, resultCollector.size());
         assertTrue((Object) resultCollector.iterator().next() == (Object) n);

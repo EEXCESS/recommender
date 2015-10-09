@@ -21,7 +21,6 @@
 package eu.eexcess.federatedrecommender.sourceselection;
 
 import java.io.File;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -42,8 +41,6 @@ import eu.eexcess.federatedrecommender.domaindetection.probing.DomainDetector;
 import eu.eexcess.federatedrecommender.domaindetection.probing.DomainDetectorException;
 import eu.eexcess.federatedrecommender.domaindetection.wordnet.WordnetDomainsDetector;
 import eu.eexcess.federatedrecommender.interfaces.PartnerSelector;
-import eu.eexcess.federatedrecommender.utils.tree.ValueSetTreeNode;
-import eu.eexcess.federatedrecommender.utils.wordnet.WordnetDomainTreeInflator;
 
 public class WordnetDomainSourceSelector implements PartnerSelector {
 
@@ -124,16 +121,6 @@ public class WordnetDomainSourceSelector implements PartnerSelector {
 
     private boolean isKeywordGroupingEnabled = true;
 
-    private FederatedRecommenderConfiguration federatedRecommenderConfiguration = null;
-    /**
-     * TODO: externalize string to {@link FederatedRecommenderConfiguration} if
-     * possible<br>
-     * configures the file where the domain tree can be found as csv
-     */
-    private String wordnetDomainStructureCsvFile = "wn-domains-3.2-tree.csv";
-
-    private WordnetDomainTreeInflator treeInflator;
-
     /**
      * Constructs an intance of this class and a needed instance interfacing
      * {@link DomainDetector}. This instance,being rather consuming, can later
@@ -150,8 +137,6 @@ public class WordnetDomainSourceSelector implements PartnerSelector {
         } catch (DomainDetectorException e) {
             LOGGER.log(Level.SEVERE, "unable to instanciate [" + WordnetDomainsDetector.class.getSimpleName() + "]", e);
         }
-
-        // treeInflator = WordnetDomainTreeInflator.newBaseTreeNodeInflator();
     }
 
     // TODO: Domain detection does not consider weights and ordering of domains
@@ -263,19 +248,12 @@ public class WordnetDomainSourceSelector implements PartnerSelector {
             }
         }
         /*
-         * TODO this should be: get wn domain tree, for each partner domain
-         * identify the node in wn-domain tree for each keyword domain if is a
-         * subset of a partner-domain select partner else skip
+         * TODO rrubien wnd-ss next steps will be: construct plain not weighted
+         * domain tree assign partner domains to a cloned not weighted tree
+         * assign seenKeywordDomains to an other cloned not weighted tree
+         * calculate similarity measure of both trees apply filtering on all
+         * known similarity measures
          */
-        ValueSetTreeNode<String> domainTree = inflateWordnetDomainTree();
-
-        // match keywords' domains with partners' domains
-        //Double totalWeight = 0.0;
-        for (PartnerBadge partner : partners) {
-            for (PartnerDomain partnerDomain : partner.getDomainContent()) {
-                // get
-            }
-        }
 
         Double totalWeight = 0.0;
         for (PartnerBadge partner : partners) {
@@ -305,24 +283,6 @@ public class WordnetDomainSourceSelector implements PartnerSelector {
                 domainWeight.weight = domainWeight.weight / totalWeight;
             }
         }
-    }
-
-    /**
-     * Inflates the WordNet domain tree from a csv file to an
-     * {@link ValueSetTreeNode} tree.
-     * 
-     * @return
-     */
-    private ValueSetTreeNode<String> inflateWordnetDomainTree() {
-        ValueSetTreeNode<String> domainTree = null;
-        try {
-            File wordnetDomainStructure = new File(new File(federatedRecommenderConfiguration.getWordnetDomainFilePath()).getParent() + "/"
-                    + wordnetDomainStructureCsvFile);
-            domainTree = (ValueSetTreeNode<String>) treeInflator.inflateDomainTree(wordnetDomainStructure);
-        } catch (IOException ioe) {
-            LOGGER.log(Level.WARNING, "failed to infalte domain tree", ioe);
-        }
-        return domainTree;
     }
 
     /**

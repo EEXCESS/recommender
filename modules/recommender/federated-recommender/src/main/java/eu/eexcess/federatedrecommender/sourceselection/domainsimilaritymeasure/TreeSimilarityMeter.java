@@ -18,25 +18,19 @@
  * @author Raoul Rubien
  */
 
-package eu.eexcess.federatedrecommender.utils.tree.factory;
+package eu.eexcess.federatedrecommender.sourceselection.domainsimilaritymeasure;
 
-import eu.eexcess.federatedrecommender.utils.tree.BaseTreeNode;
 import eu.eexcess.federatedrecommender.utils.tree.TreeNode;
+import eu.eexcess.federatedrecommender.utils.tree.ValueTreeNode;
 
-/*
- * a {@link BaseTreeNode}&lt;String&gt; factory implementation
- */
-public class StringBaseTreeNodeFactory implements TreeNodeFactory<String> {
+public interface TreeSimilarityMeter {
 
-    @Override
-    public TreeNode<String> createTreeNode() {
-        return new BaseTreeNode<String>();
-    }
-
-    @Override
-    public TreeNode<String> createTreeNode(String nodeName) {
-        TreeNode<String> tn = new BaseTreeNode<String>();
-        tn.setName(nodeName);
-        return tn;
-    }
+    /**
+     * Calculates the similarity in between two {@link TreeNode} trees.
+     * @param tree to be compared
+     * @param otherTree tree to be compared
+     * @return a similarity measure within [0.0, 1.0]
+     */
+    double calculateSimilarity(ValueTreeNode<Double> tree, ValueTreeNode<Double> otherTree);
+    
 }

@@ -26,15 +26,21 @@ import java.util.Set;
 
 /**
  * A node implementation that can hold type &lt;T&gt; values in a set.
+ * 
  * @author Raoul Rubien
  *
  * @param <T>
  */
-public class ValueSetTreeNode<T> extends BaseTreeNode<T> {
+public class ValueSetTreeNode<T> extends BaseTreeNode {
 
     private Set<T> values;
 
     public ValueSetTreeNode() {
+        values = new HashSet<T>();
+    }
+
+    public ValueSetTreeNode(String name) {
+        super(name);
         values = new HashSet<T>();
     }
 
@@ -54,10 +60,10 @@ public class ValueSetTreeNode<T> extends BaseTreeNode<T> {
     public String toString() {
         StringBuilder childrenString = new StringBuilder();
         boolean isFirstChild = true;
-        Iterator<TreeNode<T>> iterator = iterator();
+        Iterator<TreeNode> iterator = iterator();
 
         while (iterator.hasNext()) {
-            TreeNode<T> next = iterator.next();
+            TreeNode next = iterator.next();
             if (!isFirstChild) {
                 childrenString.append(", ");
             }

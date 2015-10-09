@@ -59,16 +59,16 @@ public class WikipediaSchoolsDomainTreeIndexer extends IndexWriterRessource {
      * @author Raoul Rubien
      *
      */
-    private static class DocumentGeneratingNodeInspector implements NodeInspector<String> {
+    private static class DocumentGeneratingNodeInspector implements NodeInspector {
 
         private List<Document> documents = new ArrayList<Document>();
 
         @Override
-        public boolean invoke(TreeNode<String> n) {
+        public boolean invoke(TreeNode n) {
             Document document = new Document();
             document.add(new TextField(LUCENE_DOCUMENT_DOCUMENT_FIELD_NAME, n.getName(), Field.Store.YES));
 
-            for (TreeNode<String> child : n.getChildren()) {
+            for (TreeNode child : n.getChildren()) {
                 document.add(new TextField(LUCENE_DOCUMENT_CHILD_FIELD_NAME, child.getName(), Field.Store.YES));
             }
             documents.add(document);
@@ -109,6 +109,7 @@ public class WikipediaSchoolsDomainTreeIndexer extends IndexWriterRessource {
         }
     }
 
+    @SuppressWarnings("unchecked")
     static ValueSetTreeNode<String> parseDomainFilesToTree(List<File> domainFiles) {
         ValueSetTreeNode<String> rootDomain = newNode(ROOT_DOMAIN_NAME);
 
@@ -117,7 +118,7 @@ public class WikipediaSchoolsDomainTreeIndexer extends IndexWriterRessource {
             List<String> domainPath = WikipediaSchoolsDumpIndexer.stripDomains(domainFile.getName());
 
             ValueSetTreeNode<String> lastVisited = rootDomain;
-            Set<TreeNode<String>> collector = newNodeCollector();
+            Set<TreeNode> collector = newNodeCollector();
 
             for (Iterator<String> domainIterator = domainPath.listIterator(); domainIterator.hasNext();) {
                 ValueSetTreeNode<String> toBeFound = newNode(domainIterator.next());
@@ -145,7 +146,7 @@ public class WikipediaSchoolsDomainTreeIndexer extends IndexWriterRessource {
         }
 
         // hack to replace the "subject" root by "factotum"
-        Set<? extends TreeNode<String>> children = rootDomain.getChildren().iterator().next().getChildren();
+        Set<? extends TreeNode> children = rootDomain.getChildren().iterator().next().getChildren();
         rootDomain.removeChildren();
         rootDomain.addChildren(children);
 
@@ -188,9 +189,9 @@ public class WikipediaSchoolsDomainTreeIndexer extends IndexWriterRessource {
             writer.write("  <graph edgedefault=\"directed\" id=\"G\">\n");
             writer.write("    <data key=\"d0\"/>\n");
 
-            NodeInspector<String> graphmlContentWriter = new NodeInspector<String>() {
+            NodeInspector graphmlContentWriter = new NodeInspector() {
                 @Override
-                public boolean invoke(TreeNode<String> n) {
+                public boolean invoke(TreeNode n) {
                     try {
                         writer.write("    <node id=\"n" + n.getName() + "\">\n");
                         // writer.write("      <data key=\"d4\"><![CDATA["+ some
@@ -217,7 +218,7 @@ public class WikipediaSchoolsDomainTreeIndexer extends IndexWriterRessource {
                         writer.write("    </data>\n");
                         writer.write("    </node>\n");
 
-                        for (TreeNode<String> child : n.getChildren()) {
+                        for (TreeNode child : n.getChildren()) {
                             writer.write("    <edge id=\"e" + child.getName() + "\" source=\"n" + n.getName() + "\" target=\"n" + child.getName() + "\">\n");
                             writer.write("      <data key=\"d10\">\n");
                             writer.write("        <y:GenericEdge configuration=\"com.yworks.bpmn.Connection\">\n");
@@ -296,8 +297,8 @@ public class WikipediaSchoolsDomainTreeIndexer extends IndexWriterRessource {
         return node;
     }
 
-    private static Set<TreeNode<String>> newNodeCollector() {
-        return new HashSet<TreeNode<String>>();
+    private static Set<TreeNode> newNodeCollector() {
+        return new HashSet<TreeNode>();
     }
 
     private List<File> collectDomainFiles(Path domainTreeRoot) throws IOException {

@@ -30,17 +30,34 @@ import java.util.Set;
  *
  * @param <T> id of the node; i.e. node's name or id
  */
-public interface TreeNode<T> extends Iterable<TreeNode<T>> {
 
-    public abstract boolean addChild(TreeNode<T> n);
+public interface TreeNode extends Iterable<TreeNode> {
 
-    public abstract Set<? extends TreeNode<T>> getChildren();
+    public abstract boolean addChild(TreeNode n);
+
+    public abstract Set<? extends TreeNode> getChildren();
 
     @Override
-    public abstract Iterator<TreeNode<T>> iterator();
+    public abstract Iterator<TreeNode> iterator();
 
     public abstract void setName(String name);
 
     public abstract String getName();
 
 }
+
+// TODO rrubien
+//public interface TreeNode<T> extends Iterable<TreeNode<T>> {
+//
+//    public abstract boolean addChild(TreeNode<T> n);
+//
+//    public abstract Set<? extends TreeNode<T>> getChildren();
+//
+//    @Override
+//    public abstract Iterator<TreeNode<T>> iterator();
+//
+//    public abstract void setName(String name);
+//
+//    public abstract String getName();
+//
+//}

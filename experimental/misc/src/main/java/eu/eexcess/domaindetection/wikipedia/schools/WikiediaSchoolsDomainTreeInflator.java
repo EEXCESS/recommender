@@ -36,7 +36,7 @@ import eu.eexcess.federatedrecommender.utils.tree.TreeNode;
 public class WikiediaSchoolsDomainTreeInflator extends IndexReaderRessource {
 
     private static final Logger LOGGER = Logger.getLogger(WikipediaSchoolsDumpIndexer.class.getName());
-    private Map<String, TreeNode<String>> nodeMap = null;
+    private Map<String, TreeNode> nodeMap = null;
 
     public WikiediaSchoolsDomainTreeInflator(File indexDirectory) {
         super(indexDirectory);
@@ -49,16 +49,16 @@ public class WikiediaSchoolsDomainTreeInflator extends IndexReaderRessource {
      * 
      * @return
      */
-    public TreeNode<String> inflateDomainTree() {
-        TreeNode<String> domainTree = null;
-        nodeMap = new HashMap<String, TreeNode<String>>();
+    public TreeNode inflateDomainTree() {
+        TreeNode domainTree = null;
+        nodeMap = new HashMap<String, TreeNode>();
 
         try {
             for (int i = 0; i < indexReader.maxDoc(); i++) {
                 Document doc = indexReader.document(i);
                 String parentName = doc.get(WikipediaSchoolsDomainTreeIndexer.LUCENE_DOCUMENT_DOCUMENT_FIELD_NAME);
 
-                TreeNode<String> parentNode = newOrCachedNode(parentName);
+                TreeNode parentNode = newOrCachedNode(parentName);
 
                 if (domainTree == null) {
                     domainTree = parentNode;
@@ -66,7 +66,7 @@ public class WikiediaSchoolsDomainTreeInflator extends IndexReaderRessource {
 
                 for (IndexableField field : doc.getFields(WikipediaSchoolsDomainTreeIndexer.LUCENE_DOCUMENT_CHILD_FIELD_NAME)) {
                     String childName = field.stringValue();
-                    TreeNode<String> childNode = newOrCachedNode(childName);
+                    TreeNode childNode = newOrCachedNode(childName);
                     parentNode.addChild(childNode);
                 }
             }
@@ -83,10 +83,10 @@ public class WikiediaSchoolsDomainTreeInflator extends IndexReaderRessource {
      *            name of the new node
      * @return the new or an already cached node
      */
-    private TreeNode<String> newOrCachedNode(String nodeName) {
-        TreeNode<String> theNode = nodeMap.get(nodeName);
+    private TreeNode newOrCachedNode(String nodeName) {
+        TreeNode theNode = nodeMap.get(nodeName);
         if (theNode == null) {
-            theNode = new BaseTreeNode<String>(nodeName);
+            theNode = new BaseTreeNode(nodeName);
             nodeMap.put(nodeName, theNode);
         }
         return theNode;
@@ -98,7 +98,7 @@ public class WikiediaSchoolsDomainTreeInflator extends IndexReaderRessource {
      * @throws IllegalStateException
      *             if {@link #inflateDomainTree()} was not called before
      */
-    public Map<String, TreeNode<String>> getNodeMap() /*
+    public Map<String, TreeNode> getNodeMap() /*
                                                        * throws
                                                        * IllegalStateException
                                                        */{

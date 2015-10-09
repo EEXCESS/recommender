@@ -103,7 +103,8 @@ public class DBDomainSampler extends TopTermToWNDomain {
     Set<String> distinctUnifyValues(Set<ValueSetTreeNode<String>> trees) {
         final Set<String> unified = new HashSet<String>();
 
-        NodeInspector<String> operator = (n) -> {
+        @SuppressWarnings("unchecked")
+        NodeInspector operator = (n) -> {
             for (String value : ((ValueSetTreeNode<String>) n).getValues()) {
                 unified.add(value);
             }

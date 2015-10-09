@@ -29,17 +29,20 @@ import eu.eexcess.federatedrecommender.utils.tree.ValueTreeNode;
  * @author Raoul Rubien
  *
  */
-public class DoubleValueTreeNodeFactory implements TreeNodeFactory<String> {
+public class DoubleValueTreeNodeFactory implements TreeNodeFactory {
 
     @Override
-    public TreeNode<String> createTreeNode() {
-        return new ValueTreeNode<String, Double>();
+    public TreeNode createTreeNode() {
+        ValueTreeNode<Double> vtn = new ValueTreeNode<Double>();
+        vtn.setValue(0.0);
+        return vtn;
     }
 
     @Override
-    public TreeNode<String> createTreeNode(String nodeName) {
-        TreeNode<String> tn = new ValueTreeNode<String, Double>();
-        tn.setName(nodeName);
-        return tn;
+    public TreeNode createTreeNode(String nodeName) {
+        ValueTreeNode<Double> vtn = new ValueTreeNode<Double>();
+        vtn.setName(nodeName);
+        vtn.setValue(0.0);
+        return vtn;
     }
 }

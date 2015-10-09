@@ -65,7 +65,7 @@ public class TopTermToWNDomain extends Resources {
         this.wordnetDomainDetectorFile = new File(wordnet20Path);
         this.wordnetCSVTreeFile = new File(wordnetDomainCsvTreePath);
         this.wordnetDomainsPath = new File(wordnetDomainsPath);
-        this.treeInflator = WordnetDomainTreeInflator.newBaseTreeNodeInflator();
+        this.treeInflator = WordnetDomainTreeInflator.newStringValueSetTreeNodeInflator();
     }
 
     /**
@@ -89,6 +89,7 @@ public class TopTermToWNDomain extends Resources {
      * @throws Exception
      */
 
+    @SuppressWarnings("unchecked")
     ValueSetTreeNode<String> assignToDomains(String[] terms) throws Exception {
         this.topTerms = terms;
         WordnetDomainsDetector wdt = new WordnetDomainsDetector(wordnetDomainDetectorFile, wordnetDomainsPath, true);
@@ -114,14 +115,14 @@ public class TopTermToWNDomain extends Resources {
 
             // mount the terms on the domain tree
             for (Map.Entry<String, HashSet<String>> entry : domainToTerms.entrySet()) {
-                Set<TreeNode<String>> resultCollector = new HashSet<TreeNode<String>>();
+                Set<TreeNode> resultCollector = new HashSet<TreeNode>();
                 ValueSetTreeNode<String> domainNode = new ValueSetTreeNode<String>();
                 domainNode.setName(entry.getKey());
                 ValueSetTreeNode.findFirstNode(domainNode, wnDomainTree, resultCollector);
 
                 // find domain in tree
                 if (resultCollector.iterator().hasNext()) {
-                    TreeNode<String> nodeInTree = resultCollector.iterator().next();
+                    TreeNode nodeInTree = resultCollector.iterator().next();
                     Set<String> domainTerms = entry.getValue();
 
                     ((ValueSetTreeNode<String>) nodeInTree).addValues(domainTerms);

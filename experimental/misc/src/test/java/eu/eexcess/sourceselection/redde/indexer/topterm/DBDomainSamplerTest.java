@@ -78,11 +78,12 @@ public class DBDomainSamplerTest {
 
             WordNetArguments wnArgs = getDefaultWordNetArguments();
             try (DBDomainSampler sampler = new DBDomainSampler(Settings.BaseIndex.baseIndexPath, wnArgs)) {
-                TreeNode<String> domainToTerms = sampler.alignTerms(0, 99);
+                TreeNode domainToTerms = sampler.alignTerms(0, 99);
 
                 final AtomicInteger numNodes = new AtomicInteger(0);
                 final AtomicInteger numTerms = new AtomicInteger(0);
-                NodeInspector<String> counter = (n) -> {
+                @SuppressWarnings("unchecked")
+                NodeInspector counter = (n) -> {
                     numNodes.incrementAndGet();
                     numTerms.set(numTerms.get() + ((ValueSetTreeNode<String>) n).getValues().size());
                     return false;
@@ -106,9 +107,10 @@ public class DBDomainSamplerTest {
                 && Settings.isWordNetDomainsResourceAvailable()) {
             WordNetArguments wnArgs = getDefaultWordNetArguments();
             try (DBDomainSampler sampler = new DBDomainSampler(Settings.BaseIndex.baseIndexPath, wnArgs)) {
-                TreeNode<String> domainToTermTree = sampler.alignTerms(0, 500);
+                TreeNode domainToTermTree = sampler.alignTerms(0, 500);
 
-                NodeInspector<String> printer = (n) -> {
+                @SuppressWarnings("unchecked")
+                NodeInspector printer = (n) -> {
                     if (((ValueSetTreeNode<String>) n).getValues().size() > 0) {
                         System.out.print("#terms: " + ((ValueSetTreeNode<String>) n).getValues().size() + " ");
                         System.out.println(n.toString());

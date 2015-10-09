@@ -55,7 +55,7 @@ public class WikipediaSchoolsReasonableDomainsTest {
     private static final File paragraphIndex = new File("/opt/data/wikipedia-schools/paragraph-index/wikipedia-schools-paragraph-index/");
     private static volatile IndexReaderRessource domainTreeIndexReaderResource = new IndexReaderRessource(domainTreeIndex);
     private static volatile IndexReaderRessource paragraphIndexReaderResource = new IndexReaderRessource(paragraphIndex);
-    private static Map<String, TreeNode<String>> nodeMap = null;
+    private static Map<String, TreeNode> nodeMap = null;
 
     @BeforeClass
     public static void inflateTree() {

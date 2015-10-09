@@ -25,11 +25,11 @@ package eu.eexcess.federatedrecommender.utils.tree;
  *
  * @param <E>
  */
-public interface NodeInspector<E> {
+public interface NodeInspector {
     /**
      * @param n
      *            the node to be inspected
      * @return true if inspection should be aborted after the invocation
      */
-    boolean invoke(TreeNode<E> n);
+    boolean invoke(TreeNode n);
 }

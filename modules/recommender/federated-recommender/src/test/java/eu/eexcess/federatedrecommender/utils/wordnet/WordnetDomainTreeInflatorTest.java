@@ -36,7 +36,7 @@ import eu.eexcess.federatedrecommender.utils.tree.TreeNode;
 public class WordnetDomainTreeInflatorTest {
 
     private int nodeCount;
-    private NodeInspector<String> nodeCounter = (n) -> {
+    private NodeInspector nodeCounter = (n) -> {
         WordnetDomainTreeInflatorTest.this.nodeCount++;
         return false;
     };
@@ -48,7 +48,7 @@ public class WordnetDomainTreeInflatorTest {
 
         if (Settings.isResourceAvailable(Settings.BaseIndex) && Settings.isWordNet20ResourceAvailable() && Settings.isWordNetDomainsResourceAvailable()) {
             try {
-                BaseTreeNode<String> domainTree = (BaseTreeNode<String>) treeInflator.inflateDomainTree(new File(Settings.WordnetDomains.CSVDomainPath));
+                BaseTreeNode domainTree = (BaseTreeNode) treeInflator.inflateDomainTree(new File(Settings.WordnetDomains.CSVDomainPath));
 
                 nodeCount = 0;
                 BaseTreeNode.depthFirstTraverser(domainTree, nodeCounter);
@@ -65,20 +65,20 @@ public class WordnetDomainTreeInflatorTest {
 
         if (Settings.isResourceAvailable(Settings.BaseIndex) && Settings.isWordNet20ResourceAvailable() && Settings.isWordNetDomainsResourceAvailable()) {
             try {
-                TreeNode<String> domainTree = treeInflator.inflateDomainTree(new File(Settings.WordnetDomains.CSVDomainPath));
+                TreeNode domainTree = treeInflator.inflateDomainTree(new File(Settings.WordnetDomains.CSVDomainPath));
 
                 // count level 2
                 int subdomainsCount = 0;
-                for (TreeNode<String> node : domainTree.getChildren()) {
+                for (TreeNode node : domainTree.getChildren()) {
                     subdomainsCount += node.getChildren().size();
                 }
                 assertEquals(45, subdomainsCount);
 
                 // count level 4
                 subdomainsCount = 0;
-                for (TreeNode<String> level1 : domainTree.getChildren()) {
-                    for (TreeNode<String> level2 : level1.getChildren()) {
-                        for (TreeNode<String> level3 : level2.getChildren()) {
+                for (TreeNode level1 : domainTree.getChildren()) {
+                    for (TreeNode level2 : level1.getChildren()) {
+                        for (TreeNode level3 : level2.getChildren()) {
                             subdomainsCount += level3.getChildren().size();
                         }
                     }

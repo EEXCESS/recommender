@@ -42,13 +42,15 @@ import eu.eexcess.sourceselection.redde.config.Settings;
 public class TopTermToWNDomainTest {
 
     private int termCount;
-    private NodeInspector<String> termCounter = (n) -> {
+    @SuppressWarnings("unchecked")
+    private NodeInspector termCounter = (n) -> {
         TopTermToWNDomainTest.this.termCount += ((ValueSetTreeNode<String>) n).getValues().size();
         return false;
     };
 
     private Set<String> collectedTerms = new HashSet<String>();
-    private NodeInspector<String> termCollector = (n) -> {
+    @SuppressWarnings("unchecked")
+    private NodeInspector termCollector = (n) -> {
         for (String term : ((ValueSetTreeNode<String>) n).getValues()) {
             TopTermToWNDomainTest.this.collectedTerms.add(term);
         }
@@ -56,7 +58,8 @@ public class TopTermToWNDomainTest {
     };
 
     private Map<String, String> termToDmain = new HashMap<String, String>();
-    private NodeInspector<String> termToDomainCollector = (n) -> {
+    @SuppressWarnings("unchecked")
+    private NodeInspector termToDomainCollector = (n) -> {
         for (String term : ((ValueSetTreeNode<String>) n).getValues()) {
             TopTermToWNDomainTest.this.termToDmain.put(term, n.getName());
         }
@@ -72,7 +75,7 @@ public class TopTermToWNDomainTest {
                 mapper = new TopTermToWNDomain(Settings.BaseIndex.baseIndexPath, Settings.WordNet.Path_2_0, Settings.WordnetDomains.Path,
                         Settings.WordnetDomains.CSVDomainPath);
 
-                TreeNode<String> domainsToTermsTree = mapper.assignToDomains(0, 99);
+                TreeNode domainsToTermsTree = mapper.assignToDomains(0, 99);
                 mapper.close();
                 assertEquals(100, mapper.getTopTerms().length);
 
@@ -118,7 +121,7 @@ public class TopTermToWNDomainTest {
 
                 String[] terms = testTerms.keySet().toArray(new String[0]);
 
-                TreeNode<String> domainsToTermsTree = mapper.assignToDomains(terms);
+                TreeNode domainsToTermsTree = mapper.assignToDomains(terms);
                 mapper.close();
 
                 termToDmain.clear();
@@ -134,6 +137,7 @@ public class TopTermToWNDomainTest {
         }
     }
 
+    
     @Test
     public void allignToDomains_allignTermsToDomains_expectCorrectNumOfTermsInSubDomain() {
 
@@ -146,11 +150,12 @@ public class TopTermToWNDomainTest {
                 ValueSetTreeNode<String> domainsToTermsTree = mapper.assignToDomains(0, 99);
                 mapper.close();
 
-                Set<TreeNode<String>> resultCollector = new HashSet<TreeNode<String>>();
+                Set<TreeNode> resultCollector = new HashSet<TreeNode>();
 
                 ValueSetTreeNode<String> template = new ValueSetTreeNode<String>();
                 template.setName("time_period");
                 ValueSetTreeNode.findFirstNode(template, domainsToTermsTree, resultCollector);
+                @SuppressWarnings("unchecked")
                 ValueSetTreeNode<String> startNode = (ValueSetTreeNode<String>) resultCollector.iterator().next();
 
                 collectedTerms.clear();

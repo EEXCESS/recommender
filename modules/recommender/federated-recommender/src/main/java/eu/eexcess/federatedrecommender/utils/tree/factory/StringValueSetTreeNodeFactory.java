@@ -29,16 +29,16 @@ import eu.eexcess.federatedrecommender.utils.tree.ValueSetTreeNode;
  * @author Raoul Rubien
  *
  */
-public class StringValueSetTreeNodeFactory implements TreeNodeFactory<String> {
+public class StringValueSetTreeNodeFactory implements TreeNodeFactory {
 
     @Override
-    public TreeNode<String> createTreeNode() {
+    public TreeNode createTreeNode() {
         return new ValueSetTreeNode<String>();
     }
 
     @Override
-    public TreeNode<String> createTreeNode(String nodeName) {
-        TreeNode<String> tn = new ValueSetTreeNode<String>();
+    public TreeNode createTreeNode(String nodeName) {
+        TreeNode tn = new ValueSetTreeNode<String>();
         tn.setName(nodeName);
         return tn;
     }

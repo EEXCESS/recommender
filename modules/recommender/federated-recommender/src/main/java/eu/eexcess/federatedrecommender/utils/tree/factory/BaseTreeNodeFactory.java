@@ -20,17 +20,23 @@
 
 package eu.eexcess.federatedrecommender.utils.tree.factory;
 
+import eu.eexcess.federatedrecommender.utils.tree.BaseTreeNode;
 import eu.eexcess.federatedrecommender.utils.tree.TreeNode;
 
-/**
- * a &lt;? extends {@link TreeNode}&gt; factory interface
- * 
- * @author Raoul Rubien
+/*
+ * a {@link BaseTreeNode}&lt;String&gt; factory implementation
  */
-public interface TreeNodeFactory {
+public class BaseTreeNodeFactory implements TreeNodeFactory {
 
-    public TreeNode createTreeNode();
-    
-    public TreeNode createTreeNode(String nodeName);
+    @Override
+    public TreeNode createTreeNode() {
+        return new BaseTreeNode();
+    }
 
+    @Override
+    public TreeNode createTreeNode(String nodeName) {
+        TreeNode tn = new BaseTreeNode();
+        tn.setName(nodeName);
+        return tn;
+    }
 }
