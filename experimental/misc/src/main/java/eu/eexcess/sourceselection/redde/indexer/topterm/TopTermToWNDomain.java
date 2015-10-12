@@ -30,9 +30,9 @@ import java.util.Set;
 import net.sf.extjwnl.JWNLException;
 import eu.eexcess.federatedrecommender.domaindetection.probing.Domain;
 import eu.eexcess.federatedrecommender.domaindetection.wordnet.WordnetDomainsDetector;
+import eu.eexcess.federatedrecommender.utils.domains.wordnet.WordnetDomainTreeInflator;
 import eu.eexcess.federatedrecommender.utils.tree.TreeNode;
 import eu.eexcess.federatedrecommender.utils.tree.ValueSetTreeNode;
-import eu.eexcess.federatedrecommender.utils.wordnet.WordnetDomainTreeInflator;
 
 public class TopTermToWNDomain extends Resources {
 
@@ -65,7 +65,7 @@ public class TopTermToWNDomain extends Resources {
         this.wordnetDomainDetectorFile = new File(wordnet20Path);
         this.wordnetCSVTreeFile = new File(wordnetDomainCsvTreePath);
         this.wordnetDomainsPath = new File(wordnetDomainsPath);
-        this.treeInflator = WordnetDomainTreeInflator.newStringValueSetTreeNodeInflator();
+        this.treeInflator = eu.eexcess.federatedrecommender.utils.domains.DomainTreeInflatorBuilder.newStringValueSetTreeNodeInflator(this.wordnetDomainsPath);
     }
 
     /**
@@ -93,7 +93,7 @@ public class TopTermToWNDomain extends Resources {
     ValueSetTreeNode<String> assignToDomains(String[] terms) throws Exception {
         this.topTerms = terms;
         WordnetDomainsDetector wdt = new WordnetDomainsDetector(wordnetDomainDetectorFile, wordnetDomainsPath, true);
-        wnDomainTree = (ValueSetTreeNode<String>) treeInflator.inflateDomainTree(wordnetCSVTreeFile);
+        wnDomainTree = (ValueSetTreeNode<String>) treeInflator.inflateDomainTree();
 
         // construct a domain map containing terms
         IdentityHashMap<String, HashSet<String>> domainToTerms = new IdentityHashMap<String, HashSet<String>>();

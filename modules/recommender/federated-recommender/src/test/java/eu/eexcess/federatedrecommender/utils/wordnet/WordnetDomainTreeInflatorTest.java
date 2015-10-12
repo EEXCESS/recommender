@@ -29,6 +29,7 @@ import java.io.IOException;
 import org.junit.Test;
 
 import eu.eexcess.federatedrecommender.config.Settings;
+import eu.eexcess.federatedrecommender.utils.domains.wordnet.WordnetDomainTreeInflator;
 import eu.eexcess.federatedrecommender.utils.tree.BaseTreeNode;
 import eu.eexcess.federatedrecommender.utils.tree.NodeInspector;
 import eu.eexcess.federatedrecommender.utils.tree.TreeNode;
@@ -41,14 +42,15 @@ public class WordnetDomainTreeInflatorTest {
         return false;
     };
 
-    private static final WordnetDomainTreeInflator treeInflator = WordnetDomainTreeInflator.newBaseTreeNodeInflator();
+    private static final WordnetDomainTreeInflator treeInflator = eu.eexcess.federatedrecommender.utils.domains.DomainTreeInflatorBuilder
+            .newBaseTreeNodeInflator(new File(Settings.WordnetDomains.CSVDomainPath));
 
     @Test
     public void inflateDomainTree_readTree_exptectCorrectNodeCountInTree() {
 
         if (Settings.isResourceAvailable(Settings.BaseIndex) && Settings.isWordNet20ResourceAvailable() && Settings.isWordNetDomainsResourceAvailable()) {
             try {
-                BaseTreeNode domainTree = (BaseTreeNode) treeInflator.inflateDomainTree(new File(Settings.WordnetDomains.CSVDomainPath));
+                BaseTreeNode domainTree = (BaseTreeNode) treeInflator.inflateDomainTree();
 
                 nodeCount = 0;
                 BaseTreeNode.depthFirstTraverser(domainTree, nodeCounter);
@@ -65,7 +67,7 @@ public class WordnetDomainTreeInflatorTest {
 
         if (Settings.isResourceAvailable(Settings.BaseIndex) && Settings.isWordNet20ResourceAvailable() && Settings.isWordNetDomainsResourceAvailable()) {
             try {
-                TreeNode domainTree = treeInflator.inflateDomainTree(new File(Settings.WordnetDomains.CSVDomainPath));
+                TreeNode domainTree = treeInflator.inflateDomainTree();
 
                 // count level 2
                 int subdomainsCount = 0;

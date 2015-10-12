@@ -4,6 +4,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import org.junit.Before;
@@ -62,37 +63,6 @@ public class FederatedRecommenderCoreTest {
 
     }
 
-    // @Test
-    // public void test() {
-    //
-    // SecureUserProfile secureUserProfile = new SecureUserProfile();
-    // secureUserProfile.contextList.add("Obama");
-    // secureUserProfile.contextList.add("Clinton");
-    // secureUserProfile.contextList.add("U.S.A");
-    // secureUserProfile.contextList.add("Europa");
-    // secureUserProfile.contextList.add("Eggenberg");
-    // secureUserProfile.contextList.add("Vienna");
-    // secureUserProfile.contextList.add("Car");
-    // secureUserProfile.contextList.add("Fiat");
-    // secureUserProfile.contextList.add("Ferrari");
-    // secureUserProfile.contextList.add("Volkswagen");
-    // secureUserProfile.contextList.add("Lamborghini");
-    // secureUserProfile.contextList.add("Audi");
-    // secureUserProfile.contextList.add("Opel");
-    // secureUserProfile.contextList.add("Porsche");
-    //
-    //
-    // FederatedRecommenderCore dCore = FederatedRecommenderCore.getInstance();
-    // PartnerRecommender partnerRecommenderApi = new PartnerRecommender();
-    // dCore.addPartner((PartnerRecommenderApi) partnerRecommenderApi);
-    // try {
-    // System.out.println(dCore.generateFederatedRecommendation(secureUserProfile));
-    // } catch (FileNotFoundException e) {
-    // // TODO Auto-generated catch block
-    // e.printStackTrace();
-    // }
-    // }
-
     @Test
     public void sourceSelection_givenSet_expectCorrectInvocationOrder() throws FederatedRecommenderException {
         FederatedRecommenderConfiguration frcc = new FederatedRecommenderConfiguration();
@@ -103,12 +73,8 @@ public class FederatedRecommenderCoreTest {
                 "eu.eexcess.federatedrecommender.FederatedRecommenderCoreTest$TestableSourceSelectorB" });
         FederatedRecommenderCore frc = FederatedRecommenderCore.getInstance(frcc);
 
-        ArrayList<String> selectorsClassNames = new ArrayList<>(3);
-        selectorsClassNames.add("eu.eexcess.federatedrecommender.FederatedRecommenderCoreTest$TestableSourceSelectorA");
-        selectorsClassNames.add("eu.eexcess.federatedrecommender.FederatedRecommenderCoreTest$TestableSourceSelectorB");
-
+        ArrayList<String> selectorsClassNames = new ArrayList<String>(Arrays.asList(frcc.getSourceSelectors()));
         SecureUserProfileEvaluation userProfile = new SecureUserProfileEvaluation();
-
         frc.sourceSelection(userProfile, selectorsClassNames);
 
         assertEquals(1, TestableSourceSelectorA.invocationCount);
@@ -130,18 +96,14 @@ public class FederatedRecommenderCoreTest {
         frcc.setPartnersTimeout(1000);
         frcc.setSolrServerUri("");
         frcc.setSourceSelectors(new String[] { "eu.eexcess.federatedrecommender.FederatedRecommenderCoreTest$TestableSourceSelectorA",
+                "eu.eexcess.federatedrecommender.FederatedRecommenderCoreTest$TestableSourceSelectorB",
+                "eu.eexcess.federatedrecommender.FederatedRecommenderCoreTest$TestableSourceSelectorA",
+                "eu.eexcess.federatedrecommender.FederatedRecommenderCoreTest$TestableSourceSelectorA",
                 "eu.eexcess.federatedrecommender.FederatedRecommenderCoreTest$TestableSourceSelectorB" });
         FederatedRecommenderCore frc = FederatedRecommenderCore.getInstance(frcc);
 
-        ArrayList<String> selectorsClassNames = new ArrayList<>(3);
-        selectorsClassNames.add("eu.eexcess.federatedrecommender.FederatedRecommenderCoreTest$TestableSourceSelectorA");
-        selectorsClassNames.add("eu.eexcess.federatedrecommender.FederatedRecommenderCoreTest$TestableSourceSelectorB");
-        selectorsClassNames.add("eu.eexcess.federatedrecommender.FederatedRecommenderCoreTest$TestableSourceSelectorA");
-        selectorsClassNames.add("eu.eexcess.federatedrecommender.FederatedRecommenderCoreTest$TestableSourceSelectorA");
-        selectorsClassNames.add("eu.eexcess.federatedrecommender.FederatedRecommenderCoreTest$TestableSourceSelectorB");
-
+        ArrayList<String> selectorsClassNames = new ArrayList<String>(Arrays.asList(frcc.getSourceSelectors()));
         SecureUserProfileEvaluation userProfile = new SecureUserProfileEvaluation();
-
         frc.sourceSelection(userProfile, selectorsClassNames);
 
         assertEquals(3, TestableSourceSelectorA.invocationCount);

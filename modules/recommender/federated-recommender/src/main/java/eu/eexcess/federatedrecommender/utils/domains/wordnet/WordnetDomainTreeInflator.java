@@ -18,7 +18,7 @@
  * @author Raoul Rubien
  */
 
-package eu.eexcess.federatedrecommender.utils.wordnet;
+package eu.eexcess.federatedrecommender.utils.domains.wordnet;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -28,61 +28,40 @@ import java.util.Set;
 
 import org.apache.commons.io.LineIterator;
 
+import eu.eexcess.federatedrecommender.utils.domains.DomainTreeInflator;
 import eu.eexcess.federatedrecommender.utils.tree.BaseTreeNode;
 import eu.eexcess.federatedrecommender.utils.tree.TreeNode;
-import eu.eexcess.federatedrecommender.utils.tree.ValueSetTreeNode;
-import eu.eexcess.federatedrecommender.utils.tree.ValueTreeNode;
-import eu.eexcess.federatedrecommender.utils.tree.factory.DoubleValueTreeNodeFactory;
-import eu.eexcess.federatedrecommender.utils.tree.factory.BaseTreeNodeFactory;
-import eu.eexcess.federatedrecommender.utils.tree.factory.StringValueSetTreeNodeFactory;
 import eu.eexcess.federatedrecommender.utils.tree.factory.TreeNodeFactory;
 
 /**
  * This class takes a WordNet domain csv and builds a domain tree structure
  * 
- * @author rrubien
+ * @author Raoul Rubien
  *
  */
-public class WordnetDomainTreeInflator {
+public class WordnetDomainTreeInflator implements DomainTreeInflator {
 
     private static final String ROOT_NODE_NAME = "factotum";
     private static final String TOKEN_DELIMITER = "[,]";
     private TreeNodeFactory nodeFactory = null;
+    private File wordnetCSVTreeFile = null;
 
     public WordnetDomainTreeInflator(TreeNodeFactory nodeFactory) {
         this.nodeFactory = nodeFactory;
     }
 
-    /**
-     * @return instance of {@link WordnetDomainTreeInflator} creating a tree of
-     *         {@link BaseTreeNode}&lt;String&gt; nodes
-     */
-    public static WordnetDomainTreeInflator newBaseTreeNodeInflator() {
-        return new WordnetDomainTreeInflator(new BaseTreeNodeFactory());
+    public WordnetDomainTreeInflator setStructureFile(File wordnetCSVTreeFile) {
+        this.wordnetCSVTreeFile = wordnetCSVTreeFile;
+        return this;
     }
 
     /**
-     * @return instance of {@link WordnetDomainTreeInflator} creating a tree of
-     *         {@link ValueSetTreeNode}&lt;String&gt; nodes
+     * call to {@link #inflateDomainTree(File, boolean)} 2nd argument = true
+     * 
      */
-    public static WordnetDomainTreeInflator newStringValueSetTreeNodeInflator() {
-        return new WordnetDomainTreeInflator(new StringValueSetTreeNodeFactory());
-    }
-
-    /**
-     * @return instance of {@link WordnetDomainTreeInflator} creating a tree of
-     *         {@link ValueTreeNode}&lt;String, Double&gt; nodes
-     */
-    public static WordnetDomainTreeInflator newDoubleValueTreeNodeInflator() {
-        return new WordnetDomainTreeInflator(new DoubleValueTreeNodeFactory());
-    }
-
-    /**
-     * call to {@link #inflateDomainTree(File, boolean)} with default argument
-     * see {@link #inflateDomainTree(File, boolean)}
-     */
-    public TreeNode inflateDomainTree(File wordnetCSVTreeFile) throws FileNotFoundException {
-        return inflateDomainTree(wordnetCSVTreeFile, false);
+    @Override
+    public TreeNode inflateDomainTree() throws FileNotFoundException {
+        return inflateDomainTree(true);
     }
 
     /**
@@ -93,7 +72,7 @@ public class WordnetDomainTreeInflator {
      * @return
      * @throws FileNotFoundException
      */
-    public TreeNode inflateDomainTree(File wordnetCSVTreeFile, boolean domainsToLowerCase) throws FileNotFoundException {
+    public TreeNode inflateDomainTree(boolean domainsToLowerCase) throws FileNotFoundException {
         LineIterator iterator = new LineIterator(new FileReader(wordnetCSVTreeFile));
         String[] currentBranch = new String[5];
         currentBranch[0] = ROOT_NODE_NAME;
@@ -124,13 +103,13 @@ public class WordnetDomainTreeInflator {
             // current tree
             TreeNode branch = null;
             for (int branchDepth = currentBranch.length; branchDepth > 0; branchDepth--) {
-                
+
                 String nodeName = currentBranch[branchDepth - 1];
 
                 if (nodeName == null) {
                     continue;
                 }
-                
+
                 if (domainsToLowerCase) {
                     nodeName = nodeName.toLowerCase();
                 }

@@ -18,7 +18,7 @@
  * @author Raoul Rubien
  */
 
-package eu.eexcess.federatedrecommender.sourceselection.wordnetdomainsourceselection;
+package eu.eexcess.federatedrecommender.sourceselection.domains;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
@@ -33,6 +33,8 @@ import org.junit.Before;
 import org.junit.Test;
 
 import eu.eexcess.dataformats.PartnerDomain;
+import eu.eexcess.federatedrecommender.sourceselection.domains.DomainTreeConstructorBuilder;
+import eu.eexcess.federatedrecommender.sourceselection.domains.TreeConstructor;
 import eu.eexcess.federatedrecommender.utils.tree.BaseTreeNode;
 import eu.eexcess.federatedrecommender.utils.tree.NodeInspector;
 import eu.eexcess.federatedrecommender.utils.tree.TreeNode;
@@ -54,7 +56,7 @@ public class WordnetDomainTreeConstructorTest {
      * @author Raoul Rubien
      *
      */
-    private class TreeTestAsserter implements NodeInspector {
+    private class TreeWeightAsserter implements NodeInspector {
 
         @Override
         public boolean invoke(TreeNode n) {
@@ -72,10 +74,10 @@ public class WordnetDomainTreeConstructorTest {
     }
 
     @Test
-    public void create_new_tree_expect_correct_weights() {
+    public void create_new_tree_expect_with_predefined_weights_correct_weights() {
 
         try {
-            WordnetDomainTreeConstructor tc = new WordnetDomainTreeConstructor(WORDNET_DOMAIN_PATH);
+            TreeConstructor tc = DomainTreeConstructorBuilder.newWordnetDomainTreeConstructor(WORDNET_DOMAIN_PATH);
             PartnerDomain domain1 = new PartnerDomain("art", 3.141592653589793);
             List<PartnerDomain> predefinedDomains = new LinkedList<PartnerDomain>();
             predefinedDomains.add(domain1);
@@ -83,7 +85,7 @@ public class WordnetDomainTreeConstructorTest {
             ValueTreeNode<Double> tree = tc.newTree(predefinedDomains);
 
             assertEquals(1, predefinedDomains.size());
-            BaseTreeNode.depthFirstTraverser(tree, new TreeTestAsserter());
+            BaseTreeNode.depthFirstTraverser(tree, new TreeWeightAsserter());
         } catch (Error e) {
             e.printStackTrace();
             assertTrue(false);
@@ -97,7 +99,7 @@ public class WordnetDomainTreeConstructorTest {
      * @author Raoul Rubien
      *
      */
-    private class TreeTestDefaultValueAsserter implements NodeInspector {
+    private class TreeDefaultWeightAsserter implements NodeInspector {
 
         @Override
         public boolean invoke(TreeNode n) {
@@ -115,9 +117,9 @@ public class WordnetDomainTreeConstructorTest {
         mapper.configure(JsonParser.Feature.ALLOW_COMMENTS, true);
 
         try {
-            WordnetDomainTreeConstructor tc = new WordnetDomainTreeConstructor(WORDNET_DOMAIN_PATH);
+            TreeConstructor tc = DomainTreeConstructorBuilder.newWordnetDomainTreeConstructor(WORDNET_DOMAIN_PATH);
             ValueTreeNode<Double> tree = tc.newTree(new LinkedList<PartnerDomain>());
-            BaseTreeNode.depthFirstTraverser(tree, new TreeTestDefaultValueAsserter());
+            BaseTreeNode.depthFirstTraverser(tree, new TreeDefaultWeightAsserter());
         } catch (Error e) {
             e.printStackTrace();
             assertTrue(false);

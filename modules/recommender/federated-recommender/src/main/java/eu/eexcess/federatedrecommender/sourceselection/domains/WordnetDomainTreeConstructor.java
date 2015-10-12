@@ -18,9 +18,8 @@
  * @author Raoul Rubien
  */
 
-package eu.eexcess.federatedrecommender.sourceselection.wordnetdomainsourceselection;
+package eu.eexcess.federatedrecommender.sourceselection.domains;
 
-import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
@@ -28,20 +27,19 @@ import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import eu.eexcess.config.FederatedRecommenderConfiguration;
 import eu.eexcess.dataformats.PartnerDomain;
+import eu.eexcess.federatedrecommender.utils.domains.DomainTreeInflator;
 import eu.eexcess.federatedrecommender.utils.tree.BaseTreeNode;
 import eu.eexcess.federatedrecommender.utils.tree.NodeInspector;
 import eu.eexcess.federatedrecommender.utils.tree.TreeNode;
 import eu.eexcess.federatedrecommender.utils.tree.ValueTreeNode;
-import eu.eexcess.federatedrecommender.utils.wordnet.WordnetDomainTreeInflator;
 
 /**
  * Not thread save weighted WordNet domain tree construction utility class.
  * 
  * @author Raoul Rubien
  */
-public class WordnetDomainTreeConstructor {
+public class WordnetDomainTreeConstructor implements TreeConstructor {
 
     private static final Logger LOGGER = Logger.getLogger(WordnetDomainTreeConstructor.class.getName());
 
@@ -51,29 +49,18 @@ public class WordnetDomainTreeConstructor {
     private Map<String, ValueTreeNode<Double>> clonedNodesMap = new HashMap<String, ValueTreeNode<Double>>();
 
     /**
-     * TODO: externalize string to {@link FederatedRecommenderConfiguration} if
-     * possible<br>
-     * configures the file where the domain tree can be found as csv
-     */
-    private String wordnetDomainStructureCsvFile = "wn-domains-3.2-tree.csv";
-
-    /**
      * Inflates the a not weighted WordNet domain template tree from csv file to
      * an {@link ValueTreeNode<String>} tree.
      * 
      * @return
      */
     @SuppressWarnings("unchecked")
-    WordnetDomainTreeConstructor(File wordnetDomainPath) {
-        WordnetDomainTreeInflator baseTreeInflator = WordnetDomainTreeInflator.newDoubleValueTreeNodeInflator();
-
+    WordnetDomainTreeConstructor(DomainTreeInflator treeInflator) {
         try {
-            File wordnetDomainStructure = new File(wordnetDomainPath.getParent() + "/" + wordnetDomainStructureCsvFile);
-            templateTree = (ValueTreeNode<Double>) baseTreeInflator.inflateDomainTree(wordnetDomainStructure, true);
+            templateTree = (ValueTreeNode<Double>) treeInflator.inflateDomainTree();
         } catch (IOException ioe) {
             LOGGER.log(Level.WARNING, "failed to infalte domain tree", ioe);
         }
-
     }
 
     /**
@@ -122,14 +109,7 @@ public class WordnetDomainTreeConstructor {
         }
     }
 
-    /**
-     * Returns an neutrally weighted tree except of the predefined node weights
-     * will be taken as new weight.
-     * 
-     * @param domains
-     *            predefined domain weights
-     * @return a complete WordnetDomain tree
-     */
+    @Override
     public ValueTreeNode<Double> newTree(List<PartnerDomain> domains) {
 
         for (PartnerDomain domain : domains) {
