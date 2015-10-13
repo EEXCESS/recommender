@@ -143,11 +143,21 @@
 			<artifactId>extjwnl</artifactId>
 			<version>1.7.1</version>
 		</dependency>
-	<!-- 	<dependency>
-			<groupId>com.twitter</groupId>
-			<artifactId>cassovary_2.10</artifactId>
-			<version>4.0.0</version>
-		</dependency> -->
+		<dependency>
+			<scope>test</scope>
+			<groupId>jfree</groupId>
+			<artifactId>jfreechart</artifactId>
+			<version>1.0.13</version>
+		</dependency>
+		<dependency>
+			<scope>test</scope>
+			<groupId>org.apache.commons</groupId>
+			<artifactId>commons-csv</artifactId>
+			<version>1.2</version>
+		</dependency>
+
+		<!-- <dependency> <groupId>com.twitter</groupId> <artifactId>cassovary_2.10</artifactId> 
+			<version>4.0.0</version> </dependency> -->
 
 	</dependencies>
 </project>
