@@ -26,6 +26,13 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.LinkedList;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -35,6 +42,8 @@ import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
 import org.json.XML;
 import org.w3c.dom.Document;
+
+import com.sun.jersey.api.client.Client;
 
 import eu.eexcess.config.PartnerConfiguration;
 import eu.eexcess.dataformats.PartnerBadge;
@@ -67,11 +76,14 @@ public class PartnerRecommender implements PartnerRecommenderApi {
     private static ITransformer transformer = PartnerConfigurationCache.CONFIG.getTransformer();
     private static IEnrichment enricher = PartnerConfigurationCache.CONFIG.getEnricher();
 
+    private ExecutorService threadPoolDetailCalls;
+    
     /**
      * Creates a new instance of this class.
      */
     public PartnerRecommender() {
         super();
+        threadPoolDetailCalls = Executors.newFixedThreadPool(20);
     }
 
     @Override
@@ -205,8 +217,74 @@ public class PartnerRecommender implements PartnerRecommenderApi {
      * @returns list of DocumentBadges including the details
      * @throws IOException
      */
+    
+
     @Override
     public DocumentBadgeList getDetails(DocumentBadgeList documents) throws IOException {
+        PartnerdataLogger partnerdataLogger = new PartnerdataLogger(partnerConfiguration);
+        partnerdataLogger.getActLogEntry().start();
+        DocumentBadgeList returnList = new DocumentBadgeList();
+        ArrayList<Future<DocumentBadge>> futures = new ArrayList<Future<DocumentBadge>>();
+        for (int i = 0; i < documents.documentBadges.size(); i++) {
+                DocumentBadge currentDoc = documents.documentBadges.get(i);
+                
+                Future<DocumentBadge> future = threadPoolDetailCalls.submit(new Callable<DocumentBadge>() {
+                    @Override
+                    public DocumentBadge call() throws Exception {
+                        try {
+                            long startTime = System.currentTimeMillis();
+
+	                        Document detailResultNative = partnerConnector.queryPartnerDetails(partnerConfiguration, currentDoc, partnerdataLogger);
+	                        /*
+	                         * Transform Document in partner format to EEXCESS RDF format
+	                         */
+	                        Document detailResultEexcess = transformer.transformDetail(detailResultNative, partnerdataLogger);
+	
+	                        Document enrichedDetailResultEexcess = null;
+	                        enrichedDetailResultEexcess = enricher.enrichResultList(detailResultEexcess, partnerdataLogger);
+	                        String rdfXML = XMLTools.getStringFromDocument(enrichedDetailResultEexcess);
+	
+//	                        PartnerdataTracer.dumpFile(this.getClass(), PartnerRecommender.partnerConfiguration, rdfXML, "partner-recommender-results-details-before-reduce-" + i,
+//	                                PartnerdataTracer.FILETYPE.XML, partnerdataLogger);
+	                        currentDoc.details = transformRDFXMLToResponseDetail(rdfXML, partnerdataLogger, 0);
+	                        long endTime = System.currentTimeMillis();
+	                        long respTime = endTime - startTime;
+	                        System.out.println(currentDoc.id + " finished:"+respTime );
+//	                        PartnerdataTracer.dumpFile(this.getClass(), PartnerRecommender.partnerConfiguration, currentDoc.details, "partner-recommender-results-details-" + i,
+//	                                PartnerdataTracer.FILETYPE.JSON, partnerdataLogger);
+	                    } catch (EEXCESSDataTransformationException e) {
+	                        LOGGER.log(Level.INFO, "", e);
+	                    }
+                        return currentDoc;
+                    }
+
+                });
+                futures.add(future);
+
+        }
+        for (Future<DocumentBadge> actFuture : futures) {
+        	try {
+				returnList.documentBadges.add(actFuture.get(3000, TimeUnit.MILLISECONDS));
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (ExecutionException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (TimeoutException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+        partnerdataLogger.getActLogEntry().end();
+        partnerdataLogger.save();
+
+        PartnerdataTracer.dumpFile(this.getClass(), partnerConfiguration, returnList, "partner-recommender-results-details", PartnerdataTracer.FILETYPE.XML, partnerdataLogger);
+
+        return returnList;
+    }
+    
+    public DocumentBadgeList getDetailsSingleThreaded(DocumentBadgeList documents) throws IOException {
         PartnerdataLogger partnerdataLogger = new PartnerdataLogger(partnerConfiguration);
         partnerdataLogger.getActLogEntry().start();
 
@@ -260,8 +338,8 @@ public class PartnerRecommender implements PartnerRecommenderApi {
         json = json.replaceAll("\"xmlns:", "\"xmlns");
         json = json.replaceAll("\"xml:", "\"xml");
         json = json.replaceAll("\"wgs84:", "\"wgs84");
-        PartnerdataTracer.dumpFile(this.getClass(), PartnerRecommender.partnerConfiguration, json, "partner-recommender-results-details-before-reduce-" + index,
-                PartnerdataTracer.FILETYPE.JSON, partnerdataLogger);
+//        PartnerdataTracer.dumpFile(this.getClass(), PartnerRecommender.partnerConfiguration, json, "partner-recommender-results-details-before-reduce-" + index,
+//                PartnerdataTracer.FILETYPE.JSON, partnerdataLogger);
 
         JSONObject ret = new JSONObject();
         try {

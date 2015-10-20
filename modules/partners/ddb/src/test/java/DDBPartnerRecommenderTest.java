@@ -91,9 +91,52 @@ public class DDBPartnerRecommenderTest {
         assertNotNull(documentDetails);
         assertTrue(documentDetails.documentBadges.size() > 0 );
         assertEquals(2, documentDetails.documentBadges.size());
-
 	}
 	
+	@Test
+	public void detailCall16Objects() {
+        ArrayList<String> ids = new ArrayList<String>();
+		ArrayList<String> uris = new ArrayList<String>();
+        ids.add("WV2X3T5D7ZIS4RJHRH3IDR367ERXT54X");
+        uris.add("https://www.deutsche-digitale-bibliothek.de/item/WV2X3T5D7ZIS4RJHRH3IDR367ERXT54X");
+        ids.add("LDXEDWTZB35GHAXYDNVTZBK2JDHIROPP");
+        uris.add("https://www.deutsche-digitale-bibliothek.de/item/LDXEDWTZB35GHAXYDNVTZBK2JDHIROPP");
+        ids.add("EHTG6PFMAXH6MU35PP6S44ODZ56DLT2F");
+        uris.add("https://www.deutsche-digitale-bibliothek.de/item/EHTG6PFMAXH6MU35PP6S44ODZ56DLT2F");
+        ids.add("FQOUN2TQHRXHXG2LKASNZ3VD432AFUIJ");
+        uris.add("https://www.deutsche-digitale-bibliothek.de/item/FQOUN2TQHRXHXG2LKASNZ3VD432AFUIJ");
+        ids.add("WV2X3T5D7ZIS4RJHRH3IDR367ERXT54X");
+        uris.add("https://www.deutsche-digitale-bibliothek.de/item/WV2X3T5D7ZIS4RJHRH3IDR367ERXT54X");
+        ids.add("LDXEDWTZB35GHAXYDNVTZBK2JDHIROPP");
+        uris.add("https://www.deutsche-digitale-bibliothek.de/item/LDXEDWTZB35GHAXYDNVTZBK2JDHIROPP");
+        ids.add("EHTG6PFMAXH6MU35PP6S44ODZ56DLT2F");
+        uris.add("https://www.deutsche-digitale-bibliothek.de/item/EHTG6PFMAXH6MU35PP6S44ODZ56DLT2F");
+        ids.add("FQOUN2TQHRXHXG2LKASNZ3VD432AFUIJ");
+        uris.add("https://www.deutsche-digitale-bibliothek.de/item/FQOUN2TQHRXHXG2LKASNZ3VD432AFUIJ");
+        ids.add("WV2X3T5D7ZIS4RJHRH3IDR367ERXT54X");
+        uris.add("https://www.deutsche-digitale-bibliothek.de/item/WV2X3T5D7ZIS4RJHRH3IDR367ERXT54X");
+        ids.add("LDXEDWTZB35GHAXYDNVTZBK2JDHIROPP");
+        uris.add("https://www.deutsche-digitale-bibliothek.de/item/LDXEDWTZB35GHAXYDNVTZBK2JDHIROPP");
+        ids.add("EHTG6PFMAXH6MU35PP6S44ODZ56DLT2F");
+        uris.add("https://www.deutsche-digitale-bibliothek.de/item/EHTG6PFMAXH6MU35PP6S44ODZ56DLT2F");
+        ids.add("FQOUN2TQHRXHXG2LKASNZ3VD432AFUIJ");
+        uris.add("https://www.deutsche-digitale-bibliothek.de/item/FQOUN2TQHRXHXG2LKASNZ3VD432AFUIJ");
+        ids.add("WV2X3T5D7ZIS4RJHRH3IDR367ERXT54X");
+        uris.add("https://www.deutsche-digitale-bibliothek.de/item/WV2X3T5D7ZIS4RJHRH3IDR367ERXT54X");
+        ids.add("LDXEDWTZB35GHAXYDNVTZBK2JDHIROPP");
+        uris.add("https://www.deutsche-digitale-bibliothek.de/item/LDXEDWTZB35GHAXYDNVTZBK2JDHIROPP");
+        ids.add("EHTG6PFMAXH6MU35PP6S44ODZ56DLT2F");
+        uris.add("https://www.deutsche-digitale-bibliothek.de/item/EHTG6PFMAXH6MU35PP6S44ODZ56DLT2F");
+        ids.add("FQOUN2TQHRXHXG2LKASNZ3VD432AFUIJ");
+        uris.add("https://www.deutsche-digitale-bibliothek.de/item/FQOUN2TQHRXHXG2LKASNZ3VD432AFUIJ");
+        DocumentBadgeList documentDetails = PartnerRecommenderTestHelper.getDetails(DEPLOYMENT_CONTEXT,	
+        		port, 
+        		PartnerRecommenderTestHelper.createParamsForPartnerRecommenderDetailCall(ids, uris, DATAPROVIDER));
+	    
+        assertNotNull(documentDetails);
+        assertTrue(documentDetails.documentBadges.size() > 0 );
+        assertEquals(16, documentDetails.documentBadges.size());
+	}
 	
 	
 	@Test

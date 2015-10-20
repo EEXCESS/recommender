@@ -108,7 +108,36 @@ public class WissenmediaPartnerRecommenderTest {
         assertEquals(2, documentDetails.documentBadges.size());
 
 	}
-	
+
+	@Test
+	public void detailCall8Objects() {
+        ArrayList<String> ids = new ArrayList<String>();
+		ArrayList<String> uris = new ArrayList<String>();
+        ids.add("sl23520567");
+        uris.add("http://service.wissens-server.com/wissensserver/view.html?a=t&amp;r=CURRENT&amp;i=sl23520567&amp;s=BEP&amp;v=eexcess&amp;w=EEXCESS");
+        ids.add("sl23349725");
+        uris.add("http://service.wissens-server.com/wissensserver/view.html?a=t&amp;r=CURRENT&amp;i=sl23349725&amp;s=BEP&amp;v=eexcess&amp;w=EEXCESS");
+        ids.add("sl23520567");
+        uris.add("http://service.wissens-server.com/wissensserver/view.html?a=t&amp;r=CURRENT&amp;i=sl23520567&amp;s=BEP&amp;v=eexcess&amp;w=EEXCESS");
+        ids.add("sl23349725");
+        uris.add("http://service.wissens-server.com/wissensserver/view.html?a=t&amp;r=CURRENT&amp;i=sl23349725&amp;s=BEP&amp;v=eexcess&amp;w=EEXCESS");
+        ids.add("sl23520567");
+        uris.add("http://service.wissens-server.com/wissensserver/view.html?a=t&amp;r=CURRENT&amp;i=sl23520567&amp;s=BEP&amp;v=eexcess&amp;w=EEXCESS");
+        ids.add("sl23349725");
+        uris.add("http://service.wissens-server.com/wissensserver/view.html?a=t&amp;r=CURRENT&amp;i=sl23349725&amp;s=BEP&amp;v=eexcess&amp;w=EEXCESS");
+        ids.add("sl23520567");
+        uris.add("http://service.wissens-server.com/wissensserver/view.html?a=t&amp;r=CURRENT&amp;i=sl23520567&amp;s=BEP&amp;v=eexcess&amp;w=EEXCESS");
+        ids.add("sl23349725");
+        uris.add("http://service.wissens-server.com/wissensserver/view.html?a=t&amp;r=CURRENT&amp;i=sl23349725&amp;s=BEP&amp;v=eexcess&amp;w=EEXCESS");
+        DocumentBadgeList documentDetails = PartnerRecommenderTestHelper.getDetails(DEPLOYMENT_CONTEXT,	
+        		port, 
+        		PartnerRecommenderTestHelper.createParamsForPartnerRecommenderDetailCall(ids, uris, DATAPROVIDER));
+	    
+        assertNotNull(documentDetails);
+        assertTrue(documentDetails.documentBadges.size() > 0 );
+        assertEquals(8, documentDetails.documentBadges.size());
+	}
+
 	@Test
 	public void singleParisWithDetails() {
 		ArrayList<String> keywords = new ArrayList<String>();

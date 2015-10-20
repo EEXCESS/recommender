@@ -65,6 +65,35 @@ public class ZBWPartnerRecommenderTest {
     }
 
     @Test
+    public void detailCall8Objects() {
+        ArrayList<String> ids = new ArrayList<String>();
+        ArrayList<String> uris = new ArrayList<String>();
+        ids.add("10010480352");
+        uris.add("http://www.econbiz.de/Record/10010480352");
+        ids.add("10010432231");
+        uris.add("http://www.econbiz.de/Record/10010432231");
+        ids.add("10010480352");
+        uris.add("http://www.econbiz.de/Record/10010480352");
+        ids.add("10010432231");
+        uris.add("http://www.econbiz.de/Record/10010432231");
+        ids.add("10010480352");
+        uris.add("http://www.econbiz.de/Record/10010480352");
+        ids.add("10010432231");
+        uris.add("http://www.econbiz.de/Record/10010432231");
+        ids.add("10010480352");
+        uris.add("http://www.econbiz.de/Record/10010480352");
+        ids.add("10010432231");
+        uris.add("http://www.econbiz.de/Record/10010432231");
+        DocumentBadgeList documentDetails = PartnerRecommenderTestHelper.getDetails(DEPLOYMENT_CONTEXT, port,
+                PartnerRecommenderTestHelper.createParamsForPartnerRecommenderDetailCall(ids, uris, DATAPROVIDER));
+
+        assertNotNull(documentDetails);
+        assertTrue(documentDetails.documentBadges.size() > 0);
+        assertEquals(8, documentDetails.documentBadges.size());
+
+    }
+
+    @Test
     public void detailCallCreator() {
         ArrayList<String> ids = new ArrayList<String>();
         ArrayList<String> uris = new ArrayList<String>();

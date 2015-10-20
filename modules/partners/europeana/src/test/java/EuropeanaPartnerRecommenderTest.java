@@ -67,6 +67,40 @@ public class EuropeanaPartnerRecommenderTest {
 	}
 
 	@Test
+	public void detailCall10Objects() {
+        ArrayList<String> ids = new ArrayList<String>();
+		ArrayList<String> uris = new ArrayList<String>();
+        ids.add("/92070/BibliographicResource_1000126223479");
+        uris.add("http://europeana.eu/resolve/record/92070/BibliographicResource_1000126223479");
+        ids.add("/9200290/BibliographicResource_3000073520496");
+        uris.add("http://europeana.eu/resolve/record/9200290/BibliographicResource_3000073520496");
+        ids.add("/92070/BibliographicResource_1000126223479");
+        uris.add("http://europeana.eu/resolve/record/92070/BibliographicResource_1000126223479");
+        ids.add("/9200290/BibliographicResource_3000073520496");
+        uris.add("http://europeana.eu/resolve/record/9200290/BibliographicResource_3000073520496");
+        ids.add("/92070/BibliographicResource_1000126223479");
+        uris.add("http://europeana.eu/resolve/record/92070/BibliographicResource_1000126223479");
+        ids.add("/9200290/BibliographicResource_3000073520496");
+        uris.add("http://europeana.eu/resolve/record/9200290/BibliographicResource_3000073520496");
+        ids.add("/92070/BibliographicResource_1000126223479");
+        uris.add("http://europeana.eu/resolve/record/92070/BibliographicResource_1000126223479");
+        ids.add("/9200290/BibliographicResource_3000073520496");
+        uris.add("http://europeana.eu/resolve/record/9200290/BibliographicResource_3000073520496");
+        ids.add("/92070/BibliographicResource_1000126223479");
+        uris.add("http://europeana.eu/resolve/record/92070/BibliographicResource_1000126223479");
+        ids.add("/9200290/BibliographicResource_3000073520496");
+        uris.add("http://europeana.eu/resolve/record/9200290/BibliographicResource_3000073520496");
+        DocumentBadgeList documentDetails = PartnerRecommenderTestHelper.getDetails(DEPLOYMENT_CONTEXT,	
+        		port, 
+        		PartnerRecommenderTestHelper.createParamsForPartnerRecommenderDetailCall(ids, uris, DATAPROVIDER));
+	    
+        assertNotNull(documentDetails);
+        assertTrue(documentDetails.documentBadges.size() > 0 );
+        assertEquals(10, documentDetails.documentBadges.size());
+
+	}
+
+	@Test
 	public void detailCallRegressionTestRecordWithoutImage() {
         ArrayList<String> ids = new ArrayList<String>();
 		ArrayList<String> uris = new ArrayList<String>();
