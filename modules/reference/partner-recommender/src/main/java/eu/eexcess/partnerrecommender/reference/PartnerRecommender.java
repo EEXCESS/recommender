@@ -265,14 +265,11 @@ public class PartnerRecommender implements PartnerRecommenderApi {
         	try {
 				returnList.documentBadges.add(actFuture.get(3000, TimeUnit.MILLISECONDS));
 			} catch (InterruptedException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+				LOGGER.log(Level.WARNING, "InterruptedException:", e);
 			} catch (ExecutionException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+				LOGGER.log(Level.WARNING, "ExecutionException:", e);
 			} catch (TimeoutException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+				LOGGER.log(Level.WARNING, "TimeoutException:", e);
 			}
 		}
         partnerdataLogger.getActLogEntry().end();
