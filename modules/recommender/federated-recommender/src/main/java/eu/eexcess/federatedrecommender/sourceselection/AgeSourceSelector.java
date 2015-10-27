@@ -2,6 +2,7 @@ package eu.eexcess.federatedrecommender.sourceselection;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import eu.eexcess.config.FederatedRecommenderConfiguration;
@@ -42,6 +43,7 @@ public class AgeSourceSelector implements PartnerSelector {
             partners.forEach((badge) -> {
             	if(badge.getAgeRange()==null)
             		badge.setAgeRange(2); //if no age given we think its ageRange 2
+            	LOGGER.log(Level.INFO,badge.getSystemId() +" "+userProfile.getAgeRange() +" "+ badge.getAgeRange());
             	if(userProfile.getAgeRange() == badge.getAgeRange())
                 		userProfile.getPartnerList().add(badge);                
             });
