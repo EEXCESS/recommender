@@ -38,7 +38,7 @@ public class PartnerBadge implements Serializable {
     private String description;
     private String favIconURI;
     private String partnerConnectorEndpoint;
-    private Integer ageRange=2;
+    private Integer ageRange;
     private String lowerDateLimit;
     private String upperDateLimit;
     private List<String> tags;

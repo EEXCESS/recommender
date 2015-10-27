@@ -22,13 +22,12 @@ public class AgeSourceSelector implements PartnerSelector {
 	
     @Override
     public SecureUserProfile sourceSelect(SecureUserProfile userProfile, List<PartnerBadge> partners) {
-    	LOGGER.info("Selecting sources by given Age");
+    	if(userProfile.getAgeRange()==null)
+    		userProfile.setAgeRange(2); //if no age given we think its ageRange 2
         if (userProfile.getPartnerList().isEmpty()){
-        	LOGGER.info("1");
             selectPartners(userProfile, partners);
         }
         else {
-        	LOGGER.info("2");
             ArrayList<PartnerBadge> tmpPartnerList = new ArrayList<PartnerBadge>(userProfile.getPartnerList());
             userProfile.setPartnerList(new ArrayList<PartnerBadge>());
             selectPartners(userProfile, tmpPartnerList);
@@ -38,12 +37,12 @@ public class AgeSourceSelector implements PartnerSelector {
     }
 
     private void selectPartners(SecureUserProfile userProfile, List<PartnerBadge> partners) {
-    	LOGGER.info("Partners: "+partners);
+    	
         if (partners != null)
             partners.forEach((badge) -> {
-            	LOGGER.info("Selecting sources by given Age");
-            	LOGGER.info(userProfile.getAgeRange()+ " " +badge.getAgeRange() +" " + badge.getSystemId());
-                	if(userProfile.getAgeRange() == badge.getAgeRange())
+            	if(badge.getAgeRange()==null)
+            		badge.setAgeRange(2); //if no age given we think its ageRange 2
+            	if(userProfile.getAgeRange() == badge.getAgeRange())
                 		userProfile.getPartnerList().add(badge);                
             });
     }

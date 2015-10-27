@@ -39,7 +39,7 @@ public class SecureUserProfile implements Serializable {
     private List<PartnerBadge> partnerList = new ArrayList<PartnerBadge>();
     private List<PartnerBadge> protectedPartnerList = new ArrayList<PartnerBadge>();
     private String queryID;
-    private Integer ageRange = 2;
+    private Integer ageRange;
     private Integer numResults;
     private String gender;
     private Address address;
