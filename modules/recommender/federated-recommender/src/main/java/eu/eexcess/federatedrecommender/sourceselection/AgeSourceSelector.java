@@ -35,8 +35,11 @@ public class AgeSourceSelector implements PartnerSelector {
     }
 
     private void selectPartners(SecureUserProfile userProfile, List<PartnerBadge> partners) {
+    	LOGGER.info("Partners: "+partners);
         if (partners != null)
             partners.forEach((badge) -> {
+            	LOGGER.info("Selecting sources by given Age");
+            	LOGGER.info(userProfile.getAgeRange()+ " " +badge.getAgeRange() +" " + badge.getSystemId());
                 	if(userProfile.getAgeRange() == badge.getAgeRange())
                 		userProfile.getPartnerList().add(badge);                
             });
