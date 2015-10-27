@@ -43,8 +43,6 @@ import org.codehaus.jettison.json.JSONObject;
 import org.json.XML;
 import org.w3c.dom.Document;
 
-import com.sun.jersey.api.client.Client;
-
 import eu.eexcess.config.PartnerConfiguration;
 import eu.eexcess.dataformats.PartnerBadge;
 import eu.eexcess.dataformats.result.DocumentBadge;
@@ -68,13 +66,14 @@ import eu.eexcess.partnerrecommender.api.PartnerRecommenderApi;
  * 
  * @author rkern@know-center.at
  * @author plopez@know-center.at
+ * @author thomas.orgel@joanneum.at
  */
 public class PartnerRecommender implements PartnerRecommenderApi {
     private static final Logger LOGGER = Logger.getLogger(PartnerRecommender.class.getName());
     private static PartnerConfiguration partnerConfiguration = PartnerConfigurationCache.CONFIG.getPartnerConfiguration();
     private static PartnerConnectorApi partnerConnector = PartnerConfigurationCache.CONFIG.getPartnerConnector();
     private static ITransformer transformer = PartnerConfigurationCache.CONFIG.getTransformer();
-    private static IEnrichment enricher = PartnerConfigurationCache.CONFIG.getEnricher();
+//    private static IEnrichment enricher = PartnerConfigurationCache.CONFIG.getEnricher();
 
     private ExecutorService threadPoolDetailCalls;
     
@@ -217,8 +216,6 @@ public class PartnerRecommender implements PartnerRecommenderApi {
      * @returns list of DocumentBadges including the details
      * @throws IOException
      */
-    
-
     @Override
     public DocumentBadgeList getDetails(DocumentBadgeList documents) throws IOException {
         PartnerdataLogger partnerdataLogger = new PartnerdataLogger(partnerConfiguration);
@@ -241,6 +238,8 @@ public class PartnerRecommender implements PartnerRecommenderApi {
 	                        Document detailResultEexcess = transformer.transformDetail(detailResultNative, partnerdataLogger);
 	
 	                        Document enrichedDetailResultEexcess = null;
+	                        IEnrichment enricher = PartnerConfigurationCache.CONFIG.getEnricher();
+
 	                        enrichedDetailResultEexcess = enricher.enrichResultList(detailResultEexcess, partnerdataLogger);
 	                        String rdfXML = XMLTools.getStringFromDocument(enrichedDetailResultEexcess);
 	
@@ -284,6 +283,7 @@ public class PartnerRecommender implements PartnerRecommenderApi {
         return returnList;
     }
     
+    /*
     public DocumentBadgeList getDetailsSingleThreaded(DocumentBadgeList documents) throws IOException {
         PartnerdataLogger partnerdataLogger = new PartnerdataLogger(partnerConfiguration);
         partnerdataLogger.getActLogEntry().start();
@@ -292,9 +292,9 @@ public class PartnerRecommender implements PartnerRecommenderApi {
             try {
                 DocumentBadge document = documents.documentBadges.get(i);
                 Document detailResultNative = partnerConnector.queryPartnerDetails(partnerConfiguration, document, partnerdataLogger);
-                /*
-                 * Transform Document in partner format to EEXCESS RDF format
-                 */
+                
+                //Transform Document in partner format to EEXCESS RDF format
+                 
                 Document detailResultEexcess = transformer.transformDetail(detailResultNative, partnerdataLogger);
 
                 Document enrichedDetailResultEexcess = null;
@@ -321,7 +321,7 @@ public class PartnerRecommender implements PartnerRecommenderApi {
 
         return documents;
     }
-
+*/
     private String transformRDFXMLToResponseDetail(String rdfXML, PartnerdataLogger partnerdataLogger, int index) {
         String json = XML.toJSONObject(rdfXML).toString();
 

@@ -28,11 +28,15 @@ public class EnrichmentServicesProxy {
 	
 	protected PartnerConfiguration partnerConfig;
 	protected WordFilter wordFilter;
+	protected GeoNames geonames;
+	protected DbpediaSpotlight dbpediaSpotlight;
 	
 	public EnrichmentServicesProxy(PartnerConfiguration config)
 	{
 		this.partnerConfig = config;
 		wordFilter = new WordFilter(this.partnerConfig);
+		geonames = new GeoNames(this.partnerConfig);
+		dbpediaSpotlight = new DbpediaSpotlight(partnerConfig);
 	}
 
 	
@@ -40,9 +44,9 @@ public class EnrichmentServicesProxy {
 		if (this.partnerConfig.getPartnerDataRequestsTrace()) System.out.println("------------------------------------------------------------");
 		Set<EnrichmentResult> enrichmentResults = new HashSet<EnrichmentResult>();
 		
-		
-		GeoNames geonames = new GeoNames(this.partnerConfig);
-		DbpediaSpotlight dbpediaSpotlight = new DbpediaSpotlight(partnerConfig);
+//		geonames = new GeoNames(this.partnerConfig);
+//		dbpediaSpotlight = new DbpediaSpotlight(partnerConfig);
+
 		Set<DbpediaSpotlightResult> dbpediaSpotlightResults = dbpediaSpotlight.searchDbpediaSpotlight(text, logger);
 		for (Iterator<DbpediaSpotlightResult> iterator = dbpediaSpotlightResults.iterator(); iterator.hasNext();) {
 			DbpediaSpotlightResult dbpediaSpotlightResult = (DbpediaSpotlightResult) iterator.next();
