@@ -176,6 +176,7 @@ public class FederatedRecommenderService {
     @Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
     public ResultList recommend(SecureUserProfile userProfile) throws IOException {
         ResultList resultList = new ResultList();
+        LOGGER.log(Level.INFO,"AgeRange in userProfile " + userProfile.getAgeRange());
         resultList = fRC.generateFederatedRecommendation(userProfile);
         resultList.queryID = userProfile.getQueryID();
         return resultList;

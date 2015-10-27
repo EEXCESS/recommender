@@ -378,6 +378,7 @@ public class FederatedRecommenderCore implements ProbeResultChanged {
         }
 
         SecureUserProfile lastEvaluatedProfile = userProfile;
+        LOGGER.log(Level.INFO,"userprofile ageRange" + userProfile.getAgeRange());
    
         for (String sourceSelectorClassName : selectorsClassNames) {
         	

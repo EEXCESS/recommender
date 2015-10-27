@@ -23,8 +23,10 @@ public class AgeSourceSelector implements PartnerSelector {
 	
     @Override
     public SecureUserProfile sourceSelect(SecureUserProfile userProfile, List<PartnerBadge> partners) {
-    	if(userProfile.getAgeRange()==null)
+    	if(userProfile.getAgeRange()==null){
     		userProfile.setAgeRange(2); //if no age given we think its ageRange 2
+    		LOGGER.log(Level.INFO,"Setting ageRange to 2 since none is given");
+    	}
         if (userProfile.getPartnerList().isEmpty()){
             selectPartners(userProfile, partners);
         }
