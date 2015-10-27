@@ -23,9 +23,12 @@ public class AgeSourceSelector implements PartnerSelector {
     @Override
     public SecureUserProfile sourceSelect(SecureUserProfile userProfile, List<PartnerBadge> partners) {
     	LOGGER.info("Selecting sources by given Age");
-        if (userProfile.getPartnerList().isEmpty())
+        if (userProfile.getPartnerList().isEmpty()){
+        	LOGGER.info("1");
             selectPartners(userProfile, partners);
+        }
         else {
+        	LOGGER.info("2");
             ArrayList<PartnerBadge> tmpPartnerList = new ArrayList<PartnerBadge>(userProfile.getPartnerList());
             userProfile.setPartnerList(new ArrayList<PartnerBadge>());
             selectPartners(userProfile, tmpPartnerList);
