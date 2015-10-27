@@ -1,12 +1,9 @@
 package eu.eexcess.federatedrecommender.sourceselection;
 
-import java.time.LocalDate;
-import java.time.Period;
-import java.time.ZoneId;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
+import eu.eexcess.config.FederatedRecommenderConfiguration;
 import eu.eexcess.dataformats.PartnerBadge;
 import eu.eexcess.dataformats.userprofile.SecureUserProfile;
 import eu.eexcess.federatedrecommender.interfaces.PartnerSelector;
@@ -19,39 +16,28 @@ import eu.eexcess.federatedrecommender.interfaces.PartnerSelector;
  */
 public class AgeSourceSelector implements PartnerSelector {
 
+    public AgeSourceSelector(FederatedRecommenderConfiguration configuration) {
+    }
+	
     @Override
     public SecureUserProfile sourceSelect(SecureUserProfile userProfile, List<PartnerBadge> partners) {
-        Integer userAge = calcUserAge(userProfile.getBirthDate());
         if (userProfile.getPartnerList().isEmpty())
-            selectPartners(userProfile, partners, userAge);
+            selectPartners(userProfile, partners);
         else {
             ArrayList<PartnerBadge> tmpPartnerList = new ArrayList<PartnerBadge>(userProfile.getPartnerList());
             userProfile.setPartnerList(new ArrayList<PartnerBadge>());
-            selectPartners(userProfile, tmpPartnerList, userAge);
+            selectPartners(userProfile, tmpPartnerList);
         }
 
         return userProfile;
     }
 
-    private void selectPartners(SecureUserProfile userProfile, List<PartnerBadge> partners, Integer userAge) {
+    private void selectPartners(SecureUserProfile userProfile, List<PartnerBadge> partners) {
         if (partners != null)
             partners.forEach((badge) -> {
-                if (badge.getLowerAgeLimit() == null) {
-                    badge.setLowerAgeLimit(18);
-                }
-                if (badge.getUpperAgeLimit() == null) {
-                    badge.setUpperAgeLimit(150);
-                }
-                if (badge.getLowerAgeLimit() <= userAge && badge.getUpperAgeLimit() >= userAge) {
-                    userProfile.getPartnerList().add(badge);
-                }
+                	if(userProfile.getAgeRange() == badge.getAgeRange())
+                		userProfile.getPartnerList().add(badge);                
             });
     }
 
-    private Integer calcUserAge(Date birthDate) {
-        LocalDate userLocalDate = birthDate.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
-        LocalDate localDate = LocalDate.now();
-        Period p = Period.between(userLocalDate, localDate);
-        return p.getYears();
-    }
 }

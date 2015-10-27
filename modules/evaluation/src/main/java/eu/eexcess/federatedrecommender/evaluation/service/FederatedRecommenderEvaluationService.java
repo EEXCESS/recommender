@@ -102,9 +102,7 @@ public class FederatedRecommenderEvaluationService extends FederatedRecommenderS
     public SecureUserProfileEvaluation testSUPE() {
         SecureUserProfileEvaluation secureUserProfile = new SecureUserProfileEvaluation();
 
-        secureUserProfile.setFirstName("Max");
-        secureUserProfile.setLastName("Musterman");
-        secureUserProfile.setBirthDate(new Date());
+
         secureUserProfile.setGender("male");
 
         List<ContextKeyword> contextList = new ArrayList<ContextKeyword>();

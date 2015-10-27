@@ -59,7 +59,7 @@ public class DBPediaDecomposerEvaluation {
             String tmpLine = line.replaceAll("http.*", "");
             String contextKeywordsOneLine = tmpLine.replaceAll("\"", "");
             SecureUserProfileEvaluation profile = new SecureUserProfileEvaluation();
-            profile.setFirstName(line);
+//            profile.setFirstName(line);
             for (String contextKeyword : contextKeywordsOneLine.split(" ")) {
                 if (!contextKeyword.trim().isEmpty())
                     profile.getContextKeywords().add(new ContextKeyword(contextKeyword.trim()));
@@ -114,7 +114,7 @@ public class DBPediaDecomposerEvaluation {
                 LOGGER.log(Level.INFO, "Returned Groups" + keywordsBuilder.toString());
 
             }
-            LOGGER.log(Level.INFO, profileEvaluation.getFirstName());
+//            LOGGER.log(Level.INFO, profileEvaluation.getFirstName());
             // LOGGER.log(Level.INFO, "Keywords:");
             // StringBuilder keywordsBuilder = new StringBuilder();
             // for (ContextKeyword string : profileEvaluation.contextKeywords) {

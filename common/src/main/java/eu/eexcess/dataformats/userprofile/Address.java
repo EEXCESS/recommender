@@ -35,76 +35,17 @@ public class Address implements Serializable {
     private static final long serialVersionUID = -4948461957571529961L;
 
     private String country;
-    private Integer zipCode;
     private String city;
-    private String line1;
-    private String line2;
 
-    public Address(String country, Integer zipCode, String city, String line1, String line2) {
+    public Address(String country, String city) {
         super();
         this.setCountry(country);
-        this.setZipCode(zipCode);
         this.setCity(city);
-        this.setLine1(line1);
-        this.setLine2(line2);
     }
 
     public Address() {
     }
-
-    @Override
-    public String toString() {
-        return "Address [country=" + getCountry() + ", zipCode=" + getZipCode() + ", city=" + getCity() + ", line1=" + getLine1() + ", line2=" + getLine2() + "]";
-    }
-
-    @Override
-    public int hashCode() {
-        final int prime = 31;
-        int result = 1;
-        result = prime * result + ((getCity() == null) ? 0 : getCity().hashCode());
-        result = prime * result + ((getCountry() == null) ? 0 : getCountry().hashCode());
-        result = prime * result + ((getLine1() == null) ? 0 : getLine1().hashCode());
-        result = prime * result + ((getLine2() == null) ? 0 : getLine2().hashCode());
-        result = prime * result + ((getZipCode() == null) ? 0 : getZipCode().hashCode());
-        return result;
-    }
-
-    @Override
-    public boolean equals(Object obj) {
-        if (this == obj)
-            return true;
-        if (obj == null)
-            return false;
-        if (getClass() != obj.getClass())
-            return false;
-        Address other = (Address) obj;
-        if (getCity() == null) {
-            if (other.getCity() != null)
-                return false;
-        } else if (!getCity().equals(other.getCity()))
-            return false;
-        if (getCountry() == null) {
-            if (other.getCountry() != null)
-                return false;
-        } else if (!getCountry().equals(other.getCountry()))
-            return false;
-        if (getLine1() == null) {
-            if (other.getLine1() != null)
-                return false;
-        } else if (!getLine1().equals(other.getLine1()))
-            return false;
-        if (getLine2() == null) {
-            if (other.getLine2() != null)
-                return false;
-        } else if (!getLine2().equals(other.getLine2()))
-            return false;
-        if (getZipCode() == null) {
-            if (other.getZipCode() != null)
-                return false;
-        } else if (!getZipCode().equals(other.getZipCode()))
-            return false;
-        return true;
-    }
+  
 
     public String getCountry() {
         return country;
@@ -114,13 +55,6 @@ public class Address implements Serializable {
         this.country = country;
     }
 
-    public Integer getZipCode() {
-        return zipCode;
-    }
-
-    public void setZipCode(Integer zipCode) {
-        this.zipCode = zipCode;
-    }
 
     public String getCity() {
         return city;
@@ -130,20 +64,41 @@ public class Address implements Serializable {
         this.city = city;
     }
 
-    public String getLine1() {
-        return line1;
-    }
+	@Override
+	public String toString() {
+		return "Address [country=" + country + ", city=" + city + "]";
+	}
 
-    public void setLine1(String line1) {
-        this.line1 = line1;
-    }
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + ((city == null) ? 0 : city.hashCode());
+		result = prime * result + ((country == null) ? 0 : country.hashCode());
+		return result;
+	}
 
-    public String getLine2() {
-        return line2;
-    }
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		Address other = (Address) obj;
+		if (city == null) {
+			if (other.city != null)
+				return false;
+		} else if (!city.equals(other.city))
+			return false;
+		if (country == null) {
+			if (other.country != null)
+				return false;
+		} else if (!country.equals(other.country))
+			return false;
+		return true;
+	}
 
-    public void setLine2(String line2) {
-        this.line2 = line2;
-    }
 
 }

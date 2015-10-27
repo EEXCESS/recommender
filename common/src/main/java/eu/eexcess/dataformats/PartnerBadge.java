@@ -38,8 +38,7 @@ public class PartnerBadge implements Serializable {
     private String description;
     private String favIconURI;
     private String partnerConnectorEndpoint;
-    private Integer lowerAgeLimit;
-    private Integer upperAgeLimit;
+    private Integer ageRange=2;
     private String lowerDateLimit;
     private String upperDateLimit;
     private List<String> tags;
@@ -190,7 +189,7 @@ public class PartnerBadge implements Serializable {
     public String toString() {
         return "PartnerBadge [description=" + description + ", favIconURI=" + favIconURI + ", partnerConnectorEndpoint=" + partnerConnectorEndpoint + ", tags=" + tags
                 + ", domainContent=" + domainContent + ", languageContent=" + languageContent + ", systemId=" + systemId + ", queryGeneratorClass=" + getQueryGeneratorClass()
-                + ", partnerKey=" + getPartnerKey() + ", shortTimeStats=" + getShortTimeStats() + ", longTimeStats=" + longTimeStats + "]";
+                + ", partnerKey=" + getPartnerKey() + "]";
     }
 
     public String getPartnerKey() {
@@ -217,13 +216,7 @@ public class PartnerBadge implements Serializable {
         this.queryGeneratorClass = queryGeneratorClass;
     }
 
-    public Integer getLowerAgeLimit() {
-        return lowerAgeLimit;
-    }
 
-    public void setLowerAgeLimit(Integer lowerAgeLimit) {
-        this.lowerAgeLimit = lowerAgeLimit;
-    }
 
     public Boolean isQueryExpansionEnabled() {
         return isQueryExpansionEnabled;
@@ -241,13 +234,7 @@ public class PartnerBadge implements Serializable {
         this.isQuerySplittingEnabled = isQuerySplittingEnabled;
     }
 
-    public Integer getUpperAgeLimit() {
-        return upperAgeLimit;
-    }
-
-    public void setUpperAgeLimit(Integer upperAgeLimit) {
-        this.upperAgeLimit = upperAgeLimit;
-    }
+  
 
     public String getLowerDateLimit() {
         return lowerDateLimit;
@@ -264,5 +251,13 @@ public class PartnerBadge implements Serializable {
     public void setUpperDateLimit(String upperDateLimit) {
         this.upperDateLimit = upperDateLimit;
     }
+
+	public Integer getAgeRange() {
+		return ageRange;
+	}
+
+	public void setAgeRange(Integer ageRange) {
+		this.ageRange = ageRange;
+	}
 
 }

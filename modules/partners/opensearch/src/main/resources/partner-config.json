@@ -23,5 +23,6 @@
   	{"domainName" : "transport",         "weight" : 0.2},
   	{"domainName" : "telecommunication", "weight" : 0.2},
   	{"domainName" : "medicine",          "weight" : 0.2}
-  ]
+  ],
+	"ageRange":2
 }
