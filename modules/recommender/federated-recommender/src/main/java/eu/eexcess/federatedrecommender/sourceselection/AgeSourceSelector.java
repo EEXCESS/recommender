@@ -2,6 +2,7 @@ package eu.eexcess.federatedrecommender.sourceselection;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Logger;
 
 import eu.eexcess.config.FederatedRecommenderConfiguration;
 import eu.eexcess.dataformats.PartnerBadge;
@@ -15,12 +16,13 @@ import eu.eexcess.federatedrecommender.interfaces.PartnerSelector;
  *
  */
 public class AgeSourceSelector implements PartnerSelector {
-
+    private static final Logger LOGGER = Logger.getLogger(AgeSourceSelector.class.getCanonicalName());
     public AgeSourceSelector(FederatedRecommenderConfiguration configuration) {
     }
 	
     @Override
     public SecureUserProfile sourceSelect(SecureUserProfile userProfile, List<PartnerBadge> partners) {
+    	LOGGER.info("Selecting sources by given Age");
         if (userProfile.getPartnerList().isEmpty())
             selectPartners(userProfile, partners);
         else {

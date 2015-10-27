@@ -19,7 +19,7 @@ public class AgeSourceSelectorTest {
 
     @Test
     public void testSourceSelectionAge1LastThreeLeftOut() throws Exception {
-        AgeSourceSelector ageSourceSelector = new AgeSourceSelector();
+        AgeSourceSelector ageSourceSelector = new AgeSourceSelector(null);
         List<PartnerBadge> partners = new ArrayList<PartnerBadge>();
         PartnerBadge p1 = new PartnerBadge();
         p1.setAgeRange(0);
@@ -51,7 +51,7 @@ public class AgeSourceSelectorTest {
 
     @Test
     public void testSourceSelectionAgeLastLeftOut() throws Exception {
-        AgeSourceSelector ageSourceSelector = new AgeSourceSelector();
+        AgeSourceSelector ageSourceSelector = new AgeSourceSelector(null);
         List<PartnerBadge> partners = new ArrayList<PartnerBadge>();
         PartnerBadge p1 = new PartnerBadge();
         p1.setAgeRange(0);
@@ -84,7 +84,7 @@ public class AgeSourceSelectorTest {
   
     @Test
     public void testSourceSelectionPartnersNull() throws Exception {
-        AgeSourceSelector ageSourceSelector = new AgeSourceSelector();
+        AgeSourceSelector ageSourceSelector = new AgeSourceSelector(null);
         List<PartnerBadge> partners = null;
 
         SecureUserProfile userProfile = new SecureUserProfile();
@@ -98,7 +98,7 @@ public class AgeSourceSelectorTest {
 
     @Test
     public void testSourceSelectionPartnersEmpty() throws Exception {
-        AgeSourceSelector ageSourceSelector = new AgeSourceSelector();
+        AgeSourceSelector ageSourceSelector = new AgeSourceSelector(null);
         List<PartnerBadge> partners = new ArrayList<PartnerBadge>();
 
         SecureUserProfile userProfile = new SecureUserProfile();
@@ -114,7 +114,7 @@ public class AgeSourceSelectorTest {
     @Test
     public void testSourceSelectionAllreadySelectedSources() throws Exception {
 
-        AgeSourceSelector ageSourceSelector = new AgeSourceSelector();
+        AgeSourceSelector ageSourceSelector = new AgeSourceSelector(null);
         List<PartnerBadge> partners = new ArrayList<PartnerBadge>();
         PartnerBadge p1 = new PartnerBadge();
  
@@ -150,7 +150,7 @@ public class AgeSourceSelectorTest {
     @Test
     public void testSourceSelectionBadgesHaveNoAgeGiven() throws Exception {
 
-        AgeSourceSelector ageSourceSelector = new AgeSourceSelector();
+        AgeSourceSelector ageSourceSelector = new AgeSourceSelector(null);
         List<PartnerBadge> partners = new ArrayList<PartnerBadge>();
         PartnerBadge p1 = new PartnerBadge();
         p1.setSystemId("P1");
