@@ -319,6 +319,8 @@ public class FederatedRecommenderCore implements ProbeResultChanged {
                 private DocumentBadgeList getDocsResult(PartnerBadge partner, Client client, DocumentBadgeList currentDocs) {
                     DocumentBadgeList docList = getPartnerDetailsResult(partner, client, currentDocs);
                     client.destroy();
+                    if(docList.documentBadges.isEmpty())
+                    	return currentDocs;
                     return docList;
                 }
             });

@@ -80,7 +80,7 @@ public enum PartnerConfigurationCache {
             LOGGER.log(Level.INFO, "Reading Api Keys from: " + eexcessPartnerKeyFile);
             PartnerApiKeys partnerKeys = null;
             if (eexcessPartnerKeyFile == null) {
-                LOGGER.log(Level.INFO, "Environment variable \"EEXCESS_PARTNER_KEY_FILE\" for " + partnerConfiguration.getSystemId() + " has to be set");
+                LOGGER.log(Level.INFO, "Environment variable \"EEXCESS_PARTNER_KEY_FILE\" for " + partnerConfiguration.getSystemId() + " should be set");
             } else {
                 partnerKeys = mapper.readValue(new File(eexcessPartnerKeyFile), PartnerApiKeys.class);
             }
