@@ -44,14 +44,19 @@ import org.jfree.chart.plot.PlotOrientation;
 import org.jfree.data.xy.XYDataset;
 import org.jfree.data.xy.XYSeries;
 import org.jfree.data.xy.XYSeriesCollection;
+import org.junit.Test;
 
 import edu.stanford.nlp.util.StringUtils;
 import eu.eexcess.federatedrecommender.config.Settings;
 import eu.eexcess.federatedrecommender.domaindetection.wordnet.WordnetDomainsDetector;
+import net.sf.extjwnl.JWNLException;
+import net.sf.extjwnl.data.IndexWord;
+import net.sf.extjwnl.data.POS;
+import net.sf.extjwnl.dictionary.Dictionary;
 
 public class RandomWordsPerformanceTest {
 
-    private static class Stats {
+    static class Stats {
         public int shouldNumWords = 0;
         public int numWords = 0;
         public Set<String> words = null;
@@ -102,21 +107,21 @@ public class RandomWordsPerformanceTest {
 
         List<Arguments> testSettings = new LinkedList<Arguments>();
 
-        testSettings.add(new Arguments(0, 20, true));
-        testSettings.add(new Arguments(3, 20, true));
-        testSettings.add(new Arguments(5, 20, true));
-        testSettings.add(new Arguments(10, 20, true));
-        testSettings.add(new Arguments(30, 20, true));
-        testSettings.add(new Arguments(50, 20, true));
-        testSettings.add(new Arguments(100, 10, true));
-        testSettings.add(new Arguments(200, 10, true));
-        testSettings.add(new Arguments(250, 10, true));
-        testSettings.add(new Arguments(300, 5, true));
-        testSettings.add(new Arguments(350, 3, true));
+        // testSettings.add(new Arguments(0, 20, true));
+        // testSettings.add(new Arguments(3, 20, true));
+        // testSettings.add(new Arguments(5, 20, true));
+        // testSettings.add(new Arguments(10, 20, true));
+        // testSettings.add(new Arguments(30, 20, true));
+        // testSettings.add(new Arguments(50, 20, true));
+        // testSettings.add(new Arguments(100, 10, true));
+        // testSettings.add(new Arguments(200, 10, true));
+        // testSettings.add(new Arguments(250, 10, true));
+        // testSettings.add(new Arguments(300, 5, true));
+        // testSettings.add(new Arguments(350, 3, true));
 
-        // testSettings.add(new Arguments(1000, 10, true));
-        // testSettings.add(new Arguments(3000, 5, true));
-        // testSettings.add(new Arguments(10000, 5, true));
+        testSettings.add(new Arguments(1000, 10, true));
+        testSettings.add(new Arguments(3000, 5, true));
+        testSettings.add(new Arguments(10000, 5, true));
 
         Map<Integer, List<Stats>> results = new HashMap<Integer, List<RandomWordsPerformanceTest.Stats>>();
         for (Arguments args : testSettings) {
@@ -188,8 +193,8 @@ public class RandomWordsPerformanceTest {
      * @param results
      * @return
      */
-    private XYDataset createRandomWordSetVsDurationDataset(Map<Integer, List<Stats>> results) {
 
+    private XYDataset createRandomWordSetVsDurationDataset(Map<Integer, List<Stats>> results) {
         XYSeriesCollection result = new XYSeriesCollection();
 
         for (Map.Entry<Integer, List<Stats>> resultSet : results.entrySet()) {
@@ -274,6 +279,92 @@ public class RandomWordsPerformanceTest {
                 "2nd chart");
         scatterPlot(createWordPositionVsRetryDataset(results), "drawing random words: word position vs. word duplicate", "word position", "number of retries",
                 "3rd chart");
+        scatterPlot(createWordPositionVsDurationVsDuplicateDataset(results), "drawing random words: word position vs. avg. duplicate/avg.duration",
+                "word position", "avg. duplicate [#] / avg. duration [ms]", "4th chart");
+    }
+
+    /**
+     * converts results to a word position vs. average duration and word
+     * position vs. average duplicate recall
+     * 
+     * @param results
+     * @return
+     */
+    private XYDataset createWordPositionVsDurationVsDuplicateDataset(Map<Integer, List<Stats>> results) {
+
+        Map<Integer, List<Integer>> positionToDuplicate = new HashMap<Integer, List<Integer>>();
+        Map<Integer, List<Long>> positionToDuration = new HashMap<Integer, List<Long>>();
+
+        for (Map.Entry<Integer, List<Stats>> result : results.entrySet()) {
+            for (Stats stat : result.getValue()) {
+
+                // get all recall conflicts
+                int positionOfWord = 1;
+                for (Integer recalls : stat.duplicateConflictCount) {
+                    List<Integer> dupRecalls = positionToDuplicate.get(positionOfWord);
+                    if (null == dupRecalls) {
+                        dupRecalls = new LinkedList<Integer>();
+                        positionToDuplicate.put(positionOfWord, dupRecalls);
+                    }
+
+                    dupRecalls.add(recalls);
+                    positionOfWord++;
+                }
+
+                // get all durations
+                positionOfWord = 1;
+                for (Long duration : stat.durationDrawWordsMs) {
+                    List<Long> durations = positionToDuration.get(positionOfWord);
+                    if (null == durations) {
+                        durations = new LinkedList<Long>();
+                        positionToDuration.put(positionOfWord, durations);
+                    }
+
+                    durations.add(duration);
+                    positionOfWord++;
+                }
+
+            }
+        }
+
+        // calculate average
+        Map<Integer, Double> positionToDurationAverage = new HashMap<Integer, Double>();
+        for (Map.Entry<Integer, List<Long>> entry : positionToDuration.entrySet()) {
+
+            double sum = 0.0;
+            for (Long value : entry.getValue()) {
+                sum += value;
+            }
+            positionToDurationAverage.put(entry.getKey(), sum / (double) entry.getValue().size());
+        }
+
+        Map<Integer, Double> positionToRecallAverage = new HashMap<Integer, Double>();
+        for (Map.Entry<Integer, List<Integer>> entry : positionToDuplicate.entrySet()) {
+
+            double sum = 0.0;
+            for (Integer value : entry.getValue()) {
+                sum += value;
+            }
+            positionToRecallAverage.put(entry.getKey(), sum / (double) entry.getValue().size());
+        }
+
+        // create data set
+        XYSeriesCollection result = new XYSeriesCollection();
+
+        XYSeries series = new XYSeries("duplicate recalls");
+        for (Map.Entry<Integer, Double> entry : positionToRecallAverage.entrySet()) {
+            series.add(entry.getKey(), entry.getValue());
+        }
+        result.addSeries(series);
+
+        // XYSeries
+        series = new XYSeries("duration");
+        for (Map.Entry<Integer, Double> entry : positionToDurationAverage.entrySet()) {
+            series.add(entry.getKey(), entry.getValue());
+        }
+        result.addSeries(series);
+
+        return result;
     }
 
     private void scatterPlot(XYDataset dataSet, String title, String xLabel, String yLabel, String chartName) {
@@ -281,7 +372,7 @@ public class RandomWordsPerformanceTest {
                 // legend
                 true, // tooltips
                 true // urls
-                );
+        );
         ChartFrame frame = new ChartFrame(chartName, chart);
         frame.pack();
         frame.setVisible(true);
@@ -323,7 +414,7 @@ public class RandomWordsPerformanceTest {
 
     }
 
-    private Map<Integer, List<Stats>> resultsFromCsv(File file) {
+    static Map<Integer, List<Stats>> resultsFromCsv(File file) {
 
         Map<Integer, List<Stats>> testResults = new HashMap<Integer, List<Stats>>();
 
@@ -369,13 +460,43 @@ public class RandomWordsPerformanceTest {
         return testResults;
     }
 
+    @Test
+    public void WordnetDomainsDetector_drawRandmomwords_untilExceptonOccurs() {
+
+        int numWords = 10 ^ 6;
+        Settings.isWordNet20ResourceAvailable();
+        Settings.isWordNet30ResourceAvailable();
+        File wordnetDir = new File(Settings.WordNet.Path_3_0);
+
+        try {
+            Dictionary dictionary = Dictionary.getFileBackedInstance(wordnetDir.getPath());
+
+            while (numWords-- > 0) {
+
+                IndexWord randomIndexWord;
+                try {
+                    randomIndexWord = dictionary.getRandomIndexWord(POS.NOUN);
+                    randomIndexWord.equals(""); // expect NPE
+                } catch (NullPointerException e) {
+                    System.err.println("failed to draw random word => q.e.d.!");
+                    e.printStackTrace();
+                    continue;
+                }
+            }
+
+        } catch (JWNLException e) {
+            e.printStackTrace();
+            assertTrue(false);
+        }
+
+    }
+
     public static void main(String[] args) {
-         RandomWordsPerformanceTest performanceTestRunner = new
-         RandomWordsPerformanceTest();
-         performanceTestRunner.plotFromTest();
+        RandomWordsPerformanceTest performanceTestRunner = new RandomWordsPerformanceTest();
+        performanceTestRunner.plotFromTest();
 
         // RandomWordsPerformanceTest performanceTestPlotter = new
         // RandomWordsPerformanceTest();
-        //       performanceTestPlotter.plotFromCsv("/tmp/wn-domain-performance-test-results-0-200.csv");
+        // performanceTestPlotter.plotFromCsv("/tmp/wn-domain-performance-test-results.csv");
     }
 }

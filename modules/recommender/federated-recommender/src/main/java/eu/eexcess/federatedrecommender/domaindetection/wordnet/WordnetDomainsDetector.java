@@ -78,6 +78,7 @@ public class WordnetDomainsDetector extends DomainDetector {
     private final MorphologicalProcessor morphologicalProcessor;
     private final Map<String, Set<DomainAssignment>> synsetToDomains;
     private final Map<String, Map<String, Double>> domainToParentDomainToWeight;
+    private int MIN_SENSES_COUNT = 2;
 
     /**
      * Creates a new instance of this class.
@@ -182,11 +183,13 @@ public class WordnetDomainsDetector extends DomainDetector {
                         }
                     }
                 }
-                if (allDomains.size() == 1 && senses.size() > 2) {
+                if (allDomains.size() == 1 && senses.size() > MIN_SENSES_COUNT) {
                     String domain = allDomains.iterator().next();
                     if (DOMAIN_FACTOTUM.equals(domain)) {
                         lemma = randomIndexWord.getLemma();
                     }
+                } else if (senses.size() > 2) {
+                    lemma = randomIndexWord.getLemma();
                 }
             } while (lemma == null);
 
