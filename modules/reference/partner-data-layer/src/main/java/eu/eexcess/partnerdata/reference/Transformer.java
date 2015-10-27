@@ -291,7 +291,7 @@ public class Transformer implements ITransformer {
 
             Literal proxyTitle = querySol.getLiteral("proxyTitle");
             if (proxyTitle != null)
-                result.title = proxyTitle.toString();
+                result.title = proxyTitle.toString().trim();
 
             Literal proxyDescription = querySol.getLiteral("proxyDescription");
             if (proxyDescription != null)
@@ -307,12 +307,12 @@ public class Transformer implements ITransformer {
 
             Literal edmProviderName = querySol.getLiteral("edmProviderName");
             if (edmProviderName != null) {
-                result.documentBadge.provider = edmProviderName.toString();
+                result.documentBadge.provider = edmProviderName.toString().trim();
             }
 
             Literal proxyLanguage = querySol.getLiteral("proxyLanguage");
             if (proxyLanguage != null) {
-                result.language = proxyLanguage.toString();
+                result.language = proxyLanguage.toString().trim();
             }
 
             Literal proxyType = querySol.getLiteral("proxyType");
@@ -322,7 +322,7 @@ public class Transformer implements ITransformer {
 
             Literal proxyRights = querySol.getLiteral("proxyRights");
             if (proxyRights != null) {
-                result.licence = proxyRights.toString();
+                result.licence = proxyRights.toString().trim();
             } else {
                 result.licence = EEXCESS_FACETS_VALUE_DEFAULT_LICENCE;
             }
