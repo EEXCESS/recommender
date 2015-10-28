@@ -46,9 +46,9 @@ public class LuceneQueryGeneratorFieldTermConjunctionMainTopic implements QueryG
             } else
                 otherKeywords.add(kw);
         });
-        if (!mainKeywords.isEmpty())
+        if (!mainKeywords.isEmpty() && !otherKeywords.isEmpty())
             result.append(") AND (");
-
+        
         StringBuilder tmpResult = new StringBuilder();
         for (ContextKeyword key : otherKeywords) {
             String keyword = key.getText();

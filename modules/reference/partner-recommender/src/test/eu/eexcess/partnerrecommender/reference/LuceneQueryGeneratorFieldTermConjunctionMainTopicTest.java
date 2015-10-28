@@ -69,6 +69,25 @@ public class LuceneQueryGeneratorFieldTermConjunctionMainTopicTest {
     }
 
     @Test
+    public void singleMainTopicTest() {
+
+        LuceneQueryGeneratorFieldTermConjunctionMainTopic gen = new LuceneQueryGeneratorFieldTermConjunctionMainTopic();
+        SecureUserProfile userProfile = new SecureUserProfile();
+        ContextKeyword keyword1 = new ContextKeyword("k1");
+        keyword1.setIsMainTopic(true);
+        userProfile.getContextKeywords().add(keyword1);
+        
+       
+        synchronized (PartnerConfigurationCache.CONFIG.getPartnerConfiguration().isQueryExpansionEnabled()) {
+         //   PartnerConfigurationCache.CONFIG.getPartnerConfiguration().setIsQueryExpansionEnabled(true);
+            String result = gen.toQuery(userProfile);
+            System.out.println(result);
+            assertTrue(result.equals("(k1)"));
+            // assertTrue(result.equals("k1 OR (k2)"));
+        }
+    }
+
+    @Test
     public void multibleExpansionsBetweenTwoTest() {
 
         LuceneQueryGeneratorFieldTermConjunctionMainTopic gen = new LuceneQueryGeneratorFieldTermConjunctionMainTopic();
