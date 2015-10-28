@@ -6,9 +6,9 @@
 "evaluationQueriesFile":"/home/hziak/workspaces/eexcess8/code/modules/evaluation/evaluationQueryExample.json",
 "partnersTimeout":7000,
 "numRecommenderThreads":30,
-"statsLogDatabase":"/var/lib/tomcat6/webapps/eexcess-federated-recommender-web-service-1.0-SNAPSHOT/FederatedRecommenderStats.db",
+"statsLogDatabase":"/var/lib/tomcat7/webapps/eexcess-federated-recommender-web-service-1.0-SNAPSHOT/FederatedRecommenderStats.db",
 "defaultPickerName":"eu.eexcess.federatedrecommender.picker.OccurrenceProbabilityPicker",
-"sourceSelectors" : ["eu.eexcess.federatedrecommender.sourceselection.LanguageSourceSelector"],
+"sourceSelectors" : ["eu.eexcess.federatedrecommender.sourceselection.LanguageSourceSelector","eu.eexcess.federatedrecommender.sourceselection.AgeSourceSelector"],
 "wordnetPath" : "/opt/data/wordnet/WordNet-2.0/dict/",
 "wordnetDomainFilePath" : "/opt/data/wordnet-domains/wn-domains-3.2/wn-domains-3.2-20070223"
 }

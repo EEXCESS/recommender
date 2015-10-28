@@ -36,139 +36,20 @@ import eu.eexcess.dataformats.PartnerBadge;
 public class SecureUserProfile implements Serializable {
     private static final long serialVersionUID = 1344062464911638930L;
 
-    private List<PartnerBadge> partnerList = new ArrayList<PartnerBadge>(); //
+    private List<PartnerBadge> partnerList = new ArrayList<PartnerBadge>();
     private List<PartnerBadge> protectedPartnerList = new ArrayList<PartnerBadge>();
     private String queryID;
-    private String firstName;
-    private String lastName;
-    private Date birthDate;
+    private Integer ageRange;
     private Integer numResults;
     private String gender;
     private Address address;
     private TimeRange timeRange;
     private List<Language> languages = new ArrayList<Language>();
     private List<UserCredentials> userCredentials = new ArrayList<UserCredentials>();
-    private List<Interest> interestList = new ArrayList<Interest>();
     private List<ContextKeyword> contextKeywords = new ArrayList<ContextKeyword>();
+    private List<Interest> interestList = new ArrayList<Interest>();
     private Context context = new Context();
 
-    @Override
-    public String toString() {
-        return "SecureUserProfile [partnerList=" + getPartnerList() + ", protectedPartnerList=" + getProtectedPartnerList() + ", queryID=" + getQueryID()
-                + ", firstName=" + getFirstName() + ", lastName=" + getLastName() + ", birthDate=" + getBirthDate() + ", numResults=" + getNumResults()
-                + ", gender=" + getGender() + ", address=" + getAddress() + ", timeRange=" + getTimeRange() + ", languages=" + getLanguages()
-                + ",  userCredentials=" + getUserCredentials() + ", interestList=" + getInterestList() + ", contextKeywords=" + getContextKeywords()
-                + ", context=" + getContext() + "]";
-    }
-
-    @Override
-    public int hashCode() {
-        final int prime = 31;
-        int result = 1;
-        result = prime * result + ((getAddress() == null) ? 0 : getAddress().hashCode());
-        result = prime * result + ((getBirthDate() == null) ? 0 : getBirthDate().hashCode());
-        result = prime * result + ((getContext() == null) ? 0 : getContext().hashCode());
-        result = prime * result + ((getContextKeywords() == null) ? 0 : getContextKeywords().hashCode());
-        result = prime * result + ((getFirstName() == null) ? 0 : getFirstName().hashCode());
-        result = prime * result + ((getGender() == null) ? 0 : getGender().hashCode());
-        result = prime * result + ((getInterestList() == null) ? 0 : getInterestList().hashCode());
-        result = prime * result + ((getLanguages() == null) ? 0 : getLanguages().hashCode());
-        result = prime * result + ((getLastName() == null) ? 0 : getLastName().hashCode());
-        result = prime * result + ((getNumResults() == null) ? 0 : getNumResults().hashCode());
-        result = prime * result + ((getPartnerList() == null) ? 0 : getPartnerList().hashCode());
-        result = prime * result + ((getProtectedPartnerList() == null) ? 0 : getProtectedPartnerList().hashCode());
-        result = prime * result + ((getQueryID() == null) ? 0 : getQueryID().hashCode());
-        result = prime * result + ((getTimeRange() == null) ? 0 : getTimeRange().hashCode());
-        result = prime * result + ((getUserCredentials() == null) ? 0 : getUserCredentials().hashCode());
-        return result;
-    }
-
-    @Override
-    public boolean equals(Object obj) {
-        if (this == obj)
-            return true;
-        if (obj == null)
-            return false;
-        if (getClass() != obj.getClass())
-            return false;
-        SecureUserProfile other = (SecureUserProfile) obj;
-        if (getAddress() == null) {
-            if (other.getAddress() != null)
-                return false;
-        } else if (!getAddress().equals(other.getAddress()))
-            return false;
-        if (getBirthDate() == null) {
-            if (other.getBirthDate() != null)
-                return false;
-        } else if (!getBirthDate().equals(other.getBirthDate()))
-            return false;
-        if (getContext() == null) {
-            if (other.getContext() != null)
-                return false;
-        } else if (!getContext().equals(other.getContext()))
-            return false;
-        if (getContextKeywords() == null) {
-            if (other.getContextKeywords() != null)
-                return false;
-        } else if (!getContextKeywords().equals(other.getContextKeywords()))
-            return false;
-        if (getFirstName() == null) {
-            if (other.getFirstName() != null)
-                return false;
-        } else if (!getFirstName().equals(other.getFirstName()))
-            return false;
-        if (getGender() == null) {
-            if (other.getGender() != null)
-                return false;
-        } else if (!getGender().equals(other.getGender()))
-            return false;
-        if (getInterestList() == null) {
-            if (other.getInterestList() != null)
-                return false;
-        } else if (!getInterestList().equals(other.getInterestList()))
-            return false;
-        if (getLanguages() == null) {
-            if (other.getLanguages() != null)
-                return false;
-        } else if (!getLanguages().equals(other.getLanguages()))
-            return false;
-        if (getLastName() == null) {
-            if (other.getLastName() != null)
-                return false;
-        } else if (!getLastName().equals(other.getLastName()))
-            return false;
-        if (getNumResults() == null) {
-            if (other.getNumResults() != null)
-                return false;
-        } else if (!getNumResults().equals(other.getNumResults()))
-            return false;
-        if (getPartnerList() == null) {
-            if (other.getPartnerList() != null)
-                return false;
-        } else if (!getPartnerList().equals(other.getPartnerList()))
-            return false;
-        if (getProtectedPartnerList() == null) {
-            if (other.getProtectedPartnerList() != null)
-                return false;
-        } else if (!getProtectedPartnerList().equals(other.getProtectedPartnerList()))
-            return false;
-        if (getQueryID() == null) {
-            if (other.getQueryID() != null)
-                return false;
-        } else if (!getQueryID().equals(other.getQueryID()))
-            return false;
-        if (getTimeRange() == null) {
-            if (other.getTimeRange() != null)
-                return false;
-        } else if (!getTimeRange().equals(other.getTimeRange()))
-            return false;
-        if (getUserCredentials() == null) {
-            if (other.getUserCredentials() != null)
-                return false;
-        } else if (!getUserCredentials().equals(other.getUserCredentials()))
-            return false;
-        return true;
-    }
 
     @XmlElementWrapper(name = "partnerList")
     @XmlElement(name = "partnerList")
@@ -190,31 +71,7 @@ public class SecureUserProfile implements Serializable {
         this.protectedPartnerList = protectedPartnerList;
     }
 
-    public String getFirstName() {
-        return firstName;
-    }
-
-    public void setFirstName(String firstName) {
-        this.firstName = firstName;
-    }
-
-    public String getLastName() {
-        return lastName;
-    }
-
-    public void setLastName(String lastName) {
-        this.lastName = lastName;
-    }
-
-    public Date getBirthDate() {
-        return birthDate;
-    }
-
-    public void setBirthDate(Date birthDate) {
-        this.birthDate = birthDate;
-    }
-
-    public Integer getNumResults() {
+	public Integer getNumResults() {
         return numResults;
     }
 
@@ -301,4 +158,135 @@ public class SecureUserProfile implements Serializable {
     public void setContext(Context context) {
         this.context = context;
     }
+
+	public Integer getAgeRange() {
+		return ageRange;
+	}
+
+	public void setAgeRange(Integer ageRange) {
+		this.ageRange = ageRange;
+	}
+
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + ((address == null) ? 0 : address.hashCode());
+		result = prime * result
+				+ ((ageRange == null) ? 0 : ageRange.hashCode());
+		result = prime * result + ((context == null) ? 0 : context.hashCode());
+		result = prime * result
+				+ ((contextKeywords == null) ? 0 : contextKeywords.hashCode());
+		result = prime * result + ((gender == null) ? 0 : gender.hashCode());
+		result = prime * result
+				+ ((interestList == null) ? 0 : interestList.hashCode());
+		result = prime * result
+				+ ((languages == null) ? 0 : languages.hashCode());
+		result = prime * result
+				+ ((numResults == null) ? 0 : numResults.hashCode());
+		result = prime * result
+				+ ((partnerList == null) ? 0 : partnerList.hashCode());
+		result = prime
+				* result
+				+ ((protectedPartnerList == null) ? 0 : protectedPartnerList
+						.hashCode());
+		result = prime * result + ((queryID == null) ? 0 : queryID.hashCode());
+		result = prime * result
+				+ ((timeRange == null) ? 0 : timeRange.hashCode());
+		result = prime * result
+				+ ((userCredentials == null) ? 0 : userCredentials.hashCode());
+		return result;
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		SecureUserProfile other = (SecureUserProfile) obj;
+		if (address == null) {
+			if (other.address != null)
+				return false;
+		} else if (!address.equals(other.address))
+			return false;
+		if (ageRange == null) {
+			if (other.ageRange != null)
+				return false;
+		} else if (!ageRange.equals(other.ageRange))
+			return false;
+		if (context == null) {
+			if (other.context != null)
+				return false;
+		} else if (!context.equals(other.context))
+			return false;
+		if (contextKeywords == null) {
+			if (other.contextKeywords != null)
+				return false;
+		} else if (!contextKeywords.equals(other.contextKeywords))
+			return false;
+		if (gender == null) {
+			if (other.gender != null)
+				return false;
+		} else if (!gender.equals(other.gender))
+			return false;
+		if (interestList == null) {
+			if (other.interestList != null)
+				return false;
+		} else if (!interestList.equals(other.interestList))
+			return false;
+		if (languages == null) {
+			if (other.languages != null)
+				return false;
+		} else if (!languages.equals(other.languages))
+			return false;
+		if (numResults == null) {
+			if (other.numResults != null)
+				return false;
+		} else if (!numResults.equals(other.numResults))
+			return false;
+		if (partnerList == null) {
+			if (other.partnerList != null)
+				return false;
+		} else if (!partnerList.equals(other.partnerList))
+			return false;
+		if (protectedPartnerList == null) {
+			if (other.protectedPartnerList != null)
+				return false;
+		} else if (!protectedPartnerList.equals(other.protectedPartnerList))
+			return false;
+		if (queryID == null) {
+			if (other.queryID != null)
+				return false;
+		} else if (!queryID.equals(other.queryID))
+			return false;
+		if (timeRange == null) {
+			if (other.timeRange != null)
+				return false;
+		} else if (!timeRange.equals(other.timeRange))
+			return false;
+		if (userCredentials == null) {
+			if (other.userCredentials != null)
+				return false;
+		} else if (!userCredentials.equals(other.userCredentials))
+			return false;
+		return true;
+	}
+
+	@Override
+	public String toString() {
+		return "SecureUserProfile [partnerList=" + partnerList
+				+ ", protectedPartnerList=" + protectedPartnerList
+				+ ", queryID=" + queryID + ", ageRange=" + ageRange
+				+ ", numResults=" + numResults + ", gender=" + gender
+				+ ", address=" + address + ", timeRange=" + timeRange
+				+ ", languages=" + languages + ", userCredentials="
+				+ userCredentials + ", contextKeywords=" + contextKeywords
+				+ ", interestList=" + interestList + ", context=" + context
+				+ "]";
+	}
+	
+	
 }

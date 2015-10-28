@@ -46,17 +46,17 @@ public class SchloettQueryExtraction {
         }
         EvaluationQueryList evalQueries = new EvaluationQueryList();
         for (SchloettQueryFormat schloettQueryFormat : querys) {
-            if (schloettQueryFormat.getQuerieMap() == null)
-                System.out.println("is null");
-            else
-                for (Entry<String, LinkedHashMap<String, String>> schloettQueryFormat1 : schloettQueryFormat.getQuerieMap().entrySet()) {
-
-                    if (schloettQueryFormat1.getValue().get("task_name").endsWith(".en")) {
-                        System.out.println("query: " + schloettQueryFormat1.getValue().get("query"));
-                        evalQueries.getQueries().add(new EvaluationQuery(schloettQueryFormat1.getValue().get("query"), "TODO: decription", null));
-
-                    }
-                }
+//            if (schloettQueryFormat.getQuerieMap() == null)
+//                System.out.println("is null");
+//            else
+//                for (Entry<String, LinkedHashMap<String, String>> schloettQueryFormat1 : schloettQueryFormat.getQuerieMap().entrySet()) {
+//
+//                    if (schloettQueryFormat1.getValue().get("task_name").endsWith(".en")) {
+//                        System.out.println("query: " + schloettQueryFormat1.getValue().get("query"));
+//                        evalQueries.getQueries().add(new EvaluationQuery(schloettQueryFormat1.getValue().get("query"), "TODO: decription", null));
+//
+//                    }
+//                }
 
         }
 
@@ -84,9 +84,9 @@ public class SchloettQueryExtraction {
                 BufferedReader br = new BufferedReader(freader);
 
                 ObjectMapper mapper = new ObjectMapper();
-                HashMap format = mapper.readValue(file, new HashMap<String, SchloettQuery>().getClass());
+//                HashMap format = mapper.readValue(file, new HashMap<String, SchloettQuery>().getClass());
 
-                queries.add(new SchloettQueryFormat(format));
+//                queries.add(new SchloettQueryFormat(format));
                 br.close();
                 freader.close();
 

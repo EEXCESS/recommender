@@ -378,11 +378,15 @@ public class FederatedRecommenderCore implements ProbeResultChanged {
         }
 
         SecureUserProfile lastEvaluatedProfile = userProfile;
+        LOGGER.log(Level.INFO,"userprofile ageRange" + userProfile.getAgeRange());
+   
         for (String sourceSelectorClassName : selectorsClassNames) {
+        	
             PartnerSelector sourceSelector = (PartnerSelector) statelessClassInstances.get(sourceSelectorClassName);
             if (null == sourceSelector) {
                 LOGGER.info("failed to find requested source selector [" + sourceSelectorClassName + "]: ignoring source selection");
             } else {
+                LOGGER.info("sourceSelector ["+ sourceSelectorClassName +"] selected");
                 lastEvaluatedProfile = sourceSelector.sourceSelect(lastEvaluatedProfile, getPartnerRegister().getPartners());
             }
         }

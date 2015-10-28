@@ -118,9 +118,7 @@ public class PartnerRecommenderService {
     @Produces(value = MediaType.APPLICATION_XML)
     public SecureUserProfile debugDumpProfile() {
         SecureUserProfile profile = new SecureUserProfile();
-        profile.setFirstName("Hugo");
-        profile.setLastName("Boss");
-        profile.setBirthDate(new Date(System.currentTimeMillis() - 30 * 365 * 24 * 60 * 60 * 1000));
+        profile.setAgeRange(2);
         profile.getInterestList().add(new Interest("Machine Learning"));
         profile.getInterestList().add(new Interest("Information Retrieval"));
         profile.getInterestList().add(new Interest("Natural Language Processing"));

@@ -176,6 +176,7 @@ public class FederatedRecommenderService {
     @Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
     public ResultList recommend(SecureUserProfile userProfile) throws IOException {
         ResultList resultList = new ResultList();
+        LOGGER.log(Level.INFO,"AgeRange in userProfile " + userProfile.getAgeRange());
         resultList = fRC.generateFederatedRecommendation(userProfile);
         resultList.queryID = userProfile.getQueryID();
         return resultList;
@@ -300,9 +301,8 @@ public class FederatedRecommenderService {
     public SecureUserProfile testSUP() {
         SecureUserProfile secureUserProfile = new SecureUserProfile();
         secureUserProfile.setQueryID("QueryID01234567");
-        secureUserProfile.setFirstName("Max");
-        secureUserProfile.setLastName("Musterman");
-        secureUserProfile.setBirthDate(new Date());
+        
+        secureUserProfile.setAgeRange(2);
         secureUserProfile.setGender("male");
         secureUserProfile.setTimeRange(new TimeRange());
         secureUserProfile.getTimeRange().setStart("1980");
@@ -310,10 +310,10 @@ public class FederatedRecommenderService {
         List<History> history = new ArrayList<History>();
         history.add(new History(new Date(), "history title", 4, 4, "http://1234.com"));
 
-        Address address = new Address("austria", 8010, "Graz", "nothing", "to add");
+        Address address = new Address("austria",  "Graz");
         address.setCity("testcity");
         address.setCountry("testcountry");
-        address.setZipCode(1213345);
+     
         secureUserProfile.setAddress(address);
         secureUserProfile.setContext(new Context());
         secureUserProfile.getContext().setReason("manual");

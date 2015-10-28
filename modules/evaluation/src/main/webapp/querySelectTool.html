@@ -1,0 +1,116 @@
+<html ng-app="evalApp">
+<head>
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script
+	src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+
+<link rel="stylesheet"
+	href="https://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css">
+
+<link rel="stylesheet"
+	href="https://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap-theme.min.css">
+<script
+	src="https://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/js/bootstrap.min.js"></script>
+
+<link href="css/stats.css" rel="stylesheet">
+<title>EEXCESS Statistics</title>
+
+
+
+</head>
+<body class="body" ng-controller="MainCtrl as mainCtrl">
+
+		<th class="text-nowrap">Partner</th>
+		<tr ng-repeat="quer in mainCtrl.data.queries">
+			 {{query.query}}
+			<td ng-init="stats = partner.shortTimeStats" class="info"
+				ng-href='#here' ng-click="mainCtrl.getPartner(partner.systemId)">{{partner.systemId}}</td>
+			<td>{{stats.requestCount}}</td>
+			<td ng-if="stats.failedRequestCount / stats.requestCount > 0.8"
+				class="alert-danger">{{stats.failedRequestCount}}</td>
+			<td
+				ng-if="stats.failedRequestCount / stats.requestCount > 0.3 && stats.failedRequestCount / stats.requestCount <= 0.8"
+				class="alert-warning">{{stats.failedRequestCount}}</td>
+			<td
+				ng-if="stats.failedRequestCount !=0 && stats.failedRequestCount / stats.requestCount <= 0.3"
+				class="alert-success">{{stats.failedRequestCount}}</td>
+			<td ng-if="stats.failedRequestCount ==0" class="alert-success">{{stats.failedRequestCount}}</td>
+			<td ng-if="stats.failedRequestCount ==null" class="alert-success">0</td>
+			<td
+				ng-if="stats.failedRequestTimeoutCount / stats.requestCount > 0.8"
+				class="alert-danger">{{stats.failedRequestTimeoutCount}}</td>
+			<td
+				ng-if="stats.failedRequestTimeoutCount / stats.requestCount > 0.3 && stats.failedRequestCount / stats.requestCount <= 0.8"
+				class="alert-warning">{{stats.failedRequestTimeoutCount}}</td>
+			<td
+				ng-if="stats.failedRequestTimeoutCount !=0 && stats.failedRequestCount / stats.requestCount <= 0.3"
+				class="alert-success">{{stats.failedRequestTimeoutCount}}</td>
+			<td ng-if="stats.failedRequestTimeoutCount ==0" class="alert-success">{{stats.failedRequestTimeoutCount}}</td>
+			<td ng-if="stats.failedRequestTimeoutCount ==null"
+				class="alert-success">0</td>
+			<td>{{stats.shortTimeResponseTimes}}<small
+				ng-if="stats.shortTimeResponseTimes ==null">0</small> <small>ms</small></td>
+
+		</tr>
+	</table>
+
+	<table class="table">
+		<caption>
+			<div class="alert alert-info">Partner Connectors LongTime
+				Statistics</div>
+		</caption>
+		<thead>
+			<tr>
+				<th></th>
+				<th>Request Count</th>
+				<th>Failed Request Count</th>
+				<th>Failed Request Timeout Count</th>
+
+			</tr>
+		</thead>
+		<th class="text-nowrap">Partner</th>
+		
+		<tr ng-repeat="query in mainCtrl.data.queries">
+		
+			<td ng-init="stats = partner.shortTimeStats" class="info"
+				ng-href='#here' ng-click="mainCtrl.getPartner(partner.systemId)">{{query.query}}</td>
+			<td>{{query.description}}</td>
+			<td>
+			<div ng-repeat="interest in query.interests">{{interest.text}}</div></td>
+
+		</tr>
+		
+	</table>
+
+	<br />
+	<br />
+	<br />
+	<br />
+	<br />
+
+	
+
+	<script
+		src="https://ajax.googleapis.com/ajax/libs/angularjs/1.2.26/angular.min.js"></script>
+	<script>
+angular.module('evalApp', []).controller('MainCtrl', ['$http','$scope','$location', function($http,$scope,$location) {
+    var self = this
+;    self.data=null;
+	//$.getJSON("queriesEnDeDup.json", function(json) {
+	//	self.data=json;
+	    //console.log(json); // this will show the info it in firebug console
+	//});
+    self.getData= function(){ $http.get('queriesEnDeDup.json').success (function(data){
+				self.data = data;
+			});
+	};
+	self.getData();
+}
+]);
+</script>
+</body>
+</html>
+
+
