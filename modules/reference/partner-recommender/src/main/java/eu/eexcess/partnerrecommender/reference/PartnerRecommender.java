@@ -248,7 +248,7 @@ public class PartnerRecommender implements PartnerRecommenderApi {
 	                        currentDoc.details = transformRDFXMLToResponseDetail(rdfXML, partnerdataLogger, 0);
 	                        long endTime = System.currentTimeMillis();
 	                        long respTime = endTime - startTime;
-	                        System.out.println(currentDoc.id + " finished:"+respTime );
+	                        LOGGER.log(Level.FINER,currentDoc.id + " finished:"+respTime );
 //	                        PartnerdataTracer.dumpFile(this.getClass(), PartnerRecommender.partnerConfiguration, currentDoc.details, "partner-recommender-results-details-" + i,
 //	                                PartnerdataTracer.FILETYPE.JSON, partnerdataLogger);
 	                    } catch (EEXCESSDataTransformationException e) {
