@@ -55,6 +55,8 @@ public class LanguageSourceSelector implements PartnerSelector {
     @Override
     public SecureUserProfile sourceSelect(SecureUserProfile userProfile, List<PartnerBadge> partners) {
         selectedPartners.clear();
+        if (userProfile.getPartnerList()==null)
+        	userProfile.setPartnerList(new ArrayList<PartnerBadge>());
         // don't touch if already selected
         if (userProfile.getPartnerList().isEmpty()) {
             // query language(s) are specified in user profile
@@ -86,7 +88,9 @@ public class LanguageSourceSelector implements PartnerSelector {
         } else {
             LOGGER.info("unsuccessfull partner selection");
         }
-
+        if (userProfile.getPartnerList().isEmpty()) {
+        	userProfile.setPartnerList(null);
+        }
         return userProfile;
     }
 

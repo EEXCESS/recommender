@@ -687,7 +687,9 @@ public class FederatedRecommenderCore implements ProbeResultChanged {
                             return true;
                     }
             } else
-                return true;
+            {
+                return false;
+            }
         } else
             return true;
 

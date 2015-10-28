@@ -33,8 +33,10 @@ import eu.eexcess.dataformats.userprofile.SecureUserProfile;
  */
 public interface PartnerSelector {
 
+	
     /**
      * Perform source selection according to the given parameters.
+     * If no Partners a to be selected the partner list in the userProfile has to be set to null
      * 
      * @param userProfile
      * @param partners
