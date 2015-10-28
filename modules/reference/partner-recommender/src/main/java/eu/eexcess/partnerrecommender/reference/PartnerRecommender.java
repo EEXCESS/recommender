@@ -269,7 +269,7 @@ public class PartnerRecommender implements PartnerRecommenderApi {
 			} catch (ExecutionException e) {
 				LOGGER.log(Level.WARNING, "ExecutionException:", e);
 			} catch (TimeoutException e) {
-				LOGGER.log(Level.WARNING, "TimeoutException:", e);
+				LOGGER.log(Level.WARNING, "TimeoutException during getDetails call");
 			}
 		}
         partnerdataLogger.getActLogEntry().end();
