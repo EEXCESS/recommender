@@ -34,8 +34,6 @@ import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
 
-import com.hp.hpl.jena.util.iterator.ClosableIterator;
-
 import eu.eexcess.config.PartnerConfiguration;
 import eu.eexcess.partnerdata.reference.PartnerdataLogger;
 
@@ -123,7 +121,7 @@ public class DbpediaSpotlight extends EnrichmentServiceBase{
 //	        PartnerdataTracer.dumpFile(DbpediaSpotlight.class, this.partnerConfig, response.getEntity().getContent(), "dbpedia-response", FILETYPE.XML, logger);
 
 			entities.addAll(XmlParser.getEntitiesDbpediaSpotlightAnnotateXML(this.partnerConfig, response.getEntity().getContent(), logger));
-			//LOGGER.log(Level.INFO, "DbpediaSpotlight successful call with URL:\n"+url);
+//			LOGGER.log(Level.INFO, "DbpediaSpotlight successful call with URL:\n"+url);
 			client.close();
 			return entities;
 

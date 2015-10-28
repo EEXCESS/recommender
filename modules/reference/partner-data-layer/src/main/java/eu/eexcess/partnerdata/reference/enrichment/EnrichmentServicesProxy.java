@@ -19,6 +19,7 @@ package eu.eexcess.partnerdata.reference.enrichment;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
+import java.util.StringTokenizer;
 
 import eu.eexcess.config.PartnerConfiguration;
 import eu.eexcess.partnerdata.reference.PartnerdataLogger;
@@ -47,22 +48,37 @@ public class EnrichmentServicesProxy {
 //		geonames = new GeoNames(this.partnerConfig);
 //		dbpediaSpotlight = new DbpediaSpotlight(partnerConfig);
 
-		Set<DbpediaSpotlightResult> dbpediaSpotlightResults = dbpediaSpotlight.searchDbpediaSpotlight(text, logger);
-		for (Iterator<DbpediaSpotlightResult> iterator = dbpediaSpotlightResults.iterator(); iterator.hasNext();) {
-			DbpediaSpotlightResult dbpediaSpotlightResult = (DbpediaSpotlightResult) iterator.next();
-			EnrichmentResult enrichmentResult = new EnrichmentResult(EnrichmentSource.DBPEDIA);
-			enrichmentResult.setWord(dbpediaSpotlightResult.getName());
-			enrichmentResult.setUri(dbpediaSpotlightResult.getURI());
-			if (dbpediaSpotlightResult.types != null && !dbpediaSpotlightResult.types.isEmpty() ) {
-				enrichmentResult.setTypes(dbpediaSpotlightResult.getAllConcepts());
-				enrichmentResult.setType(enrichmentResult.getTypes().get(0));
-				if (enrichmentResult.isTypeGeographicResource())
-				{
-					Set<EnrichmentResult> responseGeonames = geonames.getLocationHierarchy(enrichmentResult.getWord(), logger);
-					enrichmentResults.addAll(responseGeonames);
-				}
+		
+		String newText ="";
+		StringTokenizer st = new StringTokenizer(text);
+		while (st.hasMoreElements()) {
+			String actWord = st.nextElement().toString();
+			actWord = StringNormalizer.removeStopMarks(actWord);
+			if (wordFilter.isKeyWordStopWord(actWord, logger)) 
+			{
+				newText += actWord + " ";
 			}
-			enrichmentResults.add(enrichmentResult);
+		}
+		text = newText;
+		if (!text.trim().isEmpty())
+		{
+			Set<DbpediaSpotlightResult> dbpediaSpotlightResults = dbpediaSpotlight.searchDbpediaSpotlight(text, logger);
+			for (Iterator<DbpediaSpotlightResult> iterator = dbpediaSpotlightResults.iterator(); iterator.hasNext();) {
+				DbpediaSpotlightResult dbpediaSpotlightResult = (DbpediaSpotlightResult) iterator.next();
+				EnrichmentResult enrichmentResult = new EnrichmentResult(EnrichmentSource.DBPEDIA);
+				enrichmentResult.setWord(dbpediaSpotlightResult.getName());
+				enrichmentResult.setUri(dbpediaSpotlightResult.getURI());
+				if (dbpediaSpotlightResult.types != null && !dbpediaSpotlightResult.types.isEmpty() ) {
+					enrichmentResult.setTypes(dbpediaSpotlightResult.getAllConcepts());
+					enrichmentResult.setType(enrichmentResult.getTypes().get(0));
+					if (enrichmentResult.isTypeGeographicResource())
+					{
+						Set<EnrichmentResult> responseGeonames = geonames.getLocationHierarchy(enrichmentResult.getWord(), logger);
+						enrichmentResults.addAll(responseGeonames);
+					}
+				}
+				enrichmentResults.add(enrichmentResult);
+			}
 		}
 		
 		/*
