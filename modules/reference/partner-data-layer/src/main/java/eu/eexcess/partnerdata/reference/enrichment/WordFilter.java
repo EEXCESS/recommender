@@ -25,6 +25,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import net.sf.extjwnl.JWNLException;
+import net.sf.extjwnl.data.IndexWordSet;
 import eu.eexcess.config.PartnerConfiguration;
 import eu.eexcess.partnerdata.reference.PartnerdataLogger;
 import eu.eexcess.partnerdata.reference.PartnerdataTracer;
@@ -49,6 +51,51 @@ public class WordFilter {
 	public WordNetProxy getWordNet()
 	{
 		return wordnetProxy;
+	}
+	public boolean isKeyWordWithWordNet(String word, PartnerdataLogger logger)
+	{
+		int demandedMinLength=3;
+
+		//check if it's shorter than demandedMinLength
+		if (word.length()<demandedMinLength)
+		{
+			return false;
+		}
+
+		//check if it's a stopword
+		if (stopWordsList.contains(word.toLowerCase()))
+		{
+			return false;
+		}
+
+		try {
+			IndexWordSet res = wordnetProxy.dictionary.lookupAllIndexWords(word);
+			if (res != null)
+				return true;
+		} catch (JWNLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return false;
+	}
+	
+	public boolean isKeyWordStopWord(String word, PartnerdataLogger logger)
+	{
+		int demandedMinLength=3;
+
+		//check if it's shorter than demandedMinLength
+		if (word.length()<demandedMinLength)
+		{
+			return false;
+		}
+
+		//check if it's a stopword
+		if (stopWordsList.contains(word.toLowerCase()))
+		{
+			return false;
+		}
+
+		return true;
 	}
 
 	public boolean isKeyWord(String word, PartnerdataLogger logger)

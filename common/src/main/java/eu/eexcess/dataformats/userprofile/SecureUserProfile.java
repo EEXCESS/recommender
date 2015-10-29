@@ -36,7 +36,7 @@ import eu.eexcess.dataformats.PartnerBadge;
 public class SecureUserProfile implements Serializable {
     private static final long serialVersionUID = 1344062464911638930L;
 
-    private List<PartnerBadge> partnerList = new ArrayList<PartnerBadge>();
+    private List<PartnerBadge> partnerList;
     private List<PartnerBadge> protectedPartnerList = new ArrayList<PartnerBadge>();
     private String queryID;
     private Integer ageRange;

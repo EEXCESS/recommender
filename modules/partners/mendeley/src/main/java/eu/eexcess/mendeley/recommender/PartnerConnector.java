@@ -213,18 +213,10 @@ public class PartnerConnector extends PartnerConnectorBase implements PartnerCon
 	        String searchRequest = StrSubstitutor.replace(partnerConfiguration.getDetailEndpoint(), valuesMap);
 			AccessTokenResponse accessTokenResponse = getAccessToken(client, partnerConfiguration);
 
-/*
-	        WebResource service = client.resource(searchRequest);
-	       
-	        Builder builder = service.accept(MediaType.APPLICATION_JSON);
-
-	        client.destroy();
-	        
-	        String httpJSONResult = builder.get(String.class);
-	        */
 			String httpJSONResult ="";
 			try {
-				client.addFilter(new LoggingFilter(logger));
+				// removed logging
+//				client.addFilter(new LoggingFilter(logger));
 				httpJSONResult = client.resource(searchRequest)
 						.header("Authorization", "Bearer " + accessTokenResponse.getAccessToken()).accept(APPLICATION_MENDELEY_TYPE)
 						.get(String.class);
@@ -243,10 +235,7 @@ public class PartnerConnector extends PartnerConnectorBase implements PartnerCon
 			try {
 				newResponse = this.transformJSON2XML(httpJSONResult);
 			} catch (EEXCESSDataTransformationException e) {
-				// TODO logger
-				
 				logger.log(Level.INFO,"Error Transforming Json to xml",e );
-				
 			}
 	        return newResponse;
 		}
