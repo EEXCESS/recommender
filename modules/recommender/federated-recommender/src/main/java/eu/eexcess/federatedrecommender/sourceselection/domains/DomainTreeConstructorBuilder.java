@@ -35,8 +35,6 @@ import eu.eexcess.federatedrecommender.utils.domains.wordnet.WordnetDomainTreeIn
 public class DomainTreeConstructorBuilder {
 
     /**
-     * TODO: externalize string to {@link FederatedRecommenderConfiguration} if
-     * possible<br>
      * configures the file where the domain tree can be found as csv
      */
     private static final String wordnetDomainStructureCsvFile = "wn-domains-3.2-tree.csv";

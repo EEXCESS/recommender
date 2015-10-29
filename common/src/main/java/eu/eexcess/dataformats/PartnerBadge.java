@@ -51,7 +51,7 @@ public class PartnerBadge implements Serializable {
     private String partnerKey;
     private PartnerBadgeStats shortTimeStats = new PartnerBadgeStats();
 
-    // TODO: Statistics should be moved somewere else! (Specially the logic for
+    // TODO: Statistics should be moved somewhere else! (Specially the logic for
     // it)
 
     public PartnerBadgeStats longTimeStats = new PartnerBadgeStats();

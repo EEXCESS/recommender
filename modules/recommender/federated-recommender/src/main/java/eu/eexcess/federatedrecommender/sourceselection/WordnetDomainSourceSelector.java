@@ -139,10 +139,6 @@ public class WordnetDomainSourceSelector implements PartnerSelector {
         }
     }
 
-    // TODO: Domain detection does not consider weights and ordering of domains
-    // now. Therefore source selection is based only on at least one domain hit,
-    // regardless
-    // of keyword domain weight or partner domain weight.
     @Override
     public SecureUserProfile sourceSelect(SecureUserProfile userProfile, List<PartnerBadge> partners) {
 
@@ -247,13 +243,6 @@ public class WordnetDomainSourceSelector implements PartnerSelector {
                 return;
             }
         }
-        /*
-         * TODO rrubien wnd-ss next steps will be: construct plain not weighted
-         * domain tree assign partner domains to a cloned not weighted tree
-         * assign seenKeywordDomains to an other cloned not weighted tree
-         * calculate similarity measure of both trees apply filtering on all
-         * known similarity measures
-         */
 
         Double totalWeight = 0.0;
         for (PartnerBadge partner : partners) {

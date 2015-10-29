@@ -94,8 +94,6 @@ public class DBDomainSampler extends TopTermToWNDomain {
             Query query = new QueryParser(DBDomainSampler.fieldOfInterest, new EnglishAnalyzer()).parse(queryString);
             TopScoreDocCollector collector = TopScoreDocCollector.create(1000, false);
             new IndexSearcher(inIndexReader).search(query, collector);
-            // ScoreDoc[] docs = collector.topDocs().scoreDocs;
-            // TODO: create and store docs to new index called subSample.name
         }
         throw new UnsupportedOperationException("not implemented yet");
     }

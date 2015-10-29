@@ -45,19 +45,3 @@ public interface TreeNode extends Iterable<TreeNode> {
     public abstract String getName();
 
 }
-
-// TODO rrubien
-//public interface TreeNode<T> extends Iterable<TreeNode<T>> {
-//
-//    public abstract boolean addChild(TreeNode<T> n);
-//
-//    public abstract Set<? extends TreeNode<T>> getChildren();
-//
-//    @Override
-//    public abstract Iterator<TreeNode<T>> iterator();
-//
-//    public abstract void setName(String name);
-//
-//    public abstract String getName();
-//
-//}
