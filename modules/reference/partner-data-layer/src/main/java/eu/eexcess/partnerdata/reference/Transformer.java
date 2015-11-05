@@ -41,6 +41,7 @@ import javax.xml.xpath.XPathFactory;
 
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
+import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
@@ -518,5 +519,32 @@ public class Transformer implements ITransformer {
         Element element = orgPartnerResult.getDocumentElement();
         return element.getAttribute(attribut);
     }
+
+    
+	public Document removeNameSpaces(Document doc) {
+	    NodeList list = doc.getChildNodes();
+	    for (int i = 0; i < list.getLength(); i++) {
+	        removeNameSpaces(list.item(i), "");
+	    }
+
+	    return doc;
+	}
+	
+	private void removeNameSpaces(Node node, String nameSpaceURI) {
+	    if (node.getNodeType() == Node.ELEMENT_NODE) {
+	        Document ownerDoc = node.getOwnerDocument();
+	        NamedNodeMap map = node.getAttributes();
+	        Node n;
+	        while (!(0==map.getLength())) {
+	            n = map.item(0);
+	            map.removeNamedItemNS(n.getNamespaceURI(), n.getLocalName());
+	        }
+	        ownerDoc.renameNode(node, nameSpaceURI, node.getLocalName());
+	    }
+	    NodeList list = node.getChildNodes();
+	    for (int i = 0; i < list.getLength(); i++) {
+	        removeNameSpaces(list.item(i), nameSpaceURI);
+	    }
+	}
 
 }

@@ -24,6 +24,10 @@ import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Unmarshaller;
 
+import net.sf.json.JSON;
+import net.sf.json.JSONObject;
+import net.sf.json.JSONSerializer;
+
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpPost;
@@ -134,6 +138,7 @@ public class PartnerRecommenderTestHelper {
 
             HttpPost request = new HttpPost("http://localhost:" + port + "/" + deploymentContext + "/partner/recommend/");
             request.addHeader("content-type", "application/xml");
+            request.addHeader("accept", "application/xml");
             request.setEntity(params);
             HttpResponse response = httpClient.execute(request);
             String responseString = EntityUtils.toString(response.getEntity());
@@ -148,6 +153,30 @@ public class PartnerRecommenderTestHelper {
         }
 
         return resultList;
+    }
+    
+    static public JSON getRecommendationsJSON(String deploymentContext, int port, StringEntity params) {
+
+        HttpClient httpClient = new DefaultHttpClient();
+        try {
+
+            HttpPost request = new HttpPost("http://localhost:" + port + "/" + deploymentContext + "/partner/recommend/");
+            request.addHeader("content-type", "application/xml");
+            request.addHeader("accept", "application/json");
+            request.setEntity(params);
+            HttpResponse response = httpClient.execute(request);
+            String responseString = EntityUtils.toString(response.getEntity());
+
+            JSON json = JSONSerializer.toJSON( responseString ); 
+            return json;
+        } catch (Exception ex) {
+            System.out.println(ex);
+        } finally {
+
+            httpClient.getConnectionManager().shutdown();
+        }
+
+        return null;
     }
 
     @SuppressWarnings({ "resource" })
