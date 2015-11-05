@@ -177,7 +177,11 @@ public class FederatedRecommenderService {
     public ResultList recommend(SecureUserProfile userProfile) throws IOException {
         ResultList resultList = new ResultList();
         LOGGER.log(Level.INFO,"AgeRange in userProfile " + userProfile.getAgeRange());
-        resultList = fRC.generateFederatedRecommendation(userProfile);
+        try {
+			resultList = fRC.generateFederatedRecommendation(userProfile);
+		} catch (FederatedRecommenderException e) {
+			LOGGER.log(Level.SEVERE,"Some error occured processing the query",e );
+		}
         resultList.queryID = userProfile.getQueryID();
         return resultList;
     }
@@ -278,7 +282,13 @@ public class FederatedRecommenderService {
         for (String text : Arrays.asList(context)) {
             userProfile.getContextKeywords().add(new ContextKeyword(text, 0.1));
         }
-        return fRC.generateFederatedRecommendation(userProfile);
+    	ResultList resultList = new ResultList(); 
+        try {
+			 resultList = fRC.generateFederatedRecommendation(userProfile);
+		} catch (FederatedRecommenderException e) {
+			LOGGER.log(Level.SEVERE,"Some error occured processing the query",e );
+		}
+        return resultList;
     }
 
     @GET

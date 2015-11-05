@@ -278,8 +278,9 @@ public class FederatedRecommenderCore implements ProbeResultChanged {
      * main function to generate a federated recommendation
      * 
      * @return
+     * @throws FederatedRecommenderException 
      */
-    public ResultList generateFederatedRecommendation(SecureUserProfile secureUserProfile) throws FileNotFoundException {
+    public ResultList generateFederatedRecommendation(SecureUserProfile secureUserProfile) throws FileNotFoundException, FederatedRecommenderException {
         ResultList resultList = null;
         SecureUserProfile secureUserProfileTmp = secureUserProfile;
         if (federatedRecConfiguration.getSourceSelectors() != null) {
@@ -288,15 +289,26 @@ public class FederatedRecommenderCore implements ProbeResultChanged {
             secureUserProfileTmp = sourceSelection(secureUserProfileTmp, sourceSelectors);
         }
         try {
-            resultList = getAndAggregateResults(secureUserProfileTmp, this.federatedRecConfiguration.getDefaultPickerName());
+            resultList = getAndAggregateResults(secureUserProfileTmp, getPickerName(secureUserProfile));
         } catch (FederatedRecommenderException e) {
             LOGGER.log(Level.SEVERE, "Some error retrieving or aggregation results occured.", e);
+            throw new FederatedRecommenderException("Some error retrieving or aggregation results occured.", e);
         }
         return resultList;
 
     }
-
     /**
+     *returns the name of the picker, if the picker can not be found or loaded it returns 
+     * @param secureUserProfile
+     * @return
+     */
+    private String getPickerName(SecureUserProfile secureUserProfile) {
+			if(secureUserProfile.getPickerName()!=null && !secureUserProfile.getPickerName().isEmpty())
+				return secureUserProfile.getPickerName();
+		return this.federatedRecConfiguration.getDefaultPickerName();
+	}
+
+	/**
      * Distributes the documents to each of the
      * 
      * @param documents
@@ -623,11 +635,14 @@ public class FederatedRecommenderCore implements ProbeResultChanged {
         try {
             Object newInstance = statelessClassInstances.get(pickerName);
             if (newInstance == null) {
-                newInstance = Class.forName(pickerName).newInstance();
+                Class<?> forName = Class.forName(pickerName);
+                if(forName==null)
+                	 throw new FederatedRecommenderException("Could not get Picker from Class: " + pickerName);
+				newInstance = forName.newInstance();
                 statelessClassInstances.put(pickerName, newInstance);
             }
             pFRPicker = (PartnersFederatedRecommendationsPicker) newInstance;
-        } catch (InstantiationException | IllegalAccessException | ClassNotFoundException e) {
+        } catch (InstantiationException | IllegalAccessException | NullPointerException |ClassNotFoundException e) {
             LOGGER.log(Level.SEVERE, "Could not get Picker from Class: " + pickerName, e);
             throw new FederatedRecommenderException("Could not get Picker from Class: " + pickerName, e);
         }
@@ -677,12 +692,12 @@ public class FederatedRecommenderCore implements ProbeResultChanged {
                     withKey = true;
                 if (!withKey)
                     for (PartnerBadge uBadge : secureUserProfile.getPartnerList()) {
-                        if (uBadge.getSystemId().equals(partner.getSystemId()))
+                        if (partner.getSystemId()!=null && uBadge.getSystemId()!=null &&uBadge.getSystemId().equals(partner.getSystemId()))
                             return true;
                     }
                 else
                     for (PartnerBadge uBadge : secureUserProfile.getProtectedPartnerList()) {
-                        if (uBadge.getPartnerKey() != null && !uBadge.getPartnerKey().isEmpty() && partner.getPartnerKey().equals(uBadge.getPartnerKey())
+                        if (partner.getSystemId()!=null && uBadge.getSystemId()!=null && uBadge.getPartnerKey() != null && !uBadge.getPartnerKey().isEmpty() && partner.getPartnerKey().equals(uBadge.getPartnerKey())
                                 && uBadge.getSystemId().equals(partner.getSystemId()))
                             return true;
                     }
@@ -692,7 +707,7 @@ public class FederatedRecommenderCore implements ProbeResultChanged {
             }
         } else
             return true;
-
+        
         return false;
     }
 

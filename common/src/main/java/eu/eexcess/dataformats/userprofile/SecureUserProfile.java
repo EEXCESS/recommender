@@ -38,6 +38,7 @@ public class SecureUserProfile implements Serializable {
 
     private List<PartnerBadge> partnerList;
     private List<PartnerBadge> protectedPartnerList = new ArrayList<PartnerBadge>();
+    private String pickerName;
     private String queryID;
     private Integer ageRange;
     private Integer numResults;
@@ -166,6 +167,14 @@ public class SecureUserProfile implements Serializable {
 	public void setAgeRange(Integer ageRange) {
 		this.ageRange = ageRange;
 	}
+	
+	public String getPickerName() {
+		return pickerName;
+	}
+
+	public void setPickerName(String pickerName) {
+		this.pickerName = pickerName;
+	}
 
 	@Override
 	public int hashCode() {
@@ -286,7 +295,5 @@ public class SecureUserProfile implements Serializable {
 				+ userCredentials + ", contextKeywords=" + contextKeywords
 				+ ", interestList=" + interestList + ", context=" + context
 				+ "]";
-	}
-	
-	
+	}	
 }
