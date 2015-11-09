@@ -20,7 +20,7 @@ GNU Affero General Public License for more details.
 You should have received a copy of the GNU Affero General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
  * @author Raoul Rubien
-*/
+ */
 
 package eu.eexcess.diversityasurement.iaselect;
 
@@ -31,5 +31,41 @@ package eu.eexcess.diversityasurement.iaselect;
  * @author Raoul Rubien
  */
 public class Query extends MessageCategories {
+
+    public final String query;
+
+    public Query(String query) {
+        this.query = query;
+    }
+
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + ((query == null) ? 0 : query.hashCode());
+        return result;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj)
+            return true;
+        if (obj == null)
+            return false;
+        if (getClass() != obj.getClass())
+            return false;
+        Query other = (Query) obj;
+        if (query == null) {
+            if (other.query != null)
+                return false;
+        } else if (!query.equals(other.query))
+            return false;
+        return true;
+    }
+
+    @Override
+    public String toString() {
+        return "Query [query=" + query + ", super=" + super.toString() + "]";
+    }
 
 }

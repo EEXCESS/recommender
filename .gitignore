@@ -1,0 +1,69 @@
+# eclipse ignores
+.classpath
+.gitignore
+.gitignore~
+.settings
+*.class
+
+# Mobile Tools for Java (J2ME)
+.mtj.tmp/
+
+# Package Files #
+*.jar
+*.war
+*.ear
+
+# virtual machine crash logs, see http://www.java.com/en/download/help/error_hotspot.xml
+hs_err_pid*
+
+# partners
+
+#odules/partners/ddb/target/
+modules/partners/ddb/src/main/resources/partner-config.json
+
+#odules/partners/europeana/target/
+modules/partners/europeana/src/main/resources/partner-config.json
+modules/partners/europeana/*-enrichment-stats.csv
+
+modules/partners/kimportal/target/
+modules/partners/kimportal/c:\\*
+modules/partners/kimcollect/src/main/resources/partner-config.json
+
+#modules/partners/mendeley/target/
+modules/partners/mendeley/src/main/resources/partner-config.json
+modules/partners/mendeley/*-enrichment-stats.csv
+
+#modules/partners/opensearch/target/
+modules/partners/opensearch/src/main/resources/partner-config.json
+
+#modules/partners/wikipedialocal/target/
+modules/partners/wikipedialocal/src/main/resources/partner-config.json
+
+#modules/partners/wissenmedia/target/
+modules/partners/wissenmedia/src/main/resources/partner-config.json
+modules/partners/wissenmedia/*-enrichment-stats.csv
+
+modules/partners/zbw/target/
+modules/partners/zbw/src/main/resources/partner-config.json
+modules/partners/zbw/*-enrichment-stats.csv
+
+#modules/recommender/federated-recommender/target/
+#odules/reference/partner-data-layer/target/
+#modules/reference/partner-recommender/target/
+#odules/reference/partner-web-service/target/
+
+.project
+common/target/
+
+pom.xml.tag
+pom.xml.releaseBackup
+pom.xml.versionsBackup
+pom.xml.next
+release.properties
+dependency-reduced-pom.xml
+buildNumber.properties
+
+# deployment script
+tomcat-local-uploadscript.sh
+
+/bin/

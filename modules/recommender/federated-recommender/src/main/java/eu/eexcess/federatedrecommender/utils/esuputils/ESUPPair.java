@@ -19,93 +19,93 @@ GNU Affero General Public License for more details.
 
 You should have received a copy of the GNU Affero General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
-*/
+ */
 package eu.eexcess.federatedrecommender.utils.esuputils;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
+
 /**
  * ExtendedSecureUserProfilePair support class
+ * 
  * @author hziak
  *
  */
-public class ESUPPair implements Cloneable{
-	private String source;
-	private List<ESUPSource> sourceClasses;
-	
+public class ESUPPair implements  Serializable {
+    private static final long serialVersionUID = 6130633513641518529L;
 
-	public ESUPPair(String source, List<ESUPSource> sourceClass) {
-		this.source = source;
-		this.setSourceClasses(sourceClass);
-	}
+    private String source;
+    private List<ESUPSource> sourceClasses;
 
-	
+    public ESUPPair(String source, List<ESUPSource> sourceClass) {
+        this.source = source;
+        this.setSourceClasses(sourceClass);
+    }
 
-	public ESUPPair(ESUPPair mean) {
-		this.source = new String(mean.source);
-		this.sourceClasses = new ArrayList<ESUPSource>();
-		for (ESUPSource esupSource : mean.getSourceClasses()) {
-			sourceClasses.add(new ESUPSource(esupSource));
-		}
-	}
+    public ESUPPair(ESUPPair mean) {
+        this.source = new String(mean.source);
+        this.sourceClasses = new ArrayList<ESUPSource>();
+        for (ESUPSource esupSource : mean.getSourceClasses()) {
+            sourceClasses.add(new ESUPSource(esupSource));
+        }
+    }
 
+    public String getSource() {
+        return source;
+    }
 
+    public void setSource(String source) {
+        this.source = source;
+    }
 
-	public String getSource() {
-		return source;
-	}
+    public List<ESUPSource> getSourceClasses() {
+        return sourceClasses;
+    }
 
-	public void setSource(String source) {
-		this.source = source;
-	}
+    public void setSourceClasses(List<ESUPSource> sourceClass) {
+        this.sourceClasses = sourceClass;
+    }
 
-	public List<ESUPSource> getSourceClasses() {
-		return sourceClasses;
-	}
+    public ESUPSource getBiggestSourceClass() {
+        ESUPSource result = null;
+        double value = 0.0;
+        for (ESUPSource esupSource : sourceClasses) {
+            double linksTotalValue = esupSource.getLinksTotalValue();
+            if (linksTotalValue > value) {
+                result = esupSource;
+                value = linksTotalValue;
+            }
+        }
+        return result;
+    }
+    
+    @Override
+    public String toString() {
+        return source + " " + getBiggestSourceClass();
 
-	public void setSourceClasses(List<ESUPSource> sourceClass) {
-		this.sourceClasses = sourceClass;
-	}
-	public ESUPSource getBiggestSourceClass(){
-		ESUPSource result = null;
-		double value=0.0;
-		for(ESUPSource esupSource : sourceClasses){
-			double linksTotalValue = esupSource.getLinksTotalValue();
-			if(linksTotalValue > value){
-				result = esupSource;
-				value =linksTotalValue;
-			}
-		}
-		return result;
-	}
-	public String toString(){
-		return source +  " "+  getBiggestSourceClass();
-		
-	}
-	@Override
-	public int hashCode() {
-		final int prime = 31;
-		int result = 1;
-		result = prime * result + ((source == null) ? 0 : source.hashCode());
-		result = prime * result
-				+ ((sourceClasses == null) ? 0 : sourceClasses.hashCode());
-		return result;
-	}
+    }
 
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + ((source == null) ? 0 : source.hashCode());
+        result = prime * result + ((sourceClasses == null) ? 0 : sourceClasses.hashCode());
+        return result;
+    }
 
-	/**
-	 * Careful, Equals overwritten
-	 */
-	@Override
-	public boolean equals(Object obj) {
-		 if (obj instanceof ESUPPair) {
-			if(this.source.equals(((ESUPPair)obj).getSource()))
-				return true;
-		}
-		 return false;
-	}
-	
-	
-	 
+    /**
+     * Careful, Equals overwritten
+     */
+    @Override
+    public boolean equals(Object obj) {
+        if (obj instanceof ESUPPair && this.source.equals(((ESUPPair) obj).getSource())){
+                return true;
+        }
+        return false;
+    }
+    
+
 
 }

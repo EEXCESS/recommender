@@ -18,6 +18,7 @@ package eu.eexcess.zbw.recommender;
 
 import java.net.URLEncoder;
 
+import eu.eexcess.dataformats.result.DocumentBadge;
 import eu.eexcess.dataformats.userprofile.ContextKeyword;
 import eu.eexcess.dataformats.userprofile.SecureUserProfile;
 import eu.eexcess.partnerrecommender.api.QueryGeneratorApi;
@@ -28,13 +29,20 @@ public class ZBWQueryGenerator implements QueryGeneratorApi {
     @Override
     public String toQuery(SecureUserProfile userProfile) {
         StringBuilder builder = new StringBuilder();
-        for (ContextKeyword context : userProfile.contextKeywords) {
+        for (ContextKeyword context : userProfile.getContextKeywords()) {
             if (builder.length() > 0) { 
             	builder.append(" OR "); 
             }
-            builder.append(context.text);
+            builder.append(context.getText());
         }
         return URLEncoder.encode( "\""+builder.toString()+"\"");
     }
+
+	@Override
+	public String toDetailQuery(DocumentBadge document) {
+		if (document.uri.contains("#"))
+			return document.uri.substring(document.uri.lastIndexOf("#")+1);
+		return null;
+	}
 
 }

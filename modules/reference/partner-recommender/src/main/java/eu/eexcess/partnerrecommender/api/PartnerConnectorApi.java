@@ -21,6 +21,7 @@ import java.io.IOException;
 import org.w3c.dom.Document;
 
 import eu.eexcess.config.PartnerConfiguration;
+import eu.eexcess.dataformats.result.DocumentBadge;
 import eu.eexcess.dataformats.result.ResultList;
 import eu.eexcess.dataformats.userprofile.SecureUserProfile;
 import eu.eexcess.partnerdata.reference.PartnerdataLogger;
@@ -30,23 +31,37 @@ import eu.eexcess.partnerdata.reference.PartnerdataLogger;
  * 
  * @author plopez@know-center.at
  */
+// TODO: "PartnerConfiguration partnerConfiguration" parameters should be
+// removed from the interface since it reachable via chache-enum
 public interface PartnerConnectorApi {
-	    
-	    /** 
-	     * Queries a partner
-	     * @param partnerConfiguration
-	     * @param userProfile
-	     * @return the search request as string
-	     * @throws IOException 
-	     */
-	    public Document queryPartner(PartnerConfiguration partnerConfiguration, SecureUserProfile userProfile, PartnerdataLogger logger) throws IOException;
 
-	    /**
-	     * Queries a partner and directly returns a ResultList instance.
-	     * @param partnerConfiguration
-	     * @param userProfile
-	     * @return null, if not supported
-	     * @throws IOException
-	     */
-		public ResultList queryPartnerNative(PartnerConfiguration partnerConfiguration, SecureUserProfile userProfile, PartnerdataLogger logger) throws IOException;
+    /**
+     * Queries a partner
+     * 
+     * @param partnerConfiguration
+     * @param userProfile
+     * @return the search request as string
+     * @throws IOException
+     */
+    public Document queryPartner(PartnerConfiguration partnerConfiguration, SecureUserProfile userProfile, PartnerdataLogger logger) throws IOException;
+
+    /**
+     * Queries a partner
+     * 
+     * @param partnerConfiguration
+     * @param userProfile
+     * @return the search request as string
+     * @throws IOException
+     */
+    public Document queryPartnerDetails(PartnerConfiguration partnerConfiguration, DocumentBadge document, PartnerdataLogger logger) throws IOException;
+
+    /**
+     * Queries a partner and directly returns a ResultList instance.
+     * 
+     * @param partnerConfiguration
+     * @param userProfile
+     * @return null, if not supported
+     * @throws IOException
+     */
+    public ResultList queryPartnerNative(PartnerConfiguration partnerConfiguration, SecureUserProfile userProfile, PartnerdataLogger logger) throws IOException;
 }

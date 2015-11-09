@@ -19,67 +19,73 @@ GNU Affero General Public License for more details.
 
 You should have received a copy of the GNU Affero General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
-*/
+ */
 package eu.eexcess.federatedrecommender.utils.esuputils;
+
+import java.io.Serializable;
+
 /**
  * ExtendedSecureUserProfileLink support class
+ * 
  * @author hziak
  *
  */
-public class ESUPLink {
-	private String className;
-	private Double link;
+public class ESUPLink implements Serializable {
+    private static final long serialVersionUID = -311440128549127093L;
+    private String className;
+    private Double link;
 
-	public ESUPLink(String className, Double link) {
-		this.setClassName(className);
-		this.setLink(link);
-	}
+    public ESUPLink(String className, Double link) {
+        this.setClassName(className);
+        this.setLink(link);
+    }
 
-	public ESUPLink(ESUPLink esupLink) {
-		this.className = new String(esupLink.className);
-		this.link = new Double(esupLink.getLink());
-	}
+    public ESUPLink(ESUPLink esupLink) {
+        this.className = new String(esupLink.className);
+        this.link = new Double(esupLink.getLink());
+    }
 
-	public String getClassName() {
-		return className;
-	}
+    public String getClassName() {
+        return className;
+    }
 
-	public void setClassName(String className) {
-		this.className = className;
-	}
+    public void setClassName(String className) {
+        this.className = className;
+    }
 
-	public Double getLink() {
-		return link;
-	}
+    public Double getLink() {
+        return link;
+    }
 
-	public void setLink(Double link) {
-		this.link = link;
-	}
-	
-	@Override
-	public int hashCode() {
-		final int prime = 31;
-		int result = 1;
-		result = prime * result
-				+ ((className == null) ? 0 : className.hashCode());
-		result = prime * result + ((link == null) ? 0 : link.hashCode());
-		return result;
-	}
-	/**
-	 * Careful, Equals overwritten
-	 */
-	@Override
-	public boolean equals(Object o){
-		if(o instanceof ESUPLink){
-			if(((ESUPLink)o).getClassName().equals(this.getClassName())){
-				return true;
-			}
-		}
-		return false;
-	}
-	public String toString(){
-		return className + " " + link;
-	}
-	
+    public void setLink(Double link) {
+        this.link = link;
+    }
+
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + ((className == null) ? 0 : className.hashCode());
+        result = prime * result + ((link == null) ? 0 : link.hashCode());
+        return result;
+    }
+
+    /**
+     * Careful, Equals overwritten
+     */
+    @Override
+    public boolean equals(Object o) {
+        if (o instanceof ESUPLink) {
+            if (((ESUPLink) o).getClassName().equals(this.getClassName())) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    @Override
+    public String toString() {
+        return "ESUPLink [className=" + className + ", link=" + link + "]";
+    }
 
 }

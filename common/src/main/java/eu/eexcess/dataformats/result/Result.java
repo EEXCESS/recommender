@@ -17,143 +17,127 @@ limitations under the License.
 package eu.eexcess.dataformats.result;
 
 import java.io.Serializable;
+import java.util.LinkedList;
 
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 
 /**
- * Basic information about a recommended item in EEXCESS data format.
+ * Object representation of the returned documents bei the federated recommender
  * 
- * @author plopez@know-center.at
+ * @author hziak@know-center.at
  */
 @XmlRootElement(name = "eexcess-result")
 public class Result implements Serializable {
 
-	private static final long serialVersionUID = -3095633945245542398L;
+    private static final long serialVersionUID = -3095633945245542398L;
 
-	@XmlElement(name = "id")
-	public String id;
+    @XmlElement(name = "resultGroup")
+    public LinkedList<Result> resultGroup = new LinkedList<Result>();
 
-	
-	@XmlElement(name = "title")
-	public String title;
+    @XmlElement(name = "documentBadge")
+    public DocumentBadge documentBadge = new DocumentBadge();
 
-	@XmlElement(name = "previewImage")
-	public String previewImage;
+    @XmlElement(name = "mediaType")
+    public String mediaType;
 
-	@XmlElement(name = "uri")
-	public String uri;
+    @XmlElement(name = "previewImage")
+    public String previewImage;
 
-	@XmlElement(name = "eexcessURI")
-	public String eexcessURI;
+    @XmlElement(name = "title")
+    public String title;
 
-	@XmlElement(name = "creator")
-	public String creator;
+    @XmlElement(name = "description")
+    public String description;
 
-	@XmlElement(name = "description")
-	public String description;
+    @XmlElement(name = "date")
+    public String date;
 
-	@XmlElement(name = "collectionName")
-	public String collectionName;
+    @XmlElement(name = "language")
+    public String language;
 
-	/* Fields that should be returned as facets (provider, type, language, year) */
+    @XmlElement(name = "licence")
+    public String licence;
+    @XmlElement(name = "generatingQuery")
+    public String generatingQuery;
 
-	@XmlElement(name = "facets")
-	public ResultFacets facets = new ResultFacets();
+    @Override
+    public String toString() {
+        return "Result [resultGroup=" + resultGroup + ", documentBadge=" + documentBadge + ", mediaType=" + mediaType + ", previewImage=" + previewImage + ", title=" + title
+                + ", description=" + description + ", date=" + date + ", language=" + language + ", licence=" + licence + "]";
+    }
 
-	@XmlElement(name = "rdf")
-	public Object rdf = null;
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + ((description == null) ? 0 : description.hashCode());
+        result = prime * result + ((documentBadge == null) ? 0 : documentBadge.hashCode());
+        result = prime * result + ((language == null) ? 0 : language.hashCode());
+        result = prime * result + ((licence == null) ? 0 : licence.hashCode());
+        result = prime * result + ((mediaType == null) ? 0 : mediaType.hashCode());
+        result = prime * result + ((previewImage == null) ? 0 : previewImage.hashCode());
+        result = prime * result + ((resultGroup == null) ? 0 : resultGroup.hashCode());
+        result = prime * result + ((title == null) ? 0 : title.hashCode());
+        result = prime * result + ((date == null) ? 0 : date.hashCode());
+        return result;
+    }
 
-	@Override
-	public String toString() {
-		return id + " " + title + " " + previewImage + " " + uri + " "
-				+ creator + " " + description + " " + collectionName;
-	}
-
-	@Override
-	public int hashCode() {
-		final int prime = 31;
-		int result = 1;
-		result = prime * result
-				+ ((collectionName == null) ? 0 : collectionName.hashCode());
-		result = prime * result + ((creator == null) ? 0 : creator.hashCode());
-		result = prime * result
-				+ ((description == null) ? 0 : description.hashCode());
-		result = prime * result
-				+ ((eexcessURI == null) ? 0 : eexcessURI.hashCode());
-		result = prime * result + ((facets == null) ? 0 : facets.hashCode());
-		result = prime * result + ((id == null) ? 0 : id.hashCode());
-		result = prime * result
-				+ ((previewImage == null) ? 0 : previewImage.hashCode());
-		result = prime * result + ((rdf == null) ? 0 : rdf.hashCode());
-		result = prime * result + ((title == null) ? 0 : title.hashCode());
-		result = prime * result + ((uri == null) ? 0 : uri.hashCode());
-		return result;
-	}
-
-	@Override
-	public boolean equals(Object obj) {
-		if (this == obj)
-			return true;
-		if (obj == null)
-			return false;
-		if (getClass() != obj.getClass())
-			return false;
-		Result other = (Result) obj;
-		if (collectionName == null) {
-			if (other.collectionName != null)
-				return false;
-		} else if (!collectionName.equals(other.collectionName))
-			return false;
-		if (creator == null) {
-			if (other.creator != null)
-				return false;
-		} else if (!creator.equals(other.creator))
-			return false;
-		if (description == null) {
-			if (other.description != null)
-				return false;
-		} else if (!description.equals(other.description))
-			return false;
-		if (eexcessURI == null) {
-			if (other.eexcessURI != null)
-				return false;
-		} else if (!eexcessURI.equals(other.eexcessURI))
-			return false;
-		if (facets == null) {
-			if (other.facets != null)
-				return false;
-		} else if (!facets.equals(other.facets))
-			return false;
-		if (id == null) {
-			if (other.id != null)
-				return false;
-		} else if (!id.equals(other.id))
-			return false;
-		if (previewImage == null) {
-			if (other.previewImage != null)
-				return false;
-		} else if (!previewImage.equals(other.previewImage))
-			return false;
-		if (rdf == null) {
-			if (other.rdf != null)
-				return false;
-		} else if (!rdf.equals(other.rdf))
-			return false;
-		if (title == null) {
-			if (other.title != null)
-				return false;
-		} else if (!title.equals(other.title))
-			return false;
-		if (uri == null) {
-			if (other.uri != null)
-				return false;
-		} else if (!uri.equals(other.uri))
-			return false;
-		return true;
-	}
-
-
-	
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj)
+            return true;
+        if (obj == null)
+            return false;
+        if (getClass() != obj.getClass())
+            return false;
+        Result other = (Result) obj;
+        if (description == null) {
+            if (other.description != null)
+                return false;
+        } else if (!description.equals(other.description))
+            return false;
+        if (documentBadge == null) {
+            if (other.documentBadge != null)
+                return false;
+        } else if (!documentBadge.equals(other.documentBadge))
+            return false;
+        if (language == null) {
+            if (other.language != null)
+                return false;
+        } else if (!language.equals(other.language))
+            return false;
+        if (licence == null) {
+            if (other.licence != null)
+                return false;
+        } else if (!licence.equals(other.licence))
+            return false;
+        if (mediaType == null) {
+            if (other.mediaType != null)
+                return false;
+        } else if (!mediaType.equals(other.mediaType))
+            return false;
+        if (previewImage == null) {
+            if (other.previewImage != null)
+                return false;
+        } else if (!previewImage.equals(other.previewImage))
+            return false;
+        if (resultGroup == null) {
+            if (other.resultGroup != null)
+                return false;
+        } else if (!resultGroup.equals(other.resultGroup))
+            return false;
+        if (title == null) {
+            if (other.title != null)
+                return false;
+        } else if (!title.equals(other.title))
+            return false;
+        if (date == null) {
+            if (other.date != null)
+                return false;
+        } else if (!date.equals(other.date))
+            return false;
+        return true;
+    }
 
 }

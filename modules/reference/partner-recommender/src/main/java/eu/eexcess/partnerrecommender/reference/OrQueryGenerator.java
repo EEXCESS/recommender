@@ -19,30 +19,64 @@ GNU Affero General Public License for more details.
 
 You should have received a copy of the GNU Affero General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
-*/
+ */
 package eu.eexcess.partnerrecommender.reference;
 
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
+import eu.eexcess.dataformats.result.DocumentBadge;
 import eu.eexcess.dataformats.userprofile.ContextKeyword;
+import eu.eexcess.dataformats.userprofile.ExpansionType;
 import eu.eexcess.dataformats.userprofile.SecureUserProfile;
+import eu.eexcess.partnerrecommender.api.PartnerConfigurationCache;
 import eu.eexcess.partnerrecommender.api.QueryGeneratorApi;
+
 /**
  * Generates OR Querys out of SecureUserProfile Context field
+ * 
  * @author hziak
  *
  */
-public class OrQueryGenerator implements QueryGeneratorApi{
+public class OrQueryGenerator implements QueryGeneratorApi {
 
-	@Override
-	public String toQuery(SecureUserProfile userProfile) {
-		StringBuilder builder = new StringBuilder();
-        
-        for (ContextKeyword context : userProfile.contextKeywords) {
-            	if (builder.length() > 0) { builder.append(" OR "); }
-	            builder.append('\"');
-	            builder.append(context.text);
-	            builder.append('\"');
+    private static final String REGEXP = "(?<=\\w)\\s(?=\\w)";
+
+    @Override
+    public String toQuery(SecureUserProfile userProfile) {
+        StringBuilder builder = new StringBuilder();
+        Pattern replace = Pattern.compile(REGEXP);
+
+        for (ContextKeyword context : userProfile.getContextKeywords()) {
+            if (context.getExpansion() != null && (context.getExpansion() == ExpansionType.PSEUDORELEVANCEWP || context.getExpansion() == ExpansionType.SERENDIPITY)) {
+                if (PartnerConfigurationCache.CONFIG.getPartnerConfiguration().isQueryExpansionEnabled()) {
+                    String keyword = context.getText();
+                    Matcher matcher2 = replace.matcher(keyword);
+                    keyword = matcher2.replaceAll(" OR ");
+
+                    if (builder.length() > 0) {
+                        builder.append(" OR ");
+                    }
+                    builder.append(keyword);
+                }
+            } else {
+                String keyword = context.getText();
+                Matcher matcher2 = replace.matcher(keyword);
+                keyword = matcher2.replaceAll(" OR ");
+
+                if (builder.length() > 0) {
+                    builder.append(" OR ");
+                }
+                builder.append(keyword);
+            }
+
         }
-		return builder.toString();
-	}
+        return builder.toString();
+    }
+
+    @Override
+    public String toDetailQuery(DocumentBadge document) {
+        return document.id;
+    }
 
 }

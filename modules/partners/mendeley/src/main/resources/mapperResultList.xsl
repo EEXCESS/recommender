@@ -26,17 +26,27 @@
 
 		    <xsl:element name="rdf:RDF">
 
-			      <xsl:attribute name="xml:base">http://api.mendeley.com/edm/</xsl:attribute>
+			      <xsl:attribute name="xml:base">http://api.mendeley.com//edm/</xsl:attribute>
+      
+			      <xsl:element name="owl:Ontology">
+				        <xsl:attribute name="rdf:about"/>
 
-                <xsl:element name="owl:Ontology">
-                    <xsl:element name="owl:imports">
-                        <xsl:attribute name="rdf:resource">http://www.europeana.eu/schemas/edm/</xsl:attribute>
-                    </xsl:element>
+				        <xsl:element name="owl:imports">
+					          <xsl:attribute name="rdf:resource">http://www.ebu.ch/metadata/ontologies/ebucore</xsl:attribute>
+				        </xsl:element>
 
-                    <xsl:element name="owl:imports">
-                        <xsl:attribute name="rdf:resource">http://www.openarchives.org/ore/1.0/terms</xsl:attribute>
-                    </xsl:element>
-                </xsl:element>
+				        <xsl:element name="owl:imports">
+					          <xsl:attribute name="rdf:resource">http://www.europeana.eu/schemas/edm/</xsl:attribute>
+				        </xsl:element>
+
+				        <xsl:element name="owl:imports">
+					          <xsl:attribute name="rdf:resource">http://www.openarchives.org/ore/1.0/terms</xsl:attribute>
+				        </xsl:element>
+
+				        <xsl:element name="owl:imports">
+					          <xsl:attribute name="rdf:resource">http://www.w3.org/ns/ma-ont</xsl:attribute>
+				        </xsl:element>
+			      </xsl:element>
 
 
 			      <xsl:for-each select="/o/documents/e">
@@ -53,14 +63,14 @@
 					          <xsl:element name="edm:provider">
 						            <xsl:element name="edm:Agent">
 							              <xsl:attribute name="rdf:about">http://api.mendeley.com/</xsl:attribute>
-							              <xsl:element name="foaf:name">mendeley</xsl:element>
+							              <xsl:element name="foaf:name">Mendeley</xsl:element>
 						            </xsl:element>
 					          </xsl:element>
 
 					          <xsl:element name="edm:dataProvider">
 						            <xsl:element name="edm:Agent">
 							              <xsl:attribute name="rdf:about">http://api.mendeley.com/</xsl:attribute>
-							              <xsl:element name="foaf:name">mendeley</xsl:element>
+							              <xsl:element name="foaf:name">Mendeley</xsl:element>
 						            </xsl:element>
 					          </xsl:element>
 
@@ -144,43 +154,37 @@
 
 
 	  <xsl:template name="Main.Title">
-      <apply-templates xmlns="http://www.w3.org/1999/XSL/Transform" mode="m2" select="title"/>
+      <apply-templates xmlns="http://www.w3.org/1999/XSL/Transform" mode="m5" select="title"/>
    </xsl:template>
 	  <xsl:template name="Main.Description">
       <apply-templates xmlns="http://www.w3.org/1999/XSL/Transform"
                        mode="m6"
-                       select="abstract"/>
+                       select="description"/>
    </xsl:template>
 	  <xsl:template name="Main.Date">
-      <apply-templates xmlns="http://www.w3.org/1999/XSL/Transform" mode="m3" select="year"/>
+      <apply-templates xmlns="http://www.w3.org/1999/XSL/Transform" mode="m1" select="year"/>
    </xsl:template>
 	  <xsl:template name="Main.Identifier">
-      <apply-templates xmlns="http://www.w3.org/1999/XSL/Transform" mode="m1" select="id"/>
+      <apply-templates xmlns="http://www.w3.org/1999/XSL/Transform" mode="m2" select="id"/>
    </xsl:template>
 	  <xsl:template name="Main.Creator">
       <apply-templates xmlns="http://www.w3.org/1999/XSL/Transform"
-                       mode="m5"
+                       mode="m3"
                        select="authorsString"/>
    </xsl:template>
 	  <xsl:template name="Main.isShownAt">
-      <apply-templates xmlns="http://www.w3.org/1999/XSL/Transform"
-                       mode="m4"
-                       select="link"/>
+      <apply-templates xmlns="http://www.w3.org/1999/XSL/Transform" mode="m0" select="link"/>
    </xsl:template>
 	  <xsl:template name="Main.collectionName">
       <apply-templates xmlns="http://www.w3.org/1999/XSL/Transform"
-                       mode="m7"
-                       select="source"/>
+                       mode="m4"
+                       select="publicationOutlet"/>
    </xsl:template>
 	  <xsl:template name="Main.URI">
-      <apply-templates xmlns="http://www.w3.org/1999/XSL/Transform"
-                       mode="m0"
-                       select="link"/>
+      <apply-templates xmlns="http://www.w3.org/1999/XSL/Transform" mode="m7" select="link"/>
    </xsl:template>
 
-   <template xmlns="http://www.w3.org/1999/XSL/Transform"
-             match="link"
-             mode="m0">
+   <template xmlns="http://www.w3.org/1999/XSL/Transform" match="link" mode="m0">
       <element name="uri">
          <call-template name="StringToString"/>
       </element>
@@ -188,46 +192,44 @@
    <xsl:template name="StringToString">
       <xsl:value-of select="."/>
    </xsl:template>
-   <template xmlns="http://www.w3.org/1999/XSL/Transform" match="id" mode="m1">
-      <element name="dc:identifier">
-         <call-template name="StringToString"/>
-      </element>
-   </template>
-   <template xmlns="http://www.w3.org/1999/XSL/Transform" match="title" mode="m2">
-      <element name="dc:title">
-         <call-template name="StringToString"/>
-      </element>
-   </template>
-   <template xmlns="http://www.w3.org/1999/XSL/Transform" match="year" mode="m3">
+   <template xmlns="http://www.w3.org/1999/XSL/Transform" match="year" mode="m1">
       <element name="dcterms:date">
          <call-template name="StringToString"/>
       </element>
    </template>
-   <template xmlns="http://www.w3.org/1999/XSL/Transform"
-             match="link"
-             mode="m4">
-      <element name="uri">
+   <template xmlns="http://www.w3.org/1999/XSL/Transform" match="id" mode="m2">
+      <element name="dc:identifier">
          <call-template name="StringToString"/>
       </element>
    </template>
    <template xmlns="http://www.w3.org/1999/XSL/Transform"
              match="authorsString"
-             mode="m5">
+             mode="m3">
       <element name="dc:creator">
          <call-template name="StringToString"/>
       </element>
    </template>
    <template xmlns="http://www.w3.org/1999/XSL/Transform"
-             match="abstract"
+             match="publicationOutlet"
+             mode="m4">
+      <element name="edm:collectionName">
+         <call-template name="StringToString"/>
+      </element>
+   </template>
+   <template xmlns="http://www.w3.org/1999/XSL/Transform" match="title" mode="m5">
+      <element name="dc:title">
+         <call-template name="StringToString"/>
+      </element>
+   </template>
+   <template xmlns="http://www.w3.org/1999/XSL/Transform"
+             match="description"
              mode="m6">
       <element name="dc:description">
          <call-template name="StringToString"/>
       </element>
    </template>
-   <template xmlns="http://www.w3.org/1999/XSL/Transform"
-             match="source"
-             mode="m7">
-      <element name="edm:collectionName">
+   <template xmlns="http://www.w3.org/1999/XSL/Transform" match="link" mode="m7">
+      <element name="uri">
          <call-template name="StringToString"/>
       </element>
    </template>

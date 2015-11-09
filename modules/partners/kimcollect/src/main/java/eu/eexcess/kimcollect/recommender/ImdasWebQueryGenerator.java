@@ -16,23 +16,36 @@ limitations under the License.
  */
 package eu.eexcess.kimcollect.recommender;
 
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
+
+import eu.eexcess.dataformats.result.DocumentBadge;
 import eu.eexcess.dataformats.userprofile.ContextKeyword;
 import eu.eexcess.dataformats.userprofile.SecureUserProfile;
 import eu.eexcess.partnerrecommender.api.QueryGeneratorApi;
-import eu.eexcess.utils.URLParamEncoder;
 
 public class ImdasWebQueryGenerator implements QueryGeneratorApi {
 
-	
     @Override
     public String toQuery(SecureUserProfile userProfile) {
         StringBuilder builder = new StringBuilder();
-        for (ContextKeyword context : userProfile.contextKeywords) {
+        for (ContextKeyword context : userProfile.getContextKeywords()) {
             if (builder.length() > 0) { builder.append('&'); }
             builder.append("field.fulltext.query=");
-            builder.append(URLParamEncoder.encode(context.text));
+            try {
+				builder.append(URLEncoder.encode(context.getText(),"UTF-8"));
+			} catch (UnsupportedEncodingException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
         }
         return builder.toString();
     }
+
+	@Override
+	public String toDetailQuery(DocumentBadge document) {
+		// TODO Auto-generated method stub
+		return null;
+	}
 
 }

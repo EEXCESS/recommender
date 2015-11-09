@@ -18,109 +18,147 @@ package eu.eexcess.dataformats.userprofile;
 
 import java.io.Serializable;
 
-import javax.xml.bind.annotation.XmlElement;
 /**
  * Interests of the user
+ * 
  * @author hziak
  *
  */
 
-public class Interest  implements Serializable{
+public class Interest implements Serializable {
+    private static final long serialVersionUID = -2510863722705747232L;
 
-	/**
-	 * 
-	 */
-	private static final long serialVersionUID = -2510863722705747232L;
+    private String text;
+    private Double weight;
+    private Double confidence;
+    private Double competenceLevel;
+    private String source;
+    private String uri;
 
-	public Interest(String text, Double weight, Double confidence,
-			Double competenceLevel, String source, String uri) {
-		super();
-		this.text = text;
-		this.weight = weight;
-		this.confidence = confidence;
-		this.competenceLevel = competenceLevel;
-		this.source = source;
-		this.uri = uri;
-	}
+    public Interest(String text, Double weight, Double confidence, Double competenceLevel, String source, String uri) {
+        super();
+        this.setText(text);
+        this.setWeight(weight);
+        this.setConfidence(confidence);
+        this.setCompetenceLevel(competenceLevel);
+        this.setSource(source);
+        this.setUri(uri);
+    }
 
-	public Interest(String text) {
-		this.text=text;
-	}
-	public Interest() {
-	}
-	@XmlElement(name="text")
-	public String text;
-	@XmlElement(name="weight")
-	public Double weight;
-	@XmlElement(name="confidence")
-	public Double confidence;
-	@XmlElement(name="competenceLevel")
-	public Double competenceLevel;
-	@XmlElement(name="source")
-	public String source;
-	@XmlElement(name="uri")
-	public String uri;
-	
-	@Override
-	public String toString() {
-		return "Interest [text=" + text + ", weight=" + weight
-				+ ", confidence=" + confidence + ", competenceLevel="
-				+ competenceLevel + ", source=" + source + ", uri=" + uri + "]";
-	}
-	@Override
-	public int hashCode() {
-		final int prime = 31;
-		int result = 1;
-		result = prime * result
-				+ ((competenceLevel == null) ? 0 : competenceLevel.hashCode());
-		result = prime * result
-				+ ((confidence == null) ? 0 : confidence.hashCode());
-		result = prime * result + ((source == null) ? 0 : source.hashCode());
-		result = prime * result + ((text == null) ? 0 : text.hashCode());
-		result = prime * result + ((uri == null) ? 0 : uri.hashCode());
-		result = prime * result + ((weight == null) ? 0 : weight.hashCode());
-		return result;
-	}
-	@Override
-	public boolean equals(Object obj) {
-		if (this == obj)
-			return true;
-		if (obj == null)
-			return false;
-		if (getClass() != obj.getClass())
-			return false;
-		Interest other = (Interest) obj;
-		if (competenceLevel == null) {
-			if (other.competenceLevel != null)
-				return false;
-		} else if (!competenceLevel.equals(other.competenceLevel))
-			return false;
-		if (confidence == null) {
-			if (other.confidence != null)
-				return false;
-		} else if (!confidence.equals(other.confidence))
-			return false;
-		if (source == null) {
-			if (other.source != null)
-				return false;
-		} else if (!source.equals(other.source))
-			return false;
-		if (text == null) {
-			if (other.text != null)
-				return false;
-		} else if (!text.equals(other.text))
-			return false;
-		if (uri == null) {
-			if (other.uri != null)
-				return false;
-		} else if (!uri.equals(other.uri))
-			return false;
-		if (weight == null) {
-			if (other.weight != null)
-				return false;
-		} else if (!weight.equals(other.weight))
-			return false;
-		return true;
-	}
-	
+    public Interest(String text) {
+        this.setText(text);
+    }
+
+    public Interest() {
+    }
+
+    @Override
+    public String toString() {
+        return "Interest [text=" + getText() + ", weight=" + getWeight() + ", confidence=" + getConfidence() + ", competenceLevel=" + getCompetenceLevel() + ", source="
+                + getSource() + ", uri=" + getUri() + "]";
+    }
+
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + ((getCompetenceLevel() == null) ? 0 : getCompetenceLevel().hashCode());
+        result = prime * result + ((getConfidence() == null) ? 0 : getConfidence().hashCode());
+        result = prime * result + ((getSource() == null) ? 0 : getSource().hashCode());
+        result = prime * result + ((getText() == null) ? 0 : getText().hashCode());
+        result = prime * result + ((getUri() == null) ? 0 : getUri().hashCode());
+        result = prime * result + ((getWeight() == null) ? 0 : getWeight().hashCode());
+        return result;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj)
+            return true;
+        if (obj == null)
+            return false;
+        if (getClass() != obj.getClass())
+            return false;
+        Interest other = (Interest) obj;
+        if (getCompetenceLevel() == null) {
+            if (other.getCompetenceLevel() != null)
+                return false;
+        } else if (!getCompetenceLevel().equals(other.getCompetenceLevel()))
+            return false;
+        if (getConfidence() == null) {
+            if (other.getConfidence() != null)
+                return false;
+        } else if (!getConfidence().equals(other.getConfidence()))
+            return false;
+        if (getSource() == null) {
+            if (other.getSource() != null)
+                return false;
+        } else if (!getSource().equals(other.getSource()))
+            return false;
+        if (getText() == null) {
+            if (other.getText() != null)
+                return false;
+        } else if (!getText().equals(other.getText()))
+            return false;
+        if (getUri() == null) {
+            if (other.getUri() != null)
+                return false;
+        } else if (!getUri().equals(other.getUri()))
+            return false;
+        if (getWeight() == null) {
+            if (other.getWeight() != null)
+                return false;
+        } else if (!getWeight().equals(other.getWeight()))
+            return false;
+        return true;
+    }
+
+    public String getText() {
+        return text;
+    }
+
+    public void setText(String text) {
+        this.text = text;
+    }
+
+    public Double getWeight() {
+        return weight;
+    }
+
+    public void setWeight(Double weight) {
+        this.weight = weight;
+    }
+
+    public Double getConfidence() {
+        return confidence;
+    }
+
+    public void setConfidence(Double confidence) {
+        this.confidence = confidence;
+    }
+
+    public Double getCompetenceLevel() {
+        return competenceLevel;
+    }
+
+    public void setCompetenceLevel(Double competenceLevel) {
+        this.competenceLevel = competenceLevel;
+    }
+
+    public String getSource() {
+        return source;
+    }
+
+    public void setSource(String source) {
+        this.source = source;
+    }
+
+    public String getUri() {
+        return uri;
+    }
+
+    public void setUri(String uri) {
+        this.uri = uri;
+    }
+
 }

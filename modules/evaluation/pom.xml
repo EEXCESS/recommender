@@ -1,80 +1,81 @@
 <?xml version="1.0"?>
-<project xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd" xmlns="http://maven.apache.org/POM/4.0.0"
-    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
-  <modelVersion>4.0.0</modelVersion>
-   <parent>
-        <groupId>eu.eexcess</groupId>
-        <artifactId>eexcess-parent</artifactId>
-        <version>1.0-SNAPSHOT</version>
-<!-- rrubien ../../../ -> ../../ -->
-        <relativePath>../../</relativePath>
-    </parent>
-    
-     <packaging>war</packaging>
-  <groupId>eu.eexcess.evaluation</groupId>
-  <artifactId>eexcess-federated-recommender-web-service-evaluation</artifactId>
-  <version>${project.parent.version}</version>
-  <name>EEXCESS - Federated Recommender Evaluation Framework</name>
-  <url>http://maven.apache.org</url>
-  <properties>
-    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-  </properties>
-  <dependencies>
-    <dependency>
-      <groupId>junit</groupId>
-      <artifactId>junit</artifactId>
-      <version>3.8.1</version>
-      <scope>test</scope>
-    </dependency>
-            <dependency>
-            <groupId>eu.eexcess</groupId>
-            <artifactId>eexcess-common</artifactId>
-            <version>${project.parent.version}</version>
-        </dependency>
-    
-    
-        <dependency>
-            <groupId>eu.eexcess</groupId>
-            <artifactId>eexcess-federated-recommender-web-service</artifactId>
-            <version>${project.parent.version}</version>
-        </dependency>
-        <dependency>
-	<groupId>com.thetransactioncompany</groupId>
-	<artifactId>cors-filter</artifactId>
-	<version>2.2.1</version>
-</dependency>
-        <dependency>
-	<groupId>com.google.code.gson</groupId>
-	<artifactId>gson</artifactId>
-	<version>2.3.1</version>
-</dependency>
-        
-        <dependency>
-	<groupId>org.apache.tika</groupId>
-	<artifactId>tika-core</artifactId>
-	<version>1.7</version>
-</dependency>
-        <dependency>
-	<groupId>org.apache.tika</groupId>
-	<artifactId>tika-parsers</artifactId>
-	<version>1.7</version>
-</dependency>
-        
-<dependency>
-	<groupId>edu.stanford.nlp</groupId>
-	<artifactId>stanford-corenlp</artifactId>
-	<version>3.5.1</version>
-</dependency>
-<dependency>
-	<groupId>edu.stanford.nlp</groupId>
-	<artifactId>stanford-corenlp</artifactId>
-	<version>3.5.1</version>
-	<classifier>models</classifier>
-</dependency>
+<project
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd"
+	xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+	<modelVersion>4.0.0</modelVersion>
+	<parent>
+		<groupId>eu.eexcess</groupId>
+		<artifactId>eexcess-parent</artifactId>
+		<version>1.0-SNAPSHOT</version>
+		<relativePath>../../</relativePath>
+	</parent>
+
+	<packaging>war</packaging>
+	<groupId>eu.eexcess.evaluation</groupId>
+	<artifactId>eexcess-federated-recommender-web-service-evaluation</artifactId>
+	<version>${project.parent.version}</version>
+	<name>EEXCESS - Federated Recommender Evaluation Framework</name>
+	<url>http://maven.apache.org</url>
+	<properties>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+	</properties>
+
+	<dependencies>
+		<dependency>
+			<groupId>junit</groupId>
+			<artifactId>junit</artifactId>
+			<version>3.8.1</version>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>eu.eexcess</groupId>
+			<artifactId>eexcess-common</artifactId>
+			<version>${project.parent.version}</version>
+		</dependency>
 
 
-        
-         		<dependency>
+		<dependency>
+			<groupId>eu.eexcess</groupId>
+			<artifactId>eexcess-federated-recommender-web-service</artifactId>
+			<version>${project.parent.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>com.thetransactioncompany</groupId>
+			<artifactId>cors-filter</artifactId>
+			<version>2.2.1</version>
+		</dependency>
+		<dependency>
+			<groupId>com.google.code.gson</groupId>
+			<artifactId>gson</artifactId>
+			<version>2.3.1</version>
+		</dependency>
+
+		<dependency>
+			<groupId>org.apache.tika</groupId>
+			<artifactId>tika-core</artifactId>
+			<version>1.7</version>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.tika</groupId>
+			<artifactId>tika-parsers</artifactId>
+			<version>1.7</version>
+		</dependency>
+
+		<dependency>
+			<groupId>edu.stanford.nlp</groupId>
+			<artifactId>stanford-corenlp</artifactId>
+			<version>3.5.1</version>
+		</dependency>
+		<dependency>
+			<groupId>edu.stanford.nlp</groupId>
+			<artifactId>stanford-corenlp</artifactId>
+			<version>3.5.1</version>
+			<classifier>models</classifier>
+		</dependency>
+
+
+
+		<dependency>
 			<groupId>at.know-center.ie</groupId>
 			<artifactId>ie-workbench</artifactId>
 			<version>2.2-SNAPSHOT</version>
@@ -91,13 +92,13 @@
 					<groupId>at.know-center.ie</groupId>
 					<artifactId>ie-stanford-detection</artifactId>
 				</exclusion>
-				 
+
 			</exclusions>
 		</dependency>
 		<dependency>
-	<groupId>org.apache.solr</groupId>
-	<artifactId>solr-core</artifactId>
-	<version>4.10.1</version>
-</dependency>
-  </dependencies>
+			<groupId>org.apache.solr</groupId>
+			<artifactId>solr-core</artifactId>
+			<version>4.10.1</version>
+		</dependency>
+	</dependencies>
 </project>

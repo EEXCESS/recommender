@@ -19,20 +19,22 @@ GNU Affero General Public License for more details.
 
 You should have received a copy of the GNU Affero General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
-*/
+ */
 package eu.eexcess.federatedrecommenderservice.tool;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.handler.HandlerList;
 import org.eclipse.jetty.server.handler.ResourceHandler;
 import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
-import com.sun.jersey.spi.container.servlet.ServletContainer;
 
 import com.sun.jersey.api.core.PackagesResourceConfig;
+import com.sun.jersey.spi.container.servlet.ServletContainer;
 
 /**
  * Standalone server to test the web service.
@@ -40,54 +42,64 @@ import com.sun.jersey.api.core.PackagesResourceConfig;
  * @author rkern@know-center.at
  */
 public class FederatedRecommenderStandaloneServer {
-	private static Server server;
+    private static Server server;
+    private static final Logger LOGGER = Logger.getLogger(FederatedRecommenderStandaloneServer.class.getName());
 
-	public static synchronized void start(int port) throws Exception {
-		if (server != null) {
-			throw new IllegalStateException("Server is already running");
-		}
+    private FederatedRecommenderStandaloneServer() {
 
-		ServletContextHandler context = new ServletContextHandler();
-		context.setContextPath("/eexcess-federated-recommender-web-service-1.0-SNAPSHOT");
-		Map<String, Object> initMap = new HashMap<String, Object>();
-		initMap.put("com.sun.jersey.api.json.POJOMappingFeature", "true");
-		initMap.put("com.sun.jersey.config.property.packages", "eu.eexcess.federatedrecommenderservice");
+    }
 
-		context.addServlet(new ServletHolder(new ServletContainer(new PackagesResourceConfig(initMap))), "/*");
+    public static synchronized void start(int port) {
+        if (server != null) {
+            throw new IllegalStateException("Server is already running");
+        }
 
-		ResourceHandler resourcehandler = new ResourceHandler();
-		resourcehandler.setDirectoriesListed(true);
-		resourcehandler.setWelcomeFiles(new String[] { "index.html" });
+        ServletContextHandler context = new ServletContextHandler();
+        context.setContextPath("/eexcess-federated-recommender-web-service-1.0-SNAPSHOT");
+        Map<String, Object> initMap = new HashMap<String, Object>();
+        initMap.put("com.sun.jersey.api.json.POJOMappingFeature", "true");
+        initMap.put("com.sun.jersey.config.property.packages", "eu.eexcess.federatedrecommenderservice");
 
-		resourcehandler.setResourceBase(".");
+        context.addServlet(new ServletHolder(new ServletContainer(new PackagesResourceConfig(initMap))), "/*");
 
-		// EnrichmentServer.configProvider = configProvider;
+        ResourceHandler resourcehandler = new ResourceHandler();
+        resourcehandler.setDirectoriesListed(true);
+        resourcehandler.setWelcomeFiles(new String[] { "index.html" });
 
-		HandlerList handlers = new HandlerList();
-		handlers.addHandler(resourcehandler);
-		handlers.addHandler(context);
-		server = new Server(port);
-		// server.setHandler(resourcehandler);
+        resourcehandler.setResourceBase(".");
 
-		server.setHandler(handlers);
+        HandlerList handlers = new HandlerList();
+        handlers.addHandler(resourcehandler);
+        handlers.addHandler(context);
+        server = new Server(port);
+        server.setHandler(handlers);
 
-		server.start();
-	}
+        try {
+            server.start();
+        } catch (Exception e) {
+            LOGGER.log(Level.SEVERE, "Could not start server", e);
+        }
 
-	public static synchronized void stop() throws Exception {
-		if (server == null) {
-			throw new IllegalStateException("Server not running");
-		}
-		server.stop();
-	}
+    }
 
-	public static void main(String[] args) throws Exception {
-		if (args.length != 1) {
-			System.out.println("FederatedRecommenderStandaloneServer <port-number>");
-			System.exit(-1);
-		}
+    public static synchronized void stop() {
+        if (server == null) {
+            throw new IllegalStateException("Server not running");
+        }
+        try {
+            server.stop();
+        } catch (Exception e) {
+            LOGGER.log(Level.SEVERE, "Could not stop server", e);
+        }
+    }
 
-		start(Integer.parseInt(args[0]));
-	}
+    public static void main(String[] args) throws Exception {
+        if (args.length != 1) {
+            LOGGER.log(Level.SEVERE, "USAGE: FederatedRecommenderStandaloneServer <port-number>");
+            System.exit(-1);
+        }
+
+        start(Integer.parseInt(args[0]));
+    }
 
 }

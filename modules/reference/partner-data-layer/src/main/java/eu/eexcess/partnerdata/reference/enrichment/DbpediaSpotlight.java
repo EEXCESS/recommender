@@ -20,40 +20,48 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.net.URLEncoder;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.Set;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import org.apache.http.HttpResponse;
 import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.methods.HttpGet;
+import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
 
 import eu.eexcess.config.PartnerConfiguration;
 import eu.eexcess.partnerdata.reference.PartnerdataLogger;
-import eu.eexcess.partnerdata.reference.PartnerdataTracer;
-import eu.eexcess.partnerdata.reference.PartnerdataTracer.FILETYPE;
 
 
 public class DbpediaSpotlight extends EnrichmentServiceBase{
 
-	//protected static final String DBPEDIA_URL = "http://spotlight.dbpedia.org/rest/candidates?text=";
-	protected static final String DBPEDIA_URL = "http://spotlight.dbpedia.org/rest/annotate?text=";
-	protected int timeout = 5000;
+	//protected static final String DBPEDIA_CANDIATES_URL = "http://spotlight.dbpedia.org/rest/candidates?text=";
+	protected static final String DBPEDIA_ANNOTATE_URL = "http://spotlight.dbpedia.org/rest/annotate?text=";
+	protected int timeout = 600;
+	protected RequestConfig requestConfig;
+//	protected CloseableHttpClient client;
+	
+    private static final Logger LOGGER = Logger.getLogger(DbpediaSpotlight.class.getName());
+
 	public DbpediaSpotlight(PartnerConfiguration config) {
 		super(config);
+		requestConfig = RequestConfig.custom().setConnectTimeout(timeout).setSocketTimeout(timeout).build();
+		//client = HttpClientBuilder.create().setDefaultRequestConfig(requestConfig).build();
 	}
 
 	public boolean isEntityDbpediaSpotlight(String word, PartnerdataLogger logger)
 	{
         long startTime = logger.getActLogEntry().getTimeNow();
 		try {
-			String URL=DBPEDIA_URL;
+			String URL=DBPEDIA_ANNOTATE_URL;
 			URL += word.replaceAll(" ", "%20");
 	
-			RequestConfig requestConfig = RequestConfig.custom().setConnectTimeout(timeout).setSocketTimeout(timeout).build();
+//			RequestConfig requestConfig = RequestConfig.custom().setConnectTimeout(timeout).setSocketTimeout(timeout).build();
 			HttpClient client = HttpClientBuilder.create().setDefaultRequestConfig(requestConfig).build();
 			
 	//		HttpClient client = new DefaultHttpClient();
@@ -72,6 +80,7 @@ public class DbpediaSpotlight extends EnrichmentServiceBase{
 					logger.getActLogEntry().addEnrichmentDbpediaSpotlightResults(entities.size());
 					logger.getActLogEntry().addEnrichmentDbpediaSpotlightServiceCalls(1);
 					logger.getActLogEntry().addEnrichmentDbpediaSpotlightServiceCallDuration(startTime);
+					client.getConnectionManager().shutdown();
 
 					return entities.size()>0;
 				}
@@ -83,6 +92,7 @@ public class DbpediaSpotlight extends EnrichmentServiceBase{
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
+			client.getConnectionManager().shutdown();
 		} catch (RuntimeException e)
 		{
 			// TODO Auto-generated catch block
@@ -94,66 +104,39 @@ public class DbpediaSpotlight extends EnrichmentServiceBase{
 
 	}
 
-	public Set<DbpediaSpotlightResult> selectEntitiesDbpediaSpotlight(Set<String> words, PartnerdataLogger logger)
+	public Set<DbpediaSpotlightResult> searchDbpediaSpotlight(String text, PartnerdataLogger logger)
 	{
-
         long startTime = logger.getActLogEntry().getTimeNow();
-		String urlBase=DBPEDIA_URL;
+		String urlBase=DBPEDIA_ANNOTATE_URL;
 		Set<DbpediaSpotlightResult> entities=new HashSet<DbpediaSpotlightResult>();
-
+		String url="";
 		try {
-			RequestConfig requestConfig = RequestConfig.custom().setConnectTimeout(timeout).setSocketTimeout(timeout).build();
-			HttpClient client = HttpClientBuilder.create().setDefaultRequestConfig(requestConfig).build();
-			
+//			RequestConfig requestConfig = RequestConfig.custom().setConnectTimeout(timeout).setSocketTimeout(timeout).build();
+			CloseableHttpClient client = HttpClientBuilder.create().setDefaultRequestConfig(requestConfig).build();
+			url=urlBase+URLEncoder.encode(text, java.nio.charset.StandardCharsets.UTF_8.toString());
+			HttpGet request = new HttpGet(new URI(url).toString());
+			request.setHeader("Accept", "text/xml");
 
-			for (String w : words)
-			{
-				String url=urlBase+w.replaceAll(" ", "%20");
-				HttpGet request = new HttpGet(new URI(url).toString());
-				request.setHeader("Accept", "text/xml");
+			HttpResponse response = client.execute(request);
+//	        PartnerdataTracer.dumpFile(DbpediaSpotlight.class, this.partnerConfig, response.getEntity().getContent(), "dbpedia-response", FILETYPE.XML, logger);
 
-				HttpResponse response = client.execute(request);
-		        PartnerdataTracer.dumpFile(DbpediaSpotlight.class, this.partnerConfig, response.getEntity().toString(), "dbpedia-response", FILETYPE.XML, logger);
-
-//				entities.addAll(XmlParser.getEntitiesDbpediaSpotlightCandidatesXML(this.partnerConfig, response.getEntity().getContent()));
-				entities.addAll(XmlParser.getEntitiesDbpediaSpotlightAnnotateXML(this.partnerConfig, response.getEntity().getContent(), logger));
-			}
+			entities.addAll(XmlParser.getEntitiesDbpediaSpotlightAnnotateXML(this.partnerConfig, response.getEntity().getContent(), logger));
+//			LOGGER.log(Level.INFO, "DbpediaSpotlight successful call with URL:\n"+url);
+			client.close();
 			return entities;
 
 		} catch (ClientProtocolException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			LOGGER.log(Level.WARNING, "ClientProtocolException:", e);
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			LOGGER.log(Level.WARNING, "IOException:\n"+url);
 		} catch (URISyntaxException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			LOGGER.log(Level.WARNING, "URISyntaxException: " + url);
 		}
 		logger.getActLogEntry().addEnrichmentDbpediaSpotlightResults(entities.size());
 		logger.getActLogEntry().addEnrichmentDbpediaSpotlightServiceCalls(1);
 		logger.getActLogEntry().addEnrichmentDbpediaSpotlightServiceCallDuration(startTime);
 
 		return entities;
-
 	}
-	
-	public DbpediaSpotlightResult selectEntityDbpediaSpotlight(String word, PartnerdataLogger logger)
-	{
-		
-		Set<String> words=new HashSet<String>();
-		words.add(word);
 
-		Iterator<DbpediaSpotlightResult> iterator= selectEntitiesDbpediaSpotlight(words,logger).iterator();
-		
-		if (iterator.hasNext())
-		{
-			return iterator.next();
-		}
-		else
-		{
-			return null;
-		}
-		
-	}
 }

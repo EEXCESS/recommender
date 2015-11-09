@@ -93,7 +93,8 @@ public class Resources extends IndexHelper implements Closeable {
 	 * @return
 	 * @throws Exception
 	 */
-	protected String[] getTopTerms(int startFrom, int to) throws Exception {
+	@Override
+    protected String[] getTopTerms(int startFrom, int to) throws Exception {
 		int numTerms = to - startFrom + 1;
 		String[] termNames = null;
 		TermStats[] terms = HighFreqTerms.getHighFreqTerms(inIndexReader, to + 1, fieldOfInterest,

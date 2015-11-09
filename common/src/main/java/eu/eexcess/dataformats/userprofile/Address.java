@@ -20,57 +20,64 @@ import java.io.Serializable;
 
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
-import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlRootElement;
+
 /**
  * Address class, holds information about the users address
+ * 
  * @author hziak
  *
  */
 @XmlRootElement(name = "address")
 @XmlAccessorType(XmlAccessType.FIELD)
-public class Address implements Serializable{
+public class Address implements Serializable {
 
-	private static final long serialVersionUID = -4948461957571529961L;
-	public Address(String country, Integer zipCode, String city, String line1,
-			String line2) {
-		super();
-		this.country = country;
-		this.zipCode = zipCode;
-		this.city = city;
-		this.line1 = line1;
-		this.line2 = line2;
-	}
-	public Address(){
-		
-	}
-	@XmlAttribute
-    public String country;
-	@XmlAttribute
-    public Integer zipCode;
-	@XmlAttribute
-    public String city;
-	@XmlAttribute
-    public String line1;
-	@XmlAttribute
-    public String line2;
+    private static final long serialVersionUID = -4948461957571529961L;
+
+    private String country;
+    private String city;
+
+    public Address(String country, String city) {
+        super();
+        this.setCountry(country);
+        this.setCity(city);
+    }
+
+    public Address() {
+    }
+  
+
+    public String getCountry() {
+        return country;
+    }
+
+    public void setCountry(String country) {
+        this.country = country;
+    }
+
+
+    public String getCity() {
+        return city;
+    }
+
+    public void setCity(String city) {
+        this.city = city;
+    }
+
 	@Override
 	public String toString() {
-		return "Address [country=" + country + ", zipCode=" + zipCode
-				+ ", city=" + city + ", line1=" + line1 + ", line2=" + line2
-				+ "]";
+		return "Address [country=" + country + ", city=" + city + "]";
 	}
+
 	@Override
 	public int hashCode() {
 		final int prime = 31;
 		int result = 1;
 		result = prime * result + ((city == null) ? 0 : city.hashCode());
 		result = prime * result + ((country == null) ? 0 : country.hashCode());
-		result = prime * result + ((line1 == null) ? 0 : line1.hashCode());
-		result = prime * result + ((line2 == null) ? 0 : line2.hashCode());
-		result = prime * result + ((zipCode == null) ? 0 : zipCode.hashCode());
 		return result;
 	}
+
 	@Override
 	public boolean equals(Object obj) {
 		if (this == obj)
@@ -90,26 +97,8 @@ public class Address implements Serializable{
 				return false;
 		} else if (!country.equals(other.country))
 			return false;
-		if (line1 == null) {
-			if (other.line1 != null)
-				return false;
-		} else if (!line1.equals(other.line1))
-			return false;
-		if (line2 == null) {
-			if (other.line2 != null)
-				return false;
-		} else if (!line2.equals(other.line2))
-			return false;
-		if (zipCode == null) {
-			if (other.zipCode != null)
-				return false;
-		} else if (!zipCode.equals(other.zipCode))
-			return false;
 		return true;
 	}
-	
-	
-	
-	
-}
 
+
+}

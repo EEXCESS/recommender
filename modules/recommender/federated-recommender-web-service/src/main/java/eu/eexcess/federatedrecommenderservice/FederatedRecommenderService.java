@@ -18,6 +18,8 @@ package eu.eexcess.federatedrecommenderservice;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -34,19 +36,18 @@ import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
 
-import org.codehaus.jackson.JsonParseException;
 import org.codehaus.jackson.JsonParser;
-import org.codehaus.jackson.map.JsonMappingException;
 import org.codehaus.jackson.map.ObjectMapper;
 
-import javax.ws.rs.core.Response;
 import com.sun.jersey.spi.resource.Singleton;
 
 import eu.eexcess.config.FederatedRecommenderConfiguration;
 import eu.eexcess.dataformats.PartnerBadge;
 import eu.eexcess.dataformats.PartnerBadgeList;
 import eu.eexcess.dataformats.RecommenderStats;
+import eu.eexcess.dataformats.result.DocumentBadgeList;
 import eu.eexcess.dataformats.result.ResultList;
 import eu.eexcess.dataformats.userprofile.Address;
 import eu.eexcess.dataformats.userprofile.Context;
@@ -57,6 +58,7 @@ import eu.eexcess.dataformats.userprofile.History;
 import eu.eexcess.dataformats.userprofile.Interest;
 import eu.eexcess.dataformats.userprofile.Language;
 import eu.eexcess.dataformats.userprofile.SecureUserProfile;
+import eu.eexcess.dataformats.userprofile.TimeRange;
 import eu.eexcess.dataformats.userprofile.UserCredentials;
 import eu.eexcess.dataformats.userprofile.UserLocation;
 import eu.eexcess.federatedrecommender.FederatedRecommenderCore;
@@ -70,433 +72,325 @@ import eu.eexcess.federatedrecommender.utils.FederatedRecommenderException;
 @Path("/recommender")
 @Singleton
 public class FederatedRecommenderService {
-	private static final Logger logger = Logger
-			.getLogger(FederatedRecommenderService.class.getName());
-	@SuppressWarnings("unused")
-	private static final String EEXCESS_MIMETYPE = "application/vnd.eexcess.recommendation-results+json";
-	@SuppressWarnings("unused")
-	private static final String EEXCESS_NAMESPACE = "http://eexcess.eu/schema/recommender-results";
-	private final FederatedRecommenderCore fRC;
+    private static final Logger LOGGER = Logger.getLogger(FederatedRecommenderService.class.getName());
 
-	private final FederatedRecommenderConfiguration federatedRecommenderConfiguration;
+    private final FederatedRecommenderCore fRC;
 
-	/**
-	 * Creates a new instance of this class.
-	 * 
-	 * @throws FederatedRecommenderException
-	 */
-	public FederatedRecommenderService() throws FederatedRecommenderException {
-		ObjectMapper mapper = new ObjectMapper();
-		URL resource = getClass().getResource(
-				"/federatedRecommenderConfig.json");
-		mapper.configure(JsonParser.Feature.ALLOW_COMMENTS, true);
-		try {
-			federatedRecommenderConfiguration = mapper.readValue(new File(
-					resource.getFile()),
-					FederatedRecommenderConfiguration.class);
-		} catch (JsonParseException e) {
-			logger.log(
-					Level.SEVERE,
-					"There was an error parsing the FederationRecommenderConfig File",
-					e);
-			throw new FederatedRecommenderException(
-					"There was an error parsing the FederationRecommenderConfig File in FederatedRecommenderCore Module",
-					e);
-		} catch (JsonMappingException e) {
-			logger.log(
-					Level.SEVERE,
-					"There was an error parsing the FederationRecommenderConfig File",
-					e);
-			throw new FederatedRecommenderException(
-					"There was an error parsing the FederationRecommenderConfig File in FederatedRecommenderCore Module",
-					e);
-		} catch (IOException e) {
-			logger.log(
-					Level.SEVERE,
-					"There was an error reading the FederationRecommenderConfig File",
-					e);
-			throw new FederatedRecommenderException(
-					"There was an error reading the FederationRecommenderConfig File in FederatedRecommenderCore Module",
-					e);
-		}
-		try {
-			fRC = FederatedRecommenderCore
-					.getInstance(federatedRecommenderConfiguration);
+    private final FederatedRecommenderConfiguration federatedRecommenderConfiguration;
+
+    /**
+     * Creates a new instance of this class.
+     * 
+     * @throws FederatedRecommenderException
+     */
+    public FederatedRecommenderService() throws FederatedRecommenderException {
+        ObjectMapper mapper = new ObjectMapper();
+        mapper.configure(JsonParser.Feature.ALLOW_COMMENTS, true);
+        String eexcessPartnerKeyFile = System.getenv("EEXCESS_FEDERATED_RECOMMENDER_CONFIG_FILE");
+        URL resource = null;
+        if (eexcessPartnerKeyFile == null) {
+            LOGGER.log(Level.INFO, "Config file was not defined in environment EEXCESS_FEDERATED_RECOMMENDER_CONFIG_FILE. Reading file from package resource.");
+            resource = getClass().getResource("/federatedRecommenderConfig.json");
+        } else {
+            LOGGER.log(Level.INFO, "Reading Config file from:" + eexcessPartnerKeyFile);
+            try {
+                resource = new File(eexcessPartnerKeyFile).toURI().toURL();
+            } catch (MalformedURLException e) {
+                LOGGER.log(Level.SEVERE, "Environment Variable was malformated:" + eexcessPartnerKeyFile, e);
+            }
+        }
+
+        try {
+            federatedRecommenderConfiguration = mapper.readValue(new File(resource.getFile()), FederatedRecommenderConfiguration.class);
+        } catch (IOException e) {
+            LOGGER.log(Level.SEVERE, "There was an error parsing the FederationRecommenderConfig File", e);
+            throw new FederatedRecommenderException("There was an error parsing the FederationRecommenderConfig File in FederatedRecommenderCore Module", e);
+        }
+        try {
+            fRC = FederatedRecommenderCore.getInstance(federatedRecommenderConfiguration);
+        } catch (FederatedRecommenderException e) {
+            LOGGER.log(Level.SEVERE, "", e);
+            throw new FederatedRecommenderException("Could not get an instance of FederatedRecommenderCore", e);
+        }
+
+    }
+
+    @PostConstruct
+    public void initialize() throws FederatedRecommenderException {
+        LOGGER.log(Level.INFO, "Initialize");
+    }
+
+    // Begin Services
+
+    /*
+     * OFFERED SERVICES:
+     * 
+     * (1) Register a new partner -> /register (2) Generate recommendations
+     * given a user profile -> /recommend
+     */
+    /**
+     * partners have to register their system with xml or json to let the system
+     * query the partners
+     * 
+     * @param badge
+     * @return
+     * @throws IOException
+     */
+    @POST
+    @Path("/register")
+    @Consumes({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
+    @Produces({ MediaType.WILDCARD })
+    public Response registerPartner(PartnerBadge badge) throws IOException {
+        LOGGER.log(Level.INFO, "Registering Partner: " + badge.getSystemId());
+        String returnString = fRC.registerPartner(badge);
+        if ("Partner Key is too short (<20)".equals(returnString))
+            return Response.notModified(returnString).build();
+        return Response.ok().build();
+    }
+
+    /**
+     * method to unregister a previously registered partner
+     * 
+     * @param badge
+     * @throws IOException
+     */
+    @POST
+    @Path("/unregister")
+    @Consumes({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
+    @Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
+    public void unregisterPartner(PartnerBadge badge) throws IOException {
+        LOGGER.log(Level.INFO, "Unregistering Partner: " + badge.getSystemId());
+        fRC.unregisterPartner(badge);
+    }
+
+    /**
+     * returns the result list for the given query
+     * 
+     * @param userProfile
+     * @return
+     * @throws IOException
+     */
+    @POST
+    @Path("/recommend")
+    @Consumes({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
+    @Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
+    public ResultList recommend(SecureUserProfile userProfile) throws IOException {
+        ResultList resultList = new ResultList();
+        LOGGER.log(Level.INFO,"AgeRange in userProfile " + userProfile.getAgeRange());
+        try {
+			resultList = fRC.generateFederatedRecommendation(userProfile);
 		} catch (FederatedRecommenderException e) {
-			logger.log(Level.SEVERE, "", e);
-			throw new FederatedRecommenderException(
-					"Could not get an instance of FederatedRecommenderCore", e);
+			LOGGER.log(Level.SEVERE,"Some error occured processing the query",e );
 		}
+        resultList.queryID = userProfile.getQueryID();
+        return resultList;
+    }
 
-	}
+    /**
+     * gets details for the given list of documents
+     * 
+     * @param documents
+     * @return
+     * @throws IOException
+     */
+    @POST
+    @Path("/getDetails")
+    @Consumes({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
+    @Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
+    public DocumentBadgeList getDetails(DocumentBadgeList documents) throws IOException {
+        return fRC.getDocumentDetails(documents);
+    }
 
-	@PostConstruct
-	public void initialize() throws Exception {
-		logger.log(Level.INFO,"Initialize");
-//		String europeana = null, mendeley = null, zbw = null, kimCollect = null, wissensserver = null;
-//
-//		if (federatedRecommenderConfiguration.deploymentPlatform
-//				.equals("localStandalone")) {
-//
-//			europeana = "http://localhost:8101/eexcess-partner-europeana-1.0-SNAPSHOT/partner/recommend/";
-//
-//			mendeley = "http://localhost:8103/eexcess-partner-mendeley-1.0-SNAPSHOT/partner/recommend/";
-//
-//			zbw = "http://localhost:8105/eexcess-partner-zbw-1.0-SNAPSHOT/partner/recommend/";
-//
-//			kimCollect = "http://localhost:8102/eexcess-partner-kim-collect-1.0-SNAPSHOT/partner/recommend/";
-//
-//			wissensserver = "http://localhost:8104/eexcess-partner-wissenmedia-1.0-SNAPSHOT/partner/recommend/";
-//
-//		} else if (federatedRecommenderConfiguration.deploymentPlatform
-//				.equals("localTomcat")) {
-//
-//			europeana = "http://localhost:8080/eexcess-partner-europeana-1.0-SNAPSHOT/partner/recommend/";
-//
-//			mendeley = "http://localhost:8080/eexcess-partner-mendeley-1.0-SNAPSHOT/partner/recommend/";
-//
-//			zbw = "http://localhost:8080/eexcess-partner-zbw-1.0-SNAPSHOT/partner/recommend/";
-//
-//			kimCollect = "http://localhost:8080/eexcess-partner-kim-collect-1.0-SNAPSHOT/partner/recommend/";
-//
-//			wissensserver = "http://localhost:8080/eexcess-partner-wissenmedia-1.0-SNAPSHOT/partner/recommend/";
-//
-//		}
-//
-//		else if (federatedRecommenderConfiguration.deploymentPlatform
-//				.equals("jrDev")) {
-//
-//			europeana = "http://eexcess-dev.joanneum.at/eexcess-partner-europeana-1.0-SNAPSHOT/partner/recommend/";
-//
-//			mendeley = "http://eexcess-dev.joanneum.at/eexcess-partner-mendeley-1.0-SNAPSHOT/partner/recommend/";
-//
-//			zbw = "http://eexcess-dev.joanneum.at/eexcess-partner-zbw-1.0-SNAPSHOT/partner/recommend/";
-//
-//			kimCollect = "http://eexcess-dev.joanneum.at/eexcess-partner-kim-collect-1.0-SNAPSHOT/partner/recommend/";
-//
-//			wissensserver = "http://eexcess-dev.joanneum.at/eexcess-partner-wissenmedia-1.0-SNAPSHOT/partner/recommend/";
-//
-//		}
-//
-//		else if (federatedRecommenderConfiguration.deploymentPlatform
-//				.equals("jrStable")) {
-//
-//			europeana = "http://eexcess.joanneum.at/eexcess-partner-europeana-1.0-SNAPSHOT/partner/recommend/";
-//
-//			mendeley = "http://eexcess.joanneum.at/eexcess-partner-mendeley-1.0-SNAPSHOT/partner/recommend/";
-//
-//			zbw = "http://eexcess.joanneum.at/eexcess-partner-zbw-1.0-SNAPSHOT/partner/recommend/";
-//
-//			kimCollect = "http://eexcess.joanneum.at/eexcess-partner-kim-collect-1.0-SNAPSHOT/partner/recommend/";
-//
-//			wissensserver = "http://eexcess.joanneum.at/eexcess-partner-wissenmedia-1.0-SNAPSHOT/partner/recommend/";
-//
-//		}
-//
-//		else {
-//			throw new Exception(
-//					"Problem deploying! Please use an appropriate deployment scenario in the config file (localStandalone, localTomcat, jrDev, jrStable)");
-//		}
-//
-//		PartnerBadge badge = new PartnerBadge();
-//		badge = new PartnerBadge();
-//		badge.setSystemId("Europeana");
-//		badge.setEndpoint(europeana);
-//		badge.setTags(new ArrayList<String>() {
-//			private static final long serialVersionUID = -7498028779074331771L;
-//			{
-//				add("Europe");
-//				add("Culture");
-//			}
-//		});
-//		fRC.addPartner(badge);
-//
-//		PartnerBadge badge2 = new PartnerBadge();
-//		badge2 = new PartnerBadge();
-//		badge2.setSystemId("Mendeley");
-//		badge2.setEndpoint(mendeley);
-//		badge2.setTags(new ArrayList<String>() {
-//			private static final long serialVersionUID = -4961167430016500063L;
-//
-//			{
-//				add("Science");
-//				add("Journals");
-//			}
-//		});
-//		fRC.addPartner(badge2);
-//
-//		PartnerBadge badge3 = new PartnerBadge();
-//		badge3.setSystemId("ZBW");
-//		badge3.setEndpoint(zbw);
-//		badge3.setTags(new ArrayList<String>() {
-//			private static final long serialVersionUID = 7970224907132161869L;
-//			{
-//				add("Economy");
-//				add("Articles");
-//			}
-//		});
-//		fRC.addPartner(badge3);
-//
-//		PartnerBadge badge4 = new PartnerBadge();
-//		badge4.setSystemId("KIMCollect");
-//		badge4.setEndpoint(kimCollect);
-//		badge4.setTags(new ArrayList<String>() {
-//			private static final long serialVersionUID = -8047754475051394204L;
-//
-//			{
-//				add("Swiss");
-//				add("Culture");
-//			}
-//		});
-//		fRC.addPartner(badge4);
-//
-//		PartnerBadge badge5 = new PartnerBadge();
-//		badge5.setSystemId("Wissenmedia");
-//		badge5.setEndpoint(wissensserver);
-//		badge5.setTags(new ArrayList<String>() {
-//			private static final long serialVersionUID = -993773655268128609L;
-//
-//			{
-//				add("Articles");
-//				add("Culture");
-//			}
-//		});
-//		fRC.addPartner(badge5);
-	}
+    @GET
+    @Path("/getRegisteredPartners")
+    @Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
+    public PartnerBadgeList getRegisteredPartners() throws IOException {
 
-	// Begin Services
+        PartnerBadgeList partners = new PartnerBadgeList();
 
-	/*
-	 * OFFERED SERVICES:
-	 * 
-	 * (1) Register a new partner -> /register (2) Generate recommendations
-	 * given a user profile -> /recommend
-	 */
-	/**
-	 * partners have to register their system with xml or json to let the system
-	 * query the partners
-	 * 
-	 * @param badge
-	 * @return
-	 * @throws IOException
-	 */
-	@POST
-	@Path("/register")
-	@Consumes({MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON })
-	@Produces({MediaType.WILDCARD})
-	public Response registerPartner(PartnerBadge badge) throws IOException {
-		logger.log(Level.INFO,"Registering Partner: "+badge.getSystemId());
-		String returnString =fRC.registerPartner(badge);
-		if(returnString.contains("Key is too Short"))
-			return Response.notModified(returnString).build();
-		return Response.ok().build();
-	}
+        partners.partners = fRC.getPartnerRegister().getPartners();
+        partners.totalPartners = partners.partners.size();
 
-	
-	@POST
-	@Path("/unregister")
-	@Consumes({ MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON })
-	@Produces({ MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON })
-	public void unregisterPartner(PartnerBadge badge) throws IOException {
-		logger.log(Level.INFO,"Unregistering Partner: "+badge.getSystemId());
-		fRC.unregisterPartner(badge);
-	}
+        return partners;
+    }
 
+    @GET
+    @Path("/getRecommenderStats")
+    @Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
+    public RecommenderStats getRecommenderStats() throws IOException {
+        return fRC.getRecommenderStats();
+    }
 
-	@POST
-	@Path("/recommend")
-	@Consumes({ MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON })
-	@Produces({ MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON })
-	public ResultList recommend(SecureUserProfile userProfile)
-			throws IOException {
-		ResultList resultList = new ResultList();
-		resultList = fRC.generateFederatedRecommendation(userProfile);
-		resultList.queryID = userProfile.queryID;
-		return resultList;
-	}
+    @GET
+    @Path("/getPartnerFavIcon")
+    @Produces("image/png")
+    public Response getPartnerFavIcon(@QueryParam("partnerId") String partnerId) throws IOException {
+        byte[] resourceAsStream = null;
+        resourceAsStream = fRC.getPartnerFavIcon(partnerId);
+        if (resourceAsStream != null)
+            return Response.ok(resourceAsStream).build();
+        return Response.serverError().build();
+    }
 
-	@GET
-	@Path("/getRegisteredPartners")
-	@Produces({ MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON })
-	public PartnerBadgeList getRegisteredPartners() throws IOException {
+    @GET
+    @Path("/getPreviewImage")
+    @Produces("image/png")
+    public Response getPreviewImage(@QueryParam("type") String type) throws IOException {
+        LOGGER.log(Level.INFO, type);
+        if (type == null)
+            return Response.serverError().build();
+        InputStream resourceAsStream = null;
+        switch (type) {
+        case "other":
+            resourceAsStream = this.getClass().getResourceAsStream("/Thumbnails_EECXESS_unknown.png");
+            break;
+        case "unknown":
+            resourceAsStream = this.getClass().getResourceAsStream("/Thumbnails_EECXESS_unknown.png");
+            break;
+        case "text":
+            resourceAsStream = this.getClass().getResourceAsStream("/Thumbnails_EECXESS_text.png");
+            break;
+        case "audio":
+            resourceAsStream = this.getClass().getResourceAsStream("/Thumbnails_EECXESS_audio.png");
+            break;
+        case "3d":
+            resourceAsStream = this.getClass().getResourceAsStream("/Thumbnails_EECXESS_3d.png");
+            break;
+        case "image":
+            resourceAsStream = this.getClass().getResourceAsStream("/Thumbnails_EECXESS_image.png");
+            break;
+        case "video":
+            resourceAsStream = this.getClass().getResourceAsStream("/Thumbnails_EECXESS_video.png");
+            break;
+        default:
+            break;
+        }
+        if (resourceAsStream != null)
+            return Response.ok(resourceAsStream).build();
+        return Response.serverError().build();
+    }
 
-		/*
-		 * PartnerRegister partnerRegister= fRC.getPartnerRegister();
-		 * PartnerRegister returnedPartnerRegister= new PartnerRegister(); for
-		 * (PartnerBadge partnerBadge: partnerRegister.getPartners()) {
-		 * partnerBadge.setEndpoint(""); //clean out the endpoint, user should
-		 * perhaps not know that if(partnerBadge.partnerKey==null)
-		 * returnedPartnerRegister.addPartner(partnerBadge);
-		 * if(partnerBadge.partnerKey.isEmpty())
-		 * returnedPartnerRegister.addPartner(partnerBadge); } return
-		 * returnedPartnerRegister;
-		 */
-		PartnerBadgeList partners = new PartnerBadgeList();
+    // End Services
 
-		partners.partners = fRC.getPartnerRegister().getPartners();
-		partners.totalPartners = partners.partners.size();
+    // Begin Test Services
 
-		return partners;
-	}
-	@GET
-	@Path("/getRecommenderStats")
-	@Produces({ MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON })
-	public RecommenderStats getRecommenderStats() throws IOException {
-		return fRC.getRecommenderStats();
-	}
-	// End Services
-
-	// Begin Test Services
-
-	/*
-	 * TEST METHODS:
-	 * 
-	 * (1) Test recommend -> /testRecommend?context=Keyword -> Generate
-	 * recommendations (2) Test badge -> /testBadge -> Retrieve a sample partner
-	 * badge (3) Test secure user profile -> /testSUP -> Retrieve a sample
-	 * secure user profile
-	 */
-
-	/*
-	 * @GET
-	 * 
-	 * @Path("/testRecommend")
-	 * 
-	 * @Produces(value = MediaType.APPLICATION_XML) public ResultList
-	 * testRecommend(@QueryParam("context") String context) throws IOException {
-	 * SecureUserProfile userProfile = new SecureUserProfile();
-	 * userProfile.contextList = Arrays.asList(context); return
-	 * fRC.generateFederatedRecommendation(userProfile); }
-	 */
-
-	@GET
-	@Path("/testRecommend")
-	@Produces({ MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON })
-	public ResultList testRecommend(@QueryParam("context") String context)
-			throws IOException {
-		SecureUserProfile userProfile = new SecureUserProfile();
-		for (String text : Arrays.asList(context)) {
-			userProfile.contextKeywords.add(new ContextKeyword(text, 0.1));
+    @GET
+    @Path("/testRecommend")
+    @Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
+    public ResultList testRecommend(@QueryParam("context") String context) throws IOException {
+        SecureUserProfile userProfile = new SecureUserProfile();
+        for (String text : Arrays.asList(context)) {
+            userProfile.getContextKeywords().add(new ContextKeyword(text, 0.1));
+        }
+    	ResultList resultList = new ResultList(); 
+        try {
+			 resultList = fRC.generateFederatedRecommendation(userProfile);
+		} catch (FederatedRecommenderException e) {
+			LOGGER.log(Level.SEVERE,"Some error occured processing the query",e );
 		}
-		return fRC.generateFederatedRecommendation(userProfile);
-	}
+        return resultList;
+    }
 
-	@GET
-	@Path("/testBadge")
-	@Produces({ MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON })
-	public PartnerBadge testBadge() {
+    @GET
+    @Path("/testBadge")
+    @Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
+    public PartnerBadge testBadge() {
 
-		PartnerBadge pb = new PartnerBadge();
-		pb.setSystemId("Europeana");
-		pb.setPartnerConnectorEndpoint("http://DIGV536.joanneum.at/eexcess-partner-europeana-1.0-SNAPSHOT/partner/recommend/");
-		pb.setDescription("Multi-lingual online collection of millions of digitized items from European museums, libraries, archives and multi-media collections");
+        PartnerBadge pb = new PartnerBadge();
+        pb.setSystemId("Europeana");
+        pb.setPartnerConnectorEndpoint("http://DIGV536.joanneum.at/eexcess-partner-europeana-1.0-SNAPSHOT/partner/recommend/");
+        pb.setDescription("Multi-lingual online collection of millions of digitized items from European museums, libraries, archives and multi-media collections");
+        List<String> languageContent = new ArrayList<>(Arrays.asList("de", "en"));
+        pb.setLanguageContent(languageContent);
+        return pb;
+    }
 
-		return pb;
-	}
+    @GET
+    @Path("/testSUP")
+    @Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
+    public SecureUserProfile testSUP() {
+        SecureUserProfile secureUserProfile = new SecureUserProfile();
+        secureUserProfile.setQueryID("QueryID01234567");
+        
+        secureUserProfile.setAgeRange(2);
+        secureUserProfile.setGender("male");
+        secureUserProfile.setTimeRange(new TimeRange());
+        secureUserProfile.getTimeRange().setStart("1980");
+        secureUserProfile.getTimeRange().setEnd("2000");
+        List<History> history = new ArrayList<History>();
+        history.add(new History(new Date(), "history title", 4, 4, "http://1234.com"));
 
-	@GET
-	@Path("/testSUP")
-	@Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
-	public SecureUserProfile testSUP() {
-		SecureUserProfile secureUserProfile = new SecureUserProfile();
-		secureUserProfile.firstName = "Max";
-		secureUserProfile.lastName = "Musterman";
-		secureUserProfile.birthDate = new Date();
-		secureUserProfile.gender = "male";
+        Address address = new Address("austria",  "Graz");
+        address.setCity("testcity");
+        address.setCountry("testcountry");
+     
+        secureUserProfile.setAddress(address);
+        secureUserProfile.setContext(new Context());
+        secureUserProfile.getContext().setReason("manual");
+        secureUserProfile.getContext().setValue("www.wikipedia.at");
+        secureUserProfile.setQueryID("1234COFFEE");
+        List<ContextKeyword> contextList = new ArrayList<ContextKeyword>();
+        contextList.add(new ContextKeyword("women", 0.5));
+        contextList.add(new ContextKeyword("labour", 0.5));
+        secureUserProfile.setContextKeywords(contextList);
+        PartnerBadge pB = new PartnerBadge();
+        pB.setSystemId("Europeana");
+        secureUserProfile.getPartnerList().add(pB);
 
-		List<History> history = new ArrayList<History>();
-		history.add(new History(new Date(), "history title", 4, 4,
-				"http://1234.com"));
-		secureUserProfile.history = history;
-		Address address = new Address("austria", 8010, "Graz", "nothing",
-				"to add");
-		address.city = "testcity";
-		address.country = "testcountry";
-		address.zipCode = 1213345;
-		secureUserProfile.address = address;
-		secureUserProfile.context = new Context();
-		secureUserProfile.context.reason = "manual";
-		secureUserProfile.context.value = "www.wikipedia.at";
-		secureUserProfile.queryID = "1234COFFEE";
-		List<ContextKeyword> contextList = new ArrayList<ContextKeyword>();
-		contextList.add(new ContextKeyword("women", 0.5));
-		contextList.add(new ContextKeyword("labour", 0.5));
-		secureUserProfile.contextKeywords = contextList;
-		PartnerBadge pB = new PartnerBadge();
-		pB.setSystemId("Europeana");
-		 secureUserProfile.partnerList.add(pB);
+        List<Interest> interestList = new ArrayList<Interest>();
+        interestList.add(new Interest("text", 0.1, 0.1, 0.1, "source", "http://dsjkdjas.de"));
+        interestList.add(new Interest("text2", 0.2, 0.2, 0.2, "source2", "http://google.de"));
+        secureUserProfile.setInterestList(interestList);
 
-		List<Interest> interestList = new ArrayList<Interest>();
-		interestList.add(new Interest("text", 0.1, 0.1, 0.1, "source",
-				"http://dsjkdjas.de"));
-		interestList.add(new Interest("text2", 0.2, 0.2, 0.2, "source2",
-				"http://google.de"));
-		secureUserProfile.interestList = interestList;
+        List<PartnerBadge> protectedPartnerList = new ArrayList<PartnerBadge>();
+        PartnerBadge badge = new PartnerBadge();
+        badge.setSystemId("Wissenmedia");
+        badge.setPartnerKey("dsajln22sadjkl!");
+        protectedPartnerList.add(badge);
 
-		List<PartnerBadge> protectedPartnerList = new ArrayList<PartnerBadge>();
-		PartnerBadge badge = new PartnerBadge();
-		badge.setSystemId("Wissenmedia");
-		badge.partnerKey = "dsajln22sadjkl!";
-		protectedPartnerList.add(badge);
+        List<UserCredentials> userCredentials = new ArrayList<UserCredentials>();
+        eu.eexcess.dataformats.userprofile.UserCredentials cred = new UserCredentials();
+        cred.setLogin("me@partner.x");
+        cred.setSecurityToken("sdjalkej21!#");
+        cred.setSystemId("Wissenmedia");
 
-		// secureUserProfile.protectedPartnerList = protectedPartnerList;
+        userCredentials.add(cred);
+        secureUserProfile.setUserCredentials(userCredentials);
 
-		List<UserCredentials> UserCredentials = new ArrayList<UserCredentials>();
-		eu.eexcess.dataformats.userprofile.UserCredentials cred = new UserCredentials();
-		cred.login = "me@partner.x";
-		cred.securityToken = "sdjalkej21!#";
-		cred.systemId = "Wissenmedia";
+        ContextNamedEntity contextNamedEntitie = new ContextNamedEntity();
+        final String dbPediaUrl = "http://dbpedia.url.org";
+        ContextNamedEntitiesElement location = new ContextNamedEntitiesElement("graz", 0.1, 0.1, dbPediaUrl);
+        contextNamedEntitie.locations.add(location);
+        contextNamedEntitie.locations.add(location);
+        ContextNamedEntitiesElement misc = new ContextNamedEntitiesElement("something", 0.1, 0.1, dbPediaUrl);
+        contextNamedEntitie.misc.add(misc);
+        contextNamedEntitie.misc.add(misc);
+        ContextNamedEntitiesElement org1 = new ContextNamedEntitiesElement("know-center", 0.1, 0.1, dbPediaUrl);
+        contextNamedEntitie.organizations.add(org1);
+        ContextNamedEntitiesElement org2 = new ContextNamedEntitiesElement("mendeley", 0.1, 0.1, dbPediaUrl);
+        contextNamedEntitie.organizations.add(org2);
+        ContextNamedEntitiesElement pers1 = new ContextNamedEntitiesElement("Michael Jackson", 0.1, 0.1, dbPediaUrl);
+        contextNamedEntitie.persons.add(pers1);
+        ContextNamedEntitiesElement pers2 = new ContextNamedEntitiesElement("Bill Clinton", 0.1, 0.1, dbPediaUrl);
+        contextNamedEntitie.persons.add(pers2);
+        ContextNamedEntitiesElement top1 = new ContextNamedEntitiesElement("Trees", 0.1, 0.1, dbPediaUrl);
+        contextNamedEntitie.topics.add(top1);
+        ContextNamedEntitiesElement top2 = new ContextNamedEntitiesElement("Animal", 0.1, 0.1, dbPediaUrl);
+        contextNamedEntitie.topics.add(top2);
 
-		UserCredentials.add(cred);
-		secureUserProfile.userCredentials = UserCredentials;
+        Language language1 = new Language("de", 0.1);
+        Language language2 = new Language("en", 0.1);
 
-		ContextNamedEntity ContextNamedEntitie = new ContextNamedEntity();
-		ContextNamedEntitiesElement location = new ContextNamedEntitiesElement(
-				"graz", 0.1, 0.1, "http://dbpedia.url.org");
-		ContextNamedEntitie.locations.add(location);
-		ContextNamedEntitie.locations.add(location);
-		ContextNamedEntitiesElement misc = new ContextNamedEntitiesElement(
-				"something", 0.1, 0.1, "http://dbpedia.url.org");
-		ContextNamedEntitie.misc.add(misc);
-		ContextNamedEntitie.misc.add(misc);
-		ContextNamedEntitiesElement org1 = new ContextNamedEntitiesElement(
-				"know-center", 0.1, 0.1, "http://dbpedia.url.org");
-		ContextNamedEntitie.organizations.add(org1);
-		ContextNamedEntitiesElement org2 = new ContextNamedEntitiesElement(
-				"mendeley", 0.1, 0.1, "http://dbpedia.url.org");
-		ContextNamedEntitie.organizations.add(org2);
-		ContextNamedEntitiesElement pers1 = new ContextNamedEntitiesElement(
-				"Michael Jackson", 0.1, 0.1, "http://dbpedia.url.org");
-		ContextNamedEntitie.persons.add(pers1);
-		ContextNamedEntitiesElement pers2 = new ContextNamedEntitiesElement(
-				"Bill Clinton", 0.1, 0.1, "http://dbpedia.url.org");
-		ContextNamedEntitie.persons.add(pers2);
-		ContextNamedEntitiesElement top1 = new ContextNamedEntitiesElement(
-				"Trees", 0.1, 0.1, "http://dbpedia.url.org");
-		ContextNamedEntitie.topics.add(top1);
-		ContextNamedEntitiesElement top2 = new ContextNamedEntitiesElement(
-				"Animal", 0.1, 0.1, "http://dbpedia.url.org");
-		ContextNamedEntitie.topics.add(top2);
+        secureUserProfile.getLanguages().add(language1);
+        secureUserProfile.getLanguages().add(language2);
 
-		secureUserProfile.contextNamedEntities = ContextNamedEntitie;
-		Language language1 = new Language("de", 0.1);
-		Language language2 = new Language("en", 0.1);
+        List<UserLocation> locationsList = new ArrayList<UserLocation>();
+        locationsList.add(new UserLocation(33.123123, -127.123123, 4.5, new Date()));
+        locationsList.add(new UserLocation(20.123123, -130.123123, 4.5, new Date()));
 
-		secureUserProfile.languages.add(language1);
-		secureUserProfile.languages.add(language2);
+        return secureUserProfile;
+    }
 
-		List<UserLocation> locationsList = new ArrayList<UserLocation>();
-		locationsList.add(new UserLocation(33.123123, -127.123123, 4.5,
-				new Date()));
-		locationsList.add(new UserLocation(20.123123, -130.123123, 4.5,
-				new Date()));
-		secureUserProfile.userLocations = locationsList;
-
-		return secureUserProfile;
-	}
-
-
-
-	// End Test Services
+    // End Test Services
 
 }

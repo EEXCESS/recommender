@@ -19,11 +19,13 @@ GNU Affero General Public License for more details.
 
 You should have received a copy of the GNU Affero General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
-*/
+ */
 package eu.eexcess.partnerwebservice.tool;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.servlet.ServletContextHandler;
@@ -35,45 +37,57 @@ import com.sun.jersey.spi.container.servlet.ServletContainer;
 import eu.eexcess.partnerwebservice.PartnerContextListener;
 
 /**
- * Standalone server to test the web service. 
+ * Standalone server to test the web service.
  * 
  * @author rkern@know-center.at
  */
 public class PartnerStandaloneServer {
-	private static Server server;
-	
-	public static synchronized void start(int port) throws Exception {
-		if (server != null) {
-			throw new IllegalStateException("Server is already running");
-		}
-		
-		ServletContextHandler context = new ServletContextHandler();
-		context.setContextPath("/eexcess");
-		Map<String,Object> initMap = new HashMap<String, Object>();
-	    initMap.put("com.sun.jersey.api.json.POJOMappingFeature", "true");
-	    initMap.put("com.sun.jersey.config.property.packages", "eu.eexcess.partnerwebservice");	    
-		context.addServlet(new ServletHolder(new ServletContainer(new PackagesResourceConfig(initMap))), "/*");
-		context.addEventListener(new PartnerContextListener());
-//		EnrichmentServer.configProvider = configProvider;
-		server = new Server(port);
-		server.setHandler(context);
-		server.start();
-	}
+    private static Server server;
+    private static final Logger LOGGER = Logger.getLogger(PartnerStandaloneServer.class.getName());
 
-	public static synchronized void stop() throws Exception {
-		if (server == null) {
-			throw new IllegalStateException("Server not running");
-		}
-		server.stop();		
-	}	
-	
-	public static void main(String[] args) throws Exception {
-		if(args.length != 1) {
-			System.out.println("PartnerStandaloneServer <port-number>");
-			System.exit(-1);
-		}
-		
-		start(Integer.parseInt(args[0]));
-	}
+    private PartnerStandaloneServer() {
+
+    }
+
+    public static synchronized void start(int port) {
+        if (server != null) {
+            throw new IllegalStateException("Server is already running");
+        }
+
+        ServletContextHandler context = new ServletContextHandler();
+        context.setContextPath("/eexcess");
+        Map<String, Object> initMap = new HashMap<String, Object>();
+        initMap.put("com.sun.jersey.api.json.POJOMappingFeature", "true");
+        initMap.put("com.sun.jersey.config.property.packages", "eu.eexcess.partnerwebservice");
+        context.addServlet(new ServletHolder(new ServletContainer(new PackagesResourceConfig(initMap))), "/*");
+        context.addEventListener(new PartnerContextListener());
+        server = new Server(port);
+        server.setHandler(context);
+        try {
+            server.start();
+        } catch (Exception e) {
+            LOGGER.log(Level.SEVERE, "Server could not be Started", e);
+        }
+    }
+
+    public static synchronized void stop() {
+        if (server == null) {
+            throw new IllegalStateException("Server not running");
+        }
+        try {
+            server.stop();
+        } catch (Exception e) {
+            LOGGER.log(Level.WARNING, "Server Could not be stoped", e);
+        }
+    }
+
+    public static void main(String[] args) throws Exception {
+        if (args.length != 1) {
+            LOGGER.log(Level.INFO, "USAGE: PartnerStandaloneServer <port-number>");
+            System.exit(-1);
+        }
+
+        start(Integer.parseInt(args[0]));
+    }
 
 }

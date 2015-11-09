@@ -20,6 +20,7 @@ import java.io.IOException;
 
 import org.w3c.dom.Document;
 
+import eu.eexcess.dataformats.result.DocumentBadgeList;
 import eu.eexcess.dataformats.result.ResultList;
 import eu.eexcess.dataformats.userprofile.SecureUserProfile;
 
@@ -44,13 +45,23 @@ public interface PartnerRecommenderApi {
      */
     public abstract ResultList recommend(SecureUserProfile userProfile) throws IOException;
     //public abstract ResultList details(SecureUserProfile userProfile, ResultList items) throws IOException;
-
+    
+    /**
+     * Takes a list of document Badges and returns the this list enriched with the document details
+     * @param documents
+     * @return
+     * @throws IOException
+     */
+    public abstract DocumentBadgeList getDetails(DocumentBadgeList documents) throws IOException;
+    
     /** 
      * Returns the EEXCESS user profile for a given user.
      * @return
      * @throws IOException
      */
     public abstract Document getUserProfile(String userId) throws IOException;
+
+	
 
 
 }

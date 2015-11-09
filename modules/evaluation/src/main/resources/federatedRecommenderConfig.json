@@ -1,12 +1,13 @@
 {"solrServerUri":"http://localhost:8983/solr/",
 "graphHitsLimitPerQuery":10,
-"graphQueryDepthLimit":4,
-"graphMaxPathLength":5,
+"graphQueryDepthLimit":10,
+"graphMaxPathLength":4,
 "wikipediaIndexDir":"/opt/datasets/EExcess/wiki/",
 "evaluationQueriesFile":"/home/hziak/workspaces/eexcess8/code/modules/evaluation/evaluationQueryExample.json",
 "partnersTimeout":7000,
-"numRecommenderThreads":30
+"numRecommenderThreads":30,
+"defaultPickerName":"eu.eexcess.federatedrecommender.picker.OccurrenceProbabilityPicker",
+"sourceSelectors" : ["eu.eexcess.federatedrecommender.sourceselection.LanguageSourceSelector"],
+"wordnetPath" : "/opt/data/wordnet/WordNet-2.0/dict/",
+"wordnetDomainFilePath" : "/opt/data/wordnet-domains/wn-domains-3.2/wn-domains-3.2-20070223"
 }
-
-
-

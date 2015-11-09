@@ -26,6 +26,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.logging.Level;
@@ -36,11 +37,13 @@ import org.apache.commons.lang.LocaleUtils;
 import at.knowcenter.commons.wikipedia.queryexpansion.WikipediaQueryExpansion;
 import at.knowcenter.util.term.TermSet;
 import at.knowcenter.util.term.TypedTerm;
+import eu.eexcess.config.FederatedRecommenderConfiguration;
 import eu.eexcess.dataformats.userprofile.ContextKeyword;
 import eu.eexcess.dataformats.userprofile.ExpansionType;
 import eu.eexcess.dataformats.userprofile.Language;
 import eu.eexcess.dataformats.userprofile.SecureUserProfile;
 import eu.eexcess.federatedrecommender.interfaces.SecureUserProfileDecomposer;
+import eu.eexcess.federatedrecommender.utils.FederatedRecommenderException;
 import eu.eexcess.utils.LanguageGuesser;
 /**
  * Class to provide query expansion from Wikipedia
@@ -53,8 +56,13 @@ public class PseudoRelevanceWikipediaDecomposer implements SecureUserProfileDeco
 	private static final Logger logger = Logger.getLogger(PseudoRelevanceWikipediaDecomposer.class.getName());
 	
 	private Map<String, WikipediaQueryExpansion> localeToQueryExpansion;
-	private String[] supportedLocales;
+	 private static final String[] SUPPORTED_LOCALES = new String[] { "en", "de" };
+	
 
+	/**
+	 * number of terms to be expanded in {@link #decompose(SecureUserProfile)}
+	 */
+	private int numTermsToExpand = 10;
 
 	/**
 	 * 
@@ -62,15 +70,8 @@ public class PseudoRelevanceWikipediaDecomposer implements SecureUserProfileDeco
 	 * @throws IOException
 	 */
 	
-	public PseudoRelevanceWikipediaDecomposer(String wikipediaBaseIndexDir, String[] supportedLocales) throws IOException {
-		this.supportedLocales = supportedLocales;
-		localeToQueryExpansion = new HashMap<String, WikipediaQueryExpansion>();
+	public PseudoRelevanceWikipediaDecomposer() throws IOException {
 		
-		for (String localeName : supportedLocales) {
-			Locale locale = LocaleUtils.toLocale(localeName);
-			localeToQueryExpansion.put(localeName, new WikipediaQueryExpansion(new File(wikipediaBaseIndexDir, locale+"wiki"), locale));
-			
-		}
 		
 	}
 
@@ -79,18 +80,19 @@ public class PseudoRelevanceWikipediaDecomposer implements SecureUserProfileDeco
 		
 		TermSet<TypedTerm> terms = new TermSet<TypedTerm>(new TypedTerm.AddingWeightTermMerger());
 		StringBuilder builder = new StringBuilder();
-		for (ContextKeyword keyword : inputSecureUserProfile.contextKeywords) {
+	
+		for (ContextKeyword keyword : inputSecureUserProfile.getContextKeywords()) {
 			if (builder.length() > 0) { builder.append(" "); }
-			builder.append(keyword.text);
-			terms.add(new TypedTerm(keyword.text, null, 1));
+			builder.append(keyword.getText());
+			terms.add(new TypedTerm(keyword.getText(), null, 1));
 		}
 		String query = builder.toString();
 		
 		String localeName = null;
 		// first, pick up the language specified by the user
-		if (inputSecureUserProfile.languages != null && !inputSecureUserProfile.languages.isEmpty()) {
-			Language firstLanguage = inputSecureUserProfile.languages.iterator().next();
-			localeName = firstLanguage.iso2;
+		if (inputSecureUserProfile.getLanguages() != null && !inputSecureUserProfile.getLanguages().isEmpty()) {
+			Language firstLanguage = inputSecureUserProfile.getLanguages().iterator().next();
+			localeName = firstLanguage.getIso2();
 		} else {
 			// then try to detect the language from the query
 			String guessedLanguage = LanguageGuesser.getInstance().guessLanguage(query);
@@ -102,29 +104,46 @@ public class PseudoRelevanceWikipediaDecomposer implements SecureUserProfileDeco
 		WikipediaQueryExpansion wikipediaQueryExpansion = localeToQueryExpansion.get(localeName);
 		if (wikipediaQueryExpansion == null) {
 			// no query expansion for the current locale, fall back to the first supported locale
-			wikipediaQueryExpansion = localeToQueryExpansion.get(supportedLocales[0]);
+			wikipediaQueryExpansion = localeToQueryExpansion.get(SUPPORTED_LOCALES[0]);
 		}
 
 		try {
 			TermSet<TypedTerm> queryExpansionTerms;
 			queryExpansionTerms = wikipediaQueryExpansion.expandQuery(query);
-//			for (TypedTerm typedTerm : queryExpansionTerms.getTopTerms(100)) {
-//				System.out.println("TypedTerm: "+ typedTerm.getText() +" Type: "+typedTerm.getType() +" Weight: " +typedTerm.getWeight());
-//			}
-//			System.out.println(query  +" query #############################");
-			terms.addAll(queryExpansionTerms.getTopTerms(5));
+			terms.addAll(queryExpansionTerms.getTopTerms(numTermsToExpand));
 		} catch (IOException e) {
 			logger.log(Level.SEVERE, "Cannot expand the query using Wikipedia", e);
 		}
 		
-		ArrayList<ContextKeyword> newContextKeywords = new ArrayList<ContextKeyword>();
-		for (TypedTerm typedTerm : terms.getTopTerms(5)) {
-			newContextKeywords.add(new ContextKeyword(typedTerm.getText(),ExpansionType.EXPANSION));
+		List<ContextKeyword> newContextKeywords = new ArrayList<ContextKeyword>();
+		for (TypedTerm typedTerm : terms.getTopTerms(numTermsToExpand)) {
+			newContextKeywords.add(new ContextKeyword(typedTerm.getText(),ExpansionType.PSEUDORELEVANCEWP));
 		}
-		inputSecureUserProfile.contextKeywords.addAll(newContextKeywords);
+		inputSecureUserProfile.getContextKeywords().addAll(newContextKeywords);
 		logger.log(Level.INFO, "Wikipedia Expansion: " + newContextKeywords.toString());
 		return inputSecureUserProfile;
+	}
+	
+	/**
+	 * Set number of terms to be expanded on future calls to {@link #decompose(SecureUserProfile)} default: {@link #numTermsToExpand}
+	 * @param numTerms
+	 */
+	public void setMaxNumTermsToExpand(int numTerms) {
+		numTermsToExpand = numTerms;
+	}
 
-		//return null;
+	@Override
+	public void setConfiguration(FederatedRecommenderConfiguration fedRecConfig) throws FederatedRecommenderException {
+		localeToQueryExpansion = new HashMap<String, WikipediaQueryExpansion>();
+		for (String localeName : SUPPORTED_LOCALES) {
+			Locale locale = LocaleUtils.toLocale(localeName);
+			try {
+				localeToQueryExpansion.put(localeName, new WikipediaQueryExpansion(new File(fedRecConfig.getWikipediaIndexDir(), locale+"wiki"), locale));
+			} catch (IOException e) {
+				throw new FederatedRecommenderException("Could not intialize WikipediaQueryExpansion",e);
+			}
+			
+		}
+		
 	}
 }

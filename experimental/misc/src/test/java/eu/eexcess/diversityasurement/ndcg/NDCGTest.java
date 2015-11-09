@@ -15,7 +15,7 @@ public class NDCGTest {
 	public void testSorting() {
 		NDCG ndcg = new NDCG();
 		NDCGResultList list = new NDCGResultList();
-		list.results = new ArrayList<NDCGResult>();
+//		list.results = new ArrayList<NDCGResult>();
 		NDCGResult nDCGResult1 = new NDCGResult();
 		nDCGResult1.nDCGRelevance = 1;
 		nDCGResult1.title = "T1";
@@ -134,5 +134,52 @@ public class NDCGTest {
 	// System.out.println(nDCGValue);
 	// assertEquals(nDCGValue, 0.88,1E-3);
 	// }
+	@Test
+	public void testNDCGIASELECTVarifyOne() {
+		NDCG ndcg = new NDCG();
+		NDCGResultList list = new NDCGResultList();
+		list.results = new ArrayList<NDCGResult>();
+		NDCGResult nDCGResult1 = new NDCGResult();
+		nDCGResult1.nDCGRelevance = 3;
+		nDCGResult1.title = "T1";
 
+		list.results.add(nDCGResult1);
+
+		NDCGResult nDCGResult2 = new NDCGResult();
+		nDCGResult2.nDCGRelevance = 4;
+		nDCGResult2.title = "T2";
+		list.results.add(nDCGResult2);
+
+		NDCGResult nDCGResult3 = new NDCGResult();
+		nDCGResult3.nDCGRelevance = 3;
+		nDCGResult3.title = "T3";
+		list.results.add(nDCGResult3);
+		Double calcNDCG = ndcg.calcNDCG(list, null, 3);
+		System.out.println(calcNDCG);
+		assert (calcNDCG == 0.87);
+	}
+	@Test
+	public void testNDCGIASELECTVarifyTWO() {
+		NDCG ndcg = new NDCG();
+		NDCGResultList list = new NDCGResultList();
+		list.results = new ArrayList<NDCGResult>();
+		NDCGResult nDCGResult1 = new NDCGResult();
+		nDCGResult1.nDCGRelevance = 4;
+		nDCGResult1.title = "T1";
+
+		list.results.add(nDCGResult1);
+
+		NDCGResult nDCGResult2 = new NDCGResult();
+		nDCGResult2.nDCGRelevance = 2;
+		nDCGResult2.title = "T2";
+		list.results.add(nDCGResult2);
+
+		NDCGResult nDCGResult3 = new NDCGResult();
+		nDCGResult3.nDCGRelevance = 1;
+		nDCGResult3.title = "T3";
+		list.results.add(nDCGResult3);
+		Double calcNDCG = ndcg.calcNDCG(list, null, 3);
+		System.out.println(calcNDCG);
+		assert (calcNDCG == 0.87);
+	}
 }

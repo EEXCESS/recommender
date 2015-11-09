@@ -19,104 +19,89 @@ GNU Affero General Public License for more details.
 
 You should have received a copy of the GNU Affero General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
-*/
+ */
 package eu.eexcess.partnerrecommender.reference;
 
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
+import eu.eexcess.dataformats.result.DocumentBadge;
 import eu.eexcess.dataformats.userprofile.ContextKeyword;
 import eu.eexcess.dataformats.userprofile.ExpansionType;
 import eu.eexcess.dataformats.userprofile.SecureUserProfile;
+import eu.eexcess.partnerrecommender.api.PartnerConfigurationCache;
 import eu.eexcess.partnerrecommender.api.QueryGeneratorApi;
 
 /**
- * Query generator to create a Lucene search query out of a user profile.
+ * Similar to the Lucene query generator but also checks context keywords for
+ * terms and transforms them into conjunction query terms. Keyword "New York"
+ * ends up as "New OR York" in the query.
  * 
- * @author rkern@know-center.at
+ * @author hziak@know-center.at
  */
 public class LuceneQueryGenerator implements QueryGeneratorApi {
 
-	@Override
-	public String toQuery(SecureUserProfile userProfile) {
-		StringBuilder result = new StringBuilder();
-		boolean expansion= false;
-		for (ContextKeyword key : userProfile.contextKeywords) {
-			
-			if(key.expansion!=null && (key.expansion ==ExpansionType.EXPANSION||key.expansion ==ExpansionType.SERENDIPITY))
-			{
-				if(!expansion){
-					expansion=true;
-					if(result.length()>0){
-						if(key.expansion==ExpansionType.EXPANSION)
-							result.append(" OR (\""+key.text+"\"");
-						else
-							result.append(" AND (\""+key.text+"\"");
-					}
-					else
-						result.append("(\""+key.text+"\"");
-				}else{
-					result.append(" OR \""+key.text+"\"");
-				}
-			} else{
-				if(expansion){
-					result.append(") OR \""+key.text+"\"");
-					expansion=false;
-				}	
-				else
-					if(result.length()>0)
-						result.append(" \""+key.text+"\"");
-					else
-						result.append("\""+key.text+"\"");
-			}
-		}
-		if(expansion)
-			result.append(")");
-			
-		return result.toString();
-	}
+    private static final String REGEXP = "(?<=\\w)\\s(?=\\w)";
 
-//    @Override
-//    public String toQuery(SecureUserProfile userProfile) {
-//        StringBuilder builder = new StringBuilder();
-//        boolean expanded=false;
-//        for (ContextKeyword context : userProfile.contextKeywords) {
-//        	if(context.expansion==null || !context.expansion){
-//	        	if (builder.length() > 0) { builder.append(' '); }
-//	            builder.append('\"');
-//	            builder.append(context.text);
-//	            builder.append('\"');
-//        	}else{
-//        		expanded=true;
-//        	}
-//        }
-//        if(expanded){
-//        builder.append(" OR (");
-//        Boolean first=true;
-//        for (ContextKeyword context : userProfile.contextKeywords) {
-//        	if(context.expansion!=null && context.expansion){
-//        		
-//        		if(first)
-//        			builder.append("\"");
-//        		else
-//        			builder.append("\" OR ");	
-//	            builder.append(context.text);
-//	            builder.append("\"");
-//	            first=false;
-//        	}
-//        }
-//        
-//        builder.append(')');
-//        }
-////        boolean isFirst = false;
-////        for (String interest : userProfile.interestList) {
-////            if (builder.length() > 0) { builder.append(' '); }
-////            if (isFirst) { isFirst = false; }
-////            else {builder.append(" OR "); }
-////            builder.append('\"');
-////            builder.append(interest);
-////            builder.append("\"^0.2");
-////        }
-//        return builder.toString();
-//    }
-    
-    
+    @Override
+    public String toQuery(SecureUserProfile userProfile) {
+        StringBuilder result = new StringBuilder();
+        boolean expansion = false;
+        Pattern replace = Pattern.compile(REGEXP);
+
+        for (ContextKeyword key : userProfile.getContextKeywords()) {
+            String keyword = key.getText();
+            Matcher matcher2 = replace.matcher(keyword);
+            keyword = matcher2.replaceAll(" OR ");
+
+            if (key.getExpansion() != null && (key.getExpansion() == ExpansionType.PSEUDORELEVANCEWP || key.getExpansion() == ExpansionType.SERENDIPITY)) {
+                if (PartnerConfigurationCache.CONFIG.getPartnerConfiguration().isQueryExpansionEnabled() != null
+                        && PartnerConfigurationCache.CONFIG.getPartnerConfiguration().isQueryExpansionEnabled()) {
+                    expansion = addExpansionTerm(result, expansion, key, keyword);
+                }
+            } else {
+                expansion = addQueryTerm(result, expansion, keyword);
+            }
+        }
+        if (expansion)
+            result.append(")");
+
+        return result.toString();
+    }
+
+    private boolean addQueryTerm(StringBuilder result, boolean exp, String keyword) {
+        boolean expansion = exp;
+        if (expansion) {
+            result.append(") OR " + keyword + "");
+            expansion = false;
+        } else if (result.length() > 0)
+            result.append(" OR " + keyword + "");
+        else
+            result.append("" + keyword + "");
+        return expansion;
+    }
+
+    private boolean addExpansionTerm(StringBuilder result, boolean exp, ContextKeyword key, String keyword) {
+        boolean expansion = exp;
+        if (!expansion) {
+            expansion = true;
+            if (result.length() > 0) {
+                if (key.getExpansion() == ExpansionType.PSEUDORELEVANCEWP)
+                    result.append(" OR (" + keyword + "");
+                else
+                    // result.append(" AND (" + keyword + "");
+                    result.append(" AND (" + keyword + "");
+            } else
+                result.append("(" + keyword + "");
+        } else {
+            result.append(" OR " + keyword + "");
+        }
+        return expansion;
+    }
+
+    @Override
+    public String toDetailQuery(DocumentBadge document) {
+        return document.id;
+    }
 
 }

@@ -19,11 +19,11 @@ GNU Affero General Public License for more details.
 
 You should have received a copy of the GNU Affero General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
-*/
+ */
 package eu.eexcess.diversityasurement.ndcg;
-import java.util.List;
 
-import eu.eexcess.dataformats.result.ResultList;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * 
@@ -31,11 +31,11 @@ import eu.eexcess.dataformats.result.ResultList;
  *
  */
 public class NDCGResultList {
-	 List<NDCGResult> results;
+    public List<NDCGResult> results = new ArrayList<>();
 
-	@Override
-	public String toString() {
-		return "NDCGResultList [results=" + results + "]";
-	}
-	 
+    @Override
+    public String toString() {
+        return "NDCGResultList [results=" + results + "]";
+    }
+
 }

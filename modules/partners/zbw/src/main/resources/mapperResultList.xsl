@@ -154,20 +154,24 @@
 
 
 	  <xsl:template name="Main.Title">
-      <apply-templates xmlns="http://www.w3.org/1999/XSL/Transform" mode="m0" select="title"/>
+      <apply-templates xmlns="http://www.w3.org/1999/XSL/Transform" mode="m7" select="title"/>
    </xsl:template>
-	  <xsl:template name="Main.Description"/>
+	  <xsl:template name="Main.Description">
+      <apply-templates xmlns="http://www.w3.org/1999/XSL/Transform"
+                       mode="m4"
+                       select="abstract"/>
+   </xsl:template>
 	  <xsl:template name="Main.Date">
-      <apply-templates xmlns="http://www.w3.org/1999/XSL/Transform" mode="m5" select="date"/>
+      <apply-templates xmlns="http://www.w3.org/1999/XSL/Transform" mode="m8" select="date"/>
    </xsl:template>
 	  <xsl:template name="Main.Identifier">
-      <apply-templates xmlns="http://www.w3.org/1999/XSL/Transform" mode="m3" select="id"/>
+      <apply-templates xmlns="http://www.w3.org/1999/XSL/Transform" mode="m2" select="id"/>
    </xsl:template>
 	  <xsl:template name="Main.Subject">
-      <apply-templates xmlns="http://www.w3.org/1999/XSL/Transform" mode="m2" select="subject"/>
+      <apply-templates xmlns="http://www.w3.org/1999/XSL/Transform" mode="m5" select="subject"/>
    </xsl:template>
 	  <xsl:template name="Main.URI">
-      <apply-templates xmlns="http://www.w3.org/1999/XSL/Transform" mode="m7" select="id"/>
+      <apply-templates xmlns="http://www.w3.org/1999/XSL/Transform" mode="m3" select="id"/>
    </xsl:template>
 	  <xsl:template name="Main.isShownAt"/>
 	  <xsl:template name="Main.previewImage"/>
@@ -175,46 +179,46 @@
       <apply-templates xmlns="http://www.w3.org/1999/XSL/Transform" mode="m6" select="lat"/>
    </xsl:template>
 	  <xsl:template name="Main.Longitude">
-      <apply-templates xmlns="http://www.w3.org/1999/XSL/Transform" mode="m1" select="lng"/>
+      <apply-templates xmlns="http://www.w3.org/1999/XSL/Transform" mode="m0" select="lng"/>
    </xsl:template>
 	  <xsl:template name="Main.Creator">
       <apply-templates xmlns="http://www.w3.org/1999/XSL/Transform"
-                       mode="m4"
+                       mode="m1"
                        select="creatorString"/>
    </xsl:template>
 
-   <template xmlns="http://www.w3.org/1999/XSL/Transform" match="title" mode="m0">
-      <element name="dc:title">
+   <template xmlns="http://www.w3.org/1999/XSL/Transform" match="lng" mode="m0">
+      <element name="wgs84:long">
          <call-template name="StringToString"/>
       </element>
    </template>
    <xsl:template name="StringToString">
       <xsl:value-of select="."/>
    </xsl:template>
-   <template xmlns="http://www.w3.org/1999/XSL/Transform" match="lng" mode="m1">
-      <element name="wgs84:long">
-         <call-template name="StringToString"/>
-      </element>
-   </template>
-   <template xmlns="http://www.w3.org/1999/XSL/Transform" match="subject" mode="m2">
-      <element name="dc:subject">
-         <call-template name="StringToString"/>
-      </element>
-   </template>
-   <template xmlns="http://www.w3.org/1999/XSL/Transform" match="id" mode="m3">
-      <element name="dc:identifier">
-         <call-template name="StringToString"/>
-      </element>
-   </template>
    <template xmlns="http://www.w3.org/1999/XSL/Transform"
              match="creatorString"
-             mode="m4">
+             mode="m1">
       <element name="dc:creator">
          <call-template name="StringToString"/>
       </element>
    </template>
-   <template xmlns="http://www.w3.org/1999/XSL/Transform" match="date" mode="m5">
-      <element name="dcterms:date">
+   <template xmlns="http://www.w3.org/1999/XSL/Transform" match="id" mode="m2">
+      <element name="dc:identifier">
+         <call-template name="StringToString"/>
+      </element>
+   </template>
+   <template xmlns="http://www.w3.org/1999/XSL/Transform" match="id" mode="m3">
+      <element name="uri">
+         <call-template name="StringToString"/>
+      </element>
+   </template>
+   <template xmlns="http://www.w3.org/1999/XSL/Transform" match="abstract" mode="m4">
+      <element name="dc:description">
+         <call-template name="StringToString"/>
+      </element>
+   </template>
+   <template xmlns="http://www.w3.org/1999/XSL/Transform" match="subject" mode="m5">
+      <element name="dc:subject">
          <call-template name="StringToString"/>
       </element>
    </template>
@@ -223,8 +227,13 @@
          <call-template name="StringToString"/>
       </element>
    </template>
-   <template xmlns="http://www.w3.org/1999/XSL/Transform" match="id" mode="m7">
-      <element name="uri">
+   <template xmlns="http://www.w3.org/1999/XSL/Transform" match="title" mode="m7">
+      <element name="dc:title">
+         <call-template name="StringToString"/>
+      </element>
+   </template>
+   <template xmlns="http://www.w3.org/1999/XSL/Transform" match="date" mode="m8">
+      <element name="dcterms:date">
          <call-template name="StringToString"/>
       </element>
    </template>

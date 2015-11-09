@@ -3,7 +3,7 @@ package eu.eexcess.opensearch.recommender.searchLink;
 import java.util.LinkedList;
 import java.util.List;
 
-import eu.eexcess.opensearch.opensearchDescriptionDocument.documentFields.Url;
+import eu.eexcess.opensearch.opensearchdescriptiondocument.documentfields.Url;
 
 /**
  * Selects links from a list applying {@link SearchLinkFilter}.

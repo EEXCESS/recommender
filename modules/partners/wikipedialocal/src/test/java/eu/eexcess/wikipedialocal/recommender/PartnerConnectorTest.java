@@ -20,12 +20,6 @@
 
 package eu.eexcess.wikipedialocal.recommender;
 
-import static org.hamcrest.CoreMatchers.equalTo;
-import static org.junit.Assert.assertNotEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
-
 import java.io.IOException;
 
 import org.junit.Test;
@@ -34,33 +28,30 @@ import eu.eexcess.config.PartnerConfiguration;
 import eu.eexcess.dataformats.result.ResultList;
 import eu.eexcess.dataformats.userprofile.ContextKeyword;
 import eu.eexcess.dataformats.userprofile.SecureUserProfile;
-import eu.eexcess.partnerrecommender.api.PartnerConfigurationEnum;
-import eu.eexcess.wikipedialocal.recommender.PartnerConnector;
+import eu.eexcess.partnerrecommender.api.PartnerConfigurationCache;
 
 public class PartnerConnectorTest {
 
-	@Test
-	public void queryPartnerNative_queryThreeTimes_expectOneTimeBoostrapping() {
+    @Test
+    public void queryPartnerNative_queryThreeTimes_expectOneTimeBoostrapping() {
 
-		PartnerConfiguration configuration = PartnerConfigurationEnum.CONFIG.getPartnerConfiguration();
-		ContextKeyword schroedinger = new ContextKeyword("Erwin Schrödinger");
-		SecureUserProfile userProfile = new SecureUserProfile();
-		userProfile.contextKeywords.add(schroedinger);
-		PartnerConnector connector = new PartnerConnector();
+        PartnerConfiguration configuration = PartnerConfigurationCache.CONFIG.getPartnerConfiguration();
+        ContextKeyword schroedinger = new ContextKeyword("Erwin Schrödinger");
+        SecureUserProfile userProfile = new SecureUserProfile();
+        userProfile.getContextKeywords().add(schroedinger);
+        PartnerConnector connector = new PartnerConnector();
 
-			String baseSearchEndpoint = configuration.searchEndpoint;
-			ResultList firstTryResults = null;
-			try {
-				firstTryResults = connector.queryPartnerNative(configuration, userProfile,null);
-			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-			System.out.println(firstTryResults);
-			assert(609==firstTryResults.totalResults);
-}
-			
-		
+        ResultList firstTryResults = null;
+        try {
+            firstTryResults = connector.queryPartnerNative(configuration, userProfile, null);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        if (firstTryResults != null) {
+            System.out.println(firstTryResults);
+            assert (609 == firstTryResults.totalResults);
 
-	
+        }
+    }
+
 }

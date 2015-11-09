@@ -25,6 +25,7 @@ import java.util.logging.Logger;
 
 import org.apache.commons.lang.CharEncoding;
 
+import eu.eexcess.dataformats.result.DocumentBadge;
 import eu.eexcess.dataformats.userprofile.ContextKeyword;
 import eu.eexcess.dataformats.userprofile.SecureUserProfile;
 import eu.eexcess.opensearch.recommender.PartnerConnector;
@@ -37,40 +38,46 @@ import eu.eexcess.partnerrecommender.api.QueryGeneratorApi;
  */
 public class OpensearchQueryGenerator implements QueryGeneratorApi {
 
-	private static final Logger mLogger = Logger.getLogger(PartnerConnector.class.getName());
+    private static final Logger LOGGER = Logger.getLogger(PartnerConnector.class.getName());
 
-	private static final String mDefaultUrlEncoding = CharEncoding.UTF_8;;
+    private static final String MDEFAULT_URL_ENCONDING = CharEncoding.UTF_8;;
 
-	/**
-	 * Concatenate space separated keywords and search result limit if @param
-	 * userProfile.numResults > 0
-	 */
-	@Override
-	public String toQuery(SecureUserProfile userProfile) {
+    /**
+     * Concatenate space separated keywords and search result limit if @param
+     * userProfile.numResults > 0
+     */
+    @Override
+    public String toQuery(SecureUserProfile userProfile) {
 
-		StringBuilder stringBuilder = new StringBuilder();
+        StringBuilder stringBuilder = new StringBuilder();
 
-		for (ContextKeyword keyword : userProfile.contextKeywords) {
-			stringBuilder.append(keyword.text + " ");
-		}
+        for (ContextKeyword keyword : userProfile.getContextKeywords()) {
+            stringBuilder.append(keyword.getText() + " ");
+        }
 
-		if (stringBuilder.length() > 0) {
-			stringBuilder.deleteCharAt(stringBuilder.length() - 1);
-		}
+        if (stringBuilder.length() > 0) {
+            stringBuilder.deleteCharAt(stringBuilder.length() - 1);
+        }
 
-		String urlEncodedKeywords = null;
-		try {
-			urlEncodedKeywords = URLEncoder.encode(stringBuilder.toString(), mDefaultUrlEncoding);
+        String urlEncodedKeywords = null;
+        try {
+            urlEncodedKeywords = URLEncoder.encode(stringBuilder.toString(), MDEFAULT_URL_ENCONDING);
 
-			if (userProfile.numResults != null && userProfile.numResults > 0) {
-				return urlEncodedKeywords + "&limit=" + userProfile.numResults;
-			}
-			
-		} catch (UnsupportedEncodingException e) {
-			mLogger.log(Level.WARNING, "failed encoding keywords");
-		}
+            if (userProfile.getNumResults() != null && userProfile.getNumResults() > 0) {
+                return urlEncodedKeywords + "&limit=" + userProfile.getNumResults();
+            }
 
-		return urlEncodedKeywords;
-	}
+        } catch (UnsupportedEncodingException e) {
+            LOGGER.log(Level.WARNING, "failed encoding keywords", e);
+        }
+
+        return urlEncodedKeywords;
+    }
+
+    @Override
+    public String toDetailQuery(DocumentBadge document) {
+        // TODO Auto-generated method stub
+        return null;
+    }
 
 }

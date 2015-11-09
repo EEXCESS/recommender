@@ -44,24 +44,38 @@ import java.io.File;
 
 public class Settings {
 
-	public static class RDFCategories {
-		public static final String PATH = "/opt/wikipedia/dbpedia/skos_categories_en.nt";
-	}
+    public static class RDFCategories {
+        public static final String PATH = "/opt/data/wikipedia/dbpedia/skos_categories_en.nt";
 
-	public static class SQLiteDb {
-		public static final String PATH = "/opt/iaselect/categories.sqlite";
-	}
-	
-	public static boolean isCategoryFileAvailable() {
-		return printWarning(RDFCategories.PATH);
-	}
+        private RDFCategories() {
+        }
 
-	private static boolean printWarning(String path) {
-		if (!(new File(path).canRead())) {
-			System.err.println("resource does not exist [" + path + "]");
-			return false;
-		}
-		return true;
-	}
+        public static boolean isCategoryFileAvailable() {
+            return printWarning(PATH);
+        }
+    }
+
+    public static class Grph {
+        public static final String PATH = "/opt/iaselect/gategories.grphbin";
+
+        private Grph() {
+        }
+
+        public static boolean isGrphFileAvailable() {
+            return printWarning(PATH);
+        }
+    }
+
+    private Settings() {
+
+    }
+
+    private static boolean printWarning(String path) {
+        if (!(new File(path).canRead())) {
+            System.err.println("resource does not exist [" + path + "]");
+            return false;
+        }
+        return true;
+    }
 
 }

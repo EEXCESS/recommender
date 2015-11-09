@@ -8,11 +8,16 @@
   "searchEndpoint" : "/opt/datasets/EExcess/wiki/enwiki/" ,
   "userName": "",
   "password": "",
+  "favIconURI":"https://de.wikipedia.org/static/favicon/wikipedia.ico",
   "mappingListTransformationFile":"mapperResultList.xsl",
   "mappingObjectTransformationFile":"mapperObject.xsl",
   "partnerDataRequestsTrace":"false",
   "enableEnriching":"false",
   "makeCleanupBeforeTransformation":"false",
-  "partnerConnectorEndpoint": "http://127.0.0.1/eexcess-partner-reference-wikipedia-local-1.0-SNAPSHOT/partner/recommend",
-  "federatedRecommenderURI":  "http://127.0.0.1/eexcess-federated-recommender-web-service-1.0-SNAPSHOT/recommender/"
+  "isQueryExpansionEnabled":"true",
+  "isQuerySplitingEnabled":"true",
+  "partnerConnectorEndpoint": "http://127.0.0.1/eexcess-partner-reference-wikipedia-local-1.0-SNAPSHOT/partner/",
+  "federatedRecommenderURI":  "http://127.0.0.1/eexcess-federated-recommender-web-service-1.0-SNAPSHOT/recommender/",
+  "languageContent" : ["en"],
+	"ageRange":2
 }

@@ -20,19 +20,13 @@ GNU Affero General Public License for more details.
 You should have received a copy of the GNU Affero General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
  * @author Raoul Rubien
-*/
+ */
 
 package eu.eexcess.diversityasurement.iaselect;
-
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
 
 /**
  * V(d|q,c) - relevance of a document or the quality of a document d for query q
  * when the intended category is c
- * <p>
- * TODO: this is just a lookup at the moment; implementation is missing
  * <p>
  * See also [Agrawal, R., Gollapudi, S., Halverson, A., & Ieong, S. (2009).
  * Diversifying search results. In Proceedings of the Second ACM International
@@ -42,34 +36,19 @@ import java.util.Map;
  * @author Raoul Rubien
  *
  */
-public class DocumentQualityValueV {
+public interface DocumentQualityValueV {
 
-	Map<Document, HashSet<Category>> documentQualities = new HashMap<Document, HashSet<Category>>();
-
-	public DocumentQualityValueV() {
-	}
-
-	/**
-	 * V(d|q,c) - relevance of a document or the quality of a document d for
-	 * query q when the intended category is c
-	 * 
-	 * @param d
-	 *            one document out of R(q)
-	 * @param q
-	 *            query used for R(q)
-	 * @param c
-	 *            category the document belongs to
-	 * @return document relevance
-	 * @throws IllegalArgumentException
-	 *             if document or category is not found
-	 */
-	public double V(Document d, Query q, Category c) throws IllegalArgumentException {
-		for (Category documentCategory : documentQualities.get(d)) {
-			if (documentCategory.equals(c)) {
-				return documentCategory.probability;
-			}
-		}
-		throw new IllegalArgumentException("failed fetching document quality value: category[" + c.name
-						+ "] for document[" + d.name + "] not found");
-	}
+    /**
+     * V(d|q,c) - relevance of a document or the quality of a document d for
+     * query q when the intended category is c
+     * 
+     * @param d
+     *            one document out of R(q)
+     * @param q
+     *            query used for R(q)
+     * @param c
+     *            category the document belongs to
+     * @return document relevance
+     */
+    public double v(Document d, Query q, Category c) throws IllegalArgumentException;
 }

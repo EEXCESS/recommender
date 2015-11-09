@@ -19,7 +19,7 @@ GNU Affero General Public License for more details.
 
 You should have received a copy of the GNU Affero General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
-*/
+ */
 package eu.eexcess.federatedrecommender.decomposer;
 
 import java.util.ArrayList;
@@ -34,7 +34,8 @@ import org.jgrapht.graph.SimpleWeightedGraph;
 import eu.eexcess.config.FederatedRecommenderConfiguration;
 import eu.eexcess.dataformats.userprofile.ContextKeyword;
 import eu.eexcess.dataformats.userprofile.SecureUserProfileEvaluation;
-import eu.eexcess.federatedrecommender.dbpedia.DbPediaGraph;
+import eu.eexcess.federatedrecommender.dbpedia.DBPediaGraphInterface;
+import eu.eexcess.federatedrecommender.dbpedia.DBPediaGraphJGraph;
 import eu.eexcess.federatedrecommender.dbpedia.DbPediaSolrIndex;
 import eu.eexcess.federatedrecommender.interfaces.SecureUserProfileDecomposer;
 import eu.eexcess.federatedrecommender.utils.FederatedRecommenderException;
@@ -42,134 +43,138 @@ import eu.eexcess.federatedrecommender.utils.FederatedRecommenderException;
 /**
  * Transforms the secure user profile in multiple profiles with different
  * interests combinations
+ * 
  * @author hziak
  */
 
 public class DBPediaDecomposer implements SecureUserProfileDecomposer<SecureUserProfileEvaluation, SecureUserProfileEvaluation> {
 
-	private static final Logger logger = Logger.getLogger(SecureUserProfileDecomposer.class.getName());
+    private static final Logger logger = Logger.getLogger(SecureUserProfileDecomposer.class.getName());
 
-	/*
-	 * Parameters to build the DBpedia graph -> to be tuned up
-	 */
+    /*
+     * Parameters to build the DBpedia graph -> to be tuned up
+     */
 
-	private final int hitsLimit; // Number of hits per node
-	private final int depthLimit; // Depth traversal for graph creation
-	private int semanticDistanceThreshold;
-	private DbPediaSolrIndex dbPediaSolrIndex;
+    private int hitsLimit; // Number of hits per node
+    private int depthLimit; // Depth traversal for graph creation
+    private int semanticDistanceThreshold;
+    private DbPediaSolrIndex dbPediaSolrIndex;
 
-	public DBPediaDecomposer(FederatedRecommenderConfiguration config, DbPediaSolrIndex dbPediaSolrIndex, int semanticDistanceThreshold) {
-		this.hitsLimit = config.graphHitsLimitPerQuery;
-		this.depthLimit = config.graphMaxPathLength;
-		this.dbPediaSolrIndex = dbPediaSolrIndex;
-		this.semanticDistanceThreshold = semanticDistanceThreshold;
-	}
+    /**
+     * 
+     * Generates a list of secureUserProfiles consisting of pairs of
+     * semantically related keywords from the original user profile. Two
+     * keywords are semantically related if a path in DBPedia exists between
+     * them and the path length is < "semanticDistanceThreshold"
+     * 
+     * It always includes the inputSecureUserProfile. In case of error building
+     * a DBPedia graph, it only returns the inputSecureUserProfile
+     * 
+     * 
+     * E.g. a user profile consisting of
+     * 
+     * InputProfile: "Obama", "USA", "President"
+     * 
+     * will generate the following user profiles, considering that all pairs of
+     * keywords are linked together in DBpedia by a path whose length is <
+     * MAX_PATH_LENGTH.
+     * 
+     * OutputProfile 1: "Obama", "USA" OutputProfile 2: "Obama", "President"
+     * OutputProfile 3: "USA", "President"
+     * 
+     * See "SecureUserProfileDecomposerTest.java"
+     * 
+     * These profiles are generated to re-query the recommender with them and
+     * improve results.
+     * 
+     * 
+     * @param inputSecureUserProfile
+     * @param semanticDistanceThreshold
+     * @return
+     */
+    @Override
+    public SecureUserProfileEvaluation decompose(SecureUserProfileEvaluation inputSecureUserProfile) {
 
-	/**
-	 * 
-	 * Generates a list of secureUserProfiles consisting of pairs of
-	 * semantically related keywords from the original user profile. Two
-	 * keywords are semantically related if a path in DBPedia exists between
-	 * them and the path length is < "semanticDistanceThreshold"
-	 * 
-	 * It always includes the inputSecureUserProfile. In case of error building
-	 * a DBPedia graph, it only returns the inputSecureUserProfile
-	 * 
-	 * 
-	 * E.g. a user profile consisting of
-	 * 
-	 * InputProfile: "Obama", "USA", "President"
-	 * 
-	 * will generate the following user profiles, considering that all pairs of
-	 * keywords are linked together in DBpedia by a path whose length is <
-	 * MAX_PATH_LENGTH.
-	 * 
-	 * OutputProfile 1: "Obama", "USA" OutputProfile 2: "Obama", "President"
-	 * OutputProfile 3: "USA", "President"
-	 * 
-	 * See "SecureUserProfileDecomposerTest.java"
-	 * 
-	 * These profiles are generated to re-query the recommender with them and
-	 * improve results.
-	 * 
-	 * 
-	 * @param inputSecureUserProfile
-	 * @param semanticDistanceThreshold
-	 * @return
-	 */
-	@Override
-	public SecureUserProfileEvaluation decompose(SecureUserProfileEvaluation inputSecureUserProfile) {
+        List<ContextKeyword> profileKeywords = inputSecureUserProfile.getContextKeywords(); // Keywords
+        // consist (for now) in context keywords
+        // keywordList.addAll(inputSecureUserProfile.interestList);
+        // Return inputSecureUserProfile if no further combinations are
+        // possible.
+        if (profileKeywords.size() < 3) {
+            logger.log(Level.WARNING, "Input Secure User Profile contains less than 3 keywords, returning input profile directly");
+            return (SecureUserProfileEvaluation) inputSecureUserProfile;
+        }
 
+        List<String> dbPediaEntityNames = new ArrayList<String>(); // DBpedia
+                                                                   // entities
+                                                                   // representing
+                                                                   // keywords
+                                                                   // from the
+                                                                   // inputProfile
+        DBPediaGraphInterface dbPediaGraph = new DBPediaGraphJGraph(dbPediaSolrIndex);
+        SimpleWeightedGraph<String, DefaultEdge> semanticGraph;
 
-		List<ContextKeyword> profileKeywords = inputSecureUserProfile.contextKeywords; // Keywords
-		// consist (for now) in context keywords keywordList.addAll(inputSecureUserProfile.interestList);
-		// Return inputSecureUserProfile if no further combinations are
-		// possible.
-		if (profileKeywords.size() < 3) {
-			logger.log(Level.WARNING, "Input Secure User Profile contains less than 3 keywords, returning input profile directly");
-			return (SecureUserProfileEvaluation) inputSecureUserProfile;
-		}
+        /*
+         * Get a graph from DBpedia which contains the profileKeywords.
+         */
 
-		List<String> dbPediaEntityNames = new ArrayList<String>(); // DBpedia
-																	// entities
-																	// representing
-																	// keywords
-																	// from the
-																	// inputProfile
-		DbPediaGraph dbPediaGraph = new DbPediaGraph(dbPediaSolrIndex);
-		SimpleWeightedGraph<String, DefaultEdge> semanticGraph;
+        try {
+            semanticGraph = (SimpleWeightedGraph<String, DefaultEdge>) dbPediaGraph.getGraphFromKeywords(profileKeywords, dbPediaEntityNames, hitsLimit, depthLimit);
+            // WARNING: dbPediaKeywords is an i/o parameter, now contains
+            // DBpedia entities representing keywords from the inputProfile
+        } catch (FederatedRecommenderException e) {
+            logger.log(Level.SEVERE, "Graph could not be build out of DBPedia, perhaps server is not running or reachable,returning input profile directly", e);
+            return (SecureUserProfileEvaluation) inputSecureUserProfile;
+        }
 
-		/*
-		 * Get a graph from DBpedia which contains the profileKeywords.
-		 */
+        /*
+         * Try all possible pairs of keywords from the input profile to generate
+         * candidate profiles consisting on 2 semantically related keywords.
+         * 
+         * Two keywords are semantically related if a path with length <
+         * "semanticDistanceThreshold" exist in the DBpedia graph.
+         */
 
-		try {
-			semanticGraph = dbPediaGraph.getFromKeywords(profileKeywords, dbPediaEntityNames, hitsLimit, depthLimit);
-			// WARNING: dbPediaKeywords is an i/o parameter, now contains
-			// DBpedia entities representing keywords from the inputProfile
-		} catch (FederatedRecommenderException e) {
-			logger.log(Level.SEVERE, "Graph could not be build out of DBPedia, perhaps server is not running or reachable,returning input profile directly");
-			return (SecureUserProfileEvaluation) inputSecureUserProfile;
-		}
+        List<String> restOfdbPediaEntityNames = new ArrayList<String>(dbPediaEntityNames);
 
-		/*
-		 * Try all possible pairs of keywords from the input profile to generate
-		 * candidate profiles consisting on 2 semantically related keywords.
-		 * 
-		 * Two keywords are semantically related if a path with length <
-		 * "semanticDistanceThreshold" exist in the DBpedia graph.
-		 */
+        for (String dbPediaEntityName : dbPediaEntityNames) // keyNodes =
+                                                            // DBpedia node
+                                                            // names
+                                                            // representing
+                                                            // keywords from the
+                                                            // inputProfile
+        {
+            restOfdbPediaEntityNames.remove(dbPediaEntityName);
+            for (String dbPediaEntityName2 : restOfdbPediaEntityNames) {
+//            	KShortestPaths<String, DefaultEdge> path = new KShortestPaths<String, DefaultEdge>(semanticGraph, dbPediaEntityName, dbPediaEntityName2);
+                DijkstraShortestPath<String, DefaultEdge> path = new DijkstraShortestPath<String, DefaultEdge>(semanticGraph, dbPediaEntityName, dbPediaEntityName2);
+                System.out.println("[" + dbPediaEntityName + ", " + dbPediaEntityName2 + "] - path length: " + path.getPathLength());
+                if (path.getPathLength() < semanticDistanceThreshold) {
+                    ArrayList<ContextKeyword> contextKeywordGroup = new ArrayList<ContextKeyword>();
+                    contextKeywordGroup.add(new ContextKeyword(dbPediaEntityName));
+                    contextKeywordGroup.add(new ContextKeyword(dbPediaEntityName2));
+                }
+            }
 
-		List<String> restOfdbPediaEntityNames = new ArrayList<String>(dbPediaEntityNames);
+        }
+        return (SecureUserProfileEvaluation) inputSecureUserProfile;
+    }
 
-		for (String dbPediaEntityName : dbPediaEntityNames) // keyNodes =
-															// DBpedia node
-															// names
-															// representing
-															// keywords from the
-															// inputProfile
-		{
-			restOfdbPediaEntityNames.remove(dbPediaEntityName);
-			for (String dbPediaEntityName2 : restOfdbPediaEntityNames) {
-				DijkstraShortestPath<String, DefaultEdge> path = new DijkstraShortestPath<String, DefaultEdge>(semanticGraph, dbPediaEntityName, dbPediaEntityName2);
-				System.out.println("[" + dbPediaEntityName + ", " + dbPediaEntityName2 + "] - path length: " + path.getPathLength());
-				if (path.getPathLength() < semanticDistanceThreshold) {
-					ArrayList<ContextKeyword> contextKeywordGroup = new ArrayList<ContextKeyword>();
-					contextKeywordGroup.add(new ContextKeyword(dbPediaEntityName));
-					contextKeywordGroup.add(new ContextKeyword(dbPediaEntityName2));
-				}
-			}
+    public int getSemanticDistanceThreshold() {
+        return semanticDistanceThreshold;
+    }
 
-		}
-		return (SecureUserProfileEvaluation) inputSecureUserProfile;
-	}
+    public void setSemanticDistanceThreshold(int semanticDistanceThreshold) {
+        this.semanticDistanceThreshold = semanticDistanceThreshold;
+    }
 
-	public int getSemanticDistanceThreshold() {
-		return semanticDistanceThreshold;
-	}
+    @Override
+    public void setConfiguration(FederatedRecommenderConfiguration fedRecConfig) throws FederatedRecommenderException {
+        this.hitsLimit = fedRecConfig.getGraphHitsLimitPerQuery();
+        this.depthLimit = fedRecConfig.getGraphMaxPathLength();
+        this.dbPediaSolrIndex = new DbPediaSolrIndex(fedRecConfig);
+        this.semanticDistanceThreshold = fedRecConfig.getGraphQueryDepthLimit();
 
-	public void setSemanticDistanceThreshold(int semanticDistanceThreshold) {
-		this.semanticDistanceThreshold = semanticDistanceThreshold;
-	}
+    }
 
 }

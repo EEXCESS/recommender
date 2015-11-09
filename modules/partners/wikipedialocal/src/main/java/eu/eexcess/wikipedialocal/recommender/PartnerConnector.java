@@ -24,8 +24,8 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.apache.lucene.analysis.Analyzer;
-import org.apache.lucene.analysis.en.EnglishAnalyzer;
-import org.apache.lucene.analysis.standard.StandardAnalyzer;
+import org.apache.lucene.analysis.standard.ClassicAnalyzer;
+import org.apache.lucene.index.DirectoryReader;
 import org.apache.lucene.index.IndexReader;
 import org.apache.lucene.index.IndexableField;
 import org.apache.lucene.queryparser.classic.MultiFieldQueryParser;
@@ -38,15 +38,15 @@ import org.apache.lucene.search.ScoreDoc;
 import org.apache.lucene.search.TopDocs;
 import org.apache.lucene.store.Directory;
 import org.apache.lucene.store.FSDirectory;
-import org.apache.lucene.util.Version;
 import org.w3c.dom.Document;
 
 import eu.eexcess.config.PartnerConfiguration;
+import eu.eexcess.dataformats.result.DocumentBadge;
 import eu.eexcess.dataformats.result.Result;
 import eu.eexcess.dataformats.result.ResultList;
 import eu.eexcess.dataformats.userprofile.SecureUserProfile;
 import eu.eexcess.partnerdata.reference.PartnerdataLogger;
-import eu.eexcess.partnerrecommender.api.PartnerConfigurationEnum;
+import eu.eexcess.partnerrecommender.api.PartnerConfigurationCache;
 import eu.eexcess.partnerrecommender.api.PartnerConnectorApi;
 import eu.eexcess.partnerrecommender.reference.PartnerConnectorBase;
 
@@ -57,80 +57,64 @@ import eu.eexcess.partnerrecommender.reference.PartnerConnectorBase;
  */
 public class PartnerConnector extends PartnerConnectorBase implements PartnerConnectorApi {
 
-	private static final Logger logger = Logger.getLogger(PartnerConnector.class.getName());
+    private static final Logger LOGGER = Logger.getLogger(PartnerConnector.class.getName());
 
+    private static final String[] FIELD_CONTENTS = { "sectionText", "sectionTitle", "title" };
 
-	private static final String[] FIELD_CONTENTS = {"sectionText","sectionTitle","title"};
+    public PartnerConnector() {
 
-	
-	private PartnerConfiguration partnerConfig = null;
+    }
 
+    @Override
+    public ResultList queryPartnerNative(PartnerConfiguration partnerConfiguration, SecureUserProfile userProfile, PartnerdataLogger dataLogger) throws IOException {
+        ResultList resultList = new ResultList();
+        Analyzer analyzer = new ClassicAnalyzer();
+        File directoryPath = new File(PartnerConfigurationCache.CONFIG.getPartnerConfiguration().getSearchEndpoint());
+        Directory directory = FSDirectory.open(directoryPath);
+        IndexReader indexReader = DirectoryReader.open(directory);
+        IndexSearcher indexSearcher = new IndexSearcher(indexReader);
+        QueryParser queryParser = new MultiFieldQueryParser(FIELD_CONTENTS, analyzer);
+        queryParser.setDefaultOperator(Operator.AND);
+        String queryString = PartnerConfigurationCache.CONFIG.getQueryGenerator(partnerConfiguration.getQueryGeneratorClass()).toQuery(userProfile);
+        Query query = null;
+        try {
+            query = queryParser.parse(queryString);
+        } catch (ParseException e) {
+            LOGGER.log(Level.SEVERE, "could not parse input query", e);
+        }
+        if (userProfile.getNumResults() == null)
+            userProfile.setNumResults(10);
+        TopDocs topDocs = indexSearcher.search(query, userProfile.getNumResults());
+        for (ScoreDoc sDocs : topDocs.scoreDocs) {
+            Result result = new Result();
+            result.documentBadge = new DocumentBadge("", "", PartnerConfigurationCache.CONFIG.getBadge().getSystemId());
+            org.apache.lucene.document.Document doc = indexSearcher.doc(sDocs.doc);
+            if (doc != null) {
+                IndexableField title = doc.getField("title");
+                IndexableField sectionTitle = doc.getField("sectionTitle");
+                IndexableField sectionText = doc.getField("sectionText");
+                if (sectionText != null)
+                    result.description = sectionText.stringValue();
 
-	
-	
-	public PartnerConnector() {
-		
-		
-	}
+                if (title != null && sectionTitle != null)
+                    result.title = title.stringValue() + " - " + sectionTitle.stringValue();
+                resultList.results.add(result);
+            }
+        }
+        resultList.totalResults = topDocs.totalHits;
+        return resultList;
+    }
 
-	@Override
-	public ResultList queryPartnerNative(PartnerConfiguration partnerConfiguration, SecureUserProfile userProfile, PartnerdataLogger dataLogger)
-					throws IOException {
-		partnerConfig = partnerConfiguration;
-		ResultList resultList = new ResultList();
-		
-		Analyzer analyzer = new EnglishAnalyzer();
-		File directoryPath = new File(PartnerConfigurationEnum.CONFIG.getPartnerConfiguration().searchEndpoint);
-		Directory directory = FSDirectory.open(directoryPath );
-		IndexReader indexReader = IndexReader.open(directory );
-		IndexSearcher indexSearcher = new IndexSearcher(indexReader);
-		QueryParser queryParser = new MultiFieldQueryParser(FIELD_CONTENTS,analyzer);
-		queryParser.setDefaultOperator(Operator.AND);
-		String queryString = PartnerConfigurationEnum.CONFIG.getQueryGenerator().toQuery(userProfile);
-		Query query = null;
-		try {
-			query = queryParser.parse(queryString);
-		} catch (ParseException e) {
-			
-			//logger.log(Level.SEVERE, "could not parse input query", e);
-		}
-		if(userProfile.numResults==null)
-			userProfile.numResults=10;
-		TopDocs topDocs = indexSearcher.search(query, userProfile.numResults);
-		for (ScoreDoc sDocs : topDocs.scoreDocs) {
-			Result result = new Result();
-			org.apache.lucene.document.Document  doc=indexSearcher.doc(sDocs.doc);
-			if(doc!=null){
-				IndexableField title = doc.getField("title");
-				IndexableField sectionTitle = doc.getField("sectionTitle");
-				IndexableField category = doc.getField("category");
-				IndexableField sectionText = doc.getField("sectionText");
-				if(sectionText!=null)
-					result.description= sectionText.stringValue();
-				if(category!=null){
-					result.facets.type=category.stringValue();
-					result.facets.provider="Category";
-				}
-				if(title!=null && sectionTitle!=null)				
-					result.title = title.stringValue() +" - " + sectionTitle.stringValue();
-				resultList.results.add(result );
-			}
-		}
-		
-		
-		resultList.totalResults=topDocs.totalHits;
-		return resultList;
-	}
+    @Override
+    public Document queryPartner(PartnerConfiguration partnerConfiguration, SecureUserProfile userProfile, PartnerdataLogger logger) throws IOException {
 
-	@Override
-	public Document queryPartner(PartnerConfiguration partnerConfiguration, SecureUserProfile userProfile, PartnerdataLogger logger)
-					throws IOException {
+        return null;
+    }
 
-		return null;
-	}
-
-	
-
-	
+    @Override
+    public Document queryPartnerDetails(PartnerConfiguration partnerConfiguration, DocumentBadge document, PartnerdataLogger logger) throws IOException {
+        // TODO The details call should be implemented here
+        return null;
+    }
 
 }

@@ -34,30 +34,30 @@ import eu.eexcess.config.PartnerConfiguration;
 import eu.eexcess.dataformats.result.ResultList;
 import eu.eexcess.dataformats.userprofile.ContextKeyword;
 import eu.eexcess.dataformats.userprofile.SecureUserProfile;
-import eu.eexcess.partnerrecommender.api.PartnerConfigurationEnum;
+import eu.eexcess.partnerrecommender.api.PartnerConfigurationCache;
 
 public class PartnerConnectorTest {
 
 	@Test
 	public void queryPartnerNative_queryThreeTimes_expectOneTimeBoostrapping() {
 
-		PartnerConfiguration configuration = PartnerConfigurationEnum.CONFIG.getPartnerConfiguration();
+		PartnerConfiguration configuration = PartnerConfigurationCache.CONFIG.getPartnerConfiguration();
 		ContextKeyword schroedinger = new ContextKeyword("Erwin Schrödinger");
 		SecureUserProfile userProfile = new SecureUserProfile();
-		userProfile.contextKeywords.add(schroedinger);
+		userProfile.getContextKeywords().add(schroedinger);
 		PartnerConnector connector = new PartnerConnector();
 
 		try {
 
-			String baseSearchEndpoint = configuration.searchEndpoint;
+			String baseSearchEndpoint = configuration.getSearchEndpoint();
 			ResultList firstTryResults = connector.queryPartnerNative(configuration, userProfile,null);
-			String firstTryBootstrappedSearchendpoint = configuration.searchEndpoint;
+			String firstTryBootstrappedSearchendpoint = configuration.getSearchEndpoint();
 
 			ResultList secondTryResults = connector.queryPartnerNative(configuration, userProfile,null);
-			String secondTryBootstrappedSearchEndpoint = configuration.searchEndpoint;
+			String secondTryBootstrappedSearchEndpoint = configuration.getSearchEndpoint();
 
 			ResultList thridTryResults = connector.queryPartnerNative(configuration, userProfile,null);
-			String thirdTrybootstrappedSearchendpoint = configuration.searchEndpoint;
+			String thirdTrybootstrappedSearchendpoint = configuration.getSearchEndpoint();
 
 			assertNotEquals(baseSearchEndpoint, firstTryBootstrappedSearchendpoint);
 			assertTrue(firstTryBootstrappedSearchendpoint.equals(secondTryBootstrappedSearchEndpoint));

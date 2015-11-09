@@ -1,16 +1,20 @@
 {
-  "systemId": "DeutscheDigitaleBibliothek",
-  "queryGeneratorClass": "eu.eexcess.partnerrecommender.reference.OrQueryGenerator",
+  "systemId": "Deutsche Digitale Bibliothek",
+  "queryGeneratorClass": "eu.eexcess.partnerrecommender.reference.OrQueryGeneratorFieldTermConjunction",
   "partnerConnectorClass": "eu.eexcess.ddb.recommender.PartnerConnector",
   "isTransformedNative": "false",
   "transformerClass": "eu.eexcess.ddb.datalayer.DDBTransformer",
   "searchEndpoint": "https://api.deutsche-digitale-bibliothek.de/search?query=${query}&rows=${numResults}&facet=place_fct",
+  "detailEndpoint": "https://api.deutsche-digitale-bibliothek.de/items/${detailQuery}/aip",
   "apiKey": "",
+   "favIconURI":"https://www.deutsche-digitale-bibliothek.de/appStatic/PhInYR1sfTrWQLdFdUrjTTyJBsIuPAmLecnbkynhXrS.ico",
   "mappingListTransformationFile":"mapperResultList.xsl",
   "mappingObjectTransformationFile":"mapperObject.xsl",
   "partnerDataRequestsTrace":"false",
-  "enableEnriching":"false",
+  "enableEnriching":"true",
   "makeCleanupBeforeTransformation":"false",
-  "partnerConnectorEndpoint": "http://127.0.0.1/eexcess-partner-ddb-1.0-SNAPSHOT/partner/recommend",
-  "federatedRecommenderURI":"http://127.0.0.1/eexcess-federated-recommender-web-service-1.0-SNAPSHOT/recommender/"
+  "partnerConnectorEndpoint": "http://127.0.0.1/eexcess-partner-ddb-1.0-SNAPSHOT/partner/",
+  "federatedRecommenderURI":"http://127.0.0.1/eexcess-federated-recommender-web-service-1.0-SNAPSHOT/recommender/",
+	"languageContent" : ["en","de"],
+	"ageRange":2
 }

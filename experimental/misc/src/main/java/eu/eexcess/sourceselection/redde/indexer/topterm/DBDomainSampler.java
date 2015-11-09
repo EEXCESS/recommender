@@ -33,83 +33,84 @@ import org.apache.lucene.search.IndexSearcher;
 import org.apache.lucene.search.Query;
 import org.apache.lucene.search.TopScoreDocCollector;
 
-import eu.eexcess.tree.BaseTreeNode;
-import eu.eexcess.tree.ValueTreeNode;
+import eu.eexcess.federatedrecommender.utils.tree.BaseTreeNode;
+import eu.eexcess.federatedrecommender.utils.tree.NodeInspector;
+import eu.eexcess.federatedrecommender.utils.tree.ValueSetTreeNode;
 
 public class DBDomainSampler extends TopTermToWNDomain {
 
-	public static class SampleArguments {
-		/**
-		 * result index name
-		 */
-		public String indexName;
-		/**
-		 * terms to use for sampling
-		 */
-		public Set<ValueTreeNode<String>> sampleDomains;
-	}
+    public static class SampleArguments {
+        /**
+         * result index name
+         */
+        public String indexName;
+        /**
+         * terms to use for sampling
+         */
+        public Set<ValueSetTreeNode<String>> sampleDomains;
+    }
 
-	public static class WordNetArguments {
-		public String wordnetPath;
-		public String wordnetDomainsPath;
-		public String wordnetDomainCsvTreePath;
-	}
+    public static class WordNetArguments {
+        public String wordnetPath;
+        public String wordnetDomainsPath;
+        public String wordnetDomainCsvTreePath;
+    }
 
-	private ValueTreeNode<String> domainToTermsTree;
+    private ValueSetTreeNode<String> domainToTermsTree;
 
-	/**
-	 * Creates an instance of this class.
-	 * 
-	 * @param sourceIndexPath
-	 *            path to base lucene index
-	 * @param arguments
-	 *            parameters where samples are being stored and what domains to
-	 *            use for sampling them
-	 * @throws IOException
-	 */
-	DBDomainSampler(String baseIndexPath, WordNetArguments wnArgs) throws IOException, JWNLException {
-		super(baseIndexPath, wnArgs.wordnetPath, wnArgs.wordnetDomainsPath, wnArgs.wordnetDomainCsvTreePath);
-	}
+    /**
+     * Creates an instance of this class.
+     * 
+     * @param sourceIndexPath
+     *            path to base lucene index
+     * @param arguments
+     *            parameters where samples are being stored and what domains to
+     *            use for sampling them
+     * @throws IOException
+     */
+    DBDomainSampler(String baseIndexPath, WordNetArguments wnArgs) throws IOException, JWNLException {
+        super(baseIndexPath, wnArgs.wordnetPath, wnArgs.wordnetDomainsPath, wnArgs.wordnetDomainCsvTreePath);
+    }
 
-	public ValueTreeNode<String> alignTerms(int fromTopTermIndex, int toTopTermIndex) throws Exception {
-		domainToTermsTree = super.assignToDomains(fromTopTermIndex, toTopTermIndex);
-		return domainToTermsTree;
-	}
+    public ValueSetTreeNode<String> alignTerms(int fromTopTermIndex, int toTopTermIndex) throws Exception {
+        domainToTermsTree = super.assignToDomains(fromTopTermIndex, toTopTermIndex);
+        return domainToTermsTree;
+    }
 
-	public void sample(Set<SampleArguments> sampleArgs) throws IllegalStateException, ParseException, IOException {
+    public void sample(Set<SampleArguments> sampleArgs) throws IllegalStateException, ParseException, IOException {
 
-		if (domainToTermsTree == null) {
-			throw new IllegalStateException("no terms aligned");
-		}
+        if (domainToTermsTree == null) {
+            throw new IllegalStateException("no terms aligned");
+        }
 
-		for (SampleArguments subSample : sampleArgs) {
+        for (SampleArguments subSample : sampleArgs) {
 
-			// merge requested domain-terms
-			Set<String> terms = distinctUnifyValues(subSample.sampleDomains);
+            // merge requested domain-terms
+            Set<String> terms = distinctUnifyValues(subSample.sampleDomains);
 
-			// sample with domain-term dependent query
-			String queryString = String.join("", terms);
+            // sample with domain-term dependent query
+            String queryString = String.join("", terms);
 
-			Query query = new QueryParser(DBDomainSampler.fieldOfInterest, new EnglishAnalyzer()).parse(queryString);
-			TopScoreDocCollector collector = TopScoreDocCollector.create(1000, false);
-			new IndexSearcher(inIndexReader).search(query, collector);
-			// ScoreDoc[] docs = collector.topDocs().scoreDocs;
-			// TODO: create and store docs to new index called subSample.name
-		}
-		throw new UnsupportedOperationException("not implemented yet");
-	}
+            Query query = new QueryParser(DBDomainSampler.fieldOfInterest, new EnglishAnalyzer()).parse(queryString);
+            TopScoreDocCollector collector = TopScoreDocCollector.create(1000, false);
+            new IndexSearcher(inIndexReader).search(query, collector);
+        }
+        throw new UnsupportedOperationException("not implemented yet");
+    }
 
-	Set<String> distinctUnifyValues(Set<ValueTreeNode<String>> trees) {
-		final Set<String> unified = new HashSet<String>();
+    Set<String> distinctUnifyValues(Set<ValueSetTreeNode<String>> trees) {
+        final Set<String> unified = new HashSet<String>();
 
-		BaseTreeNode.NodeInspector<String> operator = (n) -> {
-			for (String value : ((ValueTreeNode<String>) n).getValues()) {
-				unified.add(value);
-			}
-		};
-		for (ValueTreeNode<String> tree : trees) {
-			BaseTreeNode.depthFirstTraverser(tree, operator);
-		}
-		return unified;
-	}
+        @SuppressWarnings("unchecked")
+        NodeInspector operator = (n) -> {
+            for (String value : ((ValueSetTreeNode<String>) n).getValues()) {
+                unified.add(value);
+            }
+            return false;
+        };
+        for (ValueSetTreeNode<String> tree : trees) {
+            BaseTreeNode.depthFirstTraverser(tree, operator);
+        }
+        return unified;
+    }
 }

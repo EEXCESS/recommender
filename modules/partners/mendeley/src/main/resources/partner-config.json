@@ -1,17 +1,21 @@
 {
   "systemId": "Mendeley",
-  "queryGeneratorClass": "eu.eexcess.partnerrecommender.reference.LuceneQueryGenerator",
+  "queryGeneratorClass": "eu.eexcess.partnerrecommender.reference.LuceneQueryGeneratorFieldTermConjunctionMainTopic",
   "partnerConnectorClass": "eu.eexcess.mendeley.recommender.PartnerConnector",
   "transformerClass": "eu.eexcess.mendeley.datalayer.MendeleyTransformer",
   "searchEndpoint": "https://api.mendeley.com/search/catalog?limit=20&query=${query}",
+  "detailEndpoint": "https://api.mendeley.com/catalog/${detailQuery}",
    "isTransformedNative": "false",
   "userName": "",
   "password": "",
+  "favIconURI":"https://d3fildg3jlcvty.cloudfront.net/4f8209ead635af1611d51e4f3159812cc355e1ce/graphics/favicon.ico",
   "mappingListTransformationFile":"mapperResultList.xsl",
   "mappingObjectTransformationFile":"mapperObject.xsl",
   "partnerDataRequestsTrace":"false",
-  "enableEnriching":"false",
+  "enableEnriching":"true",
   "makeCleanupBeforeTransformation":"false",
-  "partnerConnectorEndpoint": "http://127.0.0.1/eexcess-partner-mendeley-1.0-SNAPSHOT/partner/recommend",
-  "federatedRecommenderURI":"http://127.0.0.1/eexcess-federated-recommender-web-service-1.0-SNAPSHOT/recommender/"
+  "partnerConnectorEndpoint": "http://127.0.0.1/eexcess-partner-mendeley-1.0-SNAPSHOT/partner/",
+  "federatedRecommenderURI":"http://127.0.0.1/eexcess-federated-recommender-web-service-1.0-SNAPSHOT/recommender/",
+  "languageContent" : ["en"],
+	"ageRange":2
 }

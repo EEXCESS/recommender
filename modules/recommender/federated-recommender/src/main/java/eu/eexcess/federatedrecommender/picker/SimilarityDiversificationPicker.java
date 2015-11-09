@@ -19,7 +19,7 @@ GNU Affero General Public License for more details.
 
 You should have received a copy of the GNU Affero General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
-*/
+ */
 package eu.eexcess.federatedrecommender.picker;
 
 import java.util.ArrayList;
@@ -43,93 +43,93 @@ import eu.eexcess.federatedrecommender.interfaces.PartnersFederatedRecommendatio
  * 
  * @author hziak
  */
-public class SimilarityDiversificationPicker implements PartnersFederatedRecommendationsPicker {
+public class SimilarityDiversificationPicker extends PartnersFederatedRecommendationsPicker {
 
-	/**
-	 * thetaF is a value between 0.0 and 1.0 larger values favor diversification
-	 * smaller values favor the original result sorting
-	 */
-	private Double thetaF;
-	private Comparator<ResultSimilarity> simResultComperator = new Comparator<ResultSimilarity>() {
-		@Override
-		public int compare(ResultSimilarity o1, ResultSimilarity o2) {
-			if (o1.getSimilarity() < o2.getSimilarity())
-				return -1;
-			if (o1.getSimilarity() > o2.getSimilarity())
-				return 1;
-			return 0;
-		}
-	};
+    /**
+     * thetaF is a value between 0.0 and 1.0 larger values favor diversification
+     * smaller values favor the original result sorting
+     */
+    private Double thetaF;
+    private Comparator<ResultSimilarity> simResultComperator = new Comparator<ResultSimilarity>() {
+        @Override
+        public int compare(ResultSimilarity o1, ResultSimilarity o2) {
+            if (o1.getSimilarity() < o2.getSimilarity())
+                return -1;
+            if (o1.getSimilarity() > o2.getSimilarity())
+                return 1;
+            return 0;
+        }
+    };
 
-	public SimilarityDiversificationPicker(Double thetaF) {
-		this.thetaF = thetaF;
-	}
-	/**
-	 * Function not implemented
-	 */
-	@Override
-	public ResultList pickResults(PFRChronicle pFRChronicle, int numResults) {
-		// TODO Auto-generated method stub
-		return null;
-	}
+    public SimilarityDiversificationPicker(Double thetaF) {
+        this.thetaF = thetaF;
+    }
 
-	@Override
-	public ResultList pickResults(SecureUserProfile secureUserProfile, PartnersFederatedRecommendations resultList, List<PartnerBadge> partners, int numResults) {
-		ResultList results = new ResultList();
-		Set<PartnerBadge> keys = resultList.getResults().keySet();
+    /**
+     * Function not implemented
+     */
+    @Override
+    public ResultList pickResults(PFRChronicle pFRChronicle, int numResults) {
 
-		int valuesSize = 0;
-		for (ResultList rL :resultList.getResults().values()) {
-			valuesSize+=rL.results.size();
-			System.out.println(rL.provider + " "+ rL.results.size());
-		}
-		int resultSize = results.results.size();
-		while (resultSize < numResults && (resultSize < valuesSize)) {
-			for (PartnerBadge partnerBadge : keys) {
-				ResultList partnerResultList = resultList.getResults().get(partnerBadge);
-				if (partnerResultList != null)
-					if (partnerResultList.results != null)
-						if (partnerResultList.results.size() > 0) {
-							results.results.add(partnerResultList.results.get(0));
-							partnerResultList.results.remove(0);
-							resultSize = results.results.size();
-						}
-			}
-		}
-		return diversify(results);
-	}
+        return null;
+    }
 
-	private ResultList diversify(ResultList resultList) {
-		ResultList diversifiedResults = new ResultList();
-		List<ResultSimilarity> tmpResult = new ArrayList<ResultSimilarity>();
-		for (Result result : resultList.results) {
-			tmpResult.add(sim(result, tmpResult));
-		}
-		Collections.sort(tmpResult, simResultComperator);
+    @Override
+    public ResultList pickResults(SecureUserProfile secureUserProfile, PartnersFederatedRecommendations resultList, List<PartnerBadge> partners, int numResults) {
+        ResultList results = new ResultList();
+        Set<PartnerBadge> keys = resultList.getResults().keySet();
 
-		for (ResultSimilarity resultSimilarity : tmpResult) {
-			diversifiedResults.results.add((Result) resultSimilarity);
-		}
-		return diversifiedResults;
-	}
+        int valuesSize = 0;
+        for (ResultList rL : resultList.getResults().values()) {
+            valuesSize += rL.results.size();
+        }
+        int resultSize = results.results.size();
+        while (resultSize < numResults && (resultSize < valuesSize)) {
+            for (PartnerBadge partnerBadge : keys) {
+                ResultList partnerResultList = resultList.getResults().get(partnerBadge);
+                if (partnerResultList != null)
+                    if (partnerResultList.results != null)
+                        if (partnerResultList.results.isEmpty()) {
+                            results.results.add(partnerResultList.results.get(0));
+                            partnerResultList.results.remove(0);
+                            resultSize = results.results.size();
+                        }
+            }
+        }
+        return diversify(results);
+    }
 
-	/**
-	 * Calculates the similarity between the given result and the already chosen
-	 * results in tmpResult
-	 * 
-	 * @param result
-	 * @param tmpResult
-	 * @return
-	 */
-	private ResultSimilarity sim(Result result, List<ResultSimilarity> tmpResult) {
-		ResultSimilarity resultWithSim = new ResultSimilarity(result);
-		double similarity = 0.0;
-		for (ResultSimilarity resultSimilarity : tmpResult) {
-			similarity += resultSimilarity.calcSimilarity(result);
-		}
-		similarity += similarity / tmpResult.size();
-		resultWithSim.setSimilarity(similarity - thetaF);
-		return resultWithSim;
-	}
+    private ResultList diversify(ResultList resultList) {
+        ResultList diversifiedResults = new ResultList();
+        List<ResultSimilarity> tmpResult = new ArrayList<ResultSimilarity>();
+        for (Result result : resultList.results) {
+            tmpResult.add(sim(result, tmpResult));
+        }
+        Collections.sort(tmpResult, simResultComperator);
+
+        for (ResultSimilarity resultSimilarity : tmpResult) {
+            diversifiedResults.results.add((Result) resultSimilarity);
+        }
+        return diversifiedResults;
+    }
+
+    /**
+     * Calculates the similarity between the given result and the already chosen
+     * results in tmpResult
+     * 
+     * @param result
+     * @param tmpResult
+     * @return
+     */
+    private ResultSimilarity sim(Result result, List<ResultSimilarity> tmpResult) {
+        ResultSimilarity resultWithSim = new ResultSimilarity(result);
+        double similarity = 0.0;
+        for (ResultSimilarity resultSimilarity : tmpResult) {
+            similarity += resultSimilarity.calcSimilarity(result);
+        }
+        similarity += similarity / tmpResult.size();
+        resultWithSim.setSimilarity(similarity - thetaF);
+        return resultWithSim;
+    }
 
 }

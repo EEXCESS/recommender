@@ -57,13 +57,35 @@ public class XMLTools {
 	
 	
 	public static String writeModel(Model model) {
-		String syntax = "RDF/XML-ABBREV"; // also try "N-TRIPLE" and "TURTLE"
+		model.setNsPrefix("wgs84", "http://www.w3.org/2003/01/geo/wgs84-pos/");
+		model.setNsPrefix("dbpediaClass", "http://dbpedia.org/ontology/");
+		model.setNsPrefix("dbpediaResource", "http://dbpedia.org/resource/");
+		model.setNsPrefix("freebase", "http://www.freebase.com/");
+		model.setNsPrefix("freebasePeople", "http://www.freebase.com/people/");
+		model.setNsPrefix("freebaseMediaCommon", "http://www.freebase.com/media_common/");
+		model.setNsPrefix("Schema", "http://schema.org/");
+		String syntax = "RDF/XML-ABBREV"; 
 		StringWriter out = new StringWriter();
 		model.write(out, syntax);
 		String ret = out.toString();
 		return ret;
 	}
 	
+	public static String writeModelNQuads(Model model) {
+		String syntax = "NQUADS"; 
+		StringWriter out = new StringWriter();
+		model.write(out, syntax);
+		String ret = out.toString();
+		return ret;
+	}
+
+	public static String writeModelJsonLD(Model model) {
+		String syntax = "JSONLD"; 
+		StringWriter out = new StringWriter();
+		model.write(out, syntax);
+		String ret = out.toString();
+		return ret;
+	}
 	
 	public static Document convertStringToDocument(String xmlStr) {
         DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();  

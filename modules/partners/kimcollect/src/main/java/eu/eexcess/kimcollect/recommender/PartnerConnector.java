@@ -30,12 +30,12 @@ import com.sun.jersey.api.client.WebResource;
 import com.sun.jersey.api.client.WebResource.Builder;
 
 import eu.eexcess.config.PartnerConfiguration;
-import eu.eexcess.dataformats.result.ResultList;
+import eu.eexcess.dataformats.result.DocumentBadge;
 import eu.eexcess.dataformats.userprofile.SecureUserProfile;
 import eu.eexcess.partnerdata.reference.PartnerdataLogger;
-import eu.eexcess.partnerrecommender.api.PartnerConfigurationEnum;
+import eu.eexcess.partnerrecommender.api.PartnerConfigurationCache;
 import eu.eexcess.partnerrecommender.api.PartnerConnectorApi;
-import eu.eexcess.partnerrecommender.api.QueryGeneratorApi;
+import eu.eexcess.partnerrecommender.reference.PartnerConnectorBase;
 
 /**
  * Query generator for KIM.Collect.
@@ -43,23 +43,8 @@ import eu.eexcess.partnerrecommender.api.QueryGeneratorApi;
  * @author thomas.orgel@joanneum.at
  */
 
-public class PartnerConnector implements PartnerConnectorApi {
+public class PartnerConnector extends PartnerConnectorBase implements PartnerConnectorApi {
 	
-    private QueryGeneratorApi queryGenerator;
-
-    /**
-     * Returns the query generator for the partner search engine.
-     * @return the query generator
-     */
-    protected QueryGeneratorApi getQueryGenerator() {
-        return queryGenerator;
-    }
-    
-    @Override
-    public ResultList queryPartnerNative(PartnerConfiguration partnerConfiguration, SecureUserProfile userProfile, PartnerdataLogger logger)
-    				throws IOException {
-    	return null;
-    }
     
 	@Override
 	public Document queryPartner(PartnerConfiguration partnerConfiguration, SecureUserProfile userProfile, PartnerdataLogger logger) throws IOException {
@@ -68,22 +53,22 @@ public class PartnerConnector implements PartnerConnectorApi {
 	try {	
 	    
 //        ClientConfig config = new DefaultClientConfig();
-        Client client = new Client(PartnerConfigurationEnum.CONFIG.getClientDefault());
+        Client client = new Client(PartnerConfigurationCache.CONFIG.getClientDefault());
 
 //        client.addFilter(new HTTPBasicAuthFilter(partnerConfiguration.userName, partnerConfiguration.password));
 
-        queryGenerator = PartnerConfigurationEnum.CONFIG.getQueryGenerator();
+        queryGenerator = PartnerConfigurationCache.CONFIG.getQueryGenerator(partnerConfiguration.getQueryGeneratorClass());
 		
         String query = getQueryGenerator().toQuery(userProfile);
         
         Map<String, String> valuesMap = new HashMap<String, String>();
         valuesMap.put("query", query);
         int numResults = 10;
-        if (userProfile.numResults!=null && userProfile.numResults != 0)
-        	numResults  = userProfile.numResults;
+        if (userProfile.getNumResults()!=null && userProfile.getNumResults() != 0)
+        	numResults  = userProfile.getNumResults();
         valuesMap.put("numResults", numResults+"");
         
-        String searchRequest = StrSubstitutor.replace(partnerConfiguration.searchEndpoint, valuesMap);
+        String searchRequest = StrSubstitutor.replace(partnerConfiguration.getSearchEndpoint(), valuesMap);
         
         WebResource service = client.resource(searchRequest);
        
@@ -95,6 +80,15 @@ public class PartnerConnector implements PartnerConnectorApi {
 			throw new IOException("Cannot query partner REST API!", e);
 		}
         
+	}
+
+	@Override
+	public Document queryPartnerDetails(
+			PartnerConfiguration partnerConfiguration,
+			DocumentBadge document, PartnerdataLogger logger)
+			throws IOException {
+		// TODO Auto-generated method stub
+		return null;
 	}
 
 }

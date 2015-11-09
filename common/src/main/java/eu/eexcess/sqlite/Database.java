@@ -1,4 +1,4 @@
-/* Copyright (C) 2014 
+/* Copyright (C) 2014
 "Kompetenzzentrum fuer wissensbasierte Anwendungen Forschungs- und EntwicklungsgmbH" 
 (Know-Center), Graz, Austria, office@know-center.at.
 
@@ -27,8 +27,14 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 package eu.eexcess.sqlite;
 
-import java.sql.*;
+import java.io.Closeable;
+import java.io.IOException;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
 import java.util.HashMap;
+import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -38,159 +44,208 @@ import java.util.logging.Logger;
  * @author hziak
  * 
  */
-public class Database {
-	private static final Logger logger = Logger.getLogger(Database.class
-			.getName());
-	private static final String JDBC_DRIVER = "org.sqlite.JDBC";
-	private static String dBName = null;
+public class Database<T extends DatabasePreparedQuery> implements Closeable {
+    private static final Logger LOGGER = Logger.getLogger(Database.class.getName());
+    private static final String JDBC_DRIVER = "org.sqlite.JDBC";
+    private String dBName = null;
 
-	private HashMap<String, PreparedStatement> map = new HashMap<String, PreparedStatement>();
+    private Map<String, PreparedStatement> map = new HashMap<String, PreparedStatement>();
 
-	private Connection con;
+    private Connection con;
 
-	public Database() {
-		try {
-			Class.forName(JDBC_DRIVER);
-		} catch (ClassNotFoundException e) {
-			logger.log(Level.SEVERE, "Could not load JDBC Driver", e);
-		}
-	}
+    public Database() {
+        try {
+            Class.forName(JDBC_DRIVER);
+        } catch (ClassNotFoundException e) {
+            LOGGER.log(Level.SEVERE, "Could not load JDBC Driver", e);
+        }
+    }
 
-	public <T extends DatabasePreparedQuery> Database(String dBName,
-			T[] preparedStatementsDefinitions) {
-		logger.log(Level.INFO,"Trying to open DB:" +this.dBName);
-		this.dBName = dBName;
-		try {
-			Class.forName(JDBC_DRIVER);
-		} catch (ClassNotFoundException e) {
-			logger.log(Level.SEVERE, "Could not load JDBC Driver", e);
-		}
-		try {
-			this.con = DriverManager
-					.getConnection("jdbc:sqlite:" + this.dBName);
-		} catch (SQLException e) {
-			logger.log(Level.SEVERE, "Could not connect to Database: "
-					+ this.dBName, e);
-		}
-		if (con != null) {
-			try {
-				initPreparedStatements(con, preparedStatementsDefinitions);
-			} catch (SQLException e) {
-				logger.log(Level.SEVERE,
-						"Prepared Statements could not be created", e);
-			}
-			try {
+    public Database(String dBName, T[] preparedStatementsDefinitions) {
+        this.dBName = dBName;
+        LOGGER.log(Level.INFO, "Trying to open DB: " + this.dBName);
+        try {
+            Class.forName(JDBC_DRIVER);
+        } catch (ClassNotFoundException e) {
+            LOGGER.log(Level.SEVERE, "Could not load JDBC Driver", e);
+        }
+        try {
+            this.con = DriverManager.getConnection("jdbc:sqlite:" + this.dBName);
+        } catch (SQLException e) {
+            LOGGER.log(Level.SEVERE, "Could not connect to Database: " + this.dBName, e);
+        }
+        if (con != null) {
+            try {
+                initPreparedStatements(con, preparedStatementsDefinitions);
+            } catch (SQLException e) {
+                LOGGER.log(Level.SEVERE, "Prepared Statements could not be created", e);
+            }
+            try {
 
-				con.setAutoCommit(false);
-			} catch (SQLException e) {
-				logger.log(Level.SEVERE,
-						"Autocommit could not be set to false", e);
-			}
-		}
-	}
+                con.setAutoCommit(false);
+            } catch (SQLException e) {
+                LOGGER.log(Level.SEVERE, "Autocommit could not be set to false", e);
+            }
+        }
+    }
 
-	/**
-	 * Creates a Connection to a Database if the Database wasn't defined in the
-	 * constructor
-	 * 
-	 * @param database
-	 * @return
-	 */
-	public Connection connect(String database) {
+    /**
+     * Creates a Connection to a Database if the Database wasn't defined in the
+     * constructor
+     * 
+     * @param database
+     * @return
+     */
+    public Connection connect(String database) {
 
-		try {
-			Class.forName(JDBC_DRIVER);
-		} catch (ClassNotFoundException e1) {
-			logger.log(Level.SEVERE,
-					"Could not Connec to Database:" + database, e1);
-			return null;
-		}
-		try {
-			this.con = DriverManager.getConnection("jdbc:sqlite:" + database);
-		} catch (SQLException e) {
-			logger.log(Level.SEVERE,
-					"Could not Connec to Database:" + database, e);
-			return null;
-		}
-		return con;
-	}
+        try {
+            Class.forName(JDBC_DRIVER);
+        } catch (ClassNotFoundException e1) {
+            LOGGER.log(Level.SEVERE, "Could not Connec to Database:" + database, e1);
+            return null;
+        }
+        try {
+            this.con = DriverManager.getConnection("jdbc:sqlite:" + database);
+        } catch (SQLException e) {
+            LOGGER.log(Level.SEVERE, "Could not Connec to Database:" + database, e);
+            return null;
+        }
+        return con;
+    }
 
-	/*
-	 * Initializes the Prepared Statements
-	 */
-	private <T extends DatabasePreparedQuery> void initPreparedStatements(
-			Connection con, T[] preparedStatements) throws SQLException {
-		
-		if (con != null) {
-			for (T t : preparedStatements) {
-				PreparedStatement updateStatement = null;
+    /*
+     * Initializes the Prepared Statements
+     */
+    private void initPreparedStatements(Connection con, T[] preparedStatements) throws SQLException {
 
-				try {
-					updateStatement = con.prepareStatement(t.getUpdateQuery());
-				} catch (SQLException e) {
-					logger.log(Level.SEVERE,
-							"Could not prepare Statement \"QueryLog\"", e);
-					try {
-						con.createStatement().executeUpdate(t.getCreateQuery());
-					} catch (SQLException e1) {
-						logger.log(Level.SEVERE, "Could not create Table  \""
-								+ t.getInternName() + "\"", e);
-					}
-				}
-				if (updateStatement == null)
-					updateStatement = con.prepareStatement(t.getUpdateQuery());
+        if (con != null) {
+            for (T t : preparedStatements) {
+                // try to create table
+                try {
+                    con.createStatement().executeUpdate(t.getCreateQuery());
+                } catch (SQLException e) {
+                    LOGGER.log(Level.SEVERE, "failed to create table  [" + t.getInternName() + "]", e);
+                }
 
-				if (updateStatement != null)
-					map.put(t.getInternName() + t.getUpdateQuery(),
-							updateStatement);
+                // map update statement
+                try {
+                    PreparedStatement updateStatement = con.prepareStatement(t.getUpdateQuery());
+                    if (updateStatement != null) {
+                        map.put(t.getInternName() + t.getUpdateQuery(), updateStatement);
+                    }
+                } catch (SQLException e) {
+                    LOGGER.log(Level.SEVERE, "failed to prepare statement [" + t.getUpdateQuery() + "]", e);
+                }
 
-				PreparedStatement getStatement = null;
-				try {
-					getStatement = con.prepareStatement(t.getSelectQuery());
-				} catch (SQLException e) {
-					logger.log(Level.SEVERE,
-							"Could not prepare Statement \"QueryLog\"", e);
-				}
-				map.put(t.getInternName() + t.getSelectQuery(), getStatement);
-			}
-		}
-	}
+                // map select statement
+                try {
+                    PreparedStatement getStatement = con.prepareStatement(t.getSelectQuery());
+                    if (getStatement != null) {
+                        map.put(t.getInternName() + t.getSelectQuery(), getStatement);
+                    }
+                } catch (SQLException e) {
+                    LOGGER.log(Level.SEVERE, "failed to prepare statement [" + t.getSelectQuery() + "]", e);
+                }
 
-	/**
-	 * Has to be called to close the Database
-	 * 
-	 * @throws SQLException
-	 */
-	public void close() throws SQLException {
-		this.con.close();
-	}
+                // map insert statement
+                try {
+                    PreparedStatement updateStatement = con.prepareStatement(t.getInsertQuery());
+                    if (updateStatement != null) {
+                        map.put(t.getInternName() + t.getInsertQuery(), updateStatement);
+                    }
+                } catch (SQLException e) {
+                    LOGGER.log(Level.SEVERE, "failed to prepare statement [" + t.getInsertQuery() + "]", e);
+                }
 
-	/**
-	 * returns the get statement from the DatabasePreparedQuery
-	 */
-	public <T extends DatabasePreparedQuery> PreparedStatement getPreparedSelectStatement(
-			T preparedQueryType) {
-		return map.get(preparedQueryType.getInternName()
-				+ preparedQueryType.getSelectQuery());
-	}
+                // map delete statement
+                try {
+                    PreparedStatement updateStatement = con.prepareStatement(t.getDeleteQuery());
+                    if (updateStatement != null) {
+                        map.put(t.getInternName() + t.getDeleteQuery(), updateStatement);
+                    }
+                } catch (SQLException e) {
+                    LOGGER.log(Level.SEVERE, "failed to prepare statement [" + t.getDeleteQuery() + "]", e);
+                }
 
-	/**
-	 * returns the update statement from the DatabasePreparedQuery
-	 */
-	public <T extends DatabasePreparedQuery> PreparedStatement getPreparedUpdateStatement(
-			T preparedQueryType) {
-		return map.get(preparedQueryType.getInternName()
-				+ preparedQueryType.getUpdateQuery());
-	}
+                // map drop statement
+                try {
+                    PreparedStatement updateStatement = con.prepareStatement(t.getDropQuery());
+                    if (updateStatement != null) {
+                        map.put(t.getInternName() + t.getDropQuery(), updateStatement);
+                    }
+                } catch (SQLException e) {
+                    LOGGER.log(Level.SEVERE, "failed to prepare statement [" + t.getDropQuery() + "]", e);
+                }
+            }
+        }
+    }
 
-	public void commit() {
-		if (con != null) {
-			try {
-				con.commit();
-			} catch (SQLException e) {
-				logger.log(Level.SEVERE, "Could not commit Query", e);
-			}
-		}
+    /**
+     * Has to be called to close the Database
+     * 
+     * @throws SQLException
+     */
+    @Override
+    public void close() throws IOException {
+        try {
+            this.con.close();
+        } catch (SQLException sqe) {
+            throw new IOException(sqe);
+        }
+    }
 
-	}
+    /**
+     * @return @see {@link DatabasePreparedQuery#getSelectQuery()}
+     */
+    public PreparedStatement getPreparedSelectStatement(T preparedQueryType) {
+        return map.get(preparedQueryType.getInternName() + preparedQueryType.getSelectQuery());
+    }
+
+    /**
+     * @return @see {@link DatabasePreparedQuery#getUpdateQuery()}
+     */
+    public PreparedStatement getPreparedUpdateStatement(T preparedQueryType) {
+        return map.get(preparedQueryType.getInternName() + preparedQueryType.getUpdateQuery());
+    }
+
+    /**
+     * @return @see {@link DatabasePreparedQuery#getCreateQuery()}
+     */
+    public PreparedStatement getPreparedCreateStatement(T preparedQueryType) {
+        return map.get(preparedQueryType.getInternName() + preparedQueryType.getCreateQuery());
+    }
+
+    /**
+     * @return @see {@link DatabasePreparedQuery#getDropQuery()}
+     */
+    public PreparedStatement getPreparedDropStatement(T preparedQueryType) {
+        return map.get(preparedQueryType.getInternName() + preparedQueryType.getDropQuery());
+    }
+
+    /**
+     * 
+     * @return @see {@link DatabasePreparedQuery#getInsertQuery()}
+     */
+    public PreparedStatement getPreparedInsertStatement(T preparedQueryType) {
+        return map.get(preparedQueryType.getInternName() + preparedQueryType.getInsertQuery());
+    }
+
+    /**
+     * 
+     * @return @see {@link DatabasePreparedQuery#getDeleteQuery()}
+     */
+    public PreparedStatement getPreparedDeleStatement(T preparedQueryType) {
+        return map.get(preparedQueryType.getInternName() + preparedQueryType.getDeleteQuery());
+    }
+
+    public void commit() {
+        if (con != null) {
+            try {
+                con.commit();
+            } catch (SQLException e) {
+                LOGGER.log(Level.SEVERE, "Could not commit Query", e);
+            }
+        }
+
+    }
 }

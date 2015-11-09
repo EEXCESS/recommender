@@ -1,15 +1,18 @@
 {
   "systemId": "ZBW",
+  "favIconURI":"http://www.zbw.eu/favicon.ico",
   "partnerConnectorClass": "eu.eexcess.zbw.recommender.PartnerConnector",
-  "queryGeneratorClass": "eu.eexcess.partnerrecommender.reference.OrQueryGenerator",
-  "searchEndpoint": "https://api.econbiz.de/v1/search?q=${query}&xml=true&size=${size}",
-"partnerConnectorEndpoint": "http://127.0.0.1/eexcess-partner-zbw-1.0-SNAPSHOT/partner/recommend",
+  "queryGeneratorClass": "eu.eexcess.partnerrecommender.reference.OrQueryGeneratorFieldTermConjunction",
+  "searchEndpoint": "https://api.econbiz.de/v1/search?q=${query}&xml=on&size=${size}&profile=eexcess",
+  "detailEndpoint": "https://api.econbiz.de/v1/record/${detailQuery}?xml=true",
+  "partnerConnectorEndpoint": "http://127.0.0.1/eexcess-partner-zbw-1.0-SNAPSHOT/partner/",
   "transformerClass": "eu.eexcess.zbw.datalayer.ZBWTransformer",
   "mappingListTransformationFile":"mapperResultList.xsl",
   "mappingObjectTransformationFile":"mapperObject.xsl",
   "partnerDataRequestsTrace":"false",
-  "enableEnriching":"false",
+  "enableEnriching":"true",
   "makeCleanupBeforeTransformation":"false",
-  "federatedRecommenderURI":"http://127.0.0.1/eexcess-federated-recommender-web-service-1.0-SNAPSHOT/recommender/"
-  
+  "federatedRecommenderURI":"http://127.0.0.1/eexcess-federated-recommender-web-service-1.0-SNAPSHOT/recommender/",
+   "languageContent" : ["en","de"],
+	"ageRange":2
 }

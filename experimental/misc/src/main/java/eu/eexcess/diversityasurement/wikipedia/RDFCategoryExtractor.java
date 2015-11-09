@@ -35,114 +35,119 @@ import eu.eexcess.logger.PianoLogger;
 
 public class RDFCategoryExtractor {
 
-	public static class Statistics {
+    public static class Statistics {
 
-		Statistics() {
-		}
+        Statistics() {
+        }
 
-		Statistics(Statistics src) {
-			this.linesConsidered = src.linesConsidered;
-			this.linesSkipped = src.linesSkipped;
-			this.linesTotal = src.linesTotal;
-			this.linesInFile = src.linesInFile;
-			this.startTimeStamp = src.startTimeStamp;
-			this.endTimeStamp = src.endTimeStamp;
-		}
+        Statistics(Statistics src) {
+            this.linesConsidered = src.linesConsidered;
+            this.linesSkipped = src.linesSkipped;
+            this.linesTotal = src.linesTotal;
+            this.linesInFile = src.linesInFile;
+            this.startTimeStamp = src.startTimeStamp;
+            this.endTimeStamp = src.endTimeStamp;
+        }
 
-		public long linesInFile = 0;
-		public long linesTotal = 0;
-		public long linesSkipped = 0;
-		public long linesConsidered = 0;
-		public long startTimeStamp;
-		public long endTimeStamp;
-	}
+        public long linesInFile = 0;
+        public long linesTotal = 0;
+        public long linesSkipped = 0;
+        public long linesConsidered = 0;
+        public long startTimeStamp;
+        public long endTimeStamp;
 
-	private static class ParentChildCategoryGlue {
-		public String parent;
-		public String child;
-	}
+        @Override
+        public String toString() {
+            return "inflated graph from rdf int [" + (endTimeStamp - startTimeStamp) + "]ms lines: considered [" + linesConsidered + "] skipped [" + linesSkipped
+                    + "] seen total [" + linesTotal + "] total in file[" + linesInFile + "]";
+        }
+    }
 
-	private Logger logger = PianoLogger.getLogger(RDFCategoryExtractor.class);
+    private static class ParentChildCategoryGlue {
+        public String parent;
+        public String child;
+    }
 
-	private File categoryListing;
-	private Statistics statistics = new Statistics();
-	private Pattern categoryRDFPattern;
-	private CategoryTupleCollector collector;
-	private int printStatsEvery = 100000;
+    private Logger logger = PianoLogger.getLogger(RDFCategoryExtractor.class);
 
-	public RDFCategoryExtractor(File filePath, CategoryTupleCollector callback) {
-		categoryListing = filePath;
-		collector = callback;
-		categoryRDFPattern = Pattern
-						.compile("<http://dbpedia.org/resource/Category:(\\w+)>\\s*<http://www.w3.org/2004/02/skos/core#broader>\\s*<http://dbpedia.org/resource/Category:(\\w+)>");
-	}
+    private File categoryListing;
+    private Statistics statistics = new Statistics();
+    Pattern categoryRDFPattern = Pattern
+            .compile("<http://dbpedia.org/resource/Category:(\\w+)>\\s*<http://www.w3.org/2004/02/skos/core#broader>\\s*<http://dbpedia.org/resource/Category:(\\w+)>");
+    private CategoryTupleCollector collector;
 
-	public void build() throws IOException {
-		LineIterator categoryEntryIterator = new LineIterator(new FileReader(categoryListing));
-		statistics.startTimeStamp = System.currentTimeMillis();
-		statistics.linesInFile = getTotalNumberOfLines(categoryListing.getAbsoluteFile());
+    // private int printStatsEvery = 200000;
 
-		while (categoryEntryIterator.hasNext()) {
-			statistics.linesTotal++;
-			ParentChildCategoryGlue tuple = parseRelatedCategoryTuple(categoryEntryIterator.nextLine());
-			if (null != tuple) {
-				statistics.linesConsidered++;
-				try {
-					collector.takeTuple(tuple.parent, tuple.child);
-				} catch (Throwable e) {
-				}
-			} else {
-				statistics.linesSkipped++;
-			}
-			if (0 == (statistics.linesTotal % printStatsEvery)) {
-				logStatistics();
-			}
-		}
-		statistics.endTimeStamp = System.currentTimeMillis();
-		logStatistics();
-	}
+    public RDFCategoryExtractor(File filePath, CategoryTupleCollector callback) {
+        categoryListing = filePath;
+        collector = callback;
+    }
 
-	private void logStatistics() {
-		logger.info("processed categories[" + statistics.linesConsidered + "] out of lines in file ["
-						+ statistics.linesInFile + "], skipped lines[" + statistics.linesSkipped
-						+ "], total lines so far[" + statistics.linesTotal + "]  duration so far["
-						+ ((System.currentTimeMillis() - statistics.startTimeStamp) / (1)) + "]");
+    public void extract() throws IOException {
+        LineIterator categoryEntryIterator = new LineIterator(new FileReader(categoryListing));
+        statistics.startTimeStamp = System.currentTimeMillis();
+        statistics.linesInFile = getTotalNumberOfLines(categoryListing.getAbsoluteFile());
 
-	}
+        while (categoryEntryIterator.hasNext()) {
+            statistics.linesTotal++;
+            ParentChildCategoryGlue tuple = parseRelatedCategoryTuple(categoryEntryIterator.nextLine());
+            if (null != tuple) {
+                statistics.linesConsidered++;
+                try {
+                    collector.takeTuple(tuple.parent, tuple.child);
+                } catch (Exception e) {
+                }
+            } else {
+                statistics.linesSkipped++;
+            }
+            // if (0 == (statistics.linesTotal % printStatsEvery)) {
+            // logStatistics();
+            // }
+        }
+        categoryEntryIterator.close();
+        statistics.endTimeStamp = System.currentTimeMillis();
+        logStatistics();
+    }
 
-	private long getTotalNumberOfLines(File file) throws FileNotFoundException, IOException {
-		long lines = 0;
-		LineNumberReader lineNumberReader = new LineNumberReader(new FileReader(file));
-		lineNumberReader.skip(Long.MAX_VALUE);
-		lines = lineNumberReader.getLineNumber();
-		lineNumberReader.close();
-		return lines;
-	}
+    private void logStatistics() {
+        logger.info("processed categories[" + statistics.linesConsidered + "] out of lines in file [" + statistics.linesInFile + "], skipped lines[" + statistics.linesSkipped
+                + "], total lines so far[" + statistics.linesTotal + "]  duration so far[" + ((System.currentTimeMillis() - statistics.startTimeStamp) / (1)) + "]");
 
-	public Statistics getStatistics() {
-		return new Statistics(statistics);
-	}
+    }
 
-	/**
-	 * Reads a tuple of related categories (parent, child) from an RDF formatted
-	 * string.
-	 * 
-	 * @param rdfString
-	 *            rdf string to parse i.e.
-	 *            <http://dbpedia.org/resource/Category:World_War_II>
-	 *            <http://www.w3.org/2004/02/skos/core#broader>
-	 *            <http://dbpedia.org/resource/Category:Wars_involving_Egypt> .
-	 * @return a tuple or null if string does not match the criteria
-	 *         {@link categoryRDFPattern}
-	 */
-	private ParentChildCategoryGlue parseRelatedCategoryTuple(String rdfString) {
-		Matcher matcher = categoryRDFPattern.matcher(rdfString);
-		if (matcher.find()) {
-			ParentChildCategoryGlue tuple = new ParentChildCategoryGlue();
-			tuple.parent = matcher.group(2);
-			tuple.child = matcher.group(1);
-			return tuple;
-		}
-		return null;
-	}
+    private long getTotalNumberOfLines(File file) throws FileNotFoundException, IOException {
+        long lines = 0;
+        LineNumberReader lineNumberReader = new LineNumberReader(new FileReader(file));
+        lineNumberReader.skip(Long.MAX_VALUE);
+        lines = lineNumberReader.getLineNumber();
+        lineNumberReader.close();
+        return lines;
+    }
+
+    public Statistics getStatistics() {
+        return new Statistics(statistics);
+    }
+
+    /**
+     * Reads a tuple of related categories (parent, child) from an RDF formatted
+     * string.
+     * 
+     * @param rdfString
+     *            rdf string to parse i.e.
+     *            <http://dbpedia.org/resource/Category:World_War_II>
+     *            <http://www.w3.org/2004/02/skos/core#broader>
+     *            <http://dbpedia.org/resource/Category:Wars_involving_Egypt> .
+     * @return a tuple or null if string does not match the criteria
+     *         {@link categoryRDFPattern}
+     */
+    private ParentChildCategoryGlue parseRelatedCategoryTuple(String rdfString) {
+        Matcher matcher = categoryRDFPattern.matcher(rdfString);
+        if (matcher.find()) {
+            ParentChildCategoryGlue tuple = new ParentChildCategoryGlue();
+            tuple.parent = matcher.group(2);
+            tuple.child = matcher.group(1);
+            return tuple;
+        }
+        return null;
+    }
 }

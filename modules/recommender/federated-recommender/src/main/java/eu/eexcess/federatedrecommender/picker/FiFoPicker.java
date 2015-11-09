@@ -19,52 +19,87 @@ GNU Affero General Public License for more details.
 
 You should have received a copy of the GNU Affero General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
-*/
+ */
 package eu.eexcess.federatedrecommender.picker;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import eu.eexcess.dataformats.PartnerBadge;
+import eu.eexcess.dataformats.result.Result;
 import eu.eexcess.dataformats.result.ResultList;
 import eu.eexcess.dataformats.userprofile.SecureUserProfile;
 import eu.eexcess.federatedrecommender.dataformats.PFRChronicle;
 import eu.eexcess.federatedrecommender.dataformats.PartnersFederatedRecommendations;
 import eu.eexcess.federatedrecommender.interfaces.PartnersFederatedRecommendationsPicker;
+
 /**
- * First in First out picker implementation 
+ * First in First out picker implementation
+ * 
  * @author hziak
  *
  */
-public class FiFoPicker implements 	PartnersFederatedRecommendationsPicker {
+public class FiFoPicker extends PartnersFederatedRecommendationsPicker {
 
+    public FiFoPicker() {
+        super();
+    }
 
-		private static final Logger logger = Logger
-				.getLogger(FiFoPicker.class.getName());
+    private static final Logger logger = Logger.getLogger(FiFoPicker.class.getName());
 
-		@Override
-		public ResultList pickResults(PFRChronicle pFRChronicle, int numResults) {
-			logger.log(Level.SEVERE,"Not Implemented!");
-			return null;
-		}
+    @Override
+    public ResultList pickResults(PFRChronicle pFRChronicle, int numResults) {
+        logger.log(Level.SEVERE, "Not Implemented!");
+        return null;
+    }
 
-		@Override
-		public ResultList pickResults(SecureUserProfile secureUserProfile,
-				PartnersFederatedRecommendations resultList,
-				List<PartnerBadge> partners, int numResults) {
-			ResultList result = new ResultList();
-		
-			for (int i=0; i< numResults;i++)
-				for (PartnerBadge partnerBadge : partners) {
-					if(resultList.getResults().get(partnerBadge)!=null)
-						if(resultList.getResults().get(partnerBadge).results.size()>0 && result.results.size()< numResults){
-								result.results.add(resultList.getResults().get(partnerBadge).results.get(0));
-								resultList.getResults().get(partnerBadge).results.remove(0);
-						}
-					}
-		
-			return result;
-		}
+    @Override
+    public ResultList pickResults(SecureUserProfile secureUserProfile, PartnersFederatedRecommendations resultList, List<PartnerBadge> partners, int numResults) {
+        ResultList result = new ResultList();
+        List<PartnerBadge> partnerTmp = new ArrayList<PartnerBadge>();
+        while (resultList != null && !resultList.getResults().isEmpty() && result.results.size() < numResults) {
+            if (partnerTmp.size() == partners.size())
+                break;
+            for (PartnerBadge partnerBadge : partners) {
+                if (resultList.getResults().get(partnerBadge) != null)
+                    if (resultList.getResults().get(partnerBadge).results.isEmpty()) {
+                        partnerTmp.add(partnerBadge);
+                        break;
+                    } else if (!resultList.getResults().get(partnerBadge).results.isEmpty() && result.results.size() < numResults) {
+                        Result resultToAdd = resultList.getResults().get(partnerBadge).results.get(0);
+                        if (resultToAdd == null)
+                            break;
+
+                        byte[] signNewResult = getFuzzyHashSignature(resultToAdd);
+                        Result found = null;
+                        for (Result selectedResult : result.results) {
+                            if (Arrays.equals(signNewResult, getFuzzyHashSignature(selectedResult))) {
+                                found = selectedResult;
+                                break;
+                            }
+                        }
+
+                        if (found == null) {
+                            result.results.add(resultToAdd);
+                        } else {
+                            if (found.resultGroup != null)
+                                found.resultGroup.add(resultToAdd);
+                            else {
+                                found.resultGroup = new LinkedList<Result>();
+                                found.resultGroup.add(resultToAdd);
+                            }
+
+                        }
+                        resultList.getResults().get(partnerBadge).results.remove(0);
+                    }
+
+            }
+        }
+        return result;
+    }
 
 }

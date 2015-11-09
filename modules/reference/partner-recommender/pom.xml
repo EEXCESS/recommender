@@ -22,44 +22,30 @@
   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 -->
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
-    <modelVersion>4.0.0</modelVersion>
-
-    <parent>
-        <groupId>eu.eexcess</groupId>
-        <artifactId>eexcess-parent</artifactId>
-        <version>1.0-SNAPSHOT</version>
-        <relativePath>../../..</relativePath>
-    </parent>
-
-    <artifactId>eexcess-reference-partner-recommender</artifactId>
-    
-    <name>EEXCESS - Reference Implementation Query Generator</name>
-    <description> 
-        Reference implementation to transform a EEXCESS secure user profile into Lucene search query.
-    </description> 
-
-    <dependencies>
-        <dependency>
-	    <groupId>eu.eexcess</groupId>
-	    <artifactId>eexcess-common</artifactId>
-	    <version>${parent.version}</version>	  
-	  </dependency>
-	  <dependency>
-	    <groupId>eu.eexcess</groupId>
-	    <artifactId>eexcess-reference-partner-data-layer</artifactId>
-	    <version>${parent.version}</version>	  
-	  </dependency>  
-	  <dependency>
-    	<groupId>org.apache.jena</groupId>
-    	<artifactId>apache-jena-libs</artifactId>
-    	<type>pom</type>
-    	<version>2.11.0</version>
-  	  </dependency>
-<dependency>
-    <groupId>javax.mail</groupId>
-    <artifactId>mail</artifactId>
-    <version>1.4</version>
+	<modelVersion>4.0.0</modelVersion>
+	<parent>
+		<groupId>eu.eexcess</groupId>
+		<artifactId>eexcess-parent</artifactId>
+		<version>1.0-SNAPSHOT</version>
+		<relativePath>../../..</relativePath>
+	</parent>
+	<artifactId>eexcess-reference-partner-recommender</artifactId>
+	<name>EEXCESS - Reference Implementation Query Generator</name>
+	<description>Reference implementation to transform a EEXCESS secure user profile into Lucene search query.
+    </description>
+	<dependencies>
+	
+		<dependency>
+			<groupId>eu.eexcess</groupId>
+			<artifactId>eexcess-reference-partner-data-layer</artifactId>
+			<version>${parent.version}</version>
+		</dependency>
+	
+		<dependency>
+	<groupId>dom4j</groupId>
+	<artifactId>dom4j</artifactId>
+	<version>1.6.1</version>
 </dependency>
+		
 	</dependencies>
-       
 </project>

@@ -29,7 +29,9 @@ public class ZBWTransformer extends Transformer{
 	
 	@Override
 	protected Result postProcessResult(Document orgPartnerResult, Result result, QuerySolution querySol) {
-		result.uri = "http://www.econbiz.de/Record/"+ result.id;
+		result.documentBadge.uri = "http://www.econbiz.de/Record/"+ result.documentBadge.id;
+		if (result.mediaType == null || result.mediaType.trim().isEmpty() || result.mediaType.equalsIgnoreCase(EEXCESS_FACETS_VALUE_UNKNOWN))
+			result.mediaType = EEXCESS_MEDIATYPE_TEXT;
 		return result;
 	}
 

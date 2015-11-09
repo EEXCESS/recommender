@@ -10,12 +10,10 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.stream.JsonReader;
 
-import edu.stanford.nlp.tagger.maxent.MaxentTagger;
 import eu.eexcess.dataformats.userprofile.Interest;
 import eu.eexcess.federatedrecommender.evaluation.csv.EvaluationQueryList;
 import eu.eexcess.federatedrecommender.evaluation.evaluation.EvaluationQuery;
 
-import org.apache.tika.exception.TikaException;
 import org.apache.tika.language.LanguageIdentifier;
 public class SchloettQuerySelection {
 	final static String directoryPath = "/home/hziak/Datasets/EExcess/schloett-datacollection-785deb288e36/";
@@ -48,7 +46,7 @@ public class SchloettQuerySelection {
 		for (EvaluationQuery evaluationQuery :upqueries) {
 			for (Interest interest : evaluationQuery.interests) {
 
-				 LanguageIdentifier identifier = new LanguageIdentifier(interest.text);
+				 LanguageIdentifier identifier = new LanguageIdentifier(interest.getText());
 			      String language = identifier.getLanguage();
 			      
 			      if(language.equals("en")){
@@ -61,7 +59,7 @@ public class SchloettQuerySelection {
 		List<Interest> interestList= new ArrayList<Interest>();
 		for (Interest key : countedWorksMap.keySet()) {
 			if(countedWorksMap.get(key)<300){
-			System.out.println(key.text +" " + countedWorksMap.get(key));
+			System.out.println(key.getText() +" " + countedWorksMap.get(key));
 			interestList.add(key);
 			}
 		}

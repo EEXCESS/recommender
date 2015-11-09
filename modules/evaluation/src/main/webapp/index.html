@@ -56,7 +56,7 @@ margin:0px;
 <div class="well custom-block">
 	  <img class="pull-left" src="img/logo.png" style="width:80px; height:33px;"></img>
   
-    <H1><center>  <img  src="img/eexcess.png"></img></center></H1>
+    <H1> <img  src="img/eexcess.png"></img></H1>
     <button type="submit" class="btn btn-primary btn-lg  pull-right submitButton" disabled="true" ng-click="mainCtrl.sendResult()" >Next</button>
       <div ng-repeat="myIcons in mainCtrl.icons | filter: {selected:false}"  >
 	  <img class="pull-left img-circle" ng-src="{{myIcons.path}}" style="background-color:{{myIcons.color}}; opacity:0.6;width:48px; height:48px;"></img>
@@ -65,7 +65,7 @@ margin:0px;
 <input class="form-control alert alert-info" ng-if=" mainCtrl.items.length != 0 " id="disabledInput" type="text" placeholder="Query: '{{mainCtrl.items.query}}' " readonly></input>
 <input class="form-control alert alert-warning" ng-if=" mainCtrl.items.length != 0 " id="disabledInput" type="text" placeholder="Query explanation: '{{mainCtrl.items.queryDescription}}' " readonly></input>
 
-</br>
+<br/>
    <div ng-repeat="myItem in mainCtrl.items.results "  >
    	 <div class="col-md-6"   >
      <!--     <div class="col-md-3"   >-->

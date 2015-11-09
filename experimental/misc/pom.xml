@@ -30,8 +30,9 @@
         Experimental code for research purposes.
     </description>
 
-	<dependencies>
 
+
+	<dependencies>
 		<dependency>
 			<groupId>eu.eexcess</groupId>
 			<artifactId>eexcess-common</artifactId>
@@ -115,6 +116,12 @@
 			<groupId>at.know-center.pattern-mining</groupId>
 			<artifactId>pattern-mining-fpgrowth</artifactId>
 			<version>1.0-SNAPSHOT</version>
+			<exclusions>
+				<exclusion>
+					<groupId>apache-collections</groupId>
+					<artifactId>commons-collections</artifactId>
+				</exclusion>
+			</exclusions>
 		</dependency>
 		<dependency>
 			<groupId>commons-collections</groupId>
@@ -130,7 +137,40 @@
 			<groupId>at.know-center.commons</groupId>
 			<artifactId>wikipedia-synonym-index</artifactId>
 			<version>2.0-SNAPSHOT</version>
+			<exclusions>
+				<exclusion>
+					<groupId>org.netlib.jlapack</groupId>
+					<artifactId>blas</artifactId>
+				</exclusion>
+			</exclusions>
+		</dependency>
+		<dependency>
+			<groupId>grph</groupId>
+			<artifactId>grph</artifactId>
+			<version>1.5.27</version>
+		</dependency>
+		<dependency>
+			<groupId>com.google.code.gson</groupId>
+			<artifactId>gson</artifactId>
+			<version>2.3.1</version>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.tika</groupId>
+			<artifactId>tika-parsers</artifactId>
+			<version>1.9</version>
+		</dependency>
+		<dependency>
+			<groupId>net.sourceforge.htmlcleaner</groupId>
+			<artifactId>htmlcleaner</artifactId>
+			<version>2.13</version>
 		</dependency>
 	</dependencies>
 
+	<repositories>
+		<repository>
+			<id>lhogie.i3s.maven.repo</id>
+			<name>Luc Hogie Maven repository</name>
+			<url>http://www.i3s.unice.fr/~hogie/maven_repository/</url>
+		</repository>
+	</repositories>
 </project>
