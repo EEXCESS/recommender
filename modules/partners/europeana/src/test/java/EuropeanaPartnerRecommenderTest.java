@@ -134,6 +134,23 @@ public class EuropeanaPartnerRecommenderTest {
 
 	}
 
+	@Test
+	public void detailCallProblemDCdateParachute() {
+        ArrayList<String> ids = new ArrayList<String>();
+		ArrayList<String> uris = new ArrayList<String>();
+        ids.add("/2022343/6EB096FC2BCC725C2340A59F32774D8CC3086F53");
+        uris.add("http://europeana.eu/resolve/record/2022343/6EB096FC2BCC725C2340A59F32774D8CC3086F53");
+        DocumentBadgeList documentDetails = PartnerRecommenderTestHelper.getDetails(DEPLOYMENT_CONTEXT,	
+        		port, 
+        		PartnerRecommenderTestHelper.createParamsForPartnerRecommenderDetailCall(ids, uris, DATAPROVIDER));
+	    
+        assertNotNull(documentDetails);
+        assertTrue(documentDetails.documentBadges.size() > 0 );
+        assertEquals(1, documentDetails.documentBadges.size());
+        assertTrue(!documentDetails.documentBadges.get(0).details.contains("18371838"));
+        assertTrue(documentDetails.documentBadges.get(0).details.contains("1837"));
+        assertTrue(documentDetails.documentBadges.get(0).details.contains("1838"));
+	}
 	
 	@Test
 	public void singleQueryGraz() {
