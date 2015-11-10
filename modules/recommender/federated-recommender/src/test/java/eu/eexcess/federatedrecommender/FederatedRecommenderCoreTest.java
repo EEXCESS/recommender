@@ -1,7 +1,6 @@
 package eu.eexcess.federatedrecommender;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -12,6 +11,7 @@ import org.junit.Test;
 
 import eu.eexcess.config.FederatedRecommenderConfiguration;
 import eu.eexcess.dataformats.PartnerBadge;
+import eu.eexcess.dataformats.userprofile.ContextKeyword;
 import eu.eexcess.dataformats.userprofile.SecureUserProfile;
 import eu.eexcess.dataformats.userprofile.SecureUserProfileEvaluation;
 import eu.eexcess.federatedrecommender.interfaces.PartnerSelector;
@@ -113,4 +113,76 @@ public class FederatedRecommenderCoreTest {
         assertEquals(1, TestableSourceSelectorB.instantiationCount);
     }
 
+	@Test
+	public void testGenerateFederatedRecommendationPickerSelectionNotFound() throws Exception {
+	     FederatedRecommenderConfiguration frcc = new FederatedRecommenderConfiguration();
+	        frcc.setNumRecommenderThreads(20);
+	        frcc.setPartnersTimeout(1000);
+	        
+	        FederatedRecommenderCore frc = FederatedRecommenderCore.getInstance(frcc);
+	        SecureUserProfileEvaluation userProfile = new SecureUserProfileEvaluation();
+	        userProfile.setPickerName("TestToFailPicker");
+	        userProfile.getContextKeywords().add(new ContextKeyword("Test"));
+	        try{
+		        frc.generateFederatedRecommendation(userProfile);
+		        }catch (Exception e){
+		        	assert(true);
+		        }
+	        assert(false);	
+	        
+	}
+	@Test
+	public void testGenerateFederatedRecommendationPickerSelectionFound() throws Exception {
+	     FederatedRecommenderConfiguration frcc = new FederatedRecommenderConfiguration();
+	        frcc.setNumRecommenderThreads(20);
+	        frcc.setPartnersTimeout(1000);
+	        frcc.setDefaultPickerName("eu.eexcess.federatedrecommender.picker.OccurrenceProbabilityPicker");
+	        FederatedRecommenderCore frc = FederatedRecommenderCore.getInstance(frcc);
+	        SecureUserProfileEvaluation userProfile = new SecureUserProfileEvaluation();
+	        userProfile.getContextKeywords().add(new ContextKeyword("Test"));
+	        userProfile.setPickerName("eu.eexcess.federatedrecommender.picker.FiFoPicker");
+	        try{
+		        frc.generateFederatedRecommendation(userProfile);
+		        }catch (Exception e){
+		        	assert(false);
+		        }
+	        assert(true);	
+	        
+	 }
+	@Test
+	public void testGenerateFederatedRecommendationPickerSelectionNull() throws Exception {
+	     FederatedRecommenderConfiguration frcc = new FederatedRecommenderConfiguration();
+	        frcc.setNumRecommenderThreads(20);
+	        frcc.setPartnersTimeout(1000);
+	        frcc.setDefaultPickerName("eu.eexcess.federatedrecommender.picker.OccurrenceProbabilityPicker");
+	        FederatedRecommenderCore frc = FederatedRecommenderCore.getInstance(frcc);
+	        SecureUserProfileEvaluation userProfile = new SecureUserProfileEvaluation();
+	        userProfile.getContextKeywords().add(new ContextKeyword("Test"));
+	        userProfile.setPickerName(null);
+	        try{
+		        frc.generateFederatedRecommendation(userProfile);
+		        }catch (Exception e){
+		        	assert(false);
+		        }
+	        assert(true);	
+	        
+	}
+	@Test
+	public void testGenerateFederatedRecommendationPickerSelectionEmtpy() throws Exception {
+	     FederatedRecommenderConfiguration frcc = new FederatedRecommenderConfiguration();
+	        frcc.setNumRecommenderThreads(20);
+	        frcc.setPartnersTimeout(1000);
+	        frcc.setDefaultPickerName("eu.eexcess.federatedrecommender.picker.OccurrenceProbabilityPicker");
+	        FederatedRecommenderCore frc = FederatedRecommenderCore.getInstance(frcc);
+	        SecureUserProfileEvaluation userProfile = new SecureUserProfileEvaluation();
+	        userProfile.getContextKeywords().add(new ContextKeyword("Test"));
+	        userProfile.setPickerName("");
+	        
+	        try{
+		        frc.generateFederatedRecommendation(userProfile);
+		        }catch (Exception e){
+		        	assert(false);
+		        }
+	        assert(true);	        
+	}
 }
