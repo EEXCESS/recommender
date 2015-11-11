@@ -134,6 +134,9 @@ public class EuropeanaPartnerRecommenderTest {
 
 	}
 
+	/*
+	 * UnitTest for https://github.com/EEXCESS/recommender/issues/27
+	 */
 	@Test
 	public void detailCallProblemDCdateParachute() {
         ArrayList<String> ids = new ArrayList<String>();
@@ -148,8 +151,27 @@ public class EuropeanaPartnerRecommenderTest {
         assertTrue(documentDetails.documentBadges.size() > 0 );
         assertEquals(1, documentDetails.documentBadges.size());
         assertTrue(!documentDetails.documentBadges.get(0).details.contains("18371838"));
-        assertTrue(documentDetails.documentBadges.get(0).details.contains("1837"));
-        assertTrue(documentDetails.documentBadges.get(0).details.contains("1838"));
+        assertTrue(documentDetails.documentBadges.get(0).details.contains("\"dctermsdate\":1837,"));
+        assertTrue(!documentDetails.documentBadges.get(0).details.contains("\"dctermsdate\":1838,"));
+	}
+
+	/*
+	 *  Unittest for https://github.com/EEXCESS/PartnerWizard/issues/1
+	 */
+	@Test
+	public void detailCallProblemDCdateArmenerziehervereins() {
+        ArrayList<String> ids = new ArrayList<String>();
+		ArrayList<String> uris = new ArrayList<String>();
+        ids.add("2022041/10848_C5081F31_FD9A_4E63_8213_2DA9CA1578FD");
+        uris.add("http://europeana.eu/resolve/record/2022041/10848_C5081F31_FD9A_4E63_8213_2DA9CA1578FD");
+        DocumentBadgeList documentDetails = PartnerRecommenderTestHelper.getDetails(DEPLOYMENT_CONTEXT,	
+        		port, 
+        		PartnerRecommenderTestHelper.createParamsForPartnerRecommenderDetailCall(ids, uris, DATAPROVIDER));
+	    
+        assertNotNull(documentDetails);
+        assertTrue(documentDetails.documentBadges.size() > 0 );
+        assertEquals(1, documentDetails.documentBadges.size());
+        assertTrue(documentDetails.documentBadges.get(0).details.contains("\"dctermsdate\":1911,"));
 	}
 	
 	@Test

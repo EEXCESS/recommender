@@ -168,7 +168,7 @@
    </xsl:template>
 	  <xsl:template name="Main.Description"/>
 	  <xsl:template name="Main.Date">
-      <apply-templates xmlns="http://www.w3.org/1999/XSL/Transform" mode="m5" select="year"/>
+      <apply-templates xmlns="http://www.w3.org/1999/XSL/Transform" mode="m5" select="year/e[1]"/>
    </xsl:template>
 	  <xsl:template name="Main.Identifier">
       <apply-templates xmlns="http://www.w3.org/1999/XSL/Transform" mode="m3" select="about"/>
@@ -256,7 +256,7 @@
          <call-template name="StringToString"/>
       </element>
    </template>
-   <template xmlns="http://www.w3.org/1999/XSL/Transform" match="year" mode="m5">
+   <template xmlns="http://www.w3.org/1999/XSL/Transform" match="year/e[1]" mode="m5">
       <element name="dcterms:date">
          <call-template name="StringToString"/>
       </element>
