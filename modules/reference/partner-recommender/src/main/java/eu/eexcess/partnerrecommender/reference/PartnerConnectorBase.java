@@ -50,6 +50,7 @@ import org.dom4j.io.SAXReader;
 import org.w3c.dom.Document;
 
 import com.sun.jersey.api.client.Client;
+import com.sun.jersey.api.client.ClientResponse;
 import com.sun.jersey.api.client.WebResource;
 import com.sun.jersey.api.client.WebResource.Builder;
 
@@ -71,6 +72,9 @@ import eu.eexcess.partnerrecommender.api.QueryGeneratorApi;
 public class PartnerConnectorBase implements PartnerConnectorApi {
 
     protected QueryGeneratorApi queryGenerator;
+    
+    protected boolean apiResponseXml = true; 
+    protected boolean apiResponseJson = !true; 
 
     /**
      * Returns the query generator for the partner search engine.
@@ -81,7 +85,25 @@ public class PartnerConnectorBase implements PartnerConnectorApi {
         return queryGenerator;
     }
 
-    @Override
+    public void setAPIResponseToXML() {
+    	this.apiResponseJson = false;
+    	this.apiResponseXml = true;
+    }
+    
+    public void setAPIResponseToJSON() {
+    	this.apiResponseJson = true;
+    	this.apiResponseXml = false;
+    }
+    
+    public boolean isApiResponseXml() {
+		return apiResponseXml;
+	}
+
+	public boolean isApiResponseJson() {
+		return apiResponseJson;
+	}
+
+	@Override
     public ResultList queryPartnerNative(PartnerConfiguration partnerConfiguration, SecureUserProfile userProfile, PartnerdataLogger logger) throws IOException {
         return null;
     }
@@ -153,10 +175,23 @@ public class PartnerConnectorBase implements PartnerConnectorApi {
             String searchRequest = StrSubstitutor.replace(partnerConfiguration.getSearchEndpoint(), valuesMap);
 
             WebResource service = client.resource(searchRequest);
-
-            Builder builder = service.accept(MediaType.APPLICATION_XML);
-            client.destroy();
-            return builder.get(Document.class);
+            
+            if (this.apiResponseXml) {
+	            Builder builder = service.accept(MediaType.APPLICATION_XML);
+	            client.destroy();
+	            return builder.get(Document.class);
+            } else {
+                if (this.apiResponseJson) {
+    	            Builder builder = service.accept(MediaType.APPLICATION_JSON);
+    	            client.destroy();
+    	            ClientResponse response = builder.get(ClientResponse.class);
+    	            String responseString = response.getEntity(String.class);
+    	            Document ret = this.transformJSON2XML(responseString);
+    	            return ret;
+                } else {
+                	throw new RuntimeException("unkown apiResponse -Type (apiResponseXml:"+apiResponseXml+" apiResponseJson:"+apiResponseJson);
+                }
+            }
         } catch (Exception e) {
             throw new IOException("Cannot query partner REST API!", e);
         }

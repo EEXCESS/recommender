@@ -64,4 +64,10 @@ public interface PartnerConnectorApi {
      * @throws IOException
      */
     public ResultList queryPartnerNative(PartnerConfiguration partnerConfiguration, SecureUserProfile userProfile, PartnerdataLogger logger) throws IOException;
+    
+    public void setAPIResponseToXML();
+    public void setAPIResponseToJSON();
+    public boolean isApiResponseXml();
+	public boolean isApiResponseJson();
+
 }
