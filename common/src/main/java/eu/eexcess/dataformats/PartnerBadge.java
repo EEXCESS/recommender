@@ -14,19 +14,17 @@ limitations under the License.
  */
 package eu.eexcess.dataformats;
 
-import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.Deque;
-import java.util.List;
+import eu.eexcess.dataformats.result.ResultStats;
+import org.codehaus.jackson.annotate.JsonIgnoreProperties;
+import org.codehaus.jackson.map.annotate.JsonSerialize;
 
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlRootElement;
-
-import org.codehaus.jackson.annotate.JsonIgnoreProperties;
-import org.codehaus.jackson.map.annotate.JsonSerialize;
-
-import eu.eexcess.dataformats.result.ResultStats;
+import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.Deque;
+import java.util.List;
 
 @XmlRootElement(name = "eexcess-partner-badge")
 @XmlAccessorType(XmlAccessType.FIELD)
@@ -35,6 +33,7 @@ import eu.eexcess.dataformats.result.ResultStats;
 public class PartnerBadge implements Serializable {
 
     private static final long serialVersionUID = -6411801334911587483L;
+    public PartnerBadgeStats longTimeStats = new PartnerBadgeStats();
     private String description;
     private String favIconURI;
     private String partnerConnectorEndpoint;
@@ -49,12 +48,10 @@ public class PartnerBadge implements Serializable {
     private Boolean isQueryExpansionEnabled;
     private Boolean isQuerySplittingEnabled;
     private String partnerKey;
-    private PartnerBadgeStats shortTimeStats = new PartnerBadgeStats();
 
     // TODO: Statistics should be moved somewhere else! (Specially the logic for
     // it)
-
-    public PartnerBadgeStats longTimeStats = new PartnerBadgeStats();
+    private PartnerBadgeStats shortTimeStats = new PartnerBadgeStats();
 
     public Long getShortTimeResponseTime() {
         return getShortTimeStats().shortTimeResponseTime;
@@ -146,8 +143,8 @@ public class PartnerBadge implements Serializable {
         return this.getShortTimeStats().lastQueries;
     }
 
-    public synchronized void addLastQueries(ResultStats lastQuerie) {
-        this.getShortTimeStats().lastQueries.add(lastQuerie);
+    public synchronized void addLastQueries(ResultStats lastQuery) {
+        this.getShortTimeStats().lastQueries.add(lastQuery);
         if (this.getShortTimeStats().lastQueries.size() > 30)
             this.getShortTimeStats().lastQueries.remove(0);
     }
