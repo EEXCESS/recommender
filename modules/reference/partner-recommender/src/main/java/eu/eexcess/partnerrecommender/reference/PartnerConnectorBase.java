@@ -215,9 +215,25 @@ public class PartnerConnectorBase implements PartnerConnectorApi {
 
             WebResource service = client.resource(searchRequest);
 
-            Builder builder = service.accept(MediaType.APPLICATION_XML);
-            client.destroy();
-            return builder.get(Document.class);
+            if (this.apiResponseXml) {
+	            Builder builder = service.accept(MediaType.APPLICATION_XML);
+	            client.destroy();
+	            return builder.get(Document.class);
+            } else {
+                if (this.apiResponseJson) {
+    	            Builder builder = service.accept(MediaType.APPLICATION_JSON);
+    	            client.destroy();
+    	            ClientResponse response = builder.get(ClientResponse.class);
+    	            String responseString = response.getEntity(String.class);
+    	            Document ret = this.transformJSON2XML(responseString);
+    	            return ret;
+                } else {
+                	throw new RuntimeException("unkown apiResponse -Type (apiResponseXml:"+apiResponseXml+" apiResponseJson:"+apiResponseJson);
+                }
+            }
+
+            
+
         } catch (Exception e) {
             throw new IOException("Cannot query partner REST API!", e);
         }
