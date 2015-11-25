@@ -163,7 +163,7 @@
                        select="language"/>
    </xsl:template>
 	  <xsl:template name="Main.Title">
-      <apply-templates xmlns="http://www.w3.org/1999/XSL/Transform" mode="m8" select="title"/>
+      <apply-templates xmlns="http://www.w3.org/1999/XSL/Transform" mode="m8" select="title/e"/>
    </xsl:template>
 	  <xsl:template name="Main.Description"/>
 	  <xsl:template name="Main.Date">
@@ -274,7 +274,7 @@
          <call-template name="StringToString"/>
       </element>
    </template>
-   <template xmlns="http://www.w3.org/1999/XSL/Transform" match="title" mode="m8">
+   <template xmlns="http://www.w3.org/1999/XSL/Transform" match="title/e" mode="m8">
       <element name="dc:title">
          <call-template name="StringToString"/>
       </element>
