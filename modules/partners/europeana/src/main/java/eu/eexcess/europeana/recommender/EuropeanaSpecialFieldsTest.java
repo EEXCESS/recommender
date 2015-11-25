@@ -36,12 +36,9 @@ public class EuropeanaSpecialFieldsTest {
         ck2.setText("KLINGENDES ÖSTERREICH");
         secureUserProfile.getContextKeywords().add(ck2);
         String returnString = europeanaSpecialFields.toQuery(secureUserProfile);
-        try {
-            System.out.println(URLDecoder.decode(returnString, "UTF-8"));
-        } catch (UnsupportedEncodingException e) {
-            e.printStackTrace();
-        }
-        assertTrue(returnString.equals("&author=SEPP+FORCHER&title=KLINGENDES+%C3%96STERREICH"));
+        System.out.println(returnString);
+
+        assertTrue(returnString.contains("TYPE:KLINGENDES+%C3%96STERREI"));
 
     }
 
@@ -52,14 +49,14 @@ public class EuropeanaSpecialFieldsTest {
         secureUserProfile.getTimeRange().setEnd("2000");
 
         String returnString = europeanaSpecialFields.toQuery(secureUserProfile);
-
+        String decoded = "";
         try {
-            System.out.println(URLDecoder.decode(returnString, "UTF-8"));
+            decoded = URLDecoder.decode(returnString, "UTF-8");
         } catch (UnsupportedEncodingException e) {
             e.printStackTrace();
         }
-        System.out.println(returnString);
-        assertTrue(returnString.equals("&min_year=1970&max_year=2000"));
+        System.out.println(decoded);
+        assertTrue(decoded.equals("YEAR:[1970 TO 2000]"));
 
     }
 }
