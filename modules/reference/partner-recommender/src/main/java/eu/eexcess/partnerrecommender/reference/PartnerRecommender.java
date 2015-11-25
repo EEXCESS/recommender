@@ -22,34 +22,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 package eu.eexcess.partnerrecommender.reference;
 
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.LinkedList;
-import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-
-import org.apache.commons.lang.SerializationUtils;
-import org.codehaus.jettison.json.JSONArray;
-import org.codehaus.jettison.json.JSONException;
-import org.codehaus.jettison.json.JSONObject;
-import org.json.XML;
-import org.w3c.dom.Document;
-
 import eu.eexcess.config.PartnerConfiguration;
 import eu.eexcess.dataformats.PartnerBadge;
-import eu.eexcess.dataformats.result.DocumentBadge;
-import eu.eexcess.dataformats.result.DocumentBadgeList;
-import eu.eexcess.dataformats.result.Result;
-import eu.eexcess.dataformats.result.ResultList;
-import eu.eexcess.dataformats.result.ResultStats;
+import eu.eexcess.dataformats.result.*;
 import eu.eexcess.dataformats.userprofile.SecureUserProfile;
 import eu.eexcess.partnerdata.api.EEXCESSDataTransformationException;
 import eu.eexcess.partnerdata.api.IEnrichment;
@@ -60,6 +35,22 @@ import eu.eexcess.partnerdata.reference.XMLTools;
 import eu.eexcess.partnerrecommender.api.PartnerConfigurationCache;
 import eu.eexcess.partnerrecommender.api.PartnerConnectorApi;
 import eu.eexcess.partnerrecommender.api.PartnerRecommenderApi;
+import eu.eexcess.partnerrecommender.api.SpecialFieldsQueryGeneratorApi;
+import org.apache.commons.lang.SerializationUtils;
+import org.codehaus.jettison.json.JSONArray;
+import org.codehaus.jettison.json.JSONException;
+import org.codehaus.jettison.json.JSONObject;
+import org.json.XML;
+import org.w3c.dom.Document;
+
+import java.io.IOException;
+import java.net.URLDecoder;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.concurrent.*;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * 
@@ -118,6 +109,11 @@ public class PartnerRecommender implements PartnerRecommenderApi {
                     }
                 }
             String finalFormulatedQuery = PartnerConfigurationCache.CONFIG.getQueryGenerator(currentPartnerConfiguration.getQueryGeneratorClass()).toQuery(userProfile);
+            if (PartnerConfigurationCache.CONFIG.getPartnerConfiguration().getSpecialFieldQueryGeneratorClass() != null) {
+                SpecialFieldsQueryGeneratorApi specialFieldsGenerator = (SpecialFieldsQueryGeneratorApi) Class
+                        .forName(PartnerConfigurationCache.CONFIG.getPartnerConfiguration().getSpecialFieldQueryGeneratorClass()).newInstance();
+                finalFormulatedQuery += specialFieldsGenerator.toQuery(userProfile);
+            }
             ResultList nativeResultList = getNativePartnerResult(userProfile, partnerdataLogger, startCallPartnerApi, currentPartnerConfiguration, finalFormulatedQuery);
             if (nativeResultList != null)
                 return nativeResultList;
@@ -165,6 +161,7 @@ public class PartnerRecommender implements PartnerRecommenderApi {
         long endTransform2 = System.currentTimeMillis();
         LOGGER.log(Level.INFO, "Call Parnter Api:" + (endCallPartnerApi - startCallPartnerApi) + "ms; First Transformation:" + (endTransform1 - startTransform1)
                 + "ms; Second Transformation:" + (endTransform2 - startTransform2) + "ms");
+        finalFormulatedQuery = URLDecoder.decode(finalFormulatedQuery, "UTF-8");
         recommendations.setResultStats(new ResultStats(finalFormulatedQuery, endCallPartnerApi - startCallPartnerApi, endTransform1 - startTransform1, endTransform2
                 - startTransform2, 0, recommendations.totalResults));
         recommendations = addQueryToResultDocuments(recommendations, finalFormulatedQuery);

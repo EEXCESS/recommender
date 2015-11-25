@@ -16,9 +16,8 @@ limitations under the License.
  */
 package eu.eexcess.dataformats.userprofile;
 
-import java.io.Serializable;
-
 import javax.xml.bind.annotation.XmlElement;
+import java.io.Serializable;
 
 /**
  * Keywords out of the context
@@ -30,7 +29,7 @@ import javax.xml.bind.annotation.XmlElement;
 public class ContextKeyword implements Serializable {
 
     private static final long serialVersionUID = -4047662119669146571L;
-    private String type;
+    private SpecialFieldsEum type;
     private String uri;
     private Boolean isMainTopic = false;
 
@@ -82,11 +81,11 @@ public class ContextKeyword implements Serializable {
         this.isMainTopic = isMainTopic;
     }
 
-    public String getType() {
+    public SpecialFieldsEum getType() {
         return type;
     }
 
-    public void setType(String type) {
+    public void setType(SpecialFieldsEum type) {
         this.type = type;
     }
 

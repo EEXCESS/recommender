@@ -16,30 +16,9 @@ limitations under the License.
  */
 package eu.eexcess.europeana.recommender;
 
-import java.io.IOException;
-import java.net.URLEncoder;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-
-import javax.ws.rs.core.MediaType;
-
-import org.apache.commons.lang.text.StrSubstitutor;
-import org.codehaus.jackson.map.ObjectMapper;
-import org.w3c.dom.Document;
-
 import com.sun.jersey.api.client.Client;
 import com.sun.jersey.api.client.WebResource;
 import com.sun.jersey.api.client.WebResource.Builder;
-
 import eu.eexcess.config.PartnerConfiguration;
 import eu.eexcess.dataformats.result.DocumentBadge;
 import eu.eexcess.dataformats.userprofile.SecureUserProfile;
@@ -51,7 +30,19 @@ import eu.eexcess.partnerdata.reference.PartnerdataLogger;
 import eu.eexcess.partnerdata.reference.PartnerdataTracer;
 import eu.eexcess.partnerrecommender.api.PartnerConfigurationCache;
 import eu.eexcess.partnerrecommender.api.PartnerConnectorApi;
+import eu.eexcess.partnerrecommender.api.SpecialFieldsQueryGeneratorApi;
 import eu.eexcess.partnerrecommender.reference.PartnerConnectorBase;
+import org.apache.commons.lang.text.StrSubstitutor;
+import org.codehaus.jackson.map.ObjectMapper;
+import org.w3c.dom.Document;
+
+import javax.ws.rs.core.MediaType;
+import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.concurrent.*;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Query generator for Europeana.
@@ -81,9 +72,19 @@ public class PartnerConnector extends PartnerConnectorBase implements PartnerCon
         queryGenerator = PartnerConfigurationCache.CONFIG.getQueryGenerator(partnerConfiguration.getQueryGeneratorClass());
         String query = getQueryGenerator().toQuery(userProfile);
         long start = System.currentTimeMillis();
-
+        if (PartnerConfigurationCache.CONFIG.getPartnerConfiguration().getSpecialFieldQueryGeneratorClass() != null) {
+            SpecialFieldsQueryGeneratorApi specialFieldsGenerator = null;
+            try {
+                specialFieldsGenerator = (SpecialFieldsQueryGeneratorApi) Class
+                        .forName(PartnerConfigurationCache.CONFIG.getPartnerConfiguration().getSpecialFieldQueryGeneratorClass()).newInstance();
+            } catch (InstantiationException | IllegalAccessException | ClassNotFoundException e) {
+                LOGGER.log(Level.WARNING, "Could not load special query class", e);
+            }
+            query += specialFieldsGenerator.toQuery(userProfile);
+        }
         Map<String, String> valuesMap = new HashMap<String, String>();
-        valuesMap.put("query", URLEncoder.encode(query, "UTF-8"));
+        //        valuesMap.put("query", URLEncoder.encode(query, "UTF-8"));
+        valuesMap.put("query", query);
         valuesMap.put("apiKey", partnerConfiguration.getApiKey()); // add API
                                                                    // key
         // searchEndpoint:

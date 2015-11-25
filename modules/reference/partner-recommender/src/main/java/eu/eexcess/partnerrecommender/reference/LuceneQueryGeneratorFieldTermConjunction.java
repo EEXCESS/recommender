@@ -1,14 +1,18 @@
 package eu.eexcess.partnerrecommender.reference;
 
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
 import eu.eexcess.dataformats.result.DocumentBadge;
 import eu.eexcess.dataformats.userprofile.ContextKeyword;
 import eu.eexcess.dataformats.userprofile.ExpansionType;
 import eu.eexcess.dataformats.userprofile.SecureUserProfile;
 import eu.eexcess.partnerrecommender.api.PartnerConfigurationCache;
 import eu.eexcess.partnerrecommender.api.QueryGeneratorApi;
+
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * Similar to the Lucene query generator but also checks context keywords for
@@ -19,7 +23,7 @@ import eu.eexcess.partnerrecommender.api.QueryGeneratorApi;
  *
  */
 public class LuceneQueryGeneratorFieldTermConjunction implements QueryGeneratorApi {
-
+    private static final Logger LOGGER = Logger.getLogger(LuceneQueryGeneratorFieldTermConjunction.class.getName());
     private static final String REGEXP = "(?<=\\S)\\s+(?=\\S)";
 
     @Override
@@ -29,24 +33,32 @@ public class LuceneQueryGeneratorFieldTermConjunction implements QueryGeneratorA
         Pattern replace = Pattern.compile(REGEXP);
 
         for (ContextKeyword key : userProfile.getContextKeywords()) {
-            String keyword = key.getText();
-            Matcher matcher2 = replace.matcher(keyword);
-            if (matcher2.find()) {
-                keyword = "(" + matcher2.replaceAll(" AND ") + ")";
-            }
-
-            if (key.getExpansion() != null && (key.getExpansion() == ExpansionType.PSEUDORELEVANCEWP || key.getExpansion() == ExpansionType.SERENDIPITY)) {
-                if (PartnerConfigurationCache.CONFIG.getPartnerConfiguration().isQueryExpansionEnabled()) {
-                    expansion = addExpansionTerm(result, expansion, key, keyword);
+            if (key.getType() == null) {
+                String keyword = key.getText();
+                Matcher matcher2 = replace.matcher(keyword);
+                if (matcher2.find()) {
+                    keyword = "(" + matcher2.replaceAll(" AND ") + ")";
                 }
-            } else {
-                expansion = addQueryTerm(result, expansion, keyword);
+
+                if (key.getExpansion() != null && (key.getExpansion() == ExpansionType.PSEUDORELEVANCEWP || key.getExpansion() == ExpansionType.SERENDIPITY)) {
+                    if (PartnerConfigurationCache.CONFIG.getPartnerConfiguration().isQueryExpansionEnabled()) {
+                        expansion = addExpansionTerm(result, expansion, key, keyword);
+                    }
+                } else {
+                    expansion = addQueryTerm(result, expansion, keyword);
+                }
             }
         }
         if (expansion)
             result.append(")");
 
-        return result.toString();
+        String resultString = result.toString();
+        try {
+            resultString = URLEncoder.encode(resultString, "UTF-8");
+        } catch (UnsupportedEncodingException e) {
+            LOGGER.log(Level.WARNING, "Could not encode query in UTF-8", e);
+        }
+        return resultString;
     }
 
     private boolean addQueryTerm(StringBuilder result, boolean exp, String keyword) {

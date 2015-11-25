@@ -1,17 +1,20 @@
 package eu.eexcess.partnerrecommender.reference;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.logging.Logger;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
 import eu.eexcess.dataformats.result.DocumentBadge;
 import eu.eexcess.dataformats.userprofile.ContextKeyword;
 import eu.eexcess.dataformats.userprofile.ExpansionType;
 import eu.eexcess.dataformats.userprofile.SecureUserProfile;
 import eu.eexcess.partnerrecommender.api.PartnerConfigurationCache;
 import eu.eexcess.partnerrecommender.api.QueryGeneratorApi;
+
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * Similar to the Lucene query generator but also checks context keywords for
@@ -36,33 +39,37 @@ public class LuceneQueryGeneratorFieldTermConjunctionMainTopic implements QueryG
         List<ContextKeyword> otherKeywords = new ArrayList<ContextKeyword>();
 
         userProfile.getContextKeywords().forEach(kw -> {
-            if (kw.getIsMainTopic()) {
-                if (result.length() == 0) {
-                    result.append("(" + kw.getText());
-                } else {
-                    result.append(" AND " + kw.getText());
-                }
-                mainKeywords.add(kw);
-            } else
-                otherKeywords.add(kw);
+            if (kw.getType() == null) {
+                if (kw.getIsMainTopic()) {
+                    if (result.length() == 0) {
+                        result.append("(" + kw.getText());
+                    } else {
+                        result.append(" AND " + kw.getText());
+                    }
+                    mainKeywords.add(kw);
+                } else
+                    otherKeywords.add(kw);
+            }
         });
         if (!mainKeywords.isEmpty() && !otherKeywords.isEmpty())
             result.append(") AND (");
         
         StringBuilder tmpResult = new StringBuilder();
         for (ContextKeyword key : otherKeywords) {
-            String keyword = key.getText();
-            Matcher matcher2 = replace.matcher(keyword);
-            if (matcher2.find()) {
-                keyword = "(" + matcher2.replaceAll(" AND ") + ")";
-            }
-
-            if (key.getExpansion() != null && (key.getExpansion() == ExpansionType.PSEUDORELEVANCEWP || key.getExpansion() == ExpansionType.SERENDIPITY)) {
-                if (PartnerConfigurationCache.CONFIG.getPartnerConfiguration().isQueryExpansionEnabled()) {
-                    expansion = addExpansionTerm(tmpResult, expansion, key, keyword);
+            if (key.getType() == null) {
+                String keyword = key.getText();
+                Matcher matcher2 = replace.matcher(keyword);
+                if (matcher2.find()) {
+                    keyword = "(" + matcher2.replaceAll(" AND ") + ")";
                 }
-            } else {
-                expansion = addQueryTerm(tmpResult, expansion, keyword);
+
+                if (key.getExpansion() != null && (key.getExpansion() == ExpansionType.PSEUDORELEVANCEWP || key.getExpansion() == ExpansionType.SERENDIPITY)) {
+                    if (PartnerConfigurationCache.CONFIG.getPartnerConfiguration().isQueryExpansionEnabled()) {
+                        expansion = addExpansionTerm(tmpResult, expansion, key, keyword);
+                    }
+                } else {
+                    expansion = addQueryTerm(tmpResult, expansion, keyword);
+                }
             }
         }
         result.append(tmpResult);
@@ -71,7 +78,14 @@ public class LuceneQueryGeneratorFieldTermConjunctionMainTopic implements QueryG
 
         if (!mainKeywords.isEmpty())
             result.append(")");
-        return result.toString();
+
+        String resultString = result.toString();
+        try {
+            resultString = URLEncoder.encode(resultString, "UTF-8");
+        } catch (UnsupportedEncodingException e) {
+            LOGGER.log(Level.WARNING, "Could not encode query in UTF-8", e);
+        }
+        return resultString;
     }
 
     private boolean addQueryTerm(StringBuilder result, boolean exp, String keyword) {

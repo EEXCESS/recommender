@@ -22,15 +22,19 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 package eu.eexcess.partnerrecommender.reference;
 
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
 import eu.eexcess.dataformats.result.DocumentBadge;
 import eu.eexcess.dataformats.userprofile.ContextKeyword;
 import eu.eexcess.dataformats.userprofile.ExpansionType;
 import eu.eexcess.dataformats.userprofile.SecureUserProfile;
 import eu.eexcess.partnerrecommender.api.PartnerConfigurationCache;
 import eu.eexcess.partnerrecommender.api.QueryGeneratorApi;
+
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * Generates OR Querys out of SecureUserProfile Context field
@@ -39,7 +43,7 @@ import eu.eexcess.partnerrecommender.api.QueryGeneratorApi;
  *
  */
 public class OrQueryGenerator implements QueryGeneratorApi {
-
+    private static final Logger LOGGER = Logger.getLogger(OrQueryGenerator.class.getName());
     private static final String REGEXP = "(?<=\\w)\\s(?=\\w)";
 
     @Override
@@ -71,7 +75,14 @@ public class OrQueryGenerator implements QueryGeneratorApi {
             }
 
         }
-        return builder.toString();
+
+        String resultString = builder.toString();
+        try {
+            resultString = URLEncoder.encode(resultString, "UTF-8");
+        } catch (UnsupportedEncodingException e) {
+            LOGGER.log(Level.WARNING, "Could not encode query in UTF-8", e);
+        }
+        return resultString;
     }
 
     @Override

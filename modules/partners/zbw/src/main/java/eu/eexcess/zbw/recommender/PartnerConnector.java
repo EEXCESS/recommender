@@ -16,13 +16,23 @@ limitations under the License.
  */
 package eu.eexcess.zbw.recommender;
 
-import java.io.IOException;
-import java.io.StringReader;
-import java.net.URLEncoder;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import com.sun.jersey.api.client.Client;
+import com.sun.jersey.api.client.WebResource;
+import com.sun.jersey.api.client.WebResource.Builder;
+import eu.eexcess.config.PartnerConfiguration;
+import eu.eexcess.dataformats.result.DocumentBadge;
+import eu.eexcess.dataformats.userprofile.SecureUserProfile;
+import eu.eexcess.partnerdata.reference.PartnerdataLogger;
+import eu.eexcess.partnerdata.reference.PartnerdataTracer;
+import eu.eexcess.partnerrecommender.api.PartnerConfigurationCache;
+import eu.eexcess.partnerrecommender.api.PartnerConnectorApi;
+import eu.eexcess.partnerrecommender.reference.PartnerConnectorBase;
+import eu.eexcess.zbw.recommender.dataformat.ZBWDocument;
+import eu.eexcess.zbw.recommender.dataformat.ZBWDocumentHit;
+import org.apache.commons.lang.text.StrSubstitutor;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.NodeList;
 
 import javax.ws.rs.core.MediaType;
 import javax.xml.bind.JAXBContext;
@@ -34,26 +44,12 @@ import javax.xml.xpath.XPath;
 import javax.xml.xpath.XPathConstants;
 import javax.xml.xpath.XPathExpressionException;
 import javax.xml.xpath.XPathFactory;
-
-import org.apache.commons.lang.text.StrSubstitutor;
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
-import org.w3c.dom.NodeList;
-
-import com.sun.jersey.api.client.Client;
-import com.sun.jersey.api.client.WebResource;
-import com.sun.jersey.api.client.WebResource.Builder;
-
-import eu.eexcess.config.PartnerConfiguration;
-import eu.eexcess.dataformats.result.DocumentBadge;
-import eu.eexcess.dataformats.userprofile.SecureUserProfile;
-import eu.eexcess.partnerdata.reference.PartnerdataLogger;
-import eu.eexcess.partnerdata.reference.PartnerdataTracer;
-import eu.eexcess.partnerrecommender.api.PartnerConfigurationCache;
-import eu.eexcess.partnerrecommender.api.PartnerConnectorApi;
-import eu.eexcess.partnerrecommender.reference.PartnerConnectorBase;
-import eu.eexcess.zbw.recommender.dataformat.ZBWDocument;
-import eu.eexcess.zbw.recommender.dataformat.ZBWDocumentHit;
+import java.io.IOException;
+import java.io.StringReader;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Query generator for ZBW.
@@ -80,7 +76,7 @@ public class PartnerConnector extends PartnerConnectorBase implements PartnerCon
             query = query.replaceAll("\"", "");
             query = query.replaceAll("\\(", " ");
             query = query.replaceAll("\\)", " ");
-            query = URLEncoder.encode(query, "UTF-8");
+            //query = URLEncoder.encode(query, "UTF-8");
             Map<String, String> valuesMap = new HashMap<String, String>();
             valuesMap.put("query", query);
             if (userProfile.getNumResults() != null)

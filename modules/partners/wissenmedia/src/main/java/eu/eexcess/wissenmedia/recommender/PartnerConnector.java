@@ -16,20 +16,10 @@ limitations under the License.
  */
 package eu.eexcess.wissenmedia.recommender;
 
-import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
-
-import javax.ws.rs.core.MediaType;
-
-import org.apache.commons.lang.text.StrSubstitutor;
-import org.w3c.dom.Document;
-
 import com.sun.jersey.api.client.Client;
 import com.sun.jersey.api.client.WebResource;
 import com.sun.jersey.api.client.WebResource.Builder;
 import com.sun.jersey.api.client.filter.HTTPBasicAuthFilter;
-
 import eu.eexcess.config.PartnerConfiguration;
 import eu.eexcess.dataformats.result.DocumentBadge;
 import eu.eexcess.dataformats.userprofile.SecureUserProfile;
@@ -37,7 +27,13 @@ import eu.eexcess.partnerdata.reference.PartnerdataLogger;
 import eu.eexcess.partnerrecommender.api.PartnerConfigurationCache;
 import eu.eexcess.partnerrecommender.api.PartnerConnectorApi;
 import eu.eexcess.partnerrecommender.reference.PartnerConnectorBase;
-import eu.eexcess.utils.URLParamEncoder;
+import org.apache.commons.lang.text.StrSubstitutor;
+import org.w3c.dom.Document;
+
+import javax.ws.rs.core.MediaType;
+import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Query generator for Wissenmedia.
@@ -64,8 +60,8 @@ public class PartnerConnector extends PartnerConnectorBase implements PartnerCon
         String query = getQueryGenerator().toQuery(userProfile);
         
         Map<String, String> valuesMap = new HashMap<String, String>();
-        valuesMap.put("query", URLParamEncoder.encode(query));
-        int numResults = 10;
+		valuesMap.put("query", query);
+		int numResults = 10;
         if (userProfile.getNumResults()!=null && userProfile.getNumResults() != 0)
         	numResults  = userProfile.getNumResults();
         valuesMap.put("numResults", numResults+"");
@@ -93,11 +89,11 @@ public class PartnerConnector extends PartnerConnectorBase implements PartnerCon
 	
 	        client.addFilter(new HTTPBasicAuthFilter(partnerConfiguration.getUserName(), partnerConfiguration.getPassword()));
 
-	        queryGenerator = PartnerConfigurationCache.CONFIG.getQueryGenerator(partnerConfiguration.getQueryGeneratorClass());;
-			
-	        String detailQuery = getQueryGenerator().toDetailQuery(document);
-	        
-	        Map<String, String> valuesMap = new HashMap<String, String>();
+			queryGenerator = PartnerConfigurationCache.CONFIG.getQueryGenerator(partnerConfiguration.getQueryGeneratorClass());
+
+			String detailQuery = getQueryGenerator().toDetailQuery(document);
+
+			Map<String, String> valuesMap = new HashMap<String, String>();
 	        valuesMap.put("detailQuery", detailQuery);
 	        
 	        String searchRequest = StrSubstitutor.replace(partnerConfiguration.getDetailEndpoint(), valuesMap);
