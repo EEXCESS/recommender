@@ -255,4 +255,19 @@ public class EuropeanaPartnerRecommenderTest {
 		}
 	}
 
+	@Test
+	public void singleQuery() {
+		ArrayList<String> keywords = new ArrayList<String>();
+		keywords.add("Kriegsflieger");
+        ResultList resultList = PartnerRecommenderTestHelper.getRecommendations(DEPLOYMENT_CONTEXT,	
+        		port, 
+        		PartnerRecommenderTestHelper.createParamsForPartnerRecommender(20,keywords ));
+	    
+        assertNotNull(resultList);
+        assertTrue(resultList.results.size() > 0 );
+        assertEquals(20, resultList.results.size());
+
+	}
+
+
 }
