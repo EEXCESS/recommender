@@ -77,6 +77,20 @@ public class DDBPartnerRecommenderTest {
 	}
 	
 	@Test
+	public void singleQueryUhrturm() {
+		ArrayList<String> keywords = new ArrayList<String>();
+		keywords.add("Uhrturm");
+        ResultList resultList = PartnerRecommenderTestHelper.getRecommendations(DEPLOYMENT_CONTEXT,	
+        		port, 
+        		PartnerRecommenderTestHelper.createParamsForPartnerRecommender(20,keywords ));
+	    
+        assertNotNull(resultList);
+        assertTrue(resultList.results.size() > 0 );
+        assertEquals(8, resultList.results.size());
+
+	}
+
+	@Test
 	public void detailCall() {
         ArrayList<String> ids = new ArrayList<String>();
 		ArrayList<String> uris = new ArrayList<String>();
@@ -154,6 +168,22 @@ public class DDBPartnerRecommenderTest {
         assertNotNull(documentDetails);
         assertTrue(documentDetails.documentBadges.size() > 0 );
         assertEquals(2, documentDetails.documentBadges.size());
+
+	}
+
+	@Test
+	public void detailCallDateUnkownProblem() {
+        ArrayList<String> ids = new ArrayList<String>();
+		ArrayList<String> uris = new ArrayList<String>();
+        ids.add("AYSTUGJAQPVI4E4LIYSCXDDO6B65GX7L");
+        uris.add("https://www.deutsche-digitale-bibliothek.de/item/AYSTUGJAQPVI4E4LIYSCXDDO6B65GX7L");
+        DocumentBadgeList documentDetails = PartnerRecommenderTestHelper.getDetails(DEPLOYMENT_CONTEXT,	
+        		port, 
+        		PartnerRecommenderTestHelper.createParamsForPartnerRecommenderDetailCall(ids, uris, DATAPROVIDER));
+	    
+        assertNotNull(documentDetails);
+        assertTrue(documentDetails.documentBadges.size() > 0 );
+        assertEquals(1, documentDetails.documentBadges.size());
 
 	}
 
