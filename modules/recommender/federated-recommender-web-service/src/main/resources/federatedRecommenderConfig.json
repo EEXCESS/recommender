@@ -10,6 +10,7 @@
   "statsLogDatabase": "/var/lib/tomcat7/webapps/eexcess-federated-recommender-web-service-1.0-SNAPSHOT/FederatedRecommenderStats.db",
   "defaultPickerName": "eu.eexcess.federatedrecommender.picker.OccurrenceProbabilityPicker",
   "sourceSelectors": [
+    "eu.eexcess.federatedrecommender.sourceselection.SpecialFieldSourceSelection",
     "eu.eexcess.federatedrecommender.sourceselection.LanguageSourceSelector",
     "eu.eexcess.federatedrecommender.sourceselection.AgeSourceSelector"
   ],

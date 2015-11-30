@@ -32,7 +32,6 @@ public class PartnerConfiguration extends PartnerBadge {
 
     // public String systemId;
     private String searchEndpoint; // e.g."http://localhost:8080/search/${query}";
-    private String specialFieldQueryGeneratorClass;
     private String specialFieldTemplate;
     private String fieldNameWho;
     private String fieldNameWhere;
@@ -244,13 +243,6 @@ public class PartnerConfiguration extends PartnerBadge {
         this.fieldNameTo = fieldNameTo;
     }
 
-    public String getSpecialFieldQueryGeneratorClass() {
-        return specialFieldQueryGeneratorClass;
-    }
-
-    public void setSpecialFieldQueryGeneratorClass(String specialFieldQueryGeneratorClass) {
-        this.specialFieldQueryGeneratorClass = specialFieldQueryGeneratorClass;
-    }
 
     @Override public int hashCode() {
         final int prime = 31;
