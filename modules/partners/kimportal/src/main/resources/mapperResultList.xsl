@@ -128,7 +128,7 @@
 	  <xsl:template name="Main.Identifier">
       <apply-templates xmlns="http://www.w3.org/1999/XSL/Transform"
                        mode="m9"
-                       select="str[@name='inventarnummer']"/>
+                       select="str[@name='uuid']"/>
    </xsl:template>
 	  <xsl:template name="Main.isShownAt">
       <apply-templates xmlns="http://www.w3.org/1999/XSL/Transform"
@@ -227,7 +227,7 @@
       </element>
    </template>
    <template xmlns="http://www.w3.org/1999/XSL/Transform"
-             match="str[@name='inventarnummer']"
+             match="str[@name='uuid']"
              mode="m9">
       <element name="dc:identifier">
          <call-template name="StringToString"/>
