@@ -20,18 +20,7 @@
 
 package eu.eexcess.federatedrecommender.domaindetection;
 
-import static org.junit.Assert.*;
-
-import java.io.File;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Set;
-
-import org.junit.BeforeClass;
-import org.junit.Test;
-
 import com.sun.jersey.api.client.Client;
-
 import eu.eexcess.dataformats.PartnerBadge;
 import eu.eexcess.dataformats.PartnerDomain;
 import eu.eexcess.federatedrecommender.domaindetection.AsyncPartnerDomainsProbe.ProbeDoneCallback;
@@ -40,41 +29,19 @@ import eu.eexcess.federatedrecommender.domaindetection.probing.DomainDetectorExc
 import eu.eexcess.federatedrecommender.domaindetection.probing.PartnerDomainsProbe;
 import eu.eexcess.federatedrecommender.domaindetection.wordnet.WordnetDomainsDetector;
 import eu.eexcess.federatedrecommender.registration.PartnerRegister;
+import org.junit.BeforeClass;
+import org.junit.Test;
+
+import java.io.File;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Set;
+
+import static org.junit.Assert.*;
+
+
 
 public class AsyncPartnerDomainsProbeTest {
-
-    private static class Callback implements ProbeDoneCallback {
-
-        private Thread testThread;
-        public int numCallbacks = 0;
-        public Map<Integer, Set<PartnerDomain>> results = new HashMap<Integer, Set<PartnerDomain>>();
-
-        public Callback(Thread testThread) {
-            this.testThread = testThread;
-        }
-
-        @Override
-        public void onProbeDoneCallback(String partnerId, Set<PartnerDomain> probeResult) {
-            System.out.println("received probe finished callback");
-            if (testThread != null) {
-                synchronized (testThread) {
-                    results.put(++numCallbacks, probeResult);
-
-                    testThread.notify();
-                }
-            }
-        }
-
-        @Override
-        public void onProbeFailedCallback(String partnerId) {
-            System.out.println("received probe failed callback");
-            if (testThread != null) {
-                synchronized (testThread) {
-                    testThread.notify();
-                }
-            }
-        }
-    }
 
     private static PartnerRegister partnerRegister = new PartnerRegister();
     private static DomainDetector detector = null;
@@ -129,5 +96,38 @@ public class AsyncPartnerDomainsProbeTest {
         assertFalse(prober.isRunning());
         // expect asynchronous probing not to be ready until now
         assertEquals(callback.numCallbacks, 0);
+    }
+
+    private static class Callback implements ProbeDoneCallback {
+
+        public int numCallbacks = 0;
+        public Map<Integer, Set<PartnerDomain>> results = new HashMap<Integer, Set<PartnerDomain>>();
+        private Thread testThread;
+
+        public Callback(Thread testThread) {
+            this.testThread = testThread;
+        }
+
+        @Override
+        public void onProbeDoneCallback(String partnerId, Set<PartnerDomain> probeResult) {
+            System.out.println("received probe finished callback");
+            if (testThread != null) {
+                synchronized (testThread) {
+                    results.put(++numCallbacks, probeResult);
+
+                    testThread.notify();
+                }
+            }
+        }
+
+        @Override
+        public void onProbeFailedCallback(String partnerId) {
+            System.out.println("received probe failed callback");
+            if (testThread != null) {
+                synchronized (testThread) {
+                    testThread.notify();
+                }
+            }
+        }
     }
 }

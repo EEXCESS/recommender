@@ -16,26 +16,6 @@ limitations under the License.
  */
 package eu.eexcess.mendeley.recommender;
 
-import java.io.IOException;
-import java.io.UnsupportedEncodingException;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-
-import javax.ws.rs.core.MediaType;
-
-import net.sf.json.JSONObject;
-import net.sf.json.JSONSerializer;
-
-import org.apache.commons.codec.binary.Base64;
-import org.apache.commons.lang.CharEncoding;
-import org.apache.commons.lang.text.StrSubstitutor;
-import org.codehaus.jackson.map.ObjectMapper;
-import org.w3c.dom.Document;
-
 import com.sun.jersey.api.client.Client;
 import com.sun.jersey.api.client.ClientResponse;
 import com.sun.jersey.api.client.UniformInterfaceException;
@@ -43,7 +23,6 @@ import com.sun.jersey.api.client.config.ClientConfig;
 import com.sun.jersey.api.client.config.DefaultClientConfig;
 import com.sun.jersey.api.client.filter.LoggingFilter;
 import com.sun.jersey.api.json.JSONConfiguration;
-
 import eu.eexcess.config.PartnerConfiguration;
 import eu.eexcess.dataformats.result.DocumentBadge;
 import eu.eexcess.dataformats.userprofile.SecureUserProfile;
@@ -55,8 +34,25 @@ import eu.eexcess.partnerdata.reference.PartnerdataLogger;
 import eu.eexcess.partnerrecommender.api.PartnerConfigurationCache;
 import eu.eexcess.partnerrecommender.api.PartnerConnectorApi;
 import eu.eexcess.partnerrecommender.api.QueryGeneratorApi;
+import eu.eexcess.partnerrecommender.api.SpecialFieldsQueryGeneratorApi;
 import eu.eexcess.partnerrecommender.reference.PartnerConnectorBase;
-import eu.eexcess.utils.URLParamEncoder;
+import net.sf.json.JSONObject;
+import net.sf.json.JSONSerializer;
+import org.apache.commons.codec.binary.Base64;
+import org.apache.commons.lang.CharEncoding;
+import org.apache.commons.lang.text.StrSubstitutor;
+import org.codehaus.jackson.map.ObjectMapper;
+import org.w3c.dom.Document;
+
+import javax.ws.rs.core.MediaType;
+import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Query generator for Mendeley.
@@ -73,9 +69,9 @@ import eu.eexcess.utils.URLParamEncoder;
  */
 
 public class PartnerConnector extends PartnerConnectorBase implements PartnerConnectorApi {
+	public static final MediaType APPLICATION_MENDELEY_TYPE = new MediaType("application", "vnd.mendeley-document.1+json");
 	private static final Logger logger = Logger.getLogger(PartnerConnector.class.getName());
 	private static final String TOKEN_URL = "https://api.mendeley.com/oauth/token";
-    public static final MediaType APPLICATION_MENDELEY_TYPE = new MediaType("application", "vnd.mendeley-document.1+json");
 
     public PartnerConnector(){}
     
@@ -118,8 +114,13 @@ public class PartnerConnector extends PartnerConnectorBase implements PartnerCon
 		logger.log(Level.INFO,"Query Generator fetch Partner: "+partnerConfiguration.getQueryGeneratorClass());
 		String query = PartnerConfigurationCache.CONFIG.getQueryGenerator(partnerConfiguration.getQueryGeneratorClass()).toQuery(userProfile);
 		Map<String, String> valuesMap = new HashMap<String, String>();
-		valuesMap.put("query", URLParamEncoder.encode(query));       
+		valuesMap.put("query", query);
 		String searchRequest = StrSubstitutor.replace(partnerConfiguration.getSearchEndpoint(), valuesMap);
+		if (PartnerConfigurationCache.CONFIG.getPartnerConfiguration().getSpecialFieldQueryGeneratorClass() != null) {
+			SpecialFieldsQueryGeneratorApi specialFieldsGenerator = (SpecialFieldsQueryGeneratorApi) Class
+					.forName(PartnerConfigurationCache.CONFIG.getPartnerConfiguration().getSpecialFieldQueryGeneratorClass()).newInstance();
+			searchRequest += specialFieldsGenerator.toQuery(userProfile);
+		}
 		MendeleyResponse jsonResponse = getJSONResponse(client, accessTokenResponse, searchRequest);
 
 		if(jsonResponse==null || jsonResponse.getDocuments()==null )

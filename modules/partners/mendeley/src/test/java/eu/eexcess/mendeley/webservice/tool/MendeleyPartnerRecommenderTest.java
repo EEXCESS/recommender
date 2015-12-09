@@ -16,27 +16,18 @@ limitations under the License.
  */
 package eu.eexcess.mendeley.webservice.tool;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
+import eu.eexcess.dataformats.result.DocumentBadgeList;
+import eu.eexcess.dataformats.result.ResultList;
+import eu.eexcess.partnerrecommender.test.PartnerRecommenderTestHelper;
+import org.junit.BeforeClass;
+import org.junit.Test;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
+import java.util.concurrent.*;
 
-import org.junit.BeforeClass;
-import org.junit.Test;
-
-import eu.eexcess.dataformats.result.DocumentBadgeList;
-import eu.eexcess.dataformats.result.ResultList;
-import eu.eexcess.mendeley.webservice.tool.PartnerStandaloneServer;
-import eu.eexcess.partnerrecommender.test.PartnerRecommenderTestHelper;
-
+import static org.junit.Assert.*;
 public class MendeleyPartnerRecommenderTest {
 
     private static final String DEPLOYMENT_CONTEXT = "eexcess-partner-mendeley-1.0-SNAPSHOT";

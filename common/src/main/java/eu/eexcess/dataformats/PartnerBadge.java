@@ -45,13 +45,21 @@ public class PartnerBadge implements Serializable {
     private List<String> languageContent = new ArrayList<String>();
     private String systemId;
     private String queryGeneratorClass;
+    private String specialFieldQueryGeneratorClass;
     private Boolean isQueryExpansionEnabled;
     private Boolean isQuerySplittingEnabled;
     private String partnerKey;
-
     // TODO: Statistics should be moved somewhere else! (Specially the logic for
     // it)
     private PartnerBadgeStats shortTimeStats = new PartnerBadgeStats();
+
+    public String getSpecialFieldQueryGeneratorClass() {
+        return specialFieldQueryGeneratorClass;
+    }
+
+    public void setSpecialFieldQueryGeneratorClass(String specialFieldQueryGeneratorClass) {
+        this.specialFieldQueryGeneratorClass = specialFieldQueryGeneratorClass;
+    }
 
     public Long getShortTimeResponseTime() {
         return getShortTimeStats().shortTimeResponseTime;
@@ -122,8 +130,8 @@ public class PartnerBadge implements Serializable {
     /**
      * updates the partner response times (shortTime and longTime) and short
      * time deviation
-     * 
-     * @param partner
+     *
+
      * @param respTime
      */
     public synchronized void updatePartnerResponseTime(long respTime) {

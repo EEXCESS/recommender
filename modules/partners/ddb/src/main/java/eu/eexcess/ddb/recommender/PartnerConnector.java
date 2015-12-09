@@ -16,21 +16,6 @@ limitations under the License.
  */
 package eu.eexcess.ddb.recommender;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.net.HttpURLConnection;
-import java.net.URL;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-
-import org.apache.commons.lang.text.StrSubstitutor;
-import org.w3c.dom.Document;
-
 import eu.eexcess.config.PartnerConfiguration;
 import eu.eexcess.dataformats.result.DocumentBadge;
 import eu.eexcess.dataformats.result.ResultList;
@@ -43,6 +28,20 @@ import eu.eexcess.partnerrecommender.api.PartnerConnectorApi;
 import eu.eexcess.partnerrecommender.api.QueryGeneratorApi;
 import eu.eexcess.partnerrecommender.reference.PartnerConnectorBase;
 import eu.eexcess.utils.URLParamEncoder;
+import org.apache.commons.lang.text.StrSubstitutor;
+import org.w3c.dom.Document;
+
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
+import java.net.URL;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Query generator for DDB.
@@ -60,8 +59,49 @@ public class PartnerConnector extends PartnerConnectorBase implements PartnerCon
     }
 
     /**
+     * Opens a HTTP connection, gets the response and converts into to a String.
+     *
+     * @param urlStr
+     *            Servers URL
+     * @param properties
+     *            Keys and values for HTTP request properties
+     * @return Servers response
+     * @throws IOException
+     *             If connection could not be established or response code is
+     *             !=200
+     */
+    public static String httpGet(String urlStr, HashMap<String, String> properties) throws IOException {
+        if (properties == null) {
+            properties = new HashMap<String, String>();
+        }
+        // open HTTP connection with URL
+        URL url = new URL(urlStr);
+        HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+        // set properties if any do exist
+        for (String key : properties.keySet()) {
+            conn.setRequestProperty(key, properties.get(key));
+        }
+        // test if request was successful (status 200)
+        if (conn.getResponseCode() != 200) {
+            throw new IOException(conn.getResponseMessage() + " " + urlStr);
+        }
+        // buffer the result into a string
+        InputStreamReader isr = new InputStreamReader(conn.getInputStream(), "UTF-8");
+        BufferedReader br = new BufferedReader(isr);
+        StringBuilder sb = new StringBuilder();
+        String line;
+        while ((line = br.readLine()) != null) {
+            sb.append(line);
+        }
+        br.close();
+        isr.close();
+        conn.disconnect();
+        return sb.toString();
+    }
+
+    /**
      * Returns the query generator for the partner search engine.
-     * 
+     *
      * @return the query generator
      */
     @Override
@@ -88,7 +128,7 @@ public class PartnerConnector extends PartnerConnectorBase implements PartnerCon
          * put("Authorization", "OAuth oauth_consumer_key=\"" + key + "\"");
          * put("Accept", "application/json"); } }); logger.info(httpJsonResult);
          * // print results
-         * 
+         *
          * // get JSON data via query parameter authentication // remember: use
          * URL encoded Strings online -> URLEncoder.encode(s, enc) String
          * queryJsonURL = url + "?oauth_consumer_key=" + URLEncoder.encode(key,
@@ -151,24 +191,24 @@ public class PartnerConnector extends PartnerConnectorBase implements PartnerCon
          * PartnerConfiguration partnerConfigLocal = partnerConfiguration; for
          * (int i = 0;i<response.items.size() ;i++) { final EuropeanaDoc item =
          * response.items.get(i);
-         * 
+         *
          * Future<Void> future = threadPool.submit(new Callable<Void>() {
-         * 
+         *
          * @Override public Void call() throws Exception { EuropeanaDocDetail
          * details = null; try { details = fetchDocumentDetails( item.id,
          * partnerConfigLocal); } catch (EEXCESSDataTransformationException e) {
          * logger.log(Level.INFO,"Error getting item with id"+item.id,e); return
          * null; } docDetails.put(item,details); return null; } });
          * futures.put(item, future); }
-         * 
+         *
          * for (EuropeanaDoc doc : futures.keySet()) { try {
          * futures.get(doc).get(start + 15 * 500 - System.currentTimeMillis(),
          * TimeUnit.MILLISECONDS); } catch (InterruptedException |
          * ExecutionException | TimeoutException e) {
          * logger.log(Level.WARNING,"Detail thread for "
          * +doc.id+" did not responses in time",e); }
-         * 
-         * 
+         *
+         *
          * //item.edmConcept.addAll(details.concepts); // item.edmConcept =
          * details.concepts; TODO: copy into doc // item.edmCountry =
          * details.edmCountry; // item.edmPlace = details.places; } }
@@ -195,24 +235,6 @@ public class PartnerConnector extends PartnerConnectorBase implements PartnerCon
 
     }
 
-    private String callDDBAPI(final String key, String searchRequest, String acceptType) throws IOException {
-        String httpJSONResult = httpGet(searchRequest, new HashMap<String, String>() {
-            /**
-			 * 
-			 */
-            private static final long serialVersionUID = -5911519512191023737L;
-
-            {
-                put("Authorization", "OAuth oauth_consumer_key=\"" + key + "\"");
-                // put("Accept", );
-                put("Accept", acceptType);
-
-            }
-        });
-        log.info(httpJSONResult);
-        return httpJSONResult;
-    }
-
     /*
      * protected EuropeanaDocDetail fetchDocumentDetails( String objectId,
      * PartnerConfiguration partnerConfiguration) throws
@@ -232,45 +254,23 @@ public class PartnerConnector extends PartnerConnectorBase implements PartnerCon
      * } catch (Exception e) { throw new EEXCESSDataTransformationException(e);
      * } }
      */
-    /**
-     * Opens a HTTP connection, gets the response and converts into to a String.
-     * 
-     * @param urlStr
-     *            Servers URL
-     * @param properties
-     *            Keys and values for HTTP request properties
-     * @return Servers response
-     * @throws IOException
-     *             If connection could not be established or response code is
-     *             !=200
-     */
-    public static String httpGet(String urlStr, HashMap<String, String> properties) throws IOException {
-        if (properties == null) {
-            properties = new HashMap<String, String>();
-        }
-        // open HTTP connection with URL
-        URL url = new URL(urlStr);
-        HttpURLConnection conn = (HttpURLConnection) url.openConnection();
-        // set properties if any do exist
-        for (String key : properties.keySet()) {
-            conn.setRequestProperty(key, properties.get(key));
-        }
-        // test if request was successful (status 200)
-        if (conn.getResponseCode() != 200) {
-            throw new IOException(conn.getResponseMessage());
-        }
-        // buffer the result into a string
-        InputStreamReader isr = new InputStreamReader(conn.getInputStream(), "UTF-8");
-        BufferedReader br = new BufferedReader(isr);
-        StringBuilder sb = new StringBuilder();
-        String line;
-        while ((line = br.readLine()) != null) {
-            sb.append(line);
-        }
-        br.close();
-        isr.close();
-        conn.disconnect();
-        return sb.toString();
+
+    private String callDDBAPI(final String key, String searchRequest, String acceptType) throws IOException {
+        String httpJSONResult = httpGet(searchRequest, new HashMap<String, String>() {
+            /**
+             *
+             */
+            private static final long serialVersionUID = -5911519512191023737L;
+
+            {
+                put("Authorization", "OAuth oauth_consumer_key=\"" + key + "\"");
+                // put("Accept", );
+                put("Accept", acceptType);
+
+            }
+        });
+        log.info(httpJSONResult);
+        return httpJSONResult;
     }
 
     @Override
@@ -280,7 +280,6 @@ public class PartnerConnector extends PartnerConnectorBase implements PartnerCon
             String key = PartnerConfigurationCache.CONFIG.getPartnerConfiguration().getApiKey();
 
             queryGenerator = PartnerConfigurationCache.CONFIG.getQueryGenerator(partnerConfiguration.getQueryGeneratorClass());
-            ;
 
             String detailQuery = getQueryGenerator().toDetailQuery(document);
 

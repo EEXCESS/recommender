@@ -25,8 +25,6 @@ package eu.eexcess.config;
 import eu.eexcess.dataformats.PartnerBadge;
 
 /**
- * 
- * 
  * @author rkern@know-center.at
  */
 public class PartnerConfiguration extends PartnerBadge {
@@ -34,14 +32,22 @@ public class PartnerConfiguration extends PartnerBadge {
 
     // public String systemId;
     private String searchEndpoint; // e.g."http://localhost:8080/search/${query}";
+    private String specialFieldTemplate;
+    private String fieldNameWho;
+    private String fieldNameWhere;
+    private String fieldNameWhat;
+    private String fieldNameFrom;
+    private String fieldNameTo;
+
     private String detailEndpoint;
+
     private String partnerConnectorClass;
     /**
      * Data mappings and transformations
      */
     private boolean isTransformedNative; // in case of partner transforms
-                                         // himself a local transformation is
-                                         // not used
+    // himself a local transformation is
+    // not used
     private String transformerClass; // e.g., DummyTransformr
     private String mappingListTransformationFile;
     private String mappingObjectTransformationFile;
@@ -189,8 +195,56 @@ public class PartnerConfiguration extends PartnerBadge {
         this.federatedRecommenderURI = federatedRecommenderURI;
     }
 
-    @Override
-    public int hashCode() {
+    public String getSpecialFieldTemplate() {
+        return specialFieldTemplate;
+    }
+
+    public void setSpecialFieldTemplate(String specialFieldTemplate) {
+        this.specialFieldTemplate = specialFieldTemplate;
+    }
+
+    public String getFieldNameWho() {
+        return fieldNameWho;
+    }
+
+    public void setFieldNameWho(String fieldNameWho) {
+        this.fieldNameWho = fieldNameWho;
+    }
+
+    public String getFieldNameWhere() {
+        return fieldNameWhere;
+    }
+
+    public void setFieldNameWhere(String fieldNameWhere) {
+        this.fieldNameWhere = fieldNameWhere;
+    }
+
+    public String getFieldNameWhat() {
+        return fieldNameWhat;
+    }
+
+    public void setFieldNameWhat(String fieldNameWhat) {
+        this.fieldNameWhat = fieldNameWhat;
+    }
+
+    public String getFieldNameFrom() {
+        return fieldNameFrom;
+    }
+
+    public void setFieldNameFrom(String fieldNameFrom) {
+        this.fieldNameFrom = fieldNameFrom;
+    }
+
+    public String getFieldNameTo() {
+        return fieldNameTo;
+    }
+
+    public void setFieldNameTo(String fieldNameTo) {
+        this.fieldNameTo = fieldNameTo;
+    }
+
+
+    @Override public int hashCode() {
         final int prime = 31;
         int result = super.hashCode();
         result = prime * result + ((apiKey == null) ? 0 : apiKey.hashCode());
@@ -212,8 +266,7 @@ public class PartnerConfiguration extends PartnerBadge {
         return result;
     }
 
-    @Override
-    public boolean equals(Object obj) {
+    @Override public boolean equals(Object obj) {
         if (this == obj)
             return true;
         if (!super.equals(obj))
@@ -301,8 +354,7 @@ public class PartnerConfiguration extends PartnerBadge {
         return true;
     }
 
-    @Override
-    public String toString() {
+    @Override public String toString() {
         return "PartnerConfiguration [searchEndpoint=" + searchEndpoint + ", detailEndpoint=" + detailEndpoint + ", partnerConnectorClass=" + partnerConnectorClass
                 + ", isTransformedNative=" + isTransformedNative + ", transformerClass=" + transformerClass + ", mappingListTransformationFile=" + mappingListTransformationFile
                 + ", mappingObjectTransformationFile=" + mappingObjectTransformationFile + ", userName=" + userName + ", password=" + password + ", apiKey=" + apiKey

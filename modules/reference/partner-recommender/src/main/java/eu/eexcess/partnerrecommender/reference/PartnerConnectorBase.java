@@ -22,38 +22,10 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 package eu.eexcess.partnerrecommender.reference;
 
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.OutputStreamWriter;
-import java.io.StringReader;
-import java.io.UnsupportedEncodingException;
-import java.io.Writer;
-import java.net.URLEncoder;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
-
-import javax.ws.rs.core.MediaType;
-
-import net.sf.json.JSON;
-import net.sf.json.JSONSerializer;
-import net.sf.json.xml.XMLSerializer;
-
-import org.apache.commons.lang.text.StrSubstitutor;
-import org.dom4j.io.DOMWriter;
-import org.dom4j.io.SAXReader;
-import org.w3c.dom.Document;
-
 import com.sun.jersey.api.client.Client;
 import com.sun.jersey.api.client.ClientResponse;
 import com.sun.jersey.api.client.WebResource;
 import com.sun.jersey.api.client.WebResource.Builder;
-
 import eu.eexcess.config.PartnerConfiguration;
 import eu.eexcess.dataformats.result.DocumentBadge;
 import eu.eexcess.dataformats.result.ResultList;
@@ -63,6 +35,23 @@ import eu.eexcess.partnerdata.reference.PartnerdataLogger;
 import eu.eexcess.partnerrecommender.api.PartnerConfigurationCache;
 import eu.eexcess.partnerrecommender.api.PartnerConnectorApi;
 import eu.eexcess.partnerrecommender.api.QueryGeneratorApi;
+import eu.eexcess.partnerrecommender.api.SpecialFieldsQueryGeneratorApi;
+import net.sf.json.JSON;
+import net.sf.json.JSONSerializer;
+import net.sf.json.xml.XMLSerializer;
+import org.apache.commons.lang.text.StrSubstitutor;
+import org.dom4j.io.DOMWriter;
+import org.dom4j.io.SAXReader;
+import org.w3c.dom.Document;
+
+import javax.ws.rs.core.MediaType;
+import java.io.*;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * 
@@ -164,7 +153,8 @@ public class PartnerConnectorBase implements PartnerConnectorApi {
             queryGenerator = PartnerConfigurationCache.CONFIG.getQueryGenerator(partnerConfiguration.getQueryGeneratorClass());
 
             String query = getQueryGenerator().toQuery(userProfile);
-            query = URLEncoder.encode(query, "UTF-8");
+
+          //  query = URLEncoder.encode(query, "UTF-8");
             Map<String, String> valuesMap = new HashMap<String, String>();
             valuesMap.put("query", query);
             Integer numResults = 10;
@@ -173,30 +163,20 @@ public class PartnerConnectorBase implements PartnerConnectorApi {
             valuesMap.put("numResults", numResults.toString());
 
             String searchRequest = StrSubstitutor.replace(partnerConfiguration.getSearchEndpoint(), valuesMap);
-
-            WebResource service = client.resource(searchRequest);
-            
-            if (this.apiResponseXml) {
-	            Builder builder = service.accept(MediaType.APPLICATION_XML);
-	            client.destroy();
-	            return builder.get(Document.class);
-            } else {
-                if (this.apiResponseJson) {
-    	            Builder builder = service.accept(MediaType.APPLICATION_JSON);
-    	            client.destroy();
-    	            ClientResponse response = builder.get(ClientResponse.class);
-    	            String responseString = response.getEntity(String.class);
-    	            Document ret = this.transformJSON2XML(responseString);
-    	            return ret;
-                } else {
-                	throw new RuntimeException("unkown apiResponse -Type (apiResponseXml:"+apiResponseXml+" apiResponseJson:"+apiResponseJson);
-                }
+            if(PartnerConfigurationCache.CONFIG.getPartnerConfiguration().getSpecialFieldQueryGeneratorClass()!=null){
+                SpecialFieldsQueryGeneratorApi specialFieldsGenerator = (SpecialFieldsQueryGeneratorApi) Class.forName(PartnerConfigurationCache.CONFIG.getPartnerConfiguration().getSpecialFieldQueryGeneratorClass()).newInstance();
+                searchRequest+= specialFieldsGenerator.toQuery(userProfile);
             }
+            WebResource service = client.resource(searchRequest);
+
+            return getDocumentUniFormat(client, service);
         } catch (Exception e) {
             throw new IOException("Cannot query partner REST API!", e);
         }
 
     }
+
+
 
     @Override
     public Document queryPartnerDetails(PartnerConfiguration partnerConfiguration, DocumentBadge document, PartnerdataLogger logger) throws IOException {
@@ -215,27 +195,29 @@ public class PartnerConnectorBase implements PartnerConnectorApi {
 
             WebResource service = client.resource(searchRequest);
 
-            if (this.apiResponseXml) {
-	            Builder builder = service.accept(MediaType.APPLICATION_XML);
-	            client.destroy();
-	            return builder.get(Document.class);
-            } else {
-                if (this.apiResponseJson) {
-    	            Builder builder = service.accept(MediaType.APPLICATION_JSON);
-    	            client.destroy();
-    	            ClientResponse response = builder.get(ClientResponse.class);
-    	            String responseString = response.getEntity(String.class);
-    	            Document ret = this.transformJSON2XML(responseString);
-    	            return ret;
-                } else {
-                	throw new RuntimeException("unkown apiResponse -Type (apiResponseXml:"+apiResponseXml+" apiResponseJson:"+apiResponseJson);
-                }
-            }
-
-            
+            return getDocumentUniFormat(client, service);
 
         } catch (Exception e) {
             throw new IOException("Cannot query partner REST API!", e);
+        }
+    }
+
+    private Document getDocumentUniFormat(Client client, WebResource service) throws EEXCESSDataTransformationException {
+        if (this.apiResponseXml) {
+            Builder builder = service.accept(MediaType.APPLICATION_XML);
+            client.destroy();
+            return builder.get(Document.class);
+        } else {
+            if (this.apiResponseJson) {
+                Builder builder = service.accept(MediaType.APPLICATION_JSON);
+                client.destroy();
+                ClientResponse response = builder.get(ClientResponse.class);
+                String responseString = response.getEntity(String.class);
+                Document ret = this.transformJSON2XML(responseString);
+                return ret;
+            } else {
+                throw new RuntimeException("unkown apiResponse -Type (apiResponseXml:"+apiResponseXml+" apiResponseJson:"+apiResponseJson);
+            }
         }
     }
 
