@@ -67,3 +67,16 @@ buildNumber.properties
 tomcat-local-uploadscript.sh
 
 /bin/
+/modules/partners/ddb/target
+/modules/partners/europeana/target
+/modules/partners/mendeley/target
+/modules/partners/wissenmedia/target
+/modules/reference/partner-data-layer/target
+/modules/reference/partner-recommender/target
+/modules/reference/partner-web-service/target
+/modules/recommender/federated-recommender/target
+/modules/recommender/federated-recommender-web-service/target
+/modules/partners/kimcollect/target
+/modules/partners/opensearch/target
+/modules/partners/wikipedialocal/target
+/*.bat
