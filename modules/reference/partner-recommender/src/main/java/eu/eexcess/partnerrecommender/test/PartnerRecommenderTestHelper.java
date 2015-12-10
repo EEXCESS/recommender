@@ -53,6 +53,20 @@ public class PartnerRecommenderTestHelper {
         return params;
     }
 
+    static public StringEntity createParamsForPartnerRecommender(int records, String mainTopic, ArrayList<String> keywords) {
+        StringEntity params = null;
+        String userprofile = "<eexcess-secure-user-profile numResults=\"" + records
+                + "\" firstName=\"Hugo\" lastName=\"Boss\" birthDate=\"2013-10-14T05:06:44.550+02:00\">   <contextKeywords>      ";
+        for (int i = 0; i < keywords.size(); i++) {
+            userprofile += "<contextKeywords><text>" + keywords.get(i) + "</text></contextKeywords>";
+        }
+        if (mainTopic!= null && !mainTopic.isEmpty())
+        	userprofile += "<contextKeywords><isMainTopic>true</isMainTopic><text>" + mainTopic + "</text></contextKeywords>";
+        userprofile += " </contextKeywords></eexcess-secure-user-profile>";
+        params = new StringEntity(userprofile, "UTF-8");
+        return params;
+    }
+    
     static public StringEntity createParamsForPartnerRecommenderDetailCall(ArrayList<String> ids, ArrayList<String> uris, String provider) {
         /*
          * <eexcess-document-badges-list> <documentBadge> <id>E1.6882</id>
