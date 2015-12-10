@@ -67,6 +67,23 @@ public class EuropeanaPartnerRecommenderTest {
 	}
 
 	@Test
+	public void detailCallGitHubIssueViz54() {
+		// https://github.com/EEXCESS/visualization-widgets/issues/54
+        ArrayList<String> ids = new ArrayList<String>();
+		ArrayList<String> uris = new ArrayList<String>();
+        ids.add("/2058620/e0064797_4543_e64b_3b36_e78553f58411");
+        uris.add("http://europeana.eu/resolve/record/2058620/e0064797_4543_e64b_3b36_e78553f58411");
+        DocumentBadgeList documentDetails = PartnerRecommenderTestHelper.getDetails(DEPLOYMENT_CONTEXT,	
+        		port, 
+        		PartnerRecommenderTestHelper.createParamsForPartnerRecommenderDetailCall(ids, uris, DATAPROVIDER));
+	    
+        assertNotNull(documentDetails);
+        assertTrue(documentDetails.documentBadges.size() > 0 );
+        assertEquals(2, documentDetails.documentBadges.size());
+
+	}
+
+	@Test
 	public void detailCall10Objects() {
         ArrayList<String> ids = new ArrayList<String>();
 		ArrayList<String> uris = new ArrayList<String>();
