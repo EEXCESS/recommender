@@ -65,6 +65,20 @@ public class KIMPortalPartnerRecommenderTest {
         assertEquals(20, resultList.results.size());
 
     }
+    
+    
+    @Test public void singleQueryAsteraceae() {
+        ArrayList<String> keywords = new ArrayList<String>();
+//        keywords.add("Asteraceae");
+        String mainTopic = "Asteraceae";
+        ResultList resultList = PartnerRecommenderTestHelper
+                .getRecommendations(DEPLOYMENT_CONTEXT, port, PartnerRecommenderTestHelper.createParamsForPartnerRecommender(20, mainTopic, keywords));
+
+        assertNotNull(resultList);
+        assertTrue(resultList.results.size() > 0);
+        assertEquals(20, resultList.results.size());
+
+    }
 
     @Test public void singleQueryZiegelhof() {
         ArrayList<String> keywords = new ArrayList<String>();
@@ -158,6 +172,22 @@ public class KIMPortalPartnerRecommenderTest {
         uris.add("https://www.kgportal.bl.ch/sammlungen#f19e71ca-4dc6-48b8-858c-60a1710066f0");
         ids.add("f04ae6c5-45fd-ff40-333c-f3b50dffbe3d");
         uris.add("https://www.kgportal.bl.ch/sammlungen#f04ae6c5-45fd-ff40-333c-f3b50dffbe3d");
+        DocumentBadgeList documentDetails = PartnerRecommenderTestHelper
+                .getDetails(DEPLOYMENT_CONTEXT, port, PartnerRecommenderTestHelper.createParamsForPartnerRecommenderDetailCall(ids, uris, DATAPROVIDER));
+
+        assertNotNull(documentDetails);
+        assertTrue(documentDetails.documentBadges.size() > 0);
+        assertEquals(2, documentDetails.documentBadges.size());
+
+    }
+
+    @Test public void detailCallBaselGeo() {
+        ArrayList<String> ids = new ArrayList<String>();
+        ArrayList<String> uris = new ArrayList<String>();
+        ids.add("70e1531b-4ce5-33cb-8ba7-91b2dcd033f8");
+        uris.add("https://www.kgportal.bl.ch/sammlungen#70e1531b-4ce5-33cb-8ba7-91b2dcd033f8");
+        ids.add("e5cc7b15-49c6-ae2e-c292-b0b4ffbf7276");
+        uris.add("https://www.kgportal.bl.ch/sammlungen#e5cc7b15-49c6-ae2e-c292-b0b4ffbf7276");
         DocumentBadgeList documentDetails = PartnerRecommenderTestHelper
                 .getDetails(DEPLOYMENT_CONTEXT, port, PartnerRecommenderTestHelper.createParamsForPartnerRecommenderDetailCall(ids, uris, DATAPROVIDER));
 
@@ -397,7 +427,7 @@ public class KIMPortalPartnerRecommenderTest {
 
         assertNotNull(resultList);
         assertTrue(resultList.results.size() > 0);
-        assertEquals(20, resultList.results.size());
+        assertEquals(10, resultList.results.size());
         for (int i = 0; i < resultList.results.size(); i++) {
             ArrayList<String> ids = new ArrayList<String>();
             ArrayList<String> uris = new ArrayList<String>();
