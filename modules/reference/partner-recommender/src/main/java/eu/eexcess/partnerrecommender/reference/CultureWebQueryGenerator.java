@@ -46,23 +46,32 @@ public class CultureWebQueryGenerator implements QueryGeneratorApi {
             if (context.getExpansion() != null && (context.getExpansion() == ExpansionType.PSEUDORELEVANCEWP || context.getExpansion() == ExpansionType.SERENDIPITY)) {
                 if (PartnerConfigurationCache.CONFIG.getPartnerConfiguration().isQueryExpansionEnabled()) {
                     String keyword = context.getText();
-                    Matcher matcher2 = replace.matcher(keyword);
-                    keyword = matcher2.replaceAll(" OR ");
-
-                    if (builder.length() > 0) {
-                        builder.append(" OR ");
+                    String[] matcher2 = replace.split(keyword);
+                    for (int i = 0; i < matcher2.length; i++) {
+                    	String temp = matcher2[i].trim();
+                    	if (!temp.isEmpty())
+                    	{
+	    	              if (builder.length() > 0) {
+	    	                  builder.append("&");
+	    	              }
+	    	              builder.append("field.fulltext.query="+temp);
+                    	}
                     }
-                    builder.append(keyword);
                 }
             } else {
                 String keyword = context.getText();
-                Matcher matcher2 = replace.matcher(keyword);
-                keyword = matcher2.replaceAll(" OR ");
-
-//                if (builder.length() > 0) {
-//                    builder.append("&");
-//                }
-                builder.append("&field.fulltext.query="+keyword);
+                keyword.split(REGEXP);
+                String[] matcher2 = replace.split(keyword);
+                for (int i = 0; i < matcher2.length; i++) {
+                	String temp = matcher2[i].trim();
+                	if (!temp.isEmpty())
+                	{
+	                  if (builder.length() > 0) {
+	                	  builder.append("&");
+	                  }
+	                  builder.append("field.fulltext.query="+temp);
+                	}
+				}
             }
 
         }
