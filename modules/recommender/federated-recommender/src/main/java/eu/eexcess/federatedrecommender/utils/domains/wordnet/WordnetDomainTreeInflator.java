@@ -20,18 +20,17 @@
 
 package eu.eexcess.federatedrecommender.utils.domains.wordnet;
 
+import eu.eexcess.federatedrecommender.utils.domains.DomainTreeInflator;
+import eu.eexcess.federatedrecommender.utils.tree.BaseTreeNode;
+import eu.eexcess.federatedrecommender.utils.tree.TreeNode;
+import eu.eexcess.federatedrecommender.utils.tree.factory.TreeNodeFactory;
+import org.apache.commons.io.LineIterator;
+
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.util.HashSet;
 import java.util.Set;
-
-import org.apache.commons.io.LineIterator;
-
-import eu.eexcess.federatedrecommender.utils.domains.DomainTreeInflator;
-import eu.eexcess.federatedrecommender.utils.tree.BaseTreeNode;
-import eu.eexcess.federatedrecommender.utils.tree.TreeNode;
-import eu.eexcess.federatedrecommender.utils.tree.factory.TreeNodeFactory;
 
 /**
  * This class takes a WordNet domain csv and builds a domain tree structure

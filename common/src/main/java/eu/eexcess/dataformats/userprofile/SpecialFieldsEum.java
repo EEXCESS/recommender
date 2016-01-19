@@ -8,7 +8,7 @@ package eu.eexcess.dataformats.userprofile;
  * enum for fields
  */
 public enum SpecialFieldsEum {
-    WHO("WHO"), WHERE("WHERE"), WHAT("WHAT");
+    Person("Person"), Location("Location"), Organization("Organization"), Misc("Misc");
 
     public final String fieldName;
 

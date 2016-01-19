@@ -20,19 +20,19 @@
 
 package eu.eexcess.federatedrecommender.sourceselection.domains;
 
-import java.io.IOException;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-
 import eu.eexcess.dataformats.PartnerDomain;
 import eu.eexcess.federatedrecommender.utils.domains.DomainTreeInflator;
 import eu.eexcess.federatedrecommender.utils.tree.BaseTreeNode;
 import eu.eexcess.federatedrecommender.utils.tree.NodeInspector;
 import eu.eexcess.federatedrecommender.utils.tree.TreeNode;
 import eu.eexcess.federatedrecommender.utils.tree.ValueTreeNode;
+
+import java.io.IOException;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Not thread save weighted WordNet domain tree construction utility class.
@@ -63,10 +63,27 @@ public class WordnetDomainTreeConstructor implements TreeConstructor {
         }
     }
 
+    @Override public ValueTreeNode<Double> newTree(List<PartnerDomain> domains) {
+
+        for (PartnerDomain domain : domains) {
+            domainsInProcess.put(domain.getName(), domain);
+        }
+
+        BaseTreeNode.depthFirstTraverser(templateTree, new TreeNodeDuplicator());
+        BaseTreeNode.depthFirstTraverser(templateTree, new TreeNodeLinker());
+
+        clonedNodesMap.clear();
+        ValueTreeNode<Double> tree = treeInProcess;
+        treeInProcess = null;
+        domainsInProcess.clear();
+
+        return tree;
+    }
+
     /**
      * clones each invoked node to
      * {@link WordnetDomainTreeConstructor#clonedNodesMap}
-     * 
+     *
      * @author Raoul Rubien
      *
      */
@@ -82,7 +99,7 @@ public class WordnetDomainTreeConstructor implements TreeConstructor {
 
     /**
      * links each cloned node regarding to its equivalent node's children
-     * 
+     *
      * @author Raoul Rubien
      *
      */
@@ -107,23 +124,5 @@ public class WordnetDomainTreeConstructor implements TreeConstructor {
 
             return false;
         }
-    }
-
-    @Override
-    public ValueTreeNode<Double> newTree(List<PartnerDomain> domains) {
-
-        for (PartnerDomain domain : domains) {
-            domainsInProcess.put(domain.getName(), domain);
-        }
-
-        BaseTreeNode.depthFirstTraverser(templateTree, new TreeNodeDuplicator());
-        BaseTreeNode.depthFirstTraverser(templateTree, new TreeNodeLinker());
-
-        clonedNodesMap.clear();
-        ValueTreeNode<Double> tree = treeInProcess;
-        treeInProcess = null;
-        domainsInProcess.clear();
-
-        return tree;
     }
 }

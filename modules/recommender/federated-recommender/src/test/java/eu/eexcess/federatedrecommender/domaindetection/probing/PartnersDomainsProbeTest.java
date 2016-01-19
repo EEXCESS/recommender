@@ -20,39 +20,23 @@
 
 package eu.eexcess.federatedrecommender.domaindetection.probing;
 
-import static org.hamcrest.Matchers.containsInAnyOrder;
-import static org.hamcrest.Matchers.greaterThan;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertSame;
-import static org.junit.Assert.assertThat;
+import eu.eexcess.dataformats.PartnerBadge;
+import eu.eexcess.dataformats.PartnerDomain;
+import eu.eexcess.federatedrecommender.domaindetection.wordnet.WordnetDomainsDetector;
+import eu.eexcess.federatedrecommender.registration.PartnerRegister;
+import org.junit.BeforeClass;
+import org.junit.Test;
 
 import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
-import org.junit.BeforeClass;
-import org.junit.Test;
-
-import eu.eexcess.dataformats.PartnerBadge;
-import eu.eexcess.dataformats.PartnerDomain;
-import eu.eexcess.federatedrecommender.domaindetection.wordnet.WordnetDomainsDetector;
-import eu.eexcess.federatedrecommender.registration.PartnerRegister;
+import static org.hamcrest.Matchers.containsInAnyOrder;
+import static org.hamcrest.Matchers.greaterThan;
+import static org.junit.Assert.*;
 
 public class PartnersDomainsProbeTest {
-
-    private static class TestablePartnersDomainsProbe extends PartnerDomainsProbe {
-        TestablePartnersDomainsProbe(DomainDetector detector, int numWords, int numResults) {
-            super(detector, numWords, numResults);
-        }
-
-        public void assertCloneEquals(PartnerDomainsProbe other) {
-            assertEquals(maxWords, other.maxWords);
-            assertEquals(maxResults, other.maxResults);
-            assertSame(domainDetector, other.domainDetector);
-            assertThat(ambiguousPhrases, containsInAnyOrder(other.ambiguousPhrases.toArray()));
-        }
-    }
 
     private static PartnerRegister partnerRegister = new PartnerRegister();
     private static DomainDetector detector = null;
@@ -109,5 +93,18 @@ public class PartnersDomainsProbeTest {
         TestablePartnersDomainsProbe template = new TestablePartnersDomainsProbe(detector, 15, 3);
         TestablePartnersDomainsProbe clone = (TestablePartnersDomainsProbe) template.clone();
         template.assertCloneEquals(clone);
+    }
+
+    private static class TestablePartnersDomainsProbe extends PartnerDomainsProbe {
+        TestablePartnersDomainsProbe(DomainDetector detector, int numWords, int numResults) {
+            super(detector, numWords, numResults);
+        }
+
+        public void assertCloneEquals(PartnerDomainsProbe other) {
+            assertEquals(maxWords, other.maxWords);
+            assertEquals(maxResults, other.maxResults);
+            assertSame(domainDetector, other.domainDetector);
+            assertThat(ambiguousPhrases, containsInAnyOrder(other.ambiguousPhrases.toArray()));
+        }
     }
 }

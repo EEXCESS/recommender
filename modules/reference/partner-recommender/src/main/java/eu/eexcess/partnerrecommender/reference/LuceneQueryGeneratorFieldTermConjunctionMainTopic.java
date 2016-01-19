@@ -4,6 +4,7 @@ import eu.eexcess.dataformats.result.DocumentBadge;
 import eu.eexcess.dataformats.userprofile.ContextKeyword;
 import eu.eexcess.dataformats.userprofile.ExpansionType;
 import eu.eexcess.dataformats.userprofile.SecureUserProfile;
+import eu.eexcess.dataformats.userprofile.SpecialFieldsEum;
 import eu.eexcess.partnerrecommender.api.PartnerConfigurationCache;
 import eu.eexcess.partnerrecommender.api.QueryGeneratorApi;
 
@@ -39,7 +40,7 @@ public class LuceneQueryGeneratorFieldTermConjunctionMainTopic implements QueryG
         List<ContextKeyword> otherKeywords = new ArrayList<ContextKeyword>();
 
         userProfile.getContextKeywords().forEach(kw -> {
-            if (kw.getType() == null) {
+            if (kw.getType() == null || kw.getType().equals(SpecialFieldsEum.Misc)) {
                 if (kw.getIsMainTopic()) {
                     if (result.length() == 0) {
                         result.append("(" + kw.getText());
@@ -56,7 +57,7 @@ public class LuceneQueryGeneratorFieldTermConjunctionMainTopic implements QueryG
         
         StringBuilder tmpResult = new StringBuilder();
         for (ContextKeyword key : otherKeywords) {
-            if (key.getType() == null) {
+            if (key.getType() == null || key.getType().equals(SpecialFieldsEum.Misc)) {
                 String keyword = key.getText();
                 Matcher matcher2 = replace.matcher(keyword);
                 if (matcher2.find()) {
@@ -64,7 +65,8 @@ public class LuceneQueryGeneratorFieldTermConjunctionMainTopic implements QueryG
                 }
 
                 if (key.getExpansion() != null && (key.getExpansion() == ExpansionType.PSEUDORELEVANCEWP || key.getExpansion() == ExpansionType.SERENDIPITY)) {
-                    if (PartnerConfigurationCache.CONFIG.getPartnerConfiguration().isQueryExpansionEnabled()) {
+                    if (PartnerConfigurationCache.CONFIG.getPartnerConfiguration().isQueryExpansionEnabled() != null && PartnerConfigurationCache.CONFIG.getPartnerConfiguration()
+                            .isQueryExpansionEnabled()) {
                         expansion = addExpansionTerm(tmpResult, expansion, key, keyword);
                     }
                 } else {

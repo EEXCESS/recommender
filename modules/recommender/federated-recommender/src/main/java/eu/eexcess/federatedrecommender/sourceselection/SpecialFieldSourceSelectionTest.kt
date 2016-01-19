@@ -55,7 +55,7 @@ class SpecialFieldSourceSelectionTest {
         partners.add(partner2);
         partners.add(partner3);
         var keyword = ContextKeyword("test")
-        keyword.type = SpecialFieldsEum.WHERE;
+        keyword.type = SpecialFieldsEum.Location;
         userp.contextKeywords.add(keyword);
 
         var returnedSUP = sFSS.sourceSelect(userp, partners);

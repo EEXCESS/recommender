@@ -20,11 +20,10 @@
 
 package eu.eexcess.federatedrecommender.sourceselection.domains;
 
-import java.io.File;
-
-import eu.eexcess.config.FederatedRecommenderConfiguration;
 import eu.eexcess.federatedrecommender.utils.domains.DomainTreeInflator;
 import eu.eexcess.federatedrecommender.utils.domains.wordnet.WordnetDomainTreeInflator;
+
+import java.io.File;
 
 /**
  * Implementation of {@link DomainTreeInflator} construction.

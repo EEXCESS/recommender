@@ -1,9 +1,5 @@
 package eu.eexcess.federatedrecommender;
 
-import static org.junit.Assert.assertEquals;
-
-import org.junit.Test;
-
 import eu.eexcess.dataformats.PartnerBadge;
 import eu.eexcess.dataformats.result.DocumentBadge;
 import eu.eexcess.dataformats.result.Result;
@@ -12,6 +8,9 @@ import eu.eexcess.federatedrecommender.dataformats.PFRChronicle;
 import eu.eexcess.federatedrecommender.dataformats.PartnersFederatedRecommendations;
 import eu.eexcess.federatedrecommender.interfaces.PartnersFederatedRecommendationsPicker;
 import eu.eexcess.federatedrecommender.picker.OccurrenceProbabilityPicker;
+import org.junit.Test;
+
+import static org.junit.Assert.assertEquals;
 
 public class PartnersFederatedRecommendationsPickerTest {
 

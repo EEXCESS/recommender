@@ -18,7 +18,6 @@ package eu.eexcess.dataformats.userprofile;
 
 import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
 import javax.xml.bind.annotation.XmlElement;
@@ -50,6 +49,17 @@ public class SecureUserProfile implements Serializable {
     private List<ContextKeyword> contextKeywords = new ArrayList<ContextKeyword>();
     private List<Interest> interestList = new ArrayList<Interest>();
     private Context context = new Context();
+	private FeatureVector userVector = new FeatureVector();
+
+
+	public FeatureVector getUserVector() {
+		return userVector;
+	}
+
+	public void setUserVector(FeatureVector userVector) {
+		this.userVector = userVector;
+	}
+
 
 
     @XmlElementWrapper(name = "partnerList")

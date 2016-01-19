@@ -20,39 +20,21 @@
 
 package eu.eexcess.federatedrecommender.sourceselection;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertSame;
-import static org.junit.Assert.assertTrue;
-
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.TreeSet;
-
-import org.junit.Before;
-import org.junit.Test;
-
 import eu.eexcess.config.FederatedRecommenderConfiguration;
 import eu.eexcess.dataformats.PartnerBadge;
 import eu.eexcess.dataformats.PartnerDomain;
 import eu.eexcess.dataformats.userprofile.ContextKeyword;
 import eu.eexcess.dataformats.userprofile.SecureUserProfile;
 import eu.eexcess.federatedrecommender.sourceselection.WordnetDomainSourceSelector.DomainWeight;
+import org.junit.Before;
+import org.junit.Test;
+
+import java.io.IOException;
+import java.util.*;
+
+import static org.junit.Assert.*;
 
 public class WordnetDomainSourceSelectorTest {
-
-    private static class TestableWndomainsSourceSelector extends WordnetDomainSourceSelector {
-        public TestableWndomainsSourceSelector(FederatedRecommenderConfiguration configuration) {
-            super(configuration);
-        }
-
-        Map<PartnerBadge, TreeSet<DomainWeight>> getMatchingPartners() {
-            return selectedPartners;
-        }
-    }
 
     private TestableWndomainsSourceSelector selector = null;
 
@@ -98,7 +80,7 @@ public class WordnetDomainSourceSelectorTest {
         partners.add(allroundPartner);
 
         SecureUserProfile userProfile = new SecureUserProfile();
-        userProfile.getContextKeywords().addAll(Arrays.asList(new ContextKeyword[] { new ContextKeyword("health") }));
+        userProfile.getContextKeywords().addAll(Arrays.asList(new ContextKeyword("health")));
 
         SecureUserProfile refinedUserProfile = selector.sourceSelect(userProfile, partners);
         assertEquals(1, userProfile.getPartnerList().size());
@@ -144,7 +126,7 @@ public class WordnetDomainSourceSelectorTest {
         partners.add(allroundPartner);
 
         SecureUserProfile userProfile = new SecureUserProfile();
-        userProfile.getContextKeywords().addAll(Arrays.asList(new ContextKeyword[] { new ContextKeyword("transport") }));
+        userProfile.getContextKeywords().addAll(Arrays.asList(new ContextKeyword("transport")));
 
         SecureUserProfile refinedUserProfile = selector.sourceSelect(userProfile, partners);
         assertEquals(1, userProfile.getPartnerList().size());
@@ -191,7 +173,7 @@ public class WordnetDomainSourceSelectorTest {
         partners.add(allroundPartner);
 
         SecureUserProfile userProfile = new SecureUserProfile();
-        userProfile.getContextKeywords().addAll(Arrays.asList(new ContextKeyword[] { new ContextKeyword("transport") }));
+        userProfile.getContextKeywords().addAll(Arrays.asList(new ContextKeyword("transport")));
 
         SecureUserProfile refinedUserProfile = selector.sourceSelect(userProfile, partners);
         assertEquals(2, userProfile.getPartnerList().size());
@@ -243,7 +225,7 @@ public class WordnetDomainSourceSelectorTest {
         partners.add(allroundPartner);
 
         SecureUserProfile userProfile = new SecureUserProfile();
-        userProfile.getContextKeywords().addAll(Arrays.asList(new ContextKeyword[] { new ContextKeyword("transport") }));
+        userProfile.getContextKeywords().addAll(Arrays.asList(new ContextKeyword("transport")));
 
         SecureUserProfile refinedUserProfile = selector.sourceSelect(userProfile, partners);
         assertEquals(2, userProfile.getPartnerList().size());
@@ -259,5 +241,15 @@ public class WordnetDomainSourceSelectorTest {
         iterator = selector.getMatchingPartners().get(refinedUserProfile.getPartnerList().get(1)).iterator();
         assertEquals(0.5, iterator.next().weight, 0.0001);
         assertEquals(false, iterator.hasNext());
+    }
+
+    private static class TestableWndomainsSourceSelector extends WordnetDomainSourceSelector {
+        public TestableWndomainsSourceSelector(FederatedRecommenderConfiguration configuration) {
+            super(configuration);
+        }
+
+        Map<PartnerBadge, TreeSet<DomainWeight>> getMatchingPartners() {
+            return selectedPartners;
+        }
     }
 }

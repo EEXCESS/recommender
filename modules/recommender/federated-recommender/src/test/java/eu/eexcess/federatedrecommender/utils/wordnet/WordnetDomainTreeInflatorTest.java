@@ -20,30 +20,28 @@
 
 package eu.eexcess.federatedrecommender.utils.wordnet;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-
-import java.io.File;
-import java.io.IOException;
-
-import org.junit.Test;
-
 import eu.eexcess.federatedrecommender.config.Settings;
 import eu.eexcess.federatedrecommender.utils.domains.wordnet.WordnetDomainTreeInflator;
 import eu.eexcess.federatedrecommender.utils.tree.BaseTreeNode;
 import eu.eexcess.federatedrecommender.utils.tree.NodeInspector;
 import eu.eexcess.federatedrecommender.utils.tree.TreeNode;
+import org.junit.Test;
+
+import java.io.File;
+import java.io.IOException;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 public class WordnetDomainTreeInflatorTest {
 
+    private static final WordnetDomainTreeInflator treeInflator = eu.eexcess.federatedrecommender.utils.domains.DomainTreeInflatorBuilder
+            .newBaseTreeNodeInflator(new File(Settings.WordnetDomains.CSVDomainPath));
     private int nodeCount;
     private NodeInspector nodeCounter = (n) -> {
         WordnetDomainTreeInflatorTest.this.nodeCount++;
         return false;
     };
-
-    private static final WordnetDomainTreeInflator treeInflator = eu.eexcess.federatedrecommender.utils.domains.DomainTreeInflatorBuilder
-            .newBaseTreeNodeInflator(new File(Settings.WordnetDomains.CSVDomainPath));
 
     @Test
     public void inflateDomainTree_readTree_exptectCorrectNodeCountInTree() {

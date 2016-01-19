@@ -22,15 +22,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 package eu.eexcess.federatedrecommender.decomposer;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-
-import org.jgraph.graph.DefaultEdge;
-import org.jgrapht.alg.DijkstraShortestPath;
-import org.jgrapht.graph.SimpleWeightedGraph;
-
 import eu.eexcess.config.FederatedRecommenderConfiguration;
 import eu.eexcess.dataformats.userprofile.ContextKeyword;
 import eu.eexcess.dataformats.userprofile.SecureUserProfileEvaluation;
@@ -39,6 +30,14 @@ import eu.eexcess.federatedrecommender.dbpedia.DBPediaGraphJGraph;
 import eu.eexcess.federatedrecommender.dbpedia.DbPediaSolrIndex;
 import eu.eexcess.federatedrecommender.interfaces.SecureUserProfileDecomposer;
 import eu.eexcess.federatedrecommender.utils.FederatedRecommenderException;
+import org.jgraph.graph.DefaultEdge;
+import org.jgrapht.alg.DijkstraShortestPath;
+import org.jgrapht.graph.SimpleWeightedGraph;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Transforms the secure user profile in multiple profiles with different
@@ -89,7 +88,6 @@ public class DBPediaDecomposer implements SecureUserProfileDecomposer<SecureUser
      * 
      * 
      * @param inputSecureUserProfile
-     * @param semanticDistanceThreshold
      * @return
      */
     @Override
@@ -102,7 +100,7 @@ public class DBPediaDecomposer implements SecureUserProfileDecomposer<SecureUser
         // possible.
         if (profileKeywords.size() < 3) {
             logger.log(Level.WARNING, "Input Secure User Profile contains less than 3 keywords, returning input profile directly");
-            return (SecureUserProfileEvaluation) inputSecureUserProfile;
+            return inputSecureUserProfile;
         }
 
         List<String> dbPediaEntityNames = new ArrayList<String>(); // DBpedia
@@ -124,7 +122,7 @@ public class DBPediaDecomposer implements SecureUserProfileDecomposer<SecureUser
             // DBpedia entities representing keywords from the inputProfile
         } catch (FederatedRecommenderException e) {
             logger.log(Level.SEVERE, "Graph could not be build out of DBPedia, perhaps server is not running or reachable,returning input profile directly", e);
-            return (SecureUserProfileEvaluation) inputSecureUserProfile;
+            return inputSecureUserProfile;
         }
 
         /*
@@ -157,7 +155,7 @@ public class DBPediaDecomposer implements SecureUserProfileDecomposer<SecureUser
             }
 
         }
-        return (SecureUserProfileEvaluation) inputSecureUserProfile;
+        return inputSecureUserProfile;
     }
 
     public int getSemanticDistanceThreshold() {

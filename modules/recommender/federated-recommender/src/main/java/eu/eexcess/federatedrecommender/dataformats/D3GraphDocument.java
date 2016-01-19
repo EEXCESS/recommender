@@ -22,18 +22,15 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 package eu.eexcess.federatedrecommender.dataformats;
 
-import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.List;
-
-import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlElementWrapper;
-
+import eu.eexcess.federatedrecommender.utils.FederatedRecommenderException;
 import org.jgrapht.graph.DefaultEdge;
 import org.jgrapht.graph.SimpleWeightedGraph;
 
-
-import eu.eexcess.federatedrecommender.utils.FederatedRecommenderException;
+import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlElementWrapper;
+import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * VisualisationDataType (Just to get a json out of the results of the graph)

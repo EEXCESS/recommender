@@ -22,9 +22,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 package eu.eexcess.federatedrecommender.dataformats;
 
-import java.io.Serializable;
-
 import eu.eexcess.dataformats.result.Result;
+
+import java.io.Serializable;
 
 public class ResultSimilarity extends Result implements Serializable {
 
@@ -111,9 +111,7 @@ public class ResultSimilarity extends Result implements Serializable {
         if (getClass() != obj.getClass())
             return false;
         ResultSimilarity other = (ResultSimilarity) obj;
-        if (Double.doubleToLongBits(similarity) != Double.doubleToLongBits(other.similarity))
-            return false;
-        return true;
+        return Double.doubleToLongBits(similarity) == Double.doubleToLongBits(other.similarity);
     }
 
     @Override

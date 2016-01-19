@@ -20,9 +20,9 @@
 
 package eu.eexcess.federatedrecommender.utils.domains;
 
-import java.io.IOException;
-
 import eu.eexcess.federatedrecommender.utils.tree.TreeNode;
+
+import java.io.IOException;
 
 /**
  * An domain tree inflator interface.
@@ -38,6 +38,6 @@ public interface DomainTreeInflator {
      * @return
      * @throws IOException
      */
-    public TreeNode inflateDomainTree() throws IOException;
+    TreeNode inflateDomainTree() throws IOException;
 
 }

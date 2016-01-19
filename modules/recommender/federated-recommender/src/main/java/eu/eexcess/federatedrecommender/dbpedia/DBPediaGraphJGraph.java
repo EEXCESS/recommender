@@ -22,8 +22,10 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 package eu.eexcess.federatedrecommender.dbpedia;
 
-import org.jgrapht.graph.SimpleWeightedGraph;
+import eu.eexcess.dataformats.userprofile.ContextKeyword;
+import eu.eexcess.federatedrecommender.utils.FederatedRecommenderException;
 import org.jgrapht.graph.DefaultEdge;
+import org.jgrapht.graph.SimpleWeightedGraph;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -36,9 +38,6 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-
-import eu.eexcess.dataformats.userprofile.ContextKeyword;
-import eu.eexcess.federatedrecommender.utils.FederatedRecommenderException;
 
 /**
  * 

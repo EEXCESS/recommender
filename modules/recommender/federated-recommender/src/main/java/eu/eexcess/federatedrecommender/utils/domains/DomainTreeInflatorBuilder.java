@@ -20,8 +20,6 @@
 
 package eu.eexcess.federatedrecommender.utils.domains;
 
-import java.io.File;
-
 import eu.eexcess.federatedrecommender.utils.domains.wordnet.WordnetDomainTreeInflator;
 import eu.eexcess.federatedrecommender.utils.tree.BaseTreeNode;
 import eu.eexcess.federatedrecommender.utils.tree.ValueSetTreeNode;
@@ -29,6 +27,8 @@ import eu.eexcess.federatedrecommender.utils.tree.ValueTreeNode;
 import eu.eexcess.federatedrecommender.utils.tree.factory.BaseTreeNodeFactory;
 import eu.eexcess.federatedrecommender.utils.tree.factory.DoubleValueTreeNodeFactory;
 import eu.eexcess.federatedrecommender.utils.tree.factory.StringValueSetTreeNodeFactory;
+
+import java.io.File;
 
 public class DomainTreeInflatorBuilder {
 

@@ -20,28 +20,25 @@
 
 package eu.eexcess.federatedrecommender.domaindetection.probing;
 
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.Locale;
-import java.util.Set;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-
-import javax.management.RuntimeErrorException;
-import javax.ws.rs.core.MediaType;
-
 import at.knowcenter.util.term.TermSet;
 import at.knowcenter.util.term.TypedTerm;
-
 import com.sun.jersey.api.client.Client;
 import com.sun.jersey.api.client.WebResource;
-
 import eu.eexcess.dataformats.PartnerBadge;
 import eu.eexcess.dataformats.PartnerDomain;
 import eu.eexcess.dataformats.result.Result;
 import eu.eexcess.dataformats.result.ResultList;
 import eu.eexcess.dataformats.userprofile.ContextKeyword;
 import eu.eexcess.dataformats.userprofile.SecureUserProfile;
+
+import javax.management.RuntimeErrorException;
+import javax.ws.rs.core.MediaType;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Locale;
+import java.util.Set;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * This class performs probing of a {@link PartnerBadge} using random phrases
@@ -54,18 +51,8 @@ import eu.eexcess.dataformats.userprofile.SecureUserProfile;
  */
 public class PartnerDomainsProbe implements Cloneable {
 
-    /**
-     * Interface that is prompted during probing to check whether the current
-     * probing has to be aborted or not.
-     * 
-     * @author Raoul Rubien
-     *
-     */
-    public static interface CancelProbeCondition {
-        public boolean isProbeToBeCancelled();
-    }
-
     private static final Logger LOGGER = Logger.getLogger(PartnerDomainsProbe.class.getName());
+    private static final String RECOMMENDATION_ENDPOINT_SUFFIX = "recommend";
     /**
      * default number of random phrases to generate once
      */
@@ -77,12 +64,8 @@ public class PartnerDomainsProbe implements Cloneable {
     protected int maxResults = 10;
     protected DomainDetector domainDetector;
     protected Set<String> ambiguousPhrases = new HashSet<String>(maxWords);
-    private static final String RECOMMENDATION_ENDPOINT_SUFFIX = "recommend";
     private CancelProbeCondition canelCondition;
 
-    /**
-     * see {@link #PartnersDomainsProbe(DomainDetector, int, int)}
-     */
     public PartnerDomainsProbe(DomainDetector domainDetector) /*
                                                                * throws
                                                                * RuntimeException
@@ -91,9 +74,6 @@ public class PartnerDomainsProbe implements Cloneable {
         generateRandomPhrases();
     }
 
-    /**
-     * see {@link #PartnersDomainsProbe(DomainDetector, int, int)}
-     */
     public PartnerDomainsProbe(DomainDetector domainDetector, int numProbePhrases) /*
                                                                                     * throws
                                                                                     * RuntimeException
@@ -104,7 +84,7 @@ public class PartnerDomainsProbe implements Cloneable {
     }
 
     /**
-     * 
+     *
      * @param domainDetector
      *            detector to be invoked
      * @param numProbePhrases
@@ -128,7 +108,7 @@ public class PartnerDomainsProbe implements Cloneable {
      * Probes all partners from {@code #partnerRegistration} with
      * {@code #maxWords} random ambiguous words considering {@code #maxResults}.
      * Received results are used for domain detection.
-     * 
+     *
      * @return mapping of {@link PartnerBadge}s to {@link PartnerDomain}s
      * @throws DomainDetectorException
      *             on exceptions during
@@ -192,7 +172,7 @@ public class PartnerDomainsProbe implements Cloneable {
      * is sent to the partner for probing. If
      * {@link CancelProbeCondition#isProbeToBeCancelled()} == true probing will
      * terminate after the currently request.
-     * 
+     *
      * @param condition
      */
     public void setCondition(CancelProbeCondition condition) {
@@ -205,7 +185,7 @@ public class PartnerDomainsProbe implements Cloneable {
 
     /**
      * Condition when probing is to be aborted.
-     * 
+     *
      * @return
      */
     private boolean isToBeAborted() {
@@ -219,7 +199,7 @@ public class PartnerDomainsProbe implements Cloneable {
 
     /**
      * Generate once ambiguous phrases to be used for all following probes.
-     * 
+     *
      * @throws DomainDetectorException
      */
     private void generateRandomPhrases() /* throws RuntimeException */{
@@ -247,7 +227,7 @@ public class PartnerDomainsProbe implements Cloneable {
 
     /**
      * Converts from set if {@link TypedTerm}s to set of {@link PartnerDomain}s.
-     * 
+     *
      * @return the converted set
      */
     private Set<PartnerDomain> getProbesFromTerms(TermSet<TypedTerm> partnerProbes) {
@@ -268,7 +248,7 @@ public class PartnerDomainsProbe implements Cloneable {
 
     /**
      * Sends a secure user profile request to a partner.
-     * 
+     *
      * @param client
      *            client to use for communication
      * @param partner
@@ -300,5 +280,15 @@ public class PartnerDomainsProbe implements Cloneable {
 
         }
         return resultList;
+    }
+
+    /**
+     * Interface that is prompted during probing to check whether the current
+     * probing has to be aborted or not.
+     *
+     * @author Raoul Rubien
+     */
+    public interface CancelProbeCondition {
+        boolean isProbeToBeCancelled();
     }
 }

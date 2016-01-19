@@ -22,19 +22,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 package eu.eexcess.federatedrecommender.picker;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.LinkedHashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.Random;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-
 import eu.eexcess.dataformats.PartnerBadge;
 import eu.eexcess.dataformats.result.Result;
 import eu.eexcess.dataformats.result.ResultList;
@@ -44,6 +31,10 @@ import eu.eexcess.dataformats.userprofile.SecureUserProfile;
 import eu.eexcess.federatedrecommender.dataformats.PFRChronicle;
 import eu.eexcess.federatedrecommender.dataformats.PartnersFederatedRecommendations;
 import eu.eexcess.federatedrecommender.interfaces.PartnersFederatedRecommendationsPicker;
+
+import java.util.*;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Picks results based on the occurrence probability of the query in the results
@@ -165,7 +156,7 @@ public class OccurrenceProbabilityPicker extends PartnersFederatedRecommendation
 
     /**
      * calculates the weight for the single result to create the weight for
-     * {@link calcPartnerWeight}
+     *
      * 
      * @param result
      * @param secureUserProfile
@@ -194,8 +185,8 @@ public class OccurrenceProbabilityPicker extends PartnersFederatedRecommendation
      * Calculation of the partner weight by similarity to the
      * {@link SecureUserProfile} and the partner's language model
      * 
-     * @param partnerBadge
      * @param secureUserProfile
+     * @param resultList
      * @return
      */
 

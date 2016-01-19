@@ -1,17 +1,13 @@
 package eu.eexcess.federatedrecommender.decomposer;
 
+import eu.eexcess.config.FederatedRecommenderConfiguration;
+import eu.eexcess.dataformats.userprofile.*;
+import eu.eexcess.federatedrecommender.interfaces.SecureUserProfileDecomposer;
+import eu.eexcess.federatedrecommender.utils.FederatedRecommenderException;
+
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-
-import eu.eexcess.config.FederatedRecommenderConfiguration;
-import eu.eexcess.dataformats.userprofile.ContextKeyword;
-import eu.eexcess.dataformats.userprofile.ExpansionType;
-import eu.eexcess.dataformats.userprofile.History;
-import eu.eexcess.dataformats.userprofile.Interest;
-import eu.eexcess.dataformats.userprofile.SecureUserProfileEvaluation;
-import eu.eexcess.federatedrecommender.interfaces.SecureUserProfileDecomposer;
-import eu.eexcess.federatedrecommender.utils.FederatedRecommenderException;
 /**
  * Generates an extended secure user profile by taken the history of the user into account
  * @author hziak

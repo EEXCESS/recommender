@@ -20,10 +20,10 @@
 
 package eu.eexcess.federatedrecommender.sourceselection.domains;
 
-import java.util.List;
-
 import eu.eexcess.dataformats.PartnerDomain;
 import eu.eexcess.federatedrecommender.utils.tree.ValueTreeNode;
+
+import java.util.List;
 
 public interface TreeConstructor {
     
@@ -35,6 +35,6 @@ public interface TreeConstructor {
      *            predefined domain weights
      * @return a complete WordnetDomain tree
      */
-    public ValueTreeNode<Double> newTree(List<PartnerDomain> domains);
+    ValueTreeNode<Double> newTree(List<PartnerDomain> domains);
 
 }

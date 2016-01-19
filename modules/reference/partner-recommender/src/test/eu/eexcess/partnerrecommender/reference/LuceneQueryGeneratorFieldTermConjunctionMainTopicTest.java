@@ -1,14 +1,15 @@
 package eu.eexcess.partnerrecommender.reference;
 
-import static org.junit.Assert.assertTrue;
-
-import org.junit.Test;
-
 import eu.eexcess.dataformats.userprofile.ContextKeyword;
 import eu.eexcess.dataformats.userprofile.ExpansionType;
 import eu.eexcess.dataformats.userprofile.SecureUserProfile;
 import eu.eexcess.partnerrecommender.api.PartnerConfigurationCache;
-import eu.eexcess.partnerrecommender.reference.LuceneQueryGeneratorFieldTermConjunctionMainTopic;
+import org.junit.Test;
+
+import java.io.UnsupportedEncodingException;
+import java.net.URLDecoder;
+
+import static org.junit.Assert.assertTrue;
 
 public class LuceneQueryGeneratorFieldTermConjunctionMainTopicTest {
 
@@ -43,8 +44,14 @@ public class LuceneQueryGeneratorFieldTermConjunctionMainTopicTest {
 //        synchronized (PartnerConfigurationCache.CONFIG.getPartnerConfiguration().isQueryExpansionEnabled()) {
 //            PartnerConfigurationCache.CONFIG.getPartnerConfiguration().setIsQueryExpansionEnabled(true);
             String result = gen.toQuery(userProfile);
-            System.out.println(result);
-            assertTrue(result.equals("(k8 AND k9) AND (k1 OR k2 OR k3 OR k4 OR (k5 OR k6 OR k7))"));
+
+        try {
+            result = URLDecoder.decode(result, "UTF-8");
+        } catch (UnsupportedEncodingException e) {
+            e.printStackTrace();
+        }
+        System.out.println(result);
+        assertTrue(result.equals("(k8 AND k9) AND (k1 OR k2 OR k3 OR k4 OR (k5 OR k6 OR k7))"));
             // assertTrue(result.equals("k1 OR k2 OR k3 OR k4 OR (k5 OR k6 OR k7)"));
 //        }
     }
@@ -62,6 +69,11 @@ public class LuceneQueryGeneratorFieldTermConjunctionMainTopicTest {
         synchronized (PartnerConfigurationCache.CONFIG.getPartnerConfiguration().isQueryExpansionEnabled()) {
             PartnerConfigurationCache.CONFIG.getPartnerConfiguration().setIsQueryExpansionEnabled(true);
             String result = gen.toQuery(userProfile);
+            try {
+                result = URLDecoder.decode(result, "UTF-8");
+            } catch (UnsupportedEncodingException e) {
+                e.printStackTrace();
+            }
             System.out.println(result);
             assertTrue(result.equals("k1 OR (k2)"));
             // assertTrue(result.equals("k1 OR (k2)"));
@@ -114,6 +126,11 @@ public class LuceneQueryGeneratorFieldTermConjunctionMainTopicTest {
         synchronized (PartnerConfigurationCache.CONFIG.getPartnerConfiguration().isQueryExpansionEnabled()) {
             PartnerConfigurationCache.CONFIG.getPartnerConfiguration().setIsQueryExpansionEnabled(true);
             String result = gen.toQuery(userProfile);
+            try {
+                result = URLDecoder.decode(result, "UTF-8");
+            } catch (UnsupportedEncodingException e) {
+                e.printStackTrace();
+            }
             System.out.println(result);
             assertTrue(result.equals("k1 OR (k2 OR k3) OR k4 OR (k5 OR k6 OR k7)"));
         }
@@ -147,8 +164,12 @@ public class LuceneQueryGeneratorFieldTermConjunctionMainTopicTest {
         synchronized (PartnerConfigurationCache.CONFIG.getPartnerConfiguration().isQueryExpansionEnabled()) {
             PartnerConfigurationCache.CONFIG.getPartnerConfiguration().setIsQueryExpansionEnabled(true);
             String result = gen.toQuery(userProfile);
+            try {
+                result = URLDecoder.decode(result, "UTF-8");
+            } catch (UnsupportedEncodingException e) {
+                e.printStackTrace();
+            }
             System.out.println(result);
-            // assertTrue(result.equals("k1 OR (k2) OR k3 OR k4 OR (k5 OR k6 OR k7)"));
             assertTrue(result.equals("k1 OR (k2) OR k3 OR k4 OR (k5 OR k6 OR k7)"));
         }
     }

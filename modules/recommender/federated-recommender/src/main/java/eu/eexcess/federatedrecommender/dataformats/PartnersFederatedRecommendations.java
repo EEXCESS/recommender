@@ -22,11 +22,11 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 package eu.eexcess.federatedrecommender.dataformats;
 
-import java.util.HashMap;
-import java.util.Map;
-
 import eu.eexcess.dataformats.PartnerBadge;
 import eu.eexcess.dataformats.result.ResultList;
+
+import java.util.HashMap;
+import java.util.Map;
 
 public class PartnersFederatedRecommendations {
     /**

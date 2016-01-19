@@ -22,14 +22,18 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 package eu.eexcess.federatedrecommender.decomposer;
 
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-
+import eu.eexcess.config.FederatedRecommenderConfiguration;
+import eu.eexcess.dataformats.PartnerBadge;
+import eu.eexcess.dataformats.result.Result;
+import eu.eexcess.dataformats.result.ResultList;
+import eu.eexcess.dataformats.userprofile.ContextKeyword;
+import eu.eexcess.dataformats.userprofile.ExpansionType;
+import eu.eexcess.dataformats.userprofile.SecureUserProfile;
+import eu.eexcess.dataformats.userprofile.SecureUserProfileEvaluation;
+import eu.eexcess.federatedrecommender.FederatedRecommenderCore;
+import eu.eexcess.federatedrecommender.dataformats.PartnersFederatedRecommendations;
+import eu.eexcess.federatedrecommender.interfaces.SecureUserProfileDecomposer;
+import eu.eexcess.federatedrecommender.utils.FederatedRecommenderException;
 import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.analysis.core.StopAnalyzer;
 import org.apache.lucene.document.Document;
@@ -47,18 +51,13 @@ import org.apache.lucene.store.Directory;
 import org.apache.lucene.store.RAMDirectory;
 import org.apache.lucene.util.Version;
 
-import eu.eexcess.config.FederatedRecommenderConfiguration;
-import eu.eexcess.dataformats.PartnerBadge;
-import eu.eexcess.dataformats.result.Result;
-import eu.eexcess.dataformats.result.ResultList;
-import eu.eexcess.dataformats.userprofile.ContextKeyword;
-import eu.eexcess.dataformats.userprofile.ExpansionType;
-import eu.eexcess.dataformats.userprofile.SecureUserProfile;
-import eu.eexcess.dataformats.userprofile.SecureUserProfileEvaluation;
-import eu.eexcess.federatedrecommender.FederatedRecommenderCore;
-import eu.eexcess.federatedrecommender.dataformats.PartnersFederatedRecommendations;
-import eu.eexcess.federatedrecommender.interfaces.SecureUserProfileDecomposer;
-import eu.eexcess.federatedrecommender.utils.FederatedRecommenderException;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Query Expansion based on pseudo relevance from the own sources
@@ -70,11 +69,32 @@ import eu.eexcess.federatedrecommender.utils.FederatedRecommenderException;
 public class PseudoRelevanceSourcesDecomposer implements SecureUserProfileDecomposer<SecureUserProfile, SecureUserProfileEvaluation> {
     private static final Logger logger = Logger.getLogger(PseudoRelevanceSourcesDecomposer.class.getName());
 
+    /**
+     * adds documents to the index
+     *
+     * @param writer
+     * @param content
+     * @throws IOException
+     */
+    private static void addDoc(IndexWriter writer, String content) throws IOException {
+        if (content != null) {
+            FieldType fieldType = new FieldType();
+            fieldType.setStoreTermVectors(true);
+            fieldType.setStoreTermVectorPositions(true);
+            fieldType.setIndexed(true);
+            fieldType.setIndexOptions(IndexOptions.DOCS_AND_FREQS);
+            fieldType.setStored(true);
+            Document doc = new Document();
+            doc.add(new Field("content", content, fieldType));
+            writer.addDocument(doc);
+        }
+    }
+
     /*
      * gets all results from the partners and puts the filtered top terms in the
      * secureuserprofile if queryExpansionSourcePartner is not empty than these
      * partners are used for the expansion
-     * 
+     *
      * @see
      * eu.eexcess.federatedrecommender.interfaces.SecureUserProfileDecomposer
      * #decompose(eu.eexcess.dataformats.userprofile.SecureUserProfile)
@@ -147,7 +167,7 @@ public class PseudoRelevanceSourcesDecomposer implements SecureUserProfileDecomp
 
     /**
      * checks if the term contains parts of the query
-     * 
+     *
      * @param term
      * @param keywords
      * @return
@@ -160,27 +180,6 @@ public class PseudoRelevanceSourcesDecomposer implements SecureUserProfileDecomp
                 return true;
         }
         return false;
-    }
-
-    /**
-     * adds documents to the index
-     * 
-     * @param writer
-     * @param content
-     * @throws IOException
-     */
-    private static void addDoc(IndexWriter writer, String content) throws IOException {
-        if (content != null) {
-            FieldType fieldType = new FieldType();
-            fieldType.setStoreTermVectors(true);
-            fieldType.setStoreTermVectorPositions(true);
-            fieldType.setIndexed(true);
-            fieldType.setIndexOptions(IndexOptions.DOCS_AND_FREQS);
-            fieldType.setStored(true);
-            Document doc = new Document();
-            doc.add(new Field("content", content, fieldType));
-            writer.addDocument(doc);
-        }
     }
 
     @Override

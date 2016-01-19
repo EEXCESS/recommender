@@ -16,15 +16,15 @@ public abstract class SpecialFieldsQueryGeneratorApi {
         userProfile.getContextKeywords().forEach((ContextKeyword keyword) -> {
             if (keyword.getType() != null) {
                 switch (keyword.getType()) {
-                case WHO:
+                case Person:
                     if (PartnerConfigurationCache.CONFIG.getPartnerConfiguration().getFieldNameWho() != null)
                         builder.append(mapValues(keyword.getText(), PartnerConfigurationCache.CONFIG.getPartnerConfiguration().getFieldNameWho()));
                     break;
-                case WHERE:
+                case Location:
                     if (PartnerConfigurationCache.CONFIG.getPartnerConfiguration().getFieldNameWhere() != null)
                         builder.append(mapValues(keyword.getText(), PartnerConfigurationCache.CONFIG.getPartnerConfiguration().getFieldNameWhere()));
                     break;
-                case WHAT:
+                case Organization:
                     if (PartnerConfigurationCache.CONFIG.getPartnerConfiguration().getFieldNameWhat() != null)
                         builder.append(mapValues(keyword.getText(), PartnerConfigurationCache.CONFIG.getPartnerConfiguration().getFieldNameWhat()));
                     break;

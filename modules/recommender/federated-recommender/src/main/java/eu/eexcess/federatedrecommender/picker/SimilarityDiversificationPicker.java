@@ -22,12 +22,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 package eu.eexcess.federatedrecommender.picker;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Set;
-
 import eu.eexcess.dataformats.PartnerBadge;
 import eu.eexcess.dataformats.result.Result;
 import eu.eexcess.dataformats.result.ResultList;
@@ -36,6 +30,8 @@ import eu.eexcess.federatedrecommender.dataformats.PFRChronicle;
 import eu.eexcess.federatedrecommender.dataformats.PartnersFederatedRecommendations;
 import eu.eexcess.federatedrecommender.dataformats.ResultSimilarity;
 import eu.eexcess.federatedrecommender.interfaces.PartnersFederatedRecommendationsPicker;
+
+import java.util.*;
 
 /**
  * Similar to suggested algorithm in
@@ -108,7 +104,7 @@ public class SimilarityDiversificationPicker extends PartnersFederatedRecommenda
         Collections.sort(tmpResult, simResultComperator);
 
         for (ResultSimilarity resultSimilarity : tmpResult) {
-            diversifiedResults.results.add((Result) resultSimilarity);
+            diversifiedResults.results.add(resultSimilarity);
         }
         return diversifiedResults;
     }

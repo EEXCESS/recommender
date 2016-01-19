@@ -22,37 +22,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 package eu.eexcess.federatedrecommender.domaindetection.wordnet;
 
-import java.io.File;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.LinkedHashMap;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Set;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-
-import net.sf.extjwnl.JWNLException;
-import net.sf.extjwnl.data.IndexWord;
-import net.sf.extjwnl.data.POS;
-import net.sf.extjwnl.data.Synset;
-import net.sf.extjwnl.dictionary.Dictionary;
-import net.sf.extjwnl.dictionary.MorphologicalProcessor;
-
-import org.apache.commons.collections.CollectionUtils;
-
-import at.knowcenter.ie.AnnotatedDocument;
-import at.knowcenter.ie.Annotation;
-import at.knowcenter.ie.Annotator;
-import at.knowcenter.ie.BaseTypeSystem;
-import at.knowcenter.ie.Language;
+import at.knowcenter.ie.*;
 import at.knowcenter.ie.impl.DefaultDocument;
 import at.knowcenter.ie.opennlp.PartOfSpeechAnnotator;
 import at.knowcenter.ie.opennlp.TokenAnnotator;
@@ -62,6 +32,20 @@ import at.knowcenter.util.term.TypedTerm;
 import eu.eexcess.federatedrecommender.domaindetection.probing.Domain;
 import eu.eexcess.federatedrecommender.domaindetection.probing.DomainDetector;
 import eu.eexcess.federatedrecommender.domaindetection.probing.DomainDetectorException;
+import net.sf.extjwnl.JWNLException;
+import net.sf.extjwnl.data.IndexWord;
+import net.sf.extjwnl.data.POS;
+import net.sf.extjwnl.data.Synset;
+import net.sf.extjwnl.dictionary.Dictionary;
+import net.sf.extjwnl.dictionary.MorphologicalProcessor;
+import org.apache.commons.collections.CollectionUtils;
+
+import java.io.File;
+import java.io.IOException;
+import java.util.*;
+import java.util.Map.Entry;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Domain detector based on the wordnet domains dataset.
@@ -140,6 +124,27 @@ public class WordnetDomainsDetector extends DomainDetector {
         }
     }
 
+    public static void main(String[] args) throws DomainDetectorException {
+        // WordnetDomainsDetector wordnetDomainsDetector = new
+        // WordnetDomainsDetector(
+        // new File("/opt/data/wordnet/WordNet-3.0/dict"),
+        // new File("/opt/data/wordnet-domains/xwnd/xwnd-30g"), false);
+        WordnetDomainsDetector wordnetDomainsDetector = new WordnetDomainsDetector(new File("/opt/data/wordnet/WordNet-2.0/dict"),
+                new File("/opt/data/wordnet-domains/wn-domains-3.2/wn-domains-3.2-20070223"), true);
+        for (String query : new String[] { "women in the workforce", "battle of trafalgar", "scientific method", "women higher education", "gender roles", "gender inequality",
+                "women wage gap", "first world war", "industrial revolution loom", "metallica enter sandman", "ufo movie", "world cup football", "java 8 features",
+                "dinosaur t-rex", "higgs boson particle field", "railway junction", "sentimental tears emotions", "black matter", "bread and butter", "mandela prison", "aids hiv",
+                "Russian Civil War", "satellite republic", "French Revolution",
+
+                "computer graphics", "linux", "windows", "vacation", "apple notebook", "lipstick color", "messenger bag", "horse trailer for sale", "kittens for sale",
+                "climate change", "department of justice",
+
+        }) {
+            Set<Domain> detect = wordnetDomainsDetector.detect(query);
+            System.out.println(query + " -> " + detect);
+        }
+    }
+
     @Override
     public Collection<Domain> getAllDomains() {
         Set<Domain> result = new HashSet<Domain>();
@@ -175,7 +180,7 @@ public class WordnetDomainsDetector extends DomainDetector {
                 Set<String> allDomains = new HashSet<String>();
                 List<Synset> senses = randomIndexWord.getSenses();
                 for (Synset synset : senses) {
-                    String synsetId = String.format("%08d-%s", (long) synset.getKey(), synset.getPOS().getKey());
+                    String synsetId = String.format("%08d-%s", synset.getKey(), synset.getPOS().getKey());
                     Set<DomainAssignment> domains = synsetToDomains.get(synsetId);
                     if (domains != null && !domains.isEmpty()) {
                         for (DomainAssignment domain : domains) {
@@ -244,7 +249,6 @@ public class WordnetDomainsDetector extends DomainDetector {
 
     /**
      * @param assignments
-     * @param result
      */
     private void disambiguate(Map<Annotation, Map<Synset, Set<DomainAssignment>>> assignments, Set<Domain> resultCollector) {
         TermSet<TypedTerm> collector = new TermSet<TypedTerm>(new TypedTerm.AddingWeightTermMerger());
@@ -345,7 +349,7 @@ public class WordnetDomainsDetector extends DomainDetector {
 
     /**
      * Returns the set of common domains give the domain tree
-     * 
+     *
      * @param domains
      * @return
      */
@@ -399,7 +403,7 @@ public class WordnetDomainsDetector extends DomainDetector {
      * @param synset
      */
     protected void collectDomains(Synset synset, Map<Synset, Set<DomainAssignment>> synsetToAssignments) {
-        String synsetId = String.format("%08d-%s", (long) synset.getKey(), synset.getPOS().getKey());
+        String synsetId = String.format("%08d-%s", synset.getKey(), synset.getPOS().getKey());
         Set<DomainAssignment> domains = synsetToDomains.get(synsetId);
         if (domains != null && !domains.isEmpty()) {
             // System.out.println("  "+synset.getKey()+", "+synset+", "+domains);
@@ -415,7 +419,7 @@ public class WordnetDomainsDetector extends DomainDetector {
              * (parentToWeight != null) { for (Entry<String, Double> e :
              * parentToWeight.entrySet()) { double weight = assignment.weight *
              * e.getValue();
-             * 
+             *
              * Double existing = assignments.get(e.getKey()); if (existing ==
              * null || existing < weight) { assignments.put(e.getKey(), weight);
              * } } } }
@@ -451,26 +455,5 @@ public class WordnetDomainsDetector extends DomainDetector {
                 pos = null;
         }
         return pos;
-    }
-
-    public static void main(String[] args) throws DomainDetectorException {
-        // WordnetDomainsDetector wordnetDomainsDetector = new
-        // WordnetDomainsDetector(
-        // new File("/opt/data/wordnet/WordNet-3.0/dict"),
-        // new File("/opt/data/wordnet-domains/xwnd/xwnd-30g"), false);
-        WordnetDomainsDetector wordnetDomainsDetector = new WordnetDomainsDetector(new File("/opt/data/wordnet/WordNet-2.0/dict"), new File(
-                "/opt/data/wordnet-domains/wn-domains-3.2/wn-domains-3.2-20070223"), true);
-        for (String query : new String[] { "women in the workforce", "battle of trafalgar", "scientific method", "women higher education", "gender roles",
-                "gender inequality", "women wage gap", "first world war", "industrial revolution loom", "metallica enter sandman", "ufo movie",
-                "world cup football", "java 8 features", "dinosaur t-rex", "higgs boson particle field", "railway junction", "sentimental tears emotions",
-                "black matter", "bread and butter", "mandela prison", "aids hiv", "Russian Civil War", "satellite republic", "French Revolution",
-
-                "computer graphics", "linux", "windows", "vacation", "apple notebook", "lipstick color", "messenger bag", "horse trailer for sale",
-                "kittens for sale", "climate change", "department of justice",
-
-        }) {
-            Set<Domain> detect = wordnetDomainsDetector.detect(query);
-            System.out.println(query + " -> " + detect);
-        }
     }
 }

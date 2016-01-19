@@ -1,12 +1,5 @@
 package eu.eexcess.federatedrecommender;
 
-import static org.junit.Assert.assertEquals;
-
-import java.util.ArrayList;
-import java.util.List;
-
-import org.junit.Test;
-
 import eu.eexcess.dataformats.PartnerBadge;
 import eu.eexcess.dataformats.result.Result;
 import eu.eexcess.dataformats.result.ResultList;
@@ -14,6 +7,12 @@ import eu.eexcess.dataformats.userprofile.ContextKeyword;
 import eu.eexcess.dataformats.userprofile.SecureUserProfile;
 import eu.eexcess.federatedrecommender.dataformats.PartnersFederatedRecommendations;
 import eu.eexcess.federatedrecommender.picker.OccurrenceProbabilityPicker;
+import org.junit.Test;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import static org.junit.Assert.assertEquals;
 
 public class OccurrenceProbabilityPickerTest {
     @Test

@@ -20,17 +20,14 @@
 
 package eu.eexcess.federatedrecommender.utils.tree;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import org.junit.Test;
 
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
 
-import org.junit.Test;
-
-import eu.eexcess.federatedrecommender.utils.tree.TreeNode;
-import eu.eexcess.federatedrecommender.utils.tree.ValueSetTreeNode;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 public class ValueTreeNodeTest {
 
@@ -122,24 +119,24 @@ public class ValueTreeNodeTest {
         Set<TreeNode> resultCollector = new HashSet<TreeNode>();
         ValueSetTreeNode.findFirstNode(template, n, resultCollector);
         assertEquals(1, resultCollector.size());
-        assertTrue((Object) resultCollector.iterator().next() == (Object) n);
+        assertTrue(resultCollector.iterator().next() == n);
 
         template.setName("child0");
         resultCollector.clear();
         ValueSetTreeNode.findFirstNode(template, n, resultCollector);
         assertEquals(1, resultCollector.size());
-        assertTrue((Object) resultCollector.iterator().next() == (Object) c);
+        assertTrue(resultCollector.iterator().next() == c);
 
         template.setName("child01");
         resultCollector.clear();
         ValueSetTreeNode.findFirstNode(template, n, resultCollector);
         assertEquals(1, resultCollector.size());
-        assertTrue((Object) resultCollector.iterator().next() == (Object) cc);
+        assertTrue(resultCollector.iterator().next() == cc);
 
         template.setName("child02");
         resultCollector.clear();
         ValueSetTreeNode.findFirstNode(template, n, resultCollector);
         assertEquals(1, resultCollector.size());
-        assertTrue((Object) resultCollector.iterator().next() == (Object) cc1);
+        assertTrue(resultCollector.iterator().next() == cc1);
     }
 }

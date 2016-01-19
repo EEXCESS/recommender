@@ -22,11 +22,11 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 package eu.eexcess.federatedrecommender.domaindetection.wordnet;
 
-import java.util.Map;
-
-import net.sf.extjwnl.data.Synset;
 import at.knowcenter.ie.Annotation;
 import eu.eexcess.federatedrecommender.domaindetection.probing.Domain;
+import net.sf.extjwnl.data.Synset;
+
+import java.util.Map;
 
 /**
  * 

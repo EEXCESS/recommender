@@ -1,18 +1,17 @@
 package eu.eexcess.federatedrecommender.decomposer;
 
+import eu.eexcess.config.FederatedRecommenderConfiguration;
+import eu.eexcess.dataformats.userprofile.ContextKeyword;
+import eu.eexcess.dataformats.userprofile.SecureUserProfileEvaluation;
+import eu.eexcess.federatedrecommender.utils.FederatedRecommenderException;
+import org.codehaus.jackson.map.ObjectMapper;
+import org.junit.Test;
+
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-
-import org.codehaus.jackson.map.ObjectMapper;
-import org.junit.Test;
-
-import eu.eexcess.config.FederatedRecommenderConfiguration;
-import eu.eexcess.dataformats.userprofile.ContextKeyword;
-import eu.eexcess.dataformats.userprofile.SecureUserProfileEvaluation;
-import eu.eexcess.federatedrecommender.utils.FederatedRecommenderException;
 
 public class DBPediaDecomposerTest {
 

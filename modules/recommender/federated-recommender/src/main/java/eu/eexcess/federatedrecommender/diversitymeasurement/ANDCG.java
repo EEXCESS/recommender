@@ -22,11 +22,11 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 package eu.eexcess.federatedrecommender.diversitymeasurement;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import eu.eexcess.dataformats.result.Result;
 import eu.eexcess.dataformats.result.ResultList;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * a-nDCG[1] diversity measurement

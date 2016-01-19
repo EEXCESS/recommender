@@ -22,13 +22,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 package eu.eexcess.federatedrecommender.picker;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-
 import eu.eexcess.dataformats.PartnerBadge;
 import eu.eexcess.dataformats.result.Result;
 import eu.eexcess.dataformats.result.ResultList;
@@ -36,6 +29,13 @@ import eu.eexcess.dataformats.userprofile.SecureUserProfile;
 import eu.eexcess.federatedrecommender.dataformats.PFRChronicle;
 import eu.eexcess.federatedrecommender.dataformats.PartnersFederatedRecommendations;
 import eu.eexcess.federatedrecommender.interfaces.PartnersFederatedRecommendationsPicker;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * First in First out picker implementation
@@ -45,11 +45,11 @@ import eu.eexcess.federatedrecommender.interfaces.PartnersFederatedRecommendatio
  */
 public class FiFoPicker extends PartnersFederatedRecommendationsPicker {
 
+    private static final Logger logger = Logger.getLogger(FiFoPicker.class.getName());
+
     public FiFoPicker() {
         super();
     }
-
-    private static final Logger logger = Logger.getLogger(FiFoPicker.class.getName());
 
     @Override
     public ResultList pickResults(PFRChronicle pFRChronicle, int numResults) {

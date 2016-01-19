@@ -22,51 +22,16 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 package eu.eexcess.federatedrecommender;
 
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.InputStream;
-import java.lang.reflect.Constructor;
-import java.lang.reflect.InvocationTargetException;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Set;
-import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-
-import javax.ws.rs.core.MediaType;
-
 import com.sun.jersey.api.client.Client;
 import com.sun.jersey.api.client.ClientHandlerException;
 import com.sun.jersey.api.client.UniformInterfaceException;
 import com.sun.jersey.api.client.WebResource;
-
 import eu.eexcess.config.FederatedRecommenderConfiguration;
 import eu.eexcess.dataformats.PartnerBadge;
 import eu.eexcess.dataformats.PartnerBadgeStats;
 import eu.eexcess.dataformats.PartnerDomain;
 import eu.eexcess.dataformats.RecommenderStats;
-import eu.eexcess.dataformats.result.DocumentBadge;
-import eu.eexcess.dataformats.result.DocumentBadgeList;
-import eu.eexcess.dataformats.result.DocumentBadgePredicate;
-import eu.eexcess.dataformats.result.PartnerResponseState;
-import eu.eexcess.dataformats.result.ResultList;
-import eu.eexcess.dataformats.result.ResultStats;
+import eu.eexcess.dataformats.result.*;
 import eu.eexcess.dataformats.userprofile.SecureUserProfile;
 import eu.eexcess.dataformats.userprofile.SecureUserProfileEvaluation;
 import eu.eexcess.federatedrecommender.dataformats.PartnersFederatedRecommendations;
@@ -82,9 +47,23 @@ import eu.eexcess.federatedrecommender.utils.FederatedRecommenderException;
 import eu.eexcess.sqlite.Database;
 import eu.eexcess.sqlite.DatabaseQueryStats;
 
+import javax.ws.rs.core.MediaType;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.*;
+import java.util.Map.Entry;
+import java.util.concurrent.*;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
 /**
  * FederatedRecommenderCore (Singleton)
- * 
  */
 public class FederatedRecommenderCore implements ProbeResultChanged {
 
@@ -117,8 +96,8 @@ public class FederatedRecommenderCore implements ProbeResultChanged {
             LOGGER.info("activating partner domaindetection since [" + domainSelectorName + "] is requested to be applied");
 
             int numRandomPhrases = 50, numConsideringPartnerResults = 10;
-            partnersDomainsDetectors = new AsyncPartnerDomainsProbeMonitor(new File(this.federatedRecConfiguration.getWordnetPath()), new File(
-                    this.federatedRecConfiguration.getWordnetDomainFilePath()), numRandomPhrases, numConsideringPartnerResults, PARTNERPROBINGTIMEOUT);
+            partnersDomainsDetectors = new AsyncPartnerDomainsProbeMonitor(new File(this.federatedRecConfiguration.getWordnetPath()),
+                    new File(this.federatedRecConfiguration.getWordnetDomainFilePath()), numRandomPhrases, numConsideringPartnerResults, PARTNERPROBINGTIMEOUT);
             partnersDomainsDetectors.setCallback(this);
         } else {
             LOGGER.info("refused to activate partner domaindetection since [" + domainSelectorName + "] is not requested to be applied");
@@ -126,36 +105,13 @@ public class FederatedRecommenderCore implements ProbeResultChanged {
     }
 
     /**
-     * returns the registered partners in the system
-     * 
-     * @return
-     */
-    public PartnerRegister getPartnerRegister() {
-        synchronized (partnerRegister) {
-            return partnerRegister;
-        }
-    }
-
-    /**
-     * adds a partner to the system
-     * 
-     * @param badge
-     */
-    public void addPartner(PartnerBadge badge) {
-        synchronized (partnerRegister) {
-            partnerRegister.addPartner(badge);
-        }
-    }
-
-    /**
      * returns the instance of the {@link FederatedRecommenderCore} has to be
      * lazy caused by the configuration by now
-     * 
+     *
      * @return
      * @throws FederatedRecommenderException
      */
-    public static FederatedRecommenderCore getInstance(FederatedRecommenderConfiguration federatedRecommenderConfiguration)
-            throws FederatedRecommenderException {
+    public static FederatedRecommenderCore getInstance(FederatedRecommenderConfiguration federatedRecommenderConfiguration) throws FederatedRecommenderException {
         if (instance == null) {
             synchronized (FederatedRecommenderCore.class) {
                 // Double check
@@ -168,10 +124,32 @@ public class FederatedRecommenderCore implements ProbeResultChanged {
     }
 
     /**
+     * returns the registered partners in the system
+     *
+     * @return
+     */
+    public PartnerRegister getPartnerRegister() {
+        synchronized (partnerRegister) {
+            return partnerRegister;
+        }
+    }
+
+    /**
+     * adds a partner to the system
+     *
+     * @param badge
+     */
+    public void addPartner(PartnerBadge badge) {
+        synchronized (partnerRegister) {
+            partnerRegister.addPartner(badge);
+        }
+    }
+
+    /**
      * returns the rcommendations for all registered partners as
      * {@link PartnersFederatedRecommendations} object (containing a Hashmap
      * with the partner as key and the data as value)
-     * 
+     *
      * @param secureUserProfile
      * @return
      */
@@ -186,8 +164,7 @@ public class FederatedRecommenderCore implements ProbeResultChanged {
                 final Client tmpClient = partnerRegister.getClient(partner.getSystemId());
 
                 Future<ResultList> future = threadPool.submit(new Callable<ResultList>() {
-                    @Override
-                    public ResultList call() {
+                    @Override public ResultList call() {
                         long startTime = System.currentTimeMillis();
                         ResultList resultList = new ResultList();
                         if (tmpClient != null) {
@@ -254,15 +231,14 @@ public class FederatedRecommenderCore implements ProbeResultChanged {
         LOGGER.log(Level.SEVERE, msg, e);
     }
 
-    private long reportTimeOutOfPartner(final PartnersFederatedRecommendations partnersFederatedResults, long timeout,
-            Entry<PartnerBadge, Future<ResultList>> entry, long startT, TimeoutException e) {
+    private long reportTimeOutOfPartner(final PartnersFederatedRecommendations partnersFederatedResults, long timeout, Entry<PartnerBadge, Future<ResultList>> entry, long startT,
+            TimeoutException e) {
         entry.getKey().getShortTimeStats().failedRequestCount++;
         entry.getKey().getShortTimeStats().failedRequestTimeoutCount++;
         entry.getValue().cancel(true);
 
         timeout -= System.currentTimeMillis() - startT;
-        String msg = "Waited too long for partner system '" + entry.getKey().getSystemId() + "' to respond "
-                + (federatedRecConfiguration.getPartnersTimeout() - timeout) + " ms ";
+        String msg = "Waited too long for partner system '" + entry.getKey().getSystemId() + "' to respond " + (federatedRecConfiguration.getPartnersTimeout() - timeout) + " ms ";
         ResultList rL = new ResultList();
         PartnerResponseState responseState = new PartnerResponseState();
         responseState.errorMessage = msg;
@@ -276,11 +252,11 @@ public class FederatedRecommenderCore implements ProbeResultChanged {
 
     /**
      * main function to generate a federated recommendation
-     * 
+     *
      * @return
-     * @throws FederatedRecommenderException 
+     * @throws FederatedRecommenderException
      */
-    public ResultList generateFederatedRecommendation(SecureUserProfile secureUserProfile) throws FileNotFoundException, FederatedRecommenderException {
+    public ResultList generateFederatedRecommendation(SecureUserProfile secureUserProfile) throws FederatedRecommenderException {
         ResultList resultList = null;
         SecureUserProfile secureUserProfileTmp = secureUserProfile;
         if (federatedRecConfiguration.getSourceSelectors() != null) {
@@ -297,20 +273,22 @@ public class FederatedRecommenderCore implements ProbeResultChanged {
         return resultList;
 
     }
+
     /**
-     *returns the name of the picker, if the picker can not be found or loaded it returns 
+     * returns the name of the picker, if the picker can not be found or loaded it returns
+     *
      * @param secureUserProfile
      * @return
      */
     private String getPickerName(SecureUserProfile secureUserProfile) {
-			if(secureUserProfile.getPickerName()!=null && !secureUserProfile.getPickerName().isEmpty())
-				return secureUserProfile.getPickerName();
-		return this.federatedRecConfiguration.getDefaultPickerName();
-	}
+        if (secureUserProfile.getPickerName() != null && !secureUserProfile.getPickerName().isEmpty())
+            return secureUserProfile.getPickerName();
+        return this.federatedRecConfiguration.getDefaultPickerName();
+    }
 
-	/**
+    /**
      * Distributes the documents to each of the
-     * 
+     *
      * @param documents
      * @return
      */
@@ -320,8 +298,7 @@ public class FederatedRecommenderCore implements ProbeResultChanged {
             final Client tmpClient = partnerRegister.getClient(partner.getSystemId());
             DocumentBadgeList currentDocs = filterDocuments(documents, (DocumentBadge document) -> partner.getSystemId().equals(document.provider));
             Future<DocumentBadgeList> future = threadPool.submit(new Callable<DocumentBadgeList>() {
-                @Override
-                public DocumentBadgeList call() throws Exception {
+                @Override public DocumentBadgeList call() throws Exception {
                     return getDocsResult(partner, tmpClient, currentDocs);
                 }
 
@@ -331,8 +308,8 @@ public class FederatedRecommenderCore implements ProbeResultChanged {
                 private DocumentBadgeList getDocsResult(PartnerBadge partner, Client client, DocumentBadgeList currentDocs) {
                     DocumentBadgeList docList = getPartnerDetailsResult(partner, client, currentDocs);
                     client.destroy();
-                    if(docList.documentBadges.isEmpty())
-                    	return currentDocs;
+                    if (docList.documentBadges.isEmpty())
+                        return currentDocs;
                     return docList;
                 }
             });
@@ -354,12 +331,11 @@ public class FederatedRecommenderCore implements ProbeResultChanged {
 
     /**
      * calls the given query expansion algorithm
-     * 
+     *
      * @param userProfile
      * @return
      */
-    @SuppressWarnings("unchecked")
-    public SecureUserProfile addQueryExpansionTerms(SecureUserProfileEvaluation userProfile, String qEClass) {
+    @SuppressWarnings("unchecked") public SecureUserProfile addQueryExpansionTerms(SecureUserProfileEvaluation userProfile, String qEClass) {
         SecureUserProfileDecomposer<SecureUserProfile, SecureUserProfile> sUPDecomposer = null;
         try {
             sUPDecomposer = (SecureUserProfileDecomposer<SecureUserProfile, SecureUserProfile>) Class.forName(qEClass).newInstance();
@@ -376,11 +352,9 @@ public class FederatedRecommenderCore implements ProbeResultChanged {
      * Performs partner source selection according to the given classes and
      * their order. Multiple identical selectors are allowed but instantiated
      * only once.
-     * 
+     *
      * @param userProfile
-     * 
-     * @param sourceSelectorClassName
-     *            class names of source selectors to be applied in same order
+     * @param selectorsClassNames class names of source selectors to be applied in same order
      * @return same userProfile but with changed partner list
      */
     public SecureUserProfile sourceSelection(SecureUserProfile userProfile, List<String> selectorsClassNames) {
@@ -390,15 +364,15 @@ public class FederatedRecommenderCore implements ProbeResultChanged {
         }
 
         SecureUserProfile lastEvaluatedProfile = userProfile;
-        LOGGER.log(Level.INFO,"userprofile ageRange" + userProfile.getAgeRange());
-   
+        LOGGER.log(Level.INFO, "userprofile ageRange" + userProfile.getAgeRange());
+
         for (String sourceSelectorClassName : selectorsClassNames) {
-        	
+
             PartnerSelector sourceSelector = (PartnerSelector) statelessClassInstances.get(sourceSelectorClassName);
             if (null == sourceSelector) {
                 LOGGER.info("failed to find requested source selector [" + sourceSelectorClassName + "]: ignoring source selection");
             } else {
-                LOGGER.info("sourceSelector ["+ sourceSelectorClassName +"] selected");
+                LOGGER.info("sourceSelector [" + sourceSelectorClassName + "] selected");
                 lastEvaluatedProfile = sourceSelector.sourceSelect(lastEvaluatedProfile, getPartnerRegister().getPartners());
             }
         }
@@ -407,7 +381,7 @@ public class FederatedRecommenderCore implements ProbeResultChanged {
 
     /**
      * returns the statistics of the federated recommender
-     * 
+     *
      * @return
      */
     public RecommenderStats getRecommenderStats() {
@@ -417,7 +391,7 @@ public class FederatedRecommenderCore implements ProbeResultChanged {
 
     /**
      * removes partners from the partner register
-     * 
+     *
      * @param badge
      */
     public void unregisterPartner(PartnerBadge badge) {
@@ -483,8 +457,7 @@ public class FederatedRecommenderCore implements ProbeResultChanged {
             LOGGER.log(Level.INFO, "Could not write into query statistics database");
     }
 
-    private String writeRequestStatsToDb(Database<DatabaseQueryStats> db, PartnerBadge partner, PartnerBadgeStats longStats, PartnerBadgeStats shortStats,
-            String dbErrorMsg) {
+    private String writeRequestStatsToDb(Database<DatabaseQueryStats> db, PartnerBadge partner, PartnerBadgeStats longStats, PartnerBadgeStats shortStats, String dbErrorMsg) {
         PreparedStatement updateS = db.getPreparedUpdateStatement(DatabaseQueryStats.REQUESTLOG);
         // Database Entry Style
         // ('SYSTEM_ID','REQUESTCOUNT','FAILEDREQUESTCOUNT','FAILEDREQUESTTIMEOUTCOUNT')
@@ -513,9 +486,8 @@ public class FederatedRecommenderCore implements ProbeResultChanged {
      * tries to get the old statistics for this partner from the database.
      * Adding a new partner also triggers domain detection if the respective
      * partner does not explicitly define domains.
-     * 
-     * @param badge
-     *            partner information
+     *
+     * @param badge partner information
      * @return an informative human readable message
      */
     public String registerPartner(PartnerBadge badge) {
@@ -573,18 +545,16 @@ public class FederatedRecommenderCore implements ProbeResultChanged {
     /**
      * Reads domain(s) information of the respective partner from database and
      * restores it back to {@link PartnerBadge}.
-     * 
-     * @param partnerConfig
-     *            supplies the {@link PartnerBadge#getSystemId()} and where to
-     *            store {@link PartnerBadge#getDomainContent()} the restored
-     *            domain information
+     *
+     * @param partnerConfig supplies the {@link PartnerBadge#getSystemId()} and where to
+     *                      store {@link PartnerBadge#getDomainContent()} the restored
+     *                      domain information
      * @return false if no domain was restored from database
      */
     private boolean restoreDomainsFromDatabase(PartnerBadge partnerConfig) {
         synchronized (partnerRegister) {
             boolean hasDomainsRestored = false;
-            Database<PartnersDomainsTableQuery> db = new Database<PartnersDomainsTableQuery>(federatedRecConfiguration.getStatsLogDatabase(),
-                    PartnersDomainsTableQuery.values());
+            Database<PartnersDomainsTableQuery> db = new Database<PartnersDomainsTableQuery>(federatedRecConfiguration.getStatsLogDatabase(), PartnersDomainsTableQuery.values());
             PreparedStatement selectStatement = db.getPreparedSelectStatement(PartnersDomainsTableQuery.PARTNER_DOMAINS_TABLE_QUERY);
 
             try {
@@ -608,8 +578,8 @@ public class FederatedRecommenderCore implements ProbeResultChanged {
                     LOGGER.info("restored [" + restoredDomainsCount + "] domain(s) of partner [" + partnerConfig.getSystemId() + "] from database");
                 }
             } catch (SQLException sqe) {
-                LOGGER.log(Level.SEVERE, "failed to retrieve partner's domain information from database ["
-                        + PartnersDomainsTableQuery.PARTNER_DOMAINS_TABLE_QUERY.getInternName() + "]", sqe);
+                LOGGER.log(Level.SEVERE,
+                        "failed to retrieve partner's domain information from database [" + PartnersDomainsTableQuery.PARTNER_DOMAINS_TABLE_QUERY.getInternName() + "]", sqe);
             } finally {
                 try {
                     db.close();
@@ -624,7 +594,7 @@ public class FederatedRecommenderCore implements ProbeResultChanged {
     /**
      * gets the Partners Results and calls the given picker to aggregate results
      * between the partners result lists
-     * 
+     *
      * @param userProfile
      * @return
      * @throws FederatedRecommenderException
@@ -636,13 +606,13 @@ public class FederatedRecommenderCore implements ProbeResultChanged {
             Object newInstance = statelessClassInstances.get(pickerName);
             if (newInstance == null) {
                 Class<?> forName = Class.forName(pickerName);
-                if(forName==null)
-                	 throw new FederatedRecommenderException("Could not get Picker from Class: " + pickerName);
-				newInstance = forName.newInstance();
+                if (forName == null)
+                    throw new FederatedRecommenderException("Could not get Picker from Class: " + pickerName);
+                newInstance = forName.newInstance();
                 statelessClassInstances.put(pickerName, newInstance);
             }
             pFRPicker = (PartnersFederatedRecommendationsPicker) newInstance;
-        } catch (InstantiationException | IllegalAccessException | NullPointerException |ClassNotFoundException e) {
+        } catch (InstantiationException | IllegalAccessException | NullPointerException | ClassNotFoundException e) {
             LOGGER.log(Level.SEVERE, "Could not get Picker from Class: " + pickerName, e);
             throw new FederatedRecommenderException("Could not get Picker from Class: " + pickerName, e);
         }
@@ -665,8 +635,9 @@ public class FederatedRecommenderCore implements ProbeResultChanged {
         long timeToPickResults = end - start;
         recommenderStats.setAverageGlobalTime(timeToGetPartners);
         recommenderStats.setAverageAggregationTime(timeToPickResults);
-        LOGGER.log(Level.INFO, " Time to get " + resultList.results.size() + " Results from the Partners: " + timeToGetPartners
-                + "ms. Time to pick the best results: " + timeToPickResults + "ms");
+        LOGGER.log(Level.INFO,
+                " Time to get " + resultList.results.size() + " Results from the Partners: " + timeToGetPartners + "ms. Time to pick the best results: " + timeToPickResults
+                        + "ms");
         resultList.totalResults = resultList.results.size();
         resultList.provider = "federated";
         resultList.partnerResponseState = partnerResponseState;
@@ -676,14 +647,14 @@ public class FederatedRecommenderCore implements ProbeResultChanged {
     /**
      * checks which partners are selected and if there is an partner access key
      * for that partner if one is needed
-     * 
+     *
      * @param secureUserProfile
      * @param partner
      * @return true/false
      */
     private boolean checkUserSelectedPartners(SecureUserProfile secureUserProfile, PartnerBadge partner) {
         if (secureUserProfile.getPartnerList() != null) { // if the list is null
-                                                          // then
+            // then
             // we query every
             // partner
             if (!secureUserProfile.getPartnerList().isEmpty()) {
@@ -692,28 +663,27 @@ public class FederatedRecommenderCore implements ProbeResultChanged {
                     withKey = true;
                 if (!withKey)
                     for (PartnerBadge uBadge : secureUserProfile.getPartnerList()) {
-                        if (partner.getSystemId()!=null && uBadge.getSystemId()!=null &&uBadge.getSystemId().equals(partner.getSystemId()))
+                        if (partner.getSystemId() != null && uBadge.getSystemId() != null && uBadge.getSystemId().equals(partner.getSystemId()))
                             return true;
                     }
                 else
                     for (PartnerBadge uBadge : secureUserProfile.getProtectedPartnerList()) {
-                        if (partner.getSystemId()!=null && uBadge.getSystemId()!=null && uBadge.getPartnerKey() != null && !uBadge.getPartnerKey().isEmpty() && partner.getPartnerKey().equals(uBadge.getPartnerKey())
-                                && uBadge.getSystemId().equals(partner.getSystemId()))
+                        if (partner.getSystemId() != null && uBadge.getSystemId() != null && uBadge.getPartnerKey() != null && !uBadge.getPartnerKey().isEmpty() && partner
+                                .getPartnerKey().equals(uBadge.getPartnerKey()) && uBadge.getSystemId().equals(partner.getSystemId()))
                             return true;
                     }
-            } else
-            {
+            } else {
                 return false;
             }
         } else
             return true;
-        
+
         return false;
     }
 
     /**
      * Helper function to filter the documents
-     * 
+     *
      * @param documents
      * @param predicate
      * @return
@@ -757,16 +727,13 @@ public class FederatedRecommenderCore implements ProbeResultChanged {
 
     /**
      * Stores partner domains mapping to {@link #partnerRegister} and database.
-     * 
-     * @param updatedProbes
-     *            the latest known {@link PartnerBadge} to {@link PartnerDomain}
-     *            mapping.
+     *
+     * @param updatedProbes the latest known {@link PartnerBadge} to {@link PartnerDomain}
+     *                      mapping.
      */
-    @Override
-    public void onProbeResultsChanged(Map<String, Set<PartnerDomain>> updatedProbes) {
+    @Override public void onProbeResultsChanged(Map<String, Set<PartnerDomain>> updatedProbes) {
         synchronized (partnerRegister) {
-            Database<PartnersDomainsTableQuery> db = new Database<PartnersDomainsTableQuery>(federatedRecConfiguration.getStatsLogDatabase(),
-                    PartnersDomainsTableQuery.values());
+            Database<PartnersDomainsTableQuery> db = new Database<PartnersDomainsTableQuery>(federatedRecConfiguration.getStatsLogDatabase(), PartnersDomainsTableQuery.values());
             PreparedStatement deleteStatement = db.getPreparedDeleStatement(PartnersDomainsTableQuery.PARTNER_DOMAINS_TABLE_QUERY);
             PreparedStatement insertStatement = db.getPreparedInsertStatement(PartnersDomainsTableQuery.PARTNER_DOMAINS_TABLE_QUERY);
 
@@ -801,18 +768,17 @@ public class FederatedRecommenderCore implements ProbeResultChanged {
                                 int numFailed = 0;
                                 for (Integer resultStatus : insertStatement.executeBatch()) {
                                     if (PreparedStatement.EXECUTE_FAILED == resultStatus) {
-                                        LOGGER.warning("failed to execute batch [" + index + "/" + partnerDomains.size() + "] of partner ["
-                                                + partner.getSystemId() + "]");
+                                        LOGGER.warning("failed to execute batch [" + index + "/" + partnerDomains.size() + "] of partner [" + partner.getSystemId() + "]");
                                         numFailed++;
                                     }
                                     index++;
                                 }
-                                LOGGER.info("stored [" + (partnerDomains.size() - numFailed) + "/" + partnerDomains.size() + "] domains of partner ["
-                                        + partner.getSystemId() + "] to database");
+                                LOGGER.info("stored [" + (partnerDomains.size() - numFailed) + "/" + partnerDomains.size() + "] domains of partner [" + partner.getSystemId()
+                                        + "] to database");
 
                             } catch (SQLException e) {
-                                LOGGER.log(Level.SEVERE, "failed storing partners domains do database ["
-                                        + PartnersDomainsTableQuery.PARTNER_DOMAINS_TABLE_QUERY.getInternName() + "]", e);
+                                LOGGER.log(Level.SEVERE,
+                                        "failed storing partners domains do database [" + PartnersDomainsTableQuery.PARTNER_DOMAINS_TABLE_QUERY.getInternName() + "]", e);
                             }
                         } else {
                             LOGGER.log(Level.WARNING, "failed retrieving an expected prepared statement of [" + PartnersDomainsTableQuery.class.getName() + "]");
@@ -859,7 +825,7 @@ public class FederatedRecommenderCore implements ProbeResultChanged {
 
     /**
      * Returns the partner favIcon as input stream out of the favIcon cache
-     * 
+     *
      * @param partnerId
      * @return {@link InputStream}
      */

@@ -20,7 +20,8 @@
   "fieldNameWhere": "COUNTRY",
   "fieldNameWhat": "TYPE",
   "fieldNameFrom": "YEAR",
-  "specialFieldQueryGeneratorClass": "eu.eexcess.europeana.recommender.EuropeanaSpecialFields"
+  "specialFieldQueryGeneratorClass": "eu.eexcess.europeana.recommender.EuropeanaSpecialFields",
+  "isQueryExpansionEnabled": "true"
 }
 
 

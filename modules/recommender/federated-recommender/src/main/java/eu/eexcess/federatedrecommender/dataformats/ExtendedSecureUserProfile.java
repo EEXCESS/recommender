@@ -22,12 +22,12 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 package eu.eexcess.federatedrecommender.dataformats;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import eu.eexcess.dataformats.userprofile.SecureUserProfile;
 import eu.eexcess.federatedrecommender.utils.esuputils.ESUPPair;
 import eu.eexcess.federatedrecommender.utils.esuputils.ESUPSource;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class ExtendedSecureUserProfile extends SecureUserProfile {
     private static final long serialVersionUID = -4983458034155356055L;

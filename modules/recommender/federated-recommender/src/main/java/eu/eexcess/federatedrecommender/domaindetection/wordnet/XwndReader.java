@@ -22,22 +22,16 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 package eu.eexcess.federatedrecommender.domaindetection.wordnet;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.FileReader;
-import java.io.IOException;
-import java.util.Map;
-import java.util.Set;
-import java.util.TreeSet;
-
+import at.knowcenter.util.io.BinaryInputStream;
+import at.knowcenter.util.io.BinaryOutputStream;
 import net.sf.extjwnl.data.POS;
-
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.LineIterator;
 
-import at.knowcenter.util.io.BinaryInputStream;
-import at.knowcenter.util.io.BinaryOutputStream;
+import java.io.*;
+import java.util.Map;
+import java.util.Set;
+import java.util.TreeSet;
 
 class XwndReader {
     private Map<String, Set<DomainAssignment>> synsetToDomains;

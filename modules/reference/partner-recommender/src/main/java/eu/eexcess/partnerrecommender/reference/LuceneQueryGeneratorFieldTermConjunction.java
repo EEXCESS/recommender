@@ -4,6 +4,7 @@ import eu.eexcess.dataformats.result.DocumentBadge;
 import eu.eexcess.dataformats.userprofile.ContextKeyword;
 import eu.eexcess.dataformats.userprofile.ExpansionType;
 import eu.eexcess.dataformats.userprofile.SecureUserProfile;
+import eu.eexcess.dataformats.userprofile.SpecialFieldsEum;
 import eu.eexcess.partnerrecommender.api.PartnerConfigurationCache;
 import eu.eexcess.partnerrecommender.api.QueryGeneratorApi;
 
@@ -33,7 +34,7 @@ public class LuceneQueryGeneratorFieldTermConjunction implements QueryGeneratorA
         Pattern replace = Pattern.compile(REGEXP);
 
         for (ContextKeyword key : userProfile.getContextKeywords()) {
-            if (key.getType() == null) {
+            if (key.getType() == null || key.getType().equals(SpecialFieldsEum.Misc)) {
                 String keyword = key.getText();
                 Matcher matcher2 = replace.matcher(keyword);
                 if (matcher2.find()) {

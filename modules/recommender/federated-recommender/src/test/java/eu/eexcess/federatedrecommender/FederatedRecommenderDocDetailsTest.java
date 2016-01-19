@@ -1,14 +1,13 @@
 package eu.eexcess.federatedrecommender;
 
-import java.util.List;
-
-import org.junit.Test;
-
 import eu.eexcess.config.FederatedRecommenderConfiguration;
 import eu.eexcess.dataformats.PartnerBadge;
 import eu.eexcess.dataformats.result.DocumentBadge;
 import eu.eexcess.dataformats.result.DocumentBadgeList;
 import eu.eexcess.federatedrecommender.utils.FederatedRecommenderException;
+import org.junit.Test;
+
+import java.util.List;
 
 public class FederatedRecommenderDocDetailsTest {
 

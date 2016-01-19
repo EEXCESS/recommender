@@ -1,21 +1,19 @@
 package eu.eexcess.dataformats;
 
-import static org.junit.Assert.assertTrue;
-
 import org.junit.Test;
+
+import static org.junit.Assert.assertTrue;
 
 public class PartnerBadgeTest {
 
-    @Test
-    public void testUpdatePartnerResponseTimeSimple() throws Exception {
+    @Test public void testUpdatePartnerResponseTimeSimple() throws Exception {
         PartnerBadge partnerBadge = new PartnerBadge();
         long respTime = 3000;
         partnerBadge.updatePartnerResponseTime(respTime);
         assertTrue(Long.compare(respTime, partnerBadge.getShortTimeResponseTime()) == 0);
     }
 
-    @Test
-    public void testUpdatePartnerResponseTime2Times() throws Exception {
+    @Test public void testUpdatePartnerResponseTime2Times() throws Exception {
         PartnerBadge partnerBadge = new PartnerBadge();
         long respTime = 3000;
         long respTime2 = 0;
@@ -24,8 +22,7 @@ public class PartnerBadgeTest {
         assertTrue(Long.compare((respTime + respTime2) / 2, partnerBadge.getShortTimeResponseTime()) == 0);
     }
 
-    @Test
-    public void testUpdatePartnerResponseTime3Times() throws Exception {
+    @Test public void testUpdatePartnerResponseTime3Times() throws Exception {
         PartnerBadge partnerBadge = new PartnerBadge();
         long respTime = 3000;
         long respTime2 = 0;

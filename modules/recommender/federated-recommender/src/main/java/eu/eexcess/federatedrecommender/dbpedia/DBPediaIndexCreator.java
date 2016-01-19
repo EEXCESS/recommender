@@ -22,13 +22,13 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 package eu.eexcess.federatedrecommender.dbpedia;
 
+import eu.eexcess.config.FederatedRecommenderConfiguration;
+import eu.eexcess.federatedrecommender.utils.FederatedRecommenderException;
+
 import java.util.Arrays;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-
-import eu.eexcess.config.FederatedRecommenderConfiguration;
-import eu.eexcess.federatedrecommender.utils.FederatedRecommenderException;
 
 /**
  * Class to create the solrIndex with the given Dbpedia mapping files at the

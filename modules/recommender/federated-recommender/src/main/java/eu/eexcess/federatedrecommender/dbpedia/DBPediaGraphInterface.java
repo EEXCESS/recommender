@@ -1,9 +1,9 @@
 package eu.eexcess.federatedrecommender.dbpedia;
 
-import java.util.List;
-
 import eu.eexcess.dataformats.userprofile.ContextKeyword;
 import eu.eexcess.federatedrecommender.utils.FederatedRecommenderException;
+
+import java.util.List;
 
 public interface  DBPediaGraphInterface<E>  {
 
@@ -12,6 +12,6 @@ public interface  DBPediaGraphInterface<E>  {
 	 * @throws FederatedRecommenderException 
 	 * 
 	 */
-	public E getGraphFromKeywords(List<ContextKeyword> profileKeywords, List<String> keynodes,int hitsLimit, int depthLimit) throws FederatedRecommenderException;
+	E getGraphFromKeywords(List<ContextKeyword> profileKeywords, List<String> keynodes, int hitsLimit, int depthLimit) throws FederatedRecommenderException;
 
 }

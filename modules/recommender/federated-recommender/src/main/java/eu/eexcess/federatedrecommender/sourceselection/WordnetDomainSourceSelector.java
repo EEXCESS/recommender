@@ -20,17 +20,6 @@
 
 package eu.eexcess.federatedrecommender.sourceselection;
 
-import java.io.File;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.TreeMap;
-import java.util.TreeSet;
-import java.util.concurrent.atomic.AtomicInteger;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-
 import eu.eexcess.config.FederatedRecommenderConfiguration;
 import eu.eexcess.dataformats.PartnerBadge;
 import eu.eexcess.dataformats.PartnerDomain;
@@ -42,90 +31,34 @@ import eu.eexcess.federatedrecommender.domaindetection.probing.DomainDetectorExc
 import eu.eexcess.federatedrecommender.domaindetection.wordnet.WordnetDomainsDetector;
 import eu.eexcess.federatedrecommender.interfaces.PartnerSelector;
 
+import java.io.File;
+import java.util.*;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
 public class WordnetDomainSourceSelector implements PartnerSelector {
 
-    /**
-     * @author Raoul Rubien
-     *
-     */
-    protected static class DomainWeight implements Comparable<DomainWeight> {
-        public Double weight;
-        public String name;
-
-        public DomainWeight(String name, Double weight) {
-            this.name = name;
-            this.weight = weight;
-        }
-
-        @Override
-        public int compareTo(DomainWeight o) {
-            if (equals(o)) {
-                return 0;
-            } else if (this.weight < o.weight) {
-                return -1;
-            } else if (this.weight > o.weight) {
-                return 1;
-            }
-            return this.name.compareTo(o.name);
-        }
-
-        @Override
-        public int hashCode() {
-            final int prime = 31;
-            int result = 1;
-            result = prime * result + ((name == null) ? 0 : name.hashCode());
-            result = prime * result + ((weight == null) ? 0 : weight.hashCode());
-            return result;
-        }
-
-        @Override
-        public boolean equals(Object obj) {
-            if (this == obj)
-                return true;
-            if (obj == null)
-                return false;
-            if (getClass() != obj.getClass())
-                return false;
-            DomainWeight other = (DomainWeight) obj;
-            if (name == null) {
-                if (other.name != null)
-                    return false;
-            } else if (!name.equals(other.name))
-                return false;
-            if (weight == null) {
-                if (other.weight != null)
-                    return false;
-            } else if (!weight.equals(other.weight))
-                return false;
-            return true;
-        }
-
-    }
-
+    private static final Logger LOGGER = Logger.getLogger(WordnetDomainSourceSelector.class.getName());
     /**
      * A map of domain matching partners mapping to a descent sorted set of
      * {@link DomainWeight}s
      */
     protected Map<PartnerBadge, TreeSet<DomainWeight>> selectedPartners = new HashMap<PartnerBadge, TreeSet<DomainWeight>>();
-
-    private static final Logger LOGGER = Logger.getLogger(WordnetDomainSourceSelector.class.getName());
-
     private DomainDetector domainDetector = null;
-
     /**
      * A descent value-sorted map of domains detected in
      * <code>ecureUserProfile</code> at one a call of
      * {@link #sourceSelect(SecureUserProfile, List)} and how many times
      */
     private Map<String, AtomicInteger> seenKeywordsDomains = new TreeMap<String, AtomicInteger>();
-
     private boolean isKeywordGroupingEnabled = true;
 
     /**
      * Constructs an intance of this class and a needed instance interfacing
      * {@link DomainDetector}. This instance,being rather consuming, can later
      * be exposed for other usage.
-     * 
+     *
      * @param configuration
      *            containing information where to find resources needed for the
      *            domain detector
@@ -172,7 +105,7 @@ public class WordnetDomainSourceSelector implements PartnerSelector {
     /**
      * Define whether domain detection should be performed on each keyword
      * separately or on the resulting phrase of joined keywords.
-     * 
+     *
      * @param enable
      *            <p>
      *            true - join keywords before domain detection
@@ -186,7 +119,7 @@ public class WordnetDomainSourceSelector implements PartnerSelector {
     /**
      * Exposes the currently referenced domain detector instance. Domain
      * detection is synchronized on the returned instance.
-     * 
+     *
      * @return the referenced domain detector instance
      */
     public synchronized DomainDetector getDomainDetector() {
@@ -196,7 +129,7 @@ public class WordnetDomainSourceSelector implements PartnerSelector {
     /**
      * Picks partners from {@link #selectedPartners} and adds their references
      * the partner list.
-     * 
+     *
      * @param partnerList
      *            list where selected partners are added to
      */
@@ -214,7 +147,7 @@ public class WordnetDomainSourceSelector implements PartnerSelector {
      * Matches parter domains with detected domains of context keywords.
      * Considers the amount of domain occurrences and normalizes their weight in
      * {@link #selectedPartners}.
-     * 
+     *
      * @param contextKeywords
      *            context keywords
      * @param partners
@@ -279,7 +212,7 @@ public class WordnetDomainSourceSelector implements PartnerSelector {
      * {@link #isKeywordGroupingEnabled} is true the keywords are joined
      * (separated by " ") altogether into the fist list entry. Resulted keywords
      * are lower case.
-     * 
+     *
      * @param contextKeywords
      * @return
      */
@@ -300,5 +233,59 @@ public class WordnetDomainSourceSelector implements PartnerSelector {
             }
         }
         return keywords;
+    }
+
+    /**
+     * @author Raoul Rubien
+     */
+    protected static class DomainWeight implements Comparable<DomainWeight> {
+        public Double weight;
+        public String name;
+
+        public DomainWeight(String name, Double weight) {
+            this.name = name;
+            this.weight = weight;
+        }
+
+        @Override public int compareTo(DomainWeight o) {
+            if (equals(o)) {
+                return 0;
+            } else if (this.weight < o.weight) {
+                return -1;
+            } else if (this.weight > o.weight) {
+                return 1;
+            }
+            return this.name.compareTo(o.name);
+        }
+
+        @Override public int hashCode() {
+            final int prime = 31;
+            int result = 1;
+            result = prime * result + ((name == null) ? 0 : name.hashCode());
+            result = prime * result + ((weight == null) ? 0 : weight.hashCode());
+            return result;
+        }
+
+        @Override public boolean equals(Object obj) {
+            if (this == obj)
+                return true;
+            if (obj == null)
+                return false;
+            if (getClass() != obj.getClass())
+                return false;
+            DomainWeight other = (DomainWeight) obj;
+            if (name == null) {
+                if (other.name != null)
+                    return false;
+            } else if (!name.equals(other.name))
+                return false;
+            if (weight == null) {
+                if (other.weight != null)
+                    return false;
+            } else if (!weight.equals(other.weight))
+                return false;
+            return true;
+        }
+
     }
 }

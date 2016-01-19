@@ -22,36 +22,12 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 package eu.eexcess.federatedrecommender.domaindetection;
 
-import java.io.File;
-import java.io.FileOutputStream;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Set;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-
-import javax.ws.rs.core.MediaType;
-
-import weka.core.Attribute;
-import weka.core.FastVector;
-import weka.core.Instance;
-import weka.core.Instances;
-import weka.core.converters.ArffSaver;
 import at.knowcenter.ie.Language;
 import at.knowcenter.ie.languagedetection.LanguageDetector;
 import at.knowcenter.util.term.TermSet;
 import at.knowcenter.util.term.TypedTerm;
-
 import com.sun.jersey.api.client.Client;
 import com.sun.jersey.api.client.WebResource;
-
 import eu.eexcess.dataformats.PartnerBadge;
 import eu.eexcess.dataformats.result.Result;
 import eu.eexcess.dataformats.result.ResultList;
@@ -61,6 +37,19 @@ import eu.eexcess.federatedrecommender.domaindetection.probing.Domain;
 import eu.eexcess.federatedrecommender.domaindetection.probing.DomainDetector;
 import eu.eexcess.federatedrecommender.domaindetection.wordnet.WordnetDomainsDetector;
 import eu.eexcess.federatedrecommender.registration.PartnerRegister;
+import weka.core.Attribute;
+import weka.core.FastVector;
+import weka.core.Instance;
+import weka.core.Instances;
+import weka.core.converters.ArffSaver;
+
+import javax.ws.rs.core.MediaType;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.util.*;
+import java.util.Map.Entry;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * 
@@ -180,6 +169,11 @@ public class PartnerToDomainTest {
         // });
         // partnerRegister.addPartner(badge5);
         // }
+    }
+
+    public static void main(String[] args) throws Exception {
+        PartnerToDomainTest parnerToDomainTest = new PartnerToDomainTest();
+        parnerToDomainTest.test();
     }
 
     private ResultList getPartnerResult(PartnerBadge partner, SecureUserProfile secureUserProfile) {
@@ -313,10 +307,5 @@ public class PartnerToDomainTest {
         }
 
         // System.out.println(partnerToDomainToCount);
-    }
-
-    public static void main(String[] args) throws Exception {
-        PartnerToDomainTest parnerToDomainTest = new PartnerToDomainTest();
-        parnerToDomainTest.test();
     }
 }

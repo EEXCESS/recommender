@@ -20,6 +20,14 @@
 
 package eu.eexcess.federatedrecommender.domaindetection;
 
+import com.sun.jersey.api.client.Client;
+import eu.eexcess.dataformats.PartnerBadge;
+import eu.eexcess.dataformats.PartnerDomain;
+import eu.eexcess.federatedrecommender.domaindetection.AsyncPartnerDomainsProbe.ProbeDoneCallback;
+import eu.eexcess.federatedrecommender.domaindetection.probing.DomainDetector;
+import eu.eexcess.federatedrecommender.domaindetection.probing.PartnerDomainsProbe;
+import eu.eexcess.federatedrecommender.domaindetection.wordnet.WordnetDomainsDetector;
+
 import java.io.File;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -28,44 +36,24 @@ import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import com.sun.jersey.api.client.Client;
-
-import eu.eexcess.dataformats.PartnerBadge;
-import eu.eexcess.dataformats.PartnerDomain;
-import eu.eexcess.federatedrecommender.domaindetection.AsyncPartnerDomainsProbe.ProbeDoneCallback;
-import eu.eexcess.federatedrecommender.domaindetection.probing.DomainDetector;
-import eu.eexcess.federatedrecommender.domaindetection.probing.PartnerDomainsProbe;
-import eu.eexcess.federatedrecommender.domaindetection.wordnet.WordnetDomainsDetector;
-
 public class AsyncPartnerDomainsProbeMonitor implements ProbeDoneCallback {
 
-    public static interface ProbeResultChanged {
-        /**
-         * passes a copy of all available probes on eache change occurred
-         * 
-         * @param updatedProbes
-         *            all probes including changes
-         */
-        public void onProbeResultsChanged(Map<String, Set<PartnerDomain>> updatedProbes);
-    }
-
+    private static final Logger LOGGER = Logger.getLogger(AsyncPartnerDomainsProbeMonitor.class.getName());
+    protected Map<String, AsyncPartnerDomainsProbe> runningProbes = new HashMap<String, AsyncPartnerDomainsProbe>();
     private DomainDetector domainDetector = null;
     private PartnerDomainsProbe probeTemplate;
     private long probeTimeout = 0;
-    private static final Logger LOGGER = Logger.getLogger(AsyncPartnerDomainsProbeMonitor.class.getName());
-    protected Map<String, AsyncPartnerDomainsProbe> runningProbes = new HashMap<String, AsyncPartnerDomainsProbe>();
     private Map<String, Set<PartnerDomain>> partnersDomains = new HashMap<String, Set<PartnerDomain>>();
     private ProbeResultChanged onDomainsChangedCallback;
     private int considerNumPartnerResults;
     private int numRandomPhrases;
-
     /**
      * Since drawing random phrases out of {@link WordnetDomainsDetector} is
      * very time expensive, the initialization of the part requesting random
      * words, {@link PartnerDomainsProbe}, is lazy. First call of
      * {@link #newAsyncPartnerDomainsProbe(PartnerBadge, Client)} may take
      * longer as expected.
-     * 
+     *
      * @param wordnetDir
      *            see {@link DomainDetector}
      * @param wordNetFile
@@ -183,11 +171,20 @@ public class AsyncPartnerDomainsProbeMonitor implements ProbeDoneCallback {
     /**
      * sets/unsets the one and only callback to be called on
      * {@link ProbeResultChanged#onProbeResultsChanged(Map)}
-     * 
+     *
      * @param callback
      *            if != null the new callback, else removes the callback
      */
     public void setCallback(ProbeResultChanged callback) {
         onDomainsChangedCallback = callback;
+    }
+
+    public interface ProbeResultChanged {
+        /**
+         * passes a copy of all available probes on eache change occurred
+         *
+         * @param updatedProbes all probes including changes
+         */
+        void onProbeResultsChanged(Map<String, Set<PartnerDomain>> updatedProbes);
     }
 }

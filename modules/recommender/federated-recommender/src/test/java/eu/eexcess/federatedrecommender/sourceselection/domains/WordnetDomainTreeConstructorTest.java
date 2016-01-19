@@ -20,25 +20,22 @@
 
 package eu.eexcess.federatedrecommender.sourceselection.domains;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-
-import java.io.File;
-import java.util.LinkedList;
-import java.util.List;
-
+import eu.eexcess.dataformats.PartnerDomain;
+import eu.eexcess.federatedrecommender.utils.tree.BaseTreeNode;
+import eu.eexcess.federatedrecommender.utils.tree.NodeInspector;
+import eu.eexcess.federatedrecommender.utils.tree.TreeNode;
+import eu.eexcess.federatedrecommender.utils.tree.ValueTreeNode;
 import org.codehaus.jackson.JsonParser;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.junit.Before;
 import org.junit.Test;
 
-import eu.eexcess.dataformats.PartnerDomain;
-import eu.eexcess.federatedrecommender.sourceselection.domains.DomainTreeConstructorBuilder;
-import eu.eexcess.federatedrecommender.sourceselection.domains.TreeConstructor;
-import eu.eexcess.federatedrecommender.utils.tree.BaseTreeNode;
-import eu.eexcess.federatedrecommender.utils.tree.NodeInspector;
-import eu.eexcess.federatedrecommender.utils.tree.TreeNode;
-import eu.eexcess.federatedrecommender.utils.tree.ValueTreeNode;
+import java.io.File;
+import java.util.LinkedList;
+import java.util.List;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 public class WordnetDomainTreeConstructorTest {
 
@@ -49,28 +46,6 @@ public class WordnetDomainTreeConstructorTest {
     @Before
     public void reset() {
         domainArtSeen = false;
-    }
-
-    /**
-     * 
-     * @author Raoul Rubien
-     *
-     */
-    private class TreeWeightAsserter implements NodeInspector {
-
-        @Override
-        public boolean invoke(TreeNode n) {
-            @SuppressWarnings("unchecked")
-            ValueTreeNode<Double> node = (ValueTreeNode<Double>) n;
-
-            if ("art".equals(node.getName())) {
-                assertEquals("expected value for node [art] is [PI]", new Double(3.141592653589793), node.getValue());
-                domainArtSeen = true;
-            } else {
-                assertEquals("unexpected value for node [" + node.getName() + "]", new Double(0.0), node.getValue());
-            }
-            return false;
-        }
     }
 
     @Test
@@ -94,24 +69,7 @@ public class WordnetDomainTreeConstructorTest {
         assertEquals(true, domainArtSeen);
     }
 
-    /**
-     * 
-     * @author Raoul Rubien
-     *
-     */
-    private class TreeDefaultWeightAsserter implements NodeInspector {
-
-        @Override
-        public boolean invoke(TreeNode n) {
-            @SuppressWarnings("unchecked")
-            ValueTreeNode<Double> node = (ValueTreeNode<Double>) n;
-            assertEquals(new Double(0.0), node.getValue());
-            return false;
-        }
-    }
-
-    @Test
-    public void create_new_tree_expect_defaut_weights_and_not_exceptional() {
+    @Test public void create_new_tree_expect_defaut_weights_and_not_exceptional() {
 
         ObjectMapper mapper = new ObjectMapper();
         mapper.configure(JsonParser.Feature.ALLOW_COMMENTS, true);
@@ -123,6 +81,40 @@ public class WordnetDomainTreeConstructorTest {
         } catch (Error e) {
             e.printStackTrace();
             assertTrue(false);
+        }
+    }
+
+    /**
+     *
+     * @author Raoul Rubien
+     *
+     */
+    private class TreeWeightAsserter implements NodeInspector {
+
+        @Override
+        public boolean invoke(TreeNode n) {
+            @SuppressWarnings("unchecked")
+            ValueTreeNode<Double> node = (ValueTreeNode<Double>) n;
+
+            if ("art".equals(node.getName())) {
+                assertEquals("expected value for node [art] is [PI]", new Double(3.141592653589793), node.getValue());
+                domainArtSeen = true;
+            } else {
+                assertEquals("unexpected value for node [" + node.getName() + "]", new Double(0.0), node.getValue());
+            }
+            return false;
+        }
+    }
+
+    /**
+     * @author Raoul Rubien
+     */
+    private class TreeDefaultWeightAsserter implements NodeInspector {
+
+        @Override public boolean invoke(TreeNode n) {
+            @SuppressWarnings("unchecked") ValueTreeNode<Double> node = (ValueTreeNode<Double>) n;
+            assertEquals(new Double(0.0), node.getValue());
+            return false;
         }
     }
 

@@ -53,7 +53,8 @@ public class OrQueryGeneratorFieldTermConjunction implements QueryGeneratorApi {
 
         for (ContextKeyword context : userProfile.getContextKeywords()) {
             if (context.getExpansion() != null && (context.getExpansion() == ExpansionType.PSEUDORELEVANCEWP || context.getExpansion() == ExpansionType.SERENDIPITY)) {
-                if (PartnerConfigurationCache.CONFIG.getPartnerConfiguration().isQueryExpansionEnabled()) {
+                if (PartnerConfigurationCache.CONFIG.getPartnerConfiguration().isQueryExpansionEnabled() != null && PartnerConfigurationCache.CONFIG.getPartnerConfiguration()
+                        .isQueryExpansionEnabled()) {
                     String keyword = context.getText();
                     Matcher matcher2 = replace.matcher(keyword);
                     keyword = matcher2.replaceAll(" AND ");

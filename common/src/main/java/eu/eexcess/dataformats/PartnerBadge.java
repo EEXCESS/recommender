@@ -15,6 +15,7 @@ limitations under the License.
 package eu.eexcess.dataformats;
 
 import eu.eexcess.dataformats.result.ResultStats;
+import eu.eexcess.dataformats.userprofile.FeatureVector;
 import org.codehaus.jackson.annotate.JsonIgnoreProperties;
 import org.codehaus.jackson.map.annotate.JsonSerialize;
 
@@ -26,11 +27,8 @@ import java.util.ArrayList;
 import java.util.Deque;
 import java.util.List;
 
-@XmlRootElement(name = "eexcess-partner-badge")
-@XmlAccessorType(XmlAccessType.FIELD)
-@JsonIgnoreProperties(ignoreUnknown = true)
-@JsonSerialize(include = JsonSerialize.Inclusion.NON_NULL)
-public class PartnerBadge implements Serializable {
+@XmlRootElement(name = "eexcess-partner-badge") @XmlAccessorType(XmlAccessType.FIELD) @JsonIgnoreProperties(ignoreUnknown = true) @JsonSerialize(include = JsonSerialize.Inclusion.NON_NULL) public class PartnerBadge
+        implements Serializable {
 
     private static final long serialVersionUID = -6411801334911587483L;
     public PartnerBadgeStats longTimeStats = new PartnerBadgeStats();
@@ -49,6 +47,9 @@ public class PartnerBadge implements Serializable {
     private Boolean isQueryExpansionEnabled;
     private Boolean isQuerySplittingEnabled;
     private String partnerKey;
+
+
+    private FeatureVector featureVector;
     // TODO: Statistics should be moved somewhere else! (Specially the logic for
     // it)
     private PartnerBadgeStats shortTimeStats = new PartnerBadgeStats();
@@ -131,7 +132,6 @@ public class PartnerBadge implements Serializable {
      * updates the partner response times (shortTime and longTime) and short
      * time deviation
      *
-
      * @param respTime
      */
     public synchronized void updatePartnerResponseTime(long respTime) {
@@ -165,16 +165,14 @@ public class PartnerBadge implements Serializable {
         this.favIconURI = favIconURI;
     }
 
-    @Override
-    public int hashCode() {
+    @Override public int hashCode() {
         final int prime = 31;
         int result = 1;
         result = prime * result + ((systemId == null) ? 0 : systemId.hashCode());
         return result;
     }
 
-    @Override
-    public boolean equals(Object obj) {
+    @Override public boolean equals(Object obj) {
         if (this == obj)
             return true;
         if (obj == null)
@@ -190,8 +188,7 @@ public class PartnerBadge implements Serializable {
         return true;
     }
 
-    @Override
-    public String toString() {
+    @Override public String toString() {
         return "PartnerBadge [description=" + description + ", favIconURI=" + favIconURI + ", partnerConnectorEndpoint=" + partnerConnectorEndpoint + ", tags=" + tags
                 + ", domainContent=" + domainContent + ", languageContent=" + languageContent + ", systemId=" + systemId + ", queryGeneratorClass=" + getQueryGeneratorClass()
                 + ", partnerKey=" + getPartnerKey() + "]";
@@ -221,8 +218,6 @@ public class PartnerBadge implements Serializable {
         this.queryGeneratorClass = queryGeneratorClass;
     }
 
-
-
     public Boolean isQueryExpansionEnabled() {
         return isQueryExpansionEnabled;
     }
@@ -238,8 +233,6 @@ public class PartnerBadge implements Serializable {
     public void setIsQuerySplittingEnabled(Boolean isQuerySplittingEnabled) {
         this.isQuerySplittingEnabled = isQuerySplittingEnabled;
     }
-
-  
 
     public String getLowerDateLimit() {
         return lowerDateLimit;
@@ -257,12 +250,21 @@ public class PartnerBadge implements Serializable {
         this.upperDateLimit = upperDateLimit;
     }
 
-	public Integer getAgeRange() {
-		return ageRange;
-	}
+    public FeatureVector getFeatureVector() {
+        return featureVector;
+    }
 
-	public void setAgeRange(Integer ageRange) {
-		this.ageRange = ageRange;
-	}
+    public void setFeatureVector(FeatureVector featureVector) {
+        this.featureVector = featureVector;
+    }
+
+
+    public Integer getAgeRange() {
+        return ageRange;
+    }
+
+    public void setAgeRange(Integer ageRange) {
+        this.ageRange = ageRange;
+    }
 
 }

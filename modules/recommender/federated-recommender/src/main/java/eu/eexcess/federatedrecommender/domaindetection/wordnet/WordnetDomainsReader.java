@@ -22,17 +22,13 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 package eu.eexcess.federatedrecommender.domaindetection.wordnet;
 
+import org.apache.commons.io.LineIterator;
+
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
-import java.util.LinkedHashMap;
-import java.util.Locale;
-import java.util.Map;
-import java.util.Set;
-import java.util.TreeSet;
-
-import org.apache.commons.io.LineIterator;
+import java.util.*;
 
 class WordnetDomainsReader {
     private Map<String, Set<DomainAssignment>> synsetToDomains;

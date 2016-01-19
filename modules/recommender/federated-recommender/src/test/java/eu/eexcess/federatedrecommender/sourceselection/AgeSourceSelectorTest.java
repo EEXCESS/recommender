@@ -1,13 +1,11 @@
 package eu.eexcess.federatedrecommender.sourceselection;
 
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-
-import org.junit.Test;
-
 import eu.eexcess.dataformats.PartnerBadge;
 import eu.eexcess.dataformats.userprofile.SecureUserProfile;
+import org.junit.Test;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * test for the age source selector algorithm

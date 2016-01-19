@@ -20,19 +20,17 @@
 
 package eu.eexcess.federatedrecommender.domaindetection;
 
-import java.util.HashSet;
-import java.util.Set;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-
-import no.uib.cipr.matrix.GivensRotation;
-
 import com.sun.jersey.api.client.Client;
-
 import eu.eexcess.dataformats.PartnerBadge;
 import eu.eexcess.dataformats.PartnerDomain;
 import eu.eexcess.federatedrecommender.domaindetection.probing.PartnerDomainsProbe;
 import eu.eexcess.federatedrecommender.domaindetection.probing.PartnerDomainsProbe.CancelProbeCondition;
+import no.uib.cipr.matrix.GivensRotation;
+
+import java.util.HashSet;
+import java.util.Set;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * This class realizes asynchronous probing of a {@link PartnerBadge} and
@@ -45,10 +43,88 @@ import eu.eexcess.federatedrecommender.domaindetection.probing.PartnerDomainsPro
  */
 public class AsyncPartnerDomainsProbe {
 
-    public static interface ProbeDoneCallback {
-        public void onProbeDoneCallback(String partnerId, Set<PartnerDomain> probeResult);
+    private static final Logger LOGGER = Logger.getLogger(AsyncPartnerDomainsProbe.class.getName());
+    private CancelCondition cancelCondition;
+    private TaskController probeController;
+    private ProbeTask probeTask;
+    private long timeout;
+    private Set<ProbeDoneCallback> callbacks = new HashSet<ProbeDoneCallback>();
 
-        public void onProbeFailedCallback(String partnerId);
+    /**
+     * Constructs an asynchronous domain probe that allows asynchronous probing
+     * with timeout. If probing is not done within the specified time, it is
+     * aborted.
+     *
+     * @param partnerConfig     partner details
+     * @param partnerClient     connector for probing the partner
+     * @param domainProbe       a cloneable instance
+     * @param asyncProbeTimeout the timeout in [ms] when the probe will be terminated it not
+     *                          finished until then
+     * @throws CloneNotSupportedException if {@link PartnerDomainsProbe} instance can not be cloned
+     *                                    using its {@link Cloneable} interface
+     */
+    public AsyncPartnerDomainsProbe(PartnerBadge partnerConfig, Client partnerClient, PartnerDomainsProbe domainProbe, long asyncProbeTimeout) throws CloneNotSupportedException {
+        PartnerDomainsProbe domainProbeClone = (PartnerDomainsProbe) domainProbe.clone();
+        this.timeout = asyncProbeTimeout;
+        cancelCondition = new CancelCondition();
+        probeTask = new ProbeTask(partnerConfig, partnerClient, domainProbeClone, callbacks, cancelCondition);
+        probeTask.setName("probe-task-[" + partnerConfig.getSystemId() + "]");
+        // this condition allows probing to terminate early and leave the result
+        // uncomplete
+        domainProbeClone.setCondition(cancelCondition);
+        probeController = new TaskController(probeTask, timeout, cancelCondition, LOGGER);
+        probeController.setName("probe-task-controller-[" + partnerConfig.getSystemId() + "]");
+    }
+
+    /**
+     * Performs an asynchronous domain probe if there is no other task running.
+     * It terminates the task if the probe duration exceeds the {@link #timeout}
+     * . If the task is ready within the timeout, the result is delivered via
+     * {@link ProbeDoneCallback}.
+     */
+    public void probeAsyncronous() {
+        if (isRunning()) {
+            LOGGER.info("failed to start new asynchronous probing while task is running");
+        } else {
+            cancelCondition.toBeCanceled = false;
+            LOGGER.info("starting probe [" + probeController.getName() + "] ...");
+            probeController.start();
+        }
+    }
+
+    /**
+     * Adds callback(s) to be performed when a probe has finished.
+     *
+     * @param callback
+     */
+    public void addCallback(ProbeDoneCallback callback) {
+        synchronized (callbacks) {
+            callbacks.add(callback);
+        }
+    }
+
+    /**
+     * Removes a desired callback.
+     *
+     * @param callback the reference to be removed
+     */
+    public void removeCallback(ProbeDoneCallback callback) {
+        synchronized (callbacks) {
+            callbacks.remove(callback);
+        }
+    }
+
+    /**
+     * @return true if the task is still running
+     */
+    public boolean isRunning() {
+        return probeController.isAlive() || probeTask.isAlive();
+    }
+
+    public interface ProbeDoneCallback {
+        void onProbeDoneCallback(String partnerId, Set<PartnerDomain> probeResult);
+
+        void onProbeFailedCallback(String partnerId);
     }
 
     private static class CancelCondition implements CancelProbeCondition {
@@ -64,15 +140,15 @@ public class AsyncPartnerDomainsProbe {
 
     /**
      * Aborts the {@link ProbeTask} if not finished within the given timeout.
-     * 
+     *
      * @author Raoul Rubien
      *
      */
     private static class TaskController extends Thread {
 
+        private final Logger logger;
         private Thread task;
         private long timeout;
-        private final Logger logger;
         private CancelCondition condition;
 
         public TaskController(Thread task, long timeoutMs, CancelCondition condition, Logger logger) {
@@ -105,7 +181,7 @@ public class AsyncPartnerDomainsProbe {
 
     /**
      * Thread that performs the asynchronous probing.
-     * 
+     *
      * @author Raoul Rubien
      *
      */
@@ -156,91 +232,6 @@ public class AsyncPartnerDomainsProbe {
                 }
             }
         }
-    }
-
-    private static final Logger LOGGER = Logger.getLogger(AsyncPartnerDomainsProbe.class.getName());
-    private CancelCondition cancelCondition;
-    private TaskController probeController;
-    private ProbeTask probeTask;
-    private long timeout;
-    private Set<ProbeDoneCallback> callbacks = new HashSet<ProbeDoneCallback>();
-
-    /**
-     * Constructs an asynchronous domain probe that allows asynchronous probing
-     * with timeout. If probing is not done within the specified time, it is
-     * aborted.
-     * 
-     * @param partnerConfig
-     *            partner details
-     * @param partnerClient
-     *            connector for probing the partner
-     * @param domainProbe
-     *            a cloneable instance
-     * @param asyncProbeTimeout
-     *            the timeout in [ms] when the probe will be terminated it not
-     *            finished until then
-     * @throws CloneNotSupportedException
-     *             if {@link PartnerDomainsProbe} instance can not be cloned
-     *             using its {@link Cloneable} interface
-     */
-    public AsyncPartnerDomainsProbe(PartnerBadge partnerConfig, Client partnerClient, PartnerDomainsProbe domainProbe, long asyncProbeTimeout)
-            throws CloneNotSupportedException {
-        PartnerDomainsProbe domainProbeClone = (PartnerDomainsProbe) domainProbe.clone();
-        this.timeout = asyncProbeTimeout;
-        cancelCondition = new CancelCondition();
-        probeTask = new ProbeTask(partnerConfig, partnerClient, domainProbeClone, callbacks, cancelCondition);
-        probeTask.setName("probe-task-[" + partnerConfig.getSystemId() + "]");
-        // this condition allows probing to terminate early and leave the result
-        // uncomplete
-        domainProbeClone.setCondition(cancelCondition);
-        probeController = new TaskController(probeTask, timeout, cancelCondition, LOGGER);
-        probeController.setName("probe-task-controller-[" + partnerConfig.getSystemId() + "]");
-    }
-
-    /**
-     * Performs an asynchronous domain probe if there is no other task running.
-     * It terminates the task if the probe duration exceeds the {@link #timeout}
-     * . If the task is ready within the timeout, the result is delivered via
-     * {@link ProbeDoneCallback}.
-     */
-    public void probeAsyncronous() {
-        if (isRunning()) {
-            LOGGER.info("failed to start new asynchronous probing while task is running");
-        } else {
-            cancelCondition.toBeCanceled = false;
-            LOGGER.info("starting probe [" + probeController.getName() + "] ...");
-            probeController.start();
-        }
-    }
-
-    /**
-     * Adds callback(s) to be performed when a probe has finished.
-     * 
-     * @param callback
-     */
-    public void addCallback(ProbeDoneCallback callback) {
-        synchronized (callbacks) {
-            callbacks.add(callback);
-        }
-    }
-
-    /**
-     * Removes a desired callback.
-     * 
-     * @param callback
-     *            the reference to be removed
-     */
-    public void removeCallback(ProbeDoneCallback callback) {
-        synchronized (callbacks) {
-            callbacks.remove(callback);
-        }
-    }
-
-    /**
-     * @return true if the task is still running
-     */
-    public boolean isRunning() {
-        return probeController.isAlive() || probeTask.isAlive();
     }
 
 }

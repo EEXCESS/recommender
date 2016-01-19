@@ -23,10 +23,10 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 package eu.eexcess.federatedrecommender.interfaces;
 
-import java.util.List;
-
 import eu.eexcess.dataformats.PartnerBadge;
 import eu.eexcess.dataformats.userprofile.SecureUserProfile;
+
+import java.util.List;
 
 /**
  * @author Raoul Rubien
@@ -42,5 +42,5 @@ public interface PartnerSelector {
      * @param partners
      * @return
      */
-    public SecureUserProfile sourceSelect(SecureUserProfile userProfile, List<PartnerBadge> partners);
+    SecureUserProfile sourceSelect(SecureUserProfile userProfile, List<PartnerBadge> partners);
 }

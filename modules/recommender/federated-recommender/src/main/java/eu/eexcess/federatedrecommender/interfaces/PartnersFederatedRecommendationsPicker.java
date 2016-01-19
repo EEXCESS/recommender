@@ -22,17 +22,16 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 package eu.eexcess.federatedrecommender.interfaces;
 
-import java.util.List;
-
-import org.apache.solr.common.params.ModifiableSolrParams;
-import org.apache.solr.update.processor.TextProfileSignature;
-
 import eu.eexcess.dataformats.PartnerBadge;
 import eu.eexcess.dataformats.result.Result;
 import eu.eexcess.dataformats.result.ResultList;
 import eu.eexcess.dataformats.userprofile.SecureUserProfile;
 import eu.eexcess.federatedrecommender.dataformats.PFRChronicle;
 import eu.eexcess.federatedrecommender.dataformats.PartnersFederatedRecommendations;
+import org.apache.solr.common.params.ModifiableSolrParams;
+import org.apache.solr.update.processor.TextProfileSignature;
+
+import java.util.List;
 
 public abstract class PartnersFederatedRecommendationsPicker {
     private final ModifiableSolrParams params = new ModifiableSolrParams();

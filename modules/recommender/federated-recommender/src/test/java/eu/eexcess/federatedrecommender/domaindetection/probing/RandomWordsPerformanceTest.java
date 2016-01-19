@@ -20,19 +20,13 @@
 
 package eu.eexcess.federatedrecommender.domaindetection.probing;
 
-import static org.junit.Assert.assertTrue;
-
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.nio.charset.Charset;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
+import edu.stanford.nlp.util.StringUtils;
+import eu.eexcess.federatedrecommender.config.Settings;
+import eu.eexcess.federatedrecommender.domaindetection.wordnet.WordnetDomainsDetector;
+import net.sf.extjwnl.JWNLException;
+import net.sf.extjwnl.data.IndexWord;
+import net.sf.extjwnl.data.POS;
+import net.sf.extjwnl.dictionary.Dictionary;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVPrinter;
@@ -46,60 +40,74 @@ import org.jfree.data.xy.XYSeries;
 import org.jfree.data.xy.XYSeriesCollection;
 import org.junit.Test;
 
-import edu.stanford.nlp.util.StringUtils;
-import eu.eexcess.federatedrecommender.config.Settings;
-import eu.eexcess.federatedrecommender.domaindetection.wordnet.WordnetDomainsDetector;
-import net.sf.extjwnl.JWNLException;
-import net.sf.extjwnl.data.IndexWord;
-import net.sf.extjwnl.data.POS;
-import net.sf.extjwnl.dictionary.Dictionary;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.nio.charset.Charset;
+import java.util.*;
+
+import static org.junit.Assert.assertTrue;
 
 public class RandomWordsPerformanceTest {
 
-    static class Stats {
-        public int shouldNumWords = 0;
-        public int numWords = 0;
-        public Set<String> words = null;
-        public List<Long> durationDrawWordsMs = new LinkedList<Long>();
-        public List<Integer> duplicateConflictCount = new LinkedList<Integer>();
-        public Long durationTotal = null;
-        public int totalTries = 0;
-    }
-
-    private static class Arguments {
-        public int numWords = 0;
-        boolean noDuplicates = true;
-        public int numRuns = 0;
-
-        public Arguments(int numWords, int numRuns, boolean noDuplicates) {
-            this.numWords = numWords;
-            this.noDuplicates = noDuplicates;
-            this.numRuns = numRuns;
-        }
-    }
-
-    /**
-     * to expose calls to contains ...
-     */
-    private static class TestableHashSet<E> extends HashSet<E> {
-        private static final long serialVersionUID = -8498822740840730885L;
-        public int containsTrueCount = 0;
-
-        @Override
-        public boolean contains(Object o) {
-
-            if (super.contains(o)) {
-                containsTrueCount++;
-                return true;
-            }
-            return false;
-        }
-    }
-
     private static final String TEST_OUTPUT_CSV = System.getProperty("java.io.tmpdir") + "/wn-domain-performance-test-results.csv";
-
     private static TestableHashSet<String> wordsToIgnore = null;
     private static Set<String> dummyWordsToIgnore = new HashSet<String>(0);
+
+    static Map<Integer, List<Stats>> resultsFromCsv(File file) {
+
+        Map<Integer, List<Stats>> testResults = new HashMap<Integer, List<Stats>>();
+
+        CSVParser parser;
+        try {
+            parser = CSVParser.parse(file, Charset.forName("UTF-8"), CSVFormat.RFC4180.withHeader());
+
+            for (CSVRecord csvRecord : parser) {
+
+                Integer testRunId = new Integer(csvRecord.get("shouldNumWordsInt"));
+                List<Stats> testRuns = testResults.get(testRunId);
+                if (null == testRuns) {
+                    testRuns = new LinkedList<Stats>();
+                    testResults.put(testRunId, testRuns);
+                }
+
+                Stats stats = new Stats();
+                stats.shouldNumWords = new Integer(csvRecord.get("shouldNumWordsInt"));
+                stats.numWords = new Integer(csvRecord.get("numWordsInt"));
+                stats.totalTries = new Integer(csvRecord.get("totalDrawRandomWordTriesInt"));
+                stats.duplicateConflictCount = new LinkedList<Integer>();
+                for (String value : StringUtils.split(csvRecord.get("duplicateCountListInt"), ",")) {
+                    if (value.length() > 0) {
+                        stats.duplicateConflictCount.add(new Integer(value));
+                    }
+                }
+                stats.durationTotal = new Long(csvRecord.get("durationTotalMsLong"));
+                stats.durationDrawWordsMs = new LinkedList<Long>();
+                for (String value : StringUtils.split(csvRecord.get("durationMsListLong"), ",")) {
+                    if (value.length() > 0) {
+                        stats.durationDrawWordsMs.add(new Long(value));
+                    }
+                }
+                stats.words = new HashSet<String>();
+                stats.words.addAll(StringUtils.split(csvRecord.get("wordListString"), ","));
+
+                testRuns.add(stats);
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        return testResults;
+    }
+
+    public static void main(String[] args) {
+        RandomWordsPerformanceTest performanceTestRunner = new RandomWordsPerformanceTest();
+        performanceTestRunner.plotFromTest();
+
+        // RandomWordsPerformanceTest performanceTestPlotter = new
+        // RandomWordsPerformanceTest();
+        // performanceTestPlotter.plotFromCsv("/tmp/wn-domain-performance-test-results.csv");
+    }
 
     private Map<Integer, List<Stats>> runTests() {
 
@@ -189,7 +197,7 @@ public class RandomWordsPerformanceTest {
 
     /**
      * converts restults to set size vs duration it took to draw that set
-     * 
+     *
      * @param results
      * @return
      */
@@ -212,7 +220,7 @@ public class RandomWordsPerformanceTest {
     /**
      * convert results word positions vs duration it took to draw that random
      * word to draw a random ambiguous word at that position
-     * 
+     *
      * @param testResults
      * @return
      */
@@ -239,7 +247,7 @@ public class RandomWordsPerformanceTest {
      * converts results to word position vs retry attempts
      * {@link WordnetDomainsDetector#drawRandomAmbiguousWord(Set)} took to draw
      * a new word
-     * 
+     *
      * @param results
      * @return
      */
@@ -286,7 +294,7 @@ public class RandomWordsPerformanceTest {
     /**
      * converts results to a word position vs. average duration and word
      * position vs. average duplicate recall
-     * 
+     *
      * @param results
      * @return
      */
@@ -414,52 +422,6 @@ public class RandomWordsPerformanceTest {
 
     }
 
-    static Map<Integer, List<Stats>> resultsFromCsv(File file) {
-
-        Map<Integer, List<Stats>> testResults = new HashMap<Integer, List<Stats>>();
-
-        CSVParser parser;
-        try {
-            parser = CSVParser.parse(file, Charset.forName("UTF-8"), CSVFormat.RFC4180.withHeader());
-
-            for (CSVRecord csvRecord : parser) {
-
-                Integer testRunId = new Integer(csvRecord.get("shouldNumWordsInt"));
-                List<Stats> testRuns = testResults.get(testRunId);
-                if (null == testRuns) {
-                    testRuns = new LinkedList<Stats>();
-                    testResults.put(testRunId, testRuns);
-                }
-
-                Stats stats = new Stats();
-                stats.shouldNumWords = new Integer(csvRecord.get("shouldNumWordsInt"));
-                stats.numWords = new Integer(csvRecord.get("numWordsInt"));
-                stats.totalTries = new Integer(csvRecord.get("totalDrawRandomWordTriesInt"));
-                stats.duplicateConflictCount = new LinkedList<Integer>();
-                for (String value : StringUtils.split(csvRecord.get("duplicateCountListInt"), ",")) {
-                    if (value.length() > 0) {
-                        stats.duplicateConflictCount.add(new Integer(value));
-                    }
-                }
-                stats.durationTotal = new Long(csvRecord.get("durationTotalMsLong"));
-                stats.durationDrawWordsMs = new LinkedList<Long>();
-                for (String value : StringUtils.split(csvRecord.get("durationMsListLong"), ",")) {
-                    if (value.length() > 0) {
-                        stats.durationDrawWordsMs.add(new Long(value));
-                    }
-                }
-                stats.words = new HashSet<String>();
-                stats.words.addAll(StringUtils.split(csvRecord.get("wordListString"), ","));
-
-                testRuns.add(stats);
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
-        return testResults;
-    }
-
     @Test
     public void WordnetDomainsDetector_drawRandmomwords_untilExceptonOccurs() {
 
@@ -491,12 +453,42 @@ public class RandomWordsPerformanceTest {
 
     }
 
-    public static void main(String[] args) {
-        RandomWordsPerformanceTest performanceTestRunner = new RandomWordsPerformanceTest();
-        performanceTestRunner.plotFromTest();
+    static class Stats {
+        public int shouldNumWords = 0;
+        public int numWords = 0;
+        public Set<String> words = null;
+        public List<Long> durationDrawWordsMs = new LinkedList<Long>();
+        public List<Integer> duplicateConflictCount = new LinkedList<Integer>();
+        public Long durationTotal = null;
+        public int totalTries = 0;
+    }
 
-        // RandomWordsPerformanceTest performanceTestPlotter = new
-        // RandomWordsPerformanceTest();
-        // performanceTestPlotter.plotFromCsv("/tmp/wn-domain-performance-test-results.csv");
+    private static class Arguments {
+        public int numWords = 0;
+        public int numRuns = 0;
+        boolean noDuplicates = true;
+
+        public Arguments(int numWords, int numRuns, boolean noDuplicates) {
+            this.numWords = numWords;
+            this.noDuplicates = noDuplicates;
+            this.numRuns = numRuns;
+        }
+    }
+
+    /**
+     * to expose calls to contains ...
+     */
+    private static class TestableHashSet<E> extends HashSet<E> {
+        private static final long serialVersionUID = -8498822740840730885L;
+        public int containsTrueCount = 0;
+
+        @Override public boolean contains(Object o) {
+
+            if (super.contains(o)) {
+                containsTrueCount++;
+                return true;
+            }
+            return false;
+        }
     }
 }

@@ -20,9 +20,9 @@
 
 package eu.eexcess.federatedrecommender.config;
 
-import java.io.File;
-
 import org.apache.lucene.util.Version;
+
+import java.io.File;
 
 /**
  * this class keeps settings about local resources (indices, files, etc. needed
@@ -35,39 +35,11 @@ public class Settings {
 
     public static final Version LuceneVersion = Version.LATEST;
     public static final double RamBufferSizeMB = 512.0;
-
-    public static class TestIndexSettings {
-
-        public String testSetName;
-        public String documentsPath;
-        public String baseIndexPath;
-        public String sampledIndexPath;
-        public int topicNumbers[];
-
-        public TestIndexSettings(String testSetName, String documentsPath, String baseIndexPath, String sampleIndexPath, int topics[]) {
-            this.testSetName = testSetName;
-            this.documentsPath = documentsPath;
-            this.baseIndexPath = baseIndexPath;
-            this.sampledIndexPath = sampleIndexPath;
-            this.topicNumbers = topics;
-        }
-    }
-
     /**
      * index containing all TREC data
      */
     public static TestIndexSettings BaseIndex = new TestIndexSettings("generalized-base", "/opt/data/trec-uncompressed", "/opt/data/redde/base-index",
             "/opt/data/redde/base-index-sapled", null);
-
-    public static class WordNet {
-        public static final String Path_2_0 = "/opt/data/wordnet/WordNet-2.0/dict";
-        public static final String Path_3_0 = "/opt/data/wordnet/WordNet-3.0/dict";
-    }
-
-    public static class WordnetDomains {
-        public static final String Path = "/opt/data/wordnet-domains/wn-domains-3.2/wn-domains-3.2-20070223";
-        public static final String CSVDomainPath = "/opt/data/wordnet-domains/wn-domains-3.2/wn-domains-3.2-tree.csv";
-    }
 
     public static boolean isResourceAvailable(TestIndexSettings settings) {
 
@@ -103,6 +75,33 @@ public class Settings {
     private static boolean printWarning(String path) {
         System.err.println("resource does not exist [" + path + "]");
         return false;
+    }
+
+    public static class TestIndexSettings {
+
+        public String testSetName;
+        public String documentsPath;
+        public String baseIndexPath;
+        public String sampledIndexPath;
+        public int topicNumbers[];
+
+        public TestIndexSettings(String testSetName, String documentsPath, String baseIndexPath, String sampleIndexPath, int topics[]) {
+            this.testSetName = testSetName;
+            this.documentsPath = documentsPath;
+            this.baseIndexPath = baseIndexPath;
+            this.sampledIndexPath = sampleIndexPath;
+            this.topicNumbers = topics;
+        }
+    }
+
+    public static class WordNet {
+        public static final String Path_2_0 = "/opt/data/wordnet/WordNet-2.0/dict";
+        public static final String Path_3_0 = "/opt/data/wordnet/WordNet-3.0/dict";
+    }
+
+    public static class WordnetDomains {
+        public static final String Path = "/opt/data/wordnet-domains/wn-domains-3.2/wn-domains-3.2-20070223";
+        public static final String CSVDomainPath = "/opt/data/wordnet-domains/wn-domains-3.2/wn-domains-3.2-tree.csv";
     }
 
 }

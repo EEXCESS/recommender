@@ -22,18 +22,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 package eu.eexcess.federatedrecommender.decomposer;
 
-import java.io.File;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-
-import org.apache.commons.lang.LocaleUtils;
-
 import at.knowcenter.commons.wikipedia.queryexpansion.WikipediaQueryExpansion;
 import at.knowcenter.util.term.TermSet;
 import at.knowcenter.util.term.TypedTerm;
@@ -45,6 +33,13 @@ import eu.eexcess.dataformats.userprofile.SecureUserProfile;
 import eu.eexcess.federatedrecommender.interfaces.SecureUserProfileDecomposer;
 import eu.eexcess.federatedrecommender.utils.FederatedRecommenderException;
 import eu.eexcess.utils.LanguageGuesser;
+import org.apache.commons.lang.LocaleUtils;
+
+import java.io.File;
+import java.io.IOException;
+import java.util.*;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 /**
  * Class to provide query expansion from Wikipedia
  * 
@@ -54,11 +49,8 @@ import eu.eexcess.utils.LanguageGuesser;
 public class PseudoRelevanceWikipediaDecomposer implements SecureUserProfileDecomposer<SecureUserProfile,SecureUserProfile> {
 
 	private static final Logger logger = Logger.getLogger(PseudoRelevanceWikipediaDecomposer.class.getName());
-	
-	private Map<String, WikipediaQueryExpansion> localeToQueryExpansion;
 	 private static final String[] SUPPORTED_LOCALES = new String[] { "en", "de" };
-	
-
+	private Map<String, WikipediaQueryExpansion> localeToQueryExpansion;
 	/**
 	 * number of terms to be expanded in {@link #decompose(SecureUserProfile)}
 	 */
@@ -66,7 +58,6 @@ public class PseudoRelevanceWikipediaDecomposer implements SecureUserProfileDeco
 
 	/**
 	 * 
-	 * @param wikipediaBaseIndexDir the base directory for the Wikipedia indices, it is expected to contain folders like "enwiki" and "dewiki"
 	 * @throws IOException
 	 */
 	
