@@ -138,6 +138,7 @@
 					          <xsl:call-template name="Main.Latitude"/>	
 					          <xsl:call-template name="Main.Longitude"/>	
 					          <xsl:call-template name="Main.Creator"/>
+								<xsl:call-template name="Main.Period" />
 
 				        </xsl:element>
 					
@@ -184,6 +185,42 @@
 	  <xsl:template name="Main.Creator">
       <apply-templates xmlns="http://www.w3.org/1999/XSL/Transform" mode="m1" select="creator"/>
    </xsl:template>
+	<xsl:template name="Main.Period">
+      <apply-templates xmlns="http://www.w3.org/1999/XSL/Transform" mode="x1" select="date"/>
+    </xsl:template>
+
+	<template xmlns="http://www.w3.org/1999/XSL/Transform" match="date" mode="x1">
+      
+		<xsl:element name="dcterms:created">		  
+					          <xsl:element name="edm:TimeSpan">
+								  <xsl:attribute name="rdf:about"><xsl:value-of select="concat('timespan/',generate-id())" /></xsl:attribute>
+								  
+								   <element name="edm:begin">
+										<xsl:value-of select="concat(.,'-01-01')" />
+								  </element>
+						
+									<element name="edm:end">
+									     <xsl:value-of select="concat(.,'-12-31')" />
+									</element>
+						
+					          </xsl:element>
+					          
+		</xsl:element>
+		
+		
+		<xsl:element name="edm:wasPresentAt">
+			<xsl:element name="edm:Event">
+								  <xsl:attribute name="rdf:about"><xsl:value-of select="concat('event/',generate-id())" /></xsl:attribute>
+			
+				<xsl:element name="edm:occurredAt">
+					<xsl:attribute name="rdf:resource"><xsl:value-of select="concat('timespan/',generate-id())" /></xsl:attribute>
+				</xsl:element>
+			
+			</xsl:element>						  
+		</xsl:element>
+		
+   </template>
+	
 
    <template xmlns="http://www.w3.org/1999/XSL/Transform" match="title" mode="m0">
       <element name="dc:title">

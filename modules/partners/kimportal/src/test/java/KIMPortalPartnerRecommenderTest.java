@@ -225,7 +225,7 @@ public class KIMPortalPartnerRecommenderTest {
 
     }
 
-    @Test public void detailCallForEnrichmentListOfObject11() {
+    @Test public void detailCallForEnrichmentListOfObject1() {
         ArrayList<String> ids = new ArrayList<String>();
         ArrayList<String> uris = new ArrayList<String>();
         ids.add("aa0b5559-6e86-46db-9785-0329ab800956");
@@ -259,6 +259,39 @@ public class KIMPortalPartnerRecommenderTest {
 
     }
 
+    @Test public void detailCallForEnrichmentListOfObject11() {
+        ArrayList<String> ids = new ArrayList<String>();
+        ArrayList<String> uris = new ArrayList<String>();
+        ids.add("aa0b5559-6e86-46db-9785-0329ab800956");
+        uris.add("https://www.kgportal.bl.ch/sammlungen#aa0b5559-6e86-46db-9785-0329ab800956");
+        ids.add("c14af242-2ed0-4f92-bae6-f4bde57ebcd7");
+        uris.add("https://www.kgportal.bl.ch/sammlungen#c14af242-2ed0-4f92-bae6-f4bde57ebcd7");
+        ids.add("d0b4b108-c929-49f7-9fc7-94f6fc1d35fa");
+        uris.add("https://www.kgportal.bl.ch/sammlungen#d0b4b108-c929-49f7-9fc7-94f6fc1d35fa");
+        ids.add("44a001e9-12dc-47f3-9f1f-ce43ab901651");
+        uris.add("https://www.kgportal.bl.ch/sammlungen#44a001e9-12dc-47f3-9f1f-ce43ab901651");
+        ids.add("61873d85-6ec9-4a1d-8b94-90ab53d53aa3");
+        uris.add("https://www.kgportal.bl.ch/sammlungen#61873d85-6ec9-4a1d-8b94-90ab53d53aa3");
+        ids.add("c7fd7ff6-ccf8-47c6-b39d-208d833546da");
+        uris.add("https://www.kgportal.bl.ch/sammlungen#c7fd7ff6-ccf8-47c6-b39d-208d833546da");
+        ids.add("29f65eab-e8a6-4417-86cf-5d7a28b150f5");
+        uris.add("https://www.kgportal.bl.ch/sammlungen#29f65eab-e8a6-4417-86cf-5d7a28b150f5");
+        ids.add("27fea24b-066b-4975-bc31-181071f7ddb6");
+        uris.add("https://www.kgportal.bl.ch/sammlungen#27fea24b-066b-4975-bc31-181071f7ddb6");
+        ids.add("de48080b-b88e-4a03-a3da-be242ea28401");
+        uris.add("https://www.kgportal.bl.ch/sammlungen#de48080b-b88e-4a03-a3da-be242ea28401");
+        ids.add("897d230e-6258-4086-804d-e555bc94d231");
+        uris.add("https://www.kgportal.bl.ch/sammlungen#897d230e-6258-4086-804d-e555bc94d231");
+        ids.add("60791aa4-ce66-4217-bf73-53ec6ad07102");
+        uris.add("https://www.kgportal.bl.ch/sammlungen#60791aa4-ce66-4217-bf73-53ec6ad07102");
+        DocumentBadgeList documentDetails = PartnerRecommenderTestHelper
+                .getDetails(DEPLOYMENT_CONTEXT, port, PartnerRecommenderTestHelper.createParamsForPartnerRecommenderDetailCall(ids, uris, DATAPROVIDER));
+
+        assertNotNull(documentDetails);
+        assertTrue(documentDetails.documentBadges.size() > 0);
+        assertEquals(11, documentDetails.documentBadges.size());
+
+    }
     @Test public void detailCallForEnrichmentListOfObject20() {
         ArrayList<String> ids = new ArrayList<String>();
         ArrayList<String> uris = new ArrayList<String>();
