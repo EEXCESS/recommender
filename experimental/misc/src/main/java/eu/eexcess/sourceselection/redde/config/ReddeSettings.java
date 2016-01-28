@@ -26,7 +26,7 @@ import java.util.Set;
 
 import org.apache.lucene.util.Version;
 
-public class Settings {
+public class ReddeSettings {
 
 	public static final Version LuceneVersion = Version.LATEST;
 	public static final double RamBufferSizeMB = 512.0;

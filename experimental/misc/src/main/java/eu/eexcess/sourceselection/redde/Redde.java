@@ -34,6 +34,7 @@ import java.util.TreeSet;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import eu.eexcess.sourceselection.redde.config.ReddeSettings;
 import net.sf.extjwnl.JWNLException;
 
 import org.apache.lucene.analysis.en.EnglishAnalyzer;
@@ -50,9 +51,8 @@ import org.apache.lucene.search.TopDocs;
 import org.apache.lucene.store.FSDirectory;
 import org.apache.lucene.util.Version;
 
-import eu.eexcess.logger.PianoLogger;
-import eu.eexcess.sourceselection.redde.config.Settings;
-import eu.eexcess.sourceselection.redde.config.Settings.TestIndexSettings;
+//import eu.eexcess.logger.PianoLogger;
+
 import eu.eexcess.sourceselection.redde.dbsampling.DBSampler;
 import eu.eexcess.sourceselection.redde.dbsampling.DatabaseDetails;
 
@@ -221,10 +221,10 @@ public class Redde {
      * contains all pre-calculated values of {@link #estimateSourcesSize()}
      */
     protected Map<String, DatabaseDetails> sourceDetails;
-    private static final Logger LOGGER = PianoLogger.getLogger(Redde.class.getName());
+    private static final Logger LOGGER = Logger.getLogger(Redde.class.getName());
     private Version luceneVersion;
     private String wordnetPath;
-    private Set<TestIndexSettings> testSets;
+    private Set<ReddeSettings.TestIndexSettings> testSets;
 
     private int numQueries;
     private int numSamplesPerQuery;
@@ -248,7 +248,7 @@ public class Redde {
      *            number of samples to take from the top documents returned for
      *            a query
      */
-    public Redde(Set<TestIndexSettings> testSets, String wordnetPath, Version luceneVersion, Parameters params) {
+    public Redde(Set<ReddeSettings.TestIndexSettings> testSets, String wordnetPath, Version luceneVersion, Parameters params) {
         this.luceneVersion = luceneVersion;
         this.testSets = testSets;
         this.wordnetPath = wordnetPath;
@@ -275,7 +275,7 @@ public class Redde {
     public void estimateSourcesSize() throws IOException {
 
         sourceDetails = new HashMap<String, DatabaseDetails>();
-        for (TestIndexSettings set : testSets) {
+        for (ReddeSettings.TestIndexSettings set : testSets) {
             DBSampler sampler = null;
             try {
                 sampler = new DBSampler(set.baseIndexPath, set.sampledIndexPath, luceneVersion, wordnetPath);
@@ -565,9 +565,9 @@ public class Redde {
         if (generalizedSampleDatabaseReader != null) {
             return generalizedSampleDatabaseReader;
         }
-        IndexReader[] readers = new IndexReader[Settings.testSets().size()];
+        IndexReader[] readers = new IndexReader[ReddeSettings.testSets().size()];
         int idx = 0;
-        for (TestIndexSettings setting : testSets) {
+        for (ReddeSettings.TestIndexSettings setting : testSets) {
             readers[idx] = DirectoryReader.open(FSDirectory.open(new File(setting.sampledIndexPath)));
             idx++;
         }
@@ -588,11 +588,11 @@ public class Redde {
         List<ScoreDoc> filtered = new LinkedList<ScoreDoc>();
 
         Set<String> fields = new HashSet<String>();
-        fields.add(Settings.IndexFields.IndexNameField);
+        fields.add(ReddeSettings.IndexFields.IndexNameField);
 
         for (ScoreDoc scoreDocument : rankedCentralizedSampleDocuments) {
             Document document = reader.document(scoreDocument.doc, fields);
-            if (document.getField(Settings.IndexFields.IndexNameField).stringValue().compareTo(databaseDetails.indexName) == 0) {
+            if (document.getField(ReddeSettings.IndexFields.IndexNameField).stringValue().compareTo(databaseDetails.indexName) == 0) {
                 filtered.add(scoreDocument);
             }
         }
@@ -665,9 +665,9 @@ public class Redde {
     private DatabaseDetails dbDetails(ScoreDoc document) throws IOException {
 
         Set<String> fields = new HashSet<String>();
-        fields.add(Settings.IndexFields.IndexNameField);
+        fields.add(ReddeSettings.IndexFields.IndexNameField);
         Document doc = generalizedSampleDatabaseReader.document(document.doc, fields);
-        return sourceDetails.get(doc.get(Settings.IndexFields.IndexNameField));
+        return sourceDetails.get(doc.get(ReddeSettings.IndexFields.IndexNameField));
     }
 
     private DatabaseDetails dbDetails(QueryRelevance relevance) {
@@ -688,7 +688,7 @@ public class Redde {
     private ScoreDoc[] scoreDatabase(String queryString, IndexReader database) {
 
         try {
-            Query query = new QueryParser(Settings.IndexFields.IndexTextField, new EnglishAnalyzer()).parse(queryString);
+            Query query = new QueryParser(ReddeSettings.IndexFields.IndexTextField, new EnglishAnalyzer()).parse(queryString);
             IndexSearcher searcher = new IndexSearcher(database);
             TopDocs topDocs = searcher.search(query, database.numDocs());
 

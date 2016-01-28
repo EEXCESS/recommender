@@ -44,7 +44,6 @@ import java.util.logging.Logger;
  *
  */
 public class FiFoPicker extends PartnersFederatedRecommendationsPicker {
-
     private static final Logger logger = Logger.getLogger(FiFoPicker.class.getName());
 
     public FiFoPicker() {
