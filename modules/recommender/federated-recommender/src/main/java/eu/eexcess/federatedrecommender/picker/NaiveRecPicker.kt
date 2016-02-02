@@ -58,7 +58,6 @@ class NaiveRecPicker : PartnersFederatedRecommendationsPicker() {
             }
 
             var score = dotProduct(tmpVector, tmpFeatureMatrix)
-            print(score.toString() + ", ")
             dotProductMap.put(i, score)
         }
         var resultList = ResultList()
@@ -66,9 +65,7 @@ class NaiveRecPicker : PartnersFederatedRecommendationsPicker() {
         if (secureUserProfile?.numResults == null)
             secureUserProfile.numResults = 10
 
-        for (i in sortedEntries.indices) {
-            println(" " + sortedEntries.get(i).key + " " + sortedEntries.get(i).value + " " + combinedResults[sortedEntries.get(i).key].title + " " + combinedResults[sortedEntries.get(i).key].mediaType + " " + combinedResults[sortedEntries.get(i).key].licence)
-        }
+
         sortedEntries.forEach(
                 {
                     if (resultList.results.size < secureUserProfile?.numResults) {
