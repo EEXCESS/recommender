@@ -19,7 +19,7 @@ import java.util.logging.Logger
  */
 class LSIPicker : PartnersFederatedRecommendationsPicker() {
     private val LOGGER = Logger.getLogger("eu.eexcess.federatedRecommender.picker.LSIPicker")
-    // private var NUM_FACTORS = 3
+
     override fun pickResults(secureUserProfile: SecureUserProfile?, resultList: PartnersFederatedRecommendations?, partners: MutableList<PartnerBadge>?, numResults: Int): ResultList? {
         var numFactors = secureUserProfile?.contextKeywords?.size!! //!! + secureUserProfile?.userVector?.vector?.size!!
 
@@ -257,9 +257,9 @@ class LSIPicker : PartnersFederatedRecommendationsPicker() {
             var x = i + oldFeatureMatrix.size
             combinedResults.forEachIndexed { y, document ->
                 when (i) {
-                    0 -> if (document.mediaType.equals("text", true)) matrix[x][y] = 1.0 else matrix[x][y] = 0.0
-                    1 -> if (document.mediaType.equals("video", true)) matrix[x][y] = 1.0 else matrix[x][y] = 0.0
-                    2 -> if (document.mediaType.equals("picture", true)) matrix[x][y] = 1.0 else matrix[x][y] = 0.0
+                    0 -> if (document.mediaType.toLowerCase().equals("text", true)) matrix[x][y] = 1.0 else matrix[x][y] = 0.0
+                    1 -> if (document.mediaType.toLowerCase().equals("video", true)) matrix[x][y] = 1.0 else matrix[x][y] = 0.0
+                    2 -> if (document.mediaType.toLowerCase().equals("image", true)) matrix[x][y] = 1.0 else matrix[x][y] = 0.0
                     3 -> if (document.licence != null && document.licence.contains("Apache", true)) matrix[x][y] = 1.0 else matrix[x][y] = 0.0
                     4 -> if (document.date != null && !document.date.isEmpty()) matrix[x][y] = 1.0 else matrix[x][y] = 0.0
                 }

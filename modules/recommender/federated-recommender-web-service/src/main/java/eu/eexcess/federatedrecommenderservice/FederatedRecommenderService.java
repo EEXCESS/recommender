@@ -38,6 +38,7 @@ import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
+import eu.eexcess.dataformats.userprofile.*;
 import org.codehaus.jackson.JsonParser;
 import org.codehaus.jackson.map.ObjectMapper;
 
@@ -49,18 +50,6 @@ import eu.eexcess.dataformats.PartnerBadgeList;
 import eu.eexcess.dataformats.RecommenderStats;
 import eu.eexcess.dataformats.result.DocumentBadgeList;
 import eu.eexcess.dataformats.result.ResultList;
-import eu.eexcess.dataformats.userprofile.Address;
-import eu.eexcess.dataformats.userprofile.Context;
-import eu.eexcess.dataformats.userprofile.ContextKeyword;
-import eu.eexcess.dataformats.userprofile.ContextNamedEntitiesElement;
-import eu.eexcess.dataformats.userprofile.ContextNamedEntity;
-import eu.eexcess.dataformats.userprofile.History;
-import eu.eexcess.dataformats.userprofile.Interest;
-import eu.eexcess.dataformats.userprofile.Language;
-import eu.eexcess.dataformats.userprofile.SecureUserProfile;
-import eu.eexcess.dataformats.userprofile.TimeRange;
-import eu.eexcess.dataformats.userprofile.UserCredentials;
-import eu.eexcess.dataformats.userprofile.UserLocation;
 import eu.eexcess.federatedrecommender.FederatedRecommenderCore;
 import eu.eexcess.federatedrecommender.utils.FederatedRecommenderException;
 
@@ -311,7 +300,14 @@ public class FederatedRecommenderService {
     public SecureUserProfile testSUP() {
         SecureUserProfile secureUserProfile = new SecureUserProfile();
         secureUserProfile.setQueryID("QueryID01234567");
-        
+        FeatureVector userVector = new FeatureVector();
+        userVector.setText(1.0);
+        userVector.setVideo(1.0);
+        userVector.setOpenLicence(1.0);
+        userVector.setDateExisting(1.0);
+
+
+        secureUserProfile.setUserVector(userVector);
         secureUserProfile.setAgeRange(2);
         secureUserProfile.setGender("male");
         secureUserProfile.setTimeRange(new TimeRange());
@@ -333,9 +329,9 @@ public class FederatedRecommenderService {
         contextList.add(new ContextKeyword("women", 0.5));
         contextList.add(new ContextKeyword("labour", 0.5));
         secureUserProfile.setContextKeywords(contextList);
-        PartnerBadge pB = new PartnerBadge();
-        pB.setSystemId("Europeana");
-        secureUserProfile.getPartnerList().add(pB);
+//        PartnerBadge pB = new PartnerBadge();
+//        pB.setSystemId("Europeana");
+//        secureUserProfile.getPartnerList().add(pB);
 
         List<Interest> interestList = new ArrayList<Interest>();
         interestList.add(new Interest("text", 0.1, 0.1, 0.1, "source", "http://dsjkdjas.de"));
