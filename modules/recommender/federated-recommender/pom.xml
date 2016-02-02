@@ -42,33 +42,21 @@
 				</executions>
 			</plugin>
 			<plugin>
-				<groupId>org.jetbrains.kotlin</groupId>
 				<artifactId>kotlin-maven-plugin</artifactId>
+				<groupId>org.jetbrains.kotlin</groupId>
 				<version>${kotlin.version}</version>
+
 				<executions>
 					<execution>
 						<id>compile</id>
 						<phase>process-sources</phase>
-						<goals>
-							<goal>compile</goal>
-						</goals>
-						<configuration>
-							<sourceDirs>
-								<source>src/main/java</source>
-							</sourceDirs>
-						</configuration>
+						<goals> <goal>compile</goal> </goals>
 					</execution>
+
 					<execution>
 						<id>test-compile</id>
 						<phase>process-test-sources</phase>
-						<goals>
-							<goal>test-compile</goal>
-						</goals>
-						<configuration>
-							<sourceDirs>
-								<source>src/test/java</source>
-							</sourceDirs>
-						</configuration>
+						<goals> <goal>test-compile</goal> </goals>
 					</execution>
 				</executions>
 			</plugin>
@@ -191,6 +179,11 @@
 			<groupId>org.jetbrains.kotlin</groupId>
 			<artifactId>kotlin-stdlib</artifactId>
 			<version>${kotlin.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>de.julielab</groupId>
+			<artifactId>aliasi-lingpipe</artifactId>
+			<version>4.1.0</version>
 		</dependency>
 
 		<!-- <dependency> <groupId>com.twitter</groupId> <artifactId>cassovary_2.10</artifactId> 
