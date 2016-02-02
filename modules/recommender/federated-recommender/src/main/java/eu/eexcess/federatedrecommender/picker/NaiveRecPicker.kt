@@ -61,7 +61,6 @@ class NaiveRecPicker : PartnersFederatedRecommendationsPicker() {
             print(score.toString() + ", ")
             dotProductMap.put(i, score)
         }
-
         var resultList = ResultList()
         var sortedEntries = dotProductMap.entries.sortedByDescending { key -> key.value }
         if (secureUserProfile?.numResults == null)
