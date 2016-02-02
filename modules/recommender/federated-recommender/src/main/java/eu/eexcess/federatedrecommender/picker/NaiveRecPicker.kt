@@ -91,26 +91,6 @@ class NaiveRecPicker : PartnersFederatedRecommendationsPicker() {
         return sum
     }
 
-    private fun calcSvdMatrix(termDocumentMatrix: Array<out DoubleArray>?, numFactors: Int): SvdMatrix {
-        val featureInit = 0.01
-        val initialLearningRate = 0.001
-        val annealingRate = 1000
-        val regularization = 0.00
-        val minImprovement = 0.0001
-        val minEpochs = 100
-        val maxEpochs = 50000
-        val matrix = SvdMatrix.svd(termDocumentMatrix,
-                numFactors,
-                featureInit,
-                initialLearningRate,
-                annealingRate.toDouble(),
-                regularization,
-                null,
-                minImprovement,
-                minEpochs,
-                maxEpochs)
-        return matrix
-    }
 
 
     private fun createTermDocMatrix(secureUserProfile: SecureUserProfile?, combinedResults: ArrayList<Result>): Array<out DoubleArray> {
@@ -132,7 +112,6 @@ class NaiveRecPicker : PartnersFederatedRecommendationsPicker() {
                     }
                     matrix[x][y] += counter;
                 }
-
             }
         }
         return matrix
