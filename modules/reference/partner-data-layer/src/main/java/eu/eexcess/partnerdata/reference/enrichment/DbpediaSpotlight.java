@@ -36,12 +36,16 @@ import org.apache.http.impl.client.HttpClientBuilder;
 
 import eu.eexcess.config.PartnerConfiguration;
 import eu.eexcess.partnerdata.reference.PartnerdataLogger;
+import eu.eexcess.partnerdata.reference.PartnerdataTracer;
+import eu.eexcess.partnerdata.reference.PartnerdataTracer.FILETYPE;
 
 
 public class DbpediaSpotlight extends EnrichmentServiceBase{
 
 	//protected static final String DBPEDIA_CANDIATES_URL = "http://spotlight.dbpedia.org/rest/candidates?text=";
-	protected static final String DBPEDIA_ANNOTATE_URL = "http://spotlight.dbpedia.org/rest/annotate?text=";
+//	protected static final String DBPEDIA_ANNOTATE_URL = "http://spotlight.dbpedia.org/rest/annotate?text=";
+	protected static final String DBPEDIA_ANNOTATE_URL = "http://spotlight.sztaki.hu:2222/rest/annotate?text=";
+	
 	protected int timeout = 600;
 	protected RequestConfig requestConfig;
 //	protected CloseableHttpClient client;
@@ -118,7 +122,7 @@ public class DbpediaSpotlight extends EnrichmentServiceBase{
 			request.setHeader("Accept", "text/xml");
 
 			HttpResponse response = client.execute(request);
-//	        PartnerdataTracer.dumpFile(DbpediaSpotlight.class, this.partnerConfig, response.getEntity().getContent(), "dbpedia-response", FILETYPE.XML, logger);
+	        PartnerdataTracer.dumpFile(DbpediaSpotlight.class, this.partnerConfig, response.getEntity().getContent(), "dbpedia-response", FILETYPE.XML, logger);
 
 			entities.addAll(XmlParser.getEntitiesDbpediaSpotlightAnnotateXML(this.partnerConfig, response.getEntity().getContent(), logger));
 //			LOGGER.log(Level.INFO, "DbpediaSpotlight successful call with URL:\n"+url);
