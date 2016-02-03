@@ -22,7 +22,17 @@ class NaiveRecPicker : PartnersFederatedRecommendationsPicker() {
 
     override fun pickResults(secureUserProfile: SecureUserProfile?, resultList: PartnersFederatedRecommendations?, partners: MutableList<PartnerBadge>?, numResults: Int): ResultList? {
         val combinedResults = ArrayList<Result>()
-        resultList?.results?.entries?.forEach { element -> combinedResults.addAll(element?.value?.results!!) }
+        resultList?.results?.entries?.forEach{ element ->
+            element?.value?.results?.forEachIndexed { i, result ->
+                result.apply {
+                    position = element.value.results.size- i.toDouble()
+                }
+                combinedResults.add(result)
+            }
+            //combinedResults.addAll(element?.value?.results!!)
+
+        }
+
         val termDocumentMatrix = createTermDocMatrix(secureUserProfile, combinedResults)
         var featureMatrix = createFeatureMatrix(termDocumentMatrix, combinedResults)
 
@@ -42,14 +52,14 @@ class NaiveRecPicker : PartnersFederatedRecommendationsPicker() {
 
     private fun search(featureMatrix: Array<out DoubleArray>, combinedResults: ArrayList<Result>, secureUserProfile: SecureUserProfile): ResultList? {
      val dotProductMap = HashMap<Int, Double>()
-        var tmpVector = DoubleArray(secureUserProfile.userVector.vector.size + secureUserProfile.contextKeywords.size)
+        var tmpVector = DoubleArray(secureUserProfile.userVector.vector.size + secureUserProfile.contextKeywords.size+1)
         secureUserProfile.contextKeywords.forEachIndexed { i, d ->
             tmpVector[i] = 1.0
         }
         secureUserProfile.userVector.vector.forEachIndexed { i, d ->
             tmpVector[i + secureUserProfile.contextKeywords.size!!] = secureUserProfile.userVector.vector[i]
         }
-
+        tmpVector[secureUserProfile.userVector.vector.size + secureUserProfile.contextKeywords.size]=1.0 //to take the original ranking into account
 
         for (i in featureMatrix.first().indices) {
             val tmpFeatureMatrix = DoubleArray(featureMatrix.size)
@@ -115,7 +125,7 @@ class NaiveRecPicker : PartnersFederatedRecommendationsPicker() {
 
 
     fun createFeatureMatrix(oldFeatureMatrix: Array<out DoubleArray>, combinedResults: ArrayList<Result>): Array<out DoubleArray> {
-        val matrix: Array<out DoubleArray> = Array(oldFeatureMatrix.size + FeatureVector().vector.size, { DoubleArray(oldFeatureMatrix.first().size) })
+        val matrix: Array<out DoubleArray> = Array(oldFeatureMatrix.size + FeatureVector().vector.size+1, { DoubleArray(oldFeatureMatrix.first().size) })
 
         for (x in oldFeatureMatrix.indices) {
             oldFeatureMatrix[x].forEachIndexed { y, d ->
@@ -123,19 +133,23 @@ class NaiveRecPicker : PartnersFederatedRecommendationsPicker() {
             }
         }
 
+        var lastElement = FeatureVector().vector.size + oldFeatureMatrix.size
         FeatureVector().vector.forEachIndexed { i, d ->
             var x = i + oldFeatureMatrix.size
             combinedResults.forEachIndexed { y, document ->
-                when (i) {
-                    0 -> if (document.mediaType.toLowerCase().equals("text", true)) matrix[x][y] = 1.0 else matrix[x][y] = 0.0
-                    1 -> if (document.mediaType.toLowerCase().equals("video", true)) matrix[x][y] = 1.0 else matrix[x][y] = 0.0
-                    2 -> if (document.mediaType.toLowerCase().equals("image", true)) matrix[x][y] = 1.0 else matrix[x][y] = 0.0
-                    3 -> if (document.licence != null && document.licence.contains("Apache", true)) matrix[x][y] = 1.0 else matrix[x][y] = 0.0
-                    4 -> if (document.date != null && !document.date.isEmpty()) matrix[x][y] = 1.0 else matrix[x][y] = 0.0
-                }
+
+                    when (i) {
+                        0 -> if (document.mediaType!=null && document.mediaType.toLowerCase().equals("text", true)) matrix[x][y] = 1.0 else matrix[x][y] = 0.0
+                        1 -> if (document.mediaType!=null && document.mediaType.toLowerCase().equals("video", true)) matrix[x][y] = 1.0 else matrix[x][y] = 0.0
+                        2 -> if (document.mediaType!=null && document.mediaType.toLowerCase().equals("image", true)) matrix[x][y] = 1.0 else matrix[x][y] = 0.0
+                        3 -> if (document.licence != null && !document.licence.contains("restricted", true)) matrix[x][y] = 1.0 else matrix[x][y] = 0.0
+                        4 -> if (document.date != null && !document.date.isEmpty()) matrix[x][y] = 1.0 else matrix[x][y] = 0.0
+                    }
+                matrix[lastElement][y] = document.position/combinedResults.size*2
             }
 
         }
+
         return matrix
     }
 

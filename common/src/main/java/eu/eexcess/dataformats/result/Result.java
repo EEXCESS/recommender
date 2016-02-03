@@ -16,6 +16,8 @@ limitations under the License.
  */
 package eu.eexcess.dataformats.result;
 
+import org.codehaus.jackson.annotate.JsonIgnore;
+
 import java.io.Serializable;
 import java.util.LinkedList;
 
@@ -31,6 +33,9 @@ import javax.xml.bind.annotation.XmlRootElement;
 public class Result implements Serializable {
 
     private static final long serialVersionUID = -3095633945245542398L;
+
+    @JsonIgnore
+    public Double position =0.0;
 
     @XmlElement(name = "resultGroup")
     public LinkedList<Result> resultGroup = new LinkedList<Result>();
