@@ -20,11 +20,11 @@ class FeatureMapPickerTest {
     @Test fun featureTest() {
         var featureMapPicker = FeatureMapPicker()
         var userProfile = SecureUserProfile()
-        userProfile.userVector.text = 0.4
-        userProfile.userVector.video = 0.0
-        userProfile.userVector.picture = 0.1
-        userProfile.userVector.openLicence = 0.8
-        userProfile.userVector.dateExisting = 0.5
+        userProfile.preferences.text = 0.4
+        userProfile.preferences.video = 0.0
+        userProfile.preferences.picture = 0.1
+        userProfile.preferences.openLicence = 0.8
+        userProfile.preferences.dateExisting = 0.5
 
         var partners = ArrayList<PartnerBadge>()
         val partner1 = PartnerBadge()

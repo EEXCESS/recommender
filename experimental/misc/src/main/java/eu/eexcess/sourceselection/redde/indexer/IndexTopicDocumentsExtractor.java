@@ -33,12 +33,12 @@ import org.apache.lucene.search.ScoreDoc;
 import org.apache.lucene.search.TopDocs;
 import org.apache.lucene.util.Version;
 
-import eu.eexcess.sourceselection.redde.config.Settings;
+import eu.eexcess.sourceselection.redde.config.ReddeSettings;
 import eu.eexcess.sourceselection.redde.indexer.trec.topic.Topic;
 
 public class IndexTopicDocumentsExtractor extends BinaryIndexResource implements Closeable {
 
-	private static final String FIELD_TEXT = Settings.IndexFields.IndexTextField;
+	private static final String FIELD_TEXT = ReddeSettings.IndexFields.IndexTextField;
 
 	public IndexTopicDocumentsExtractor(String inIndexSourcePath, String outIndexDestPath, Version luceneVersion)
 					throws IOException {

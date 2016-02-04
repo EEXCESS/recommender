@@ -51,12 +51,12 @@ class LSIPicker : PartnersFederatedRecommendationsPicker() {
 
      //   var docVectors = DoubleArray(scales?.size!! +FeatureVector().vector.size )
         val dotProductMap = HashMap<Int, Double>()
-        var tmpVector = DoubleArray(secureUserProfile.userVector.vector.size + scales?.size!!)
+        var tmpVector = DoubleArray(secureUserProfile.preferences.vector.size + scales?.size!!)
         scales?.forEachIndexed { i, d ->
             tmpVector[i] = scales.get(i)
         }
-        secureUserProfile.userVector.vector.forEachIndexed { i, d ->
-            tmpVector[i+scales?.size!!] = secureUserProfile.userVector.vector[i]
+        secureUserProfile.preferences.vector.forEachIndexed { i, d ->
+            tmpVector[i+scales?.size!!] = secureUserProfile.preferences.vector[i]
         }
 
 

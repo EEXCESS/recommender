@@ -26,6 +26,7 @@ import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import eu.eexcess.sourceselection.redde.config.ReddeSettings;
 import net.sf.extjwnl.JWNLException;
 import net.sf.extjwnl.data.IndexWord;
 import net.sf.extjwnl.data.POS;
@@ -44,8 +45,7 @@ import org.apache.lucene.search.TopDocs;
 import org.apache.lucene.search.TopScoreDocCollector;
 import org.apache.lucene.util.Version;
 
-import eu.eexcess.logger.PianoLogger;
-import eu.eexcess.sourceselection.redde.config.Settings;
+
 import eu.eexcess.sourceselection.redde.indexer.BinaryIndexResource;
 
 /**
@@ -57,7 +57,7 @@ import eu.eexcess.sourceselection.redde.indexer.BinaryIndexResource;
  */
 public class DBSampler extends BinaryIndexResource {
 
-	private Logger logger = PianoLogger.getLogger(DBSampler.class.getCanonicalName());
+	private Logger logger = Logger.getLogger(DBSampler.class.getCanonicalName());
 
 	private Dictionary dictionary;
 
@@ -131,7 +131,7 @@ public class DBSampler extends BinaryIndexResource {
 	private void collectSamples(String queryString, IndexSearcher searcher, int maxHitsPerQuery) throws ParseException,
 					IOException {
 
-		Query query = new QueryParser(Settings.IndexFields.IndexTextField, new EnglishAnalyzer()).parse(queryString);
+		Query query = new QueryParser(ReddeSettings.IndexFields.IndexTextField, new EnglishAnalyzer()).parse(queryString);
 
 		TopScoreDocCollector collector = TopScoreDocCollector.create(maxHitsPerQuery, true);
 		searcher.search(query, collector);
@@ -253,7 +253,7 @@ public class DBSampler extends BinaryIndexResource {
 	 */
 	private double resample(String term) throws ParseException, IOException, IllegalArgumentException {
 
-		Query query = new QueryParser(Settings.IndexFields.IndexTextField, new EnglishAnalyzer()).parse(term);
+		Query query = new QueryParser(ReddeSettings.IndexFields.IndexTextField, new EnglishAnalyzer()).parse(term);
 
 		outIndexWriter.commit();
 

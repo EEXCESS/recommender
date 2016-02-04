@@ -307,7 +307,7 @@ public class FederatedRecommenderService {
         userVector.setDateExisting(1.0);
 
 
-        secureUserProfile.setUserVector(userVector);
+        secureUserProfile.setPreferences(userVector);
         secureUserProfile.setAgeRange(2);
         secureUserProfile.setGender("male");
         secureUserProfile.setTimeRange(new TimeRange());

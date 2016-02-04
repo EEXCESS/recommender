@@ -49,15 +49,15 @@ public class SecureUserProfile implements Serializable {
     private List<ContextKeyword> contextKeywords = new ArrayList<ContextKeyword>();
     private List<Interest> interestList = new ArrayList<Interest>();
     private Context context = new Context();
-	private FeatureVector userVector = new FeatureVector();
+	private FeatureVector preferences = new FeatureVector();
 
 
-	public FeatureVector getUserVector() {
-		return userVector;
+	public FeatureVector getPreferences() {
+		return preferences;
 	}
 
-	public void setUserVector(FeatureVector userVector) {
-		this.userVector = userVector;
+	public void setPreferences(FeatureVector preferences) {
+		this.preferences = preferences;
 	}
 
 

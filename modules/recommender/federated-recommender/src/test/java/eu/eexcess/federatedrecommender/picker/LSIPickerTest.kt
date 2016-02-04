@@ -21,11 +21,11 @@ class LSIPickerTest {
     @Test fun testPickResultsTextLow() {
         var LsiPicker = LSIPicker()
         var userProfile = SecureUserProfile()
-        userProfile.userVector.text = 0.0
-        userProfile.userVector.video = 1.9
-        userProfile.userVector.picture = 1.9
-        userProfile.userVector.openLicence = 1.9
-        userProfile.userVector.dateExisting = 1.9
+        userProfile.preferences.text = 0.0
+        userProfile.preferences.video = 1.9
+        userProfile.preferences.picture = 1.9
+        userProfile.preferences.openLicence = 1.9
+        userProfile.preferences.dateExisting = 1.9
         userProfile.contextKeywords.add(ContextKeyword("Lord Byron"))
         userProfile.contextKeywords.add(ContextKeyword("Ada Lovelace"))
 
@@ -86,11 +86,11 @@ class LSIPickerTest {
 
         userProfile.contextKeywords.add(ContextKeyword("Lord Byron"))
         userProfile.contextKeywords.add(ContextKeyword("Ada Lovelace"))
-        userProfile.userVector.dateExisting=1.0;
-        userProfile.userVector.openLicence=1.0;
-        userProfile.userVector.picture=1.0;
-        userProfile.userVector.text=1.0;
-        userProfile.userVector.video=1.0;
+        userProfile.preferences.dateExisting=1.0;
+        userProfile.preferences.openLicence=1.0;
+        userProfile.preferences.picture=1.0;
+        userProfile.preferences.text=1.0;
+        userProfile.preferences.video=1.0;
 
         var partners = ArrayList<PartnerBadge>()
         val partner1 = PartnerBadge()
@@ -128,11 +128,11 @@ class LSIPickerTest {
     @Test fun testPickResultsTextHigh() {
         var LsiPicker = LSIPicker()
         var userProfile = SecureUserProfile()
-        userProfile.userVector.text = 0.9
-        userProfile.userVector.video = 0.0
-        userProfile.userVector.picture = 0.0
-        userProfile.userVector.openLicence = 0.0
-        userProfile.userVector.dateExisting = 0.0
+        userProfile.preferences.text = 0.9
+        userProfile.preferences.video = 0.0
+        userProfile.preferences.picture = 0.0
+        userProfile.preferences.openLicence = 0.0
+        userProfile.preferences.dateExisting = 0.0
         userProfile.contextKeywords.add(ContextKeyword("Lord Byron"))
         userProfile.contextKeywords.add(ContextKeyword("Ada Lovelace"))
 
@@ -171,11 +171,11 @@ class LSIPickerTest {
     @Test fun testPickResultsTextLowNeutral() {
         var LsiPicker = LSIPicker()
         var userProfile = SecureUserProfile()
-        userProfile.userVector.text = 0.0
-        userProfile.userVector.video = 1.0
-        userProfile.userVector.picture = 1.0
-        userProfile.userVector.openLicence = 1.0
-        userProfile.userVector.dateExisting = 1.0
+        userProfile.preferences.text = 0.0
+        userProfile.preferences.video = 1.0
+        userProfile.preferences.picture = 1.0
+        userProfile.preferences.openLicence = 1.0
+        userProfile.preferences.dateExisting = 1.0
         userProfile.contextKeywords.add(ContextKeyword("Lord Byron"))
         userProfile.contextKeywords.add(ContextKeyword("Ada Lovelace"))
 
@@ -273,11 +273,11 @@ class LSIPickerTest {
     @Test fun testPickResultsTextHighNeutral() {
         var LsiPicker = LSIPicker()
         var userProfile = SecureUserProfile()
-        userProfile.userVector.text = 1.0
-        userProfile.userVector.video = 0.0
-        userProfile.userVector.picture = 0.0
-        userProfile.userVector.openLicence = 0.0
-        userProfile.userVector.dateExisting = 0.0
+        userProfile.preferences.text = 1.0
+        userProfile.preferences.video = 0.0
+        userProfile.preferences.picture = 0.0
+        userProfile.preferences.openLicence = 0.0
+        userProfile.preferences.dateExisting = 0.0
         userProfile.contextKeywords.add(ContextKeyword("Lord Byron"))
         userProfile.contextKeywords.add(ContextKeyword("Ada Lovelace"))
 

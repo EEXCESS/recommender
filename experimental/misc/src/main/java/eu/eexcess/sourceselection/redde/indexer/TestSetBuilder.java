@@ -25,8 +25,8 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 
-import eu.eexcess.sourceselection.redde.config.Settings;
-import eu.eexcess.sourceselection.redde.config.Settings.TestIndexSettings;
+import eu.eexcess.sourceselection.redde.config.ReddeSettings;
+
 import eu.eexcess.sourceselection.redde.indexer.trec.topic.Topic;
 import eu.eexcess.sourceselection.redde.indexer.trec.topic.TrecTopicTokenizer;
 
@@ -64,12 +64,12 @@ public class TestSetBuilder {
 	}
 
 	/**
-	 * make indices out of trec data as defined in {@link Settings.testSets()}
+	 * make indices out of trec data as defined in {@link eu.eexcess.sourceselection.redde.config.ReddeSettings}
 	 */
 	public void indexSpreadDBs() {
-		for (TestIndexSettings set : Settings.testSets()) {
+		for (ReddeSettings.TestIndexSettings set : ReddeSettings.testSets()) {
 			TrecToLuceneIndexBuilder builder = new TrecToLuceneIndexBuilder(set.documentsPath, set.baseIndexPath,
-							set.testSetName, Settings.RamBufferSizeMB, Settings.LuceneVersion);
+							set.testSetName, ReddeSettings.RamBufferSizeMB, ReddeSettings.LuceneVersion);
 			builder.index();
 		}
 	}
@@ -78,9 +78,9 @@ public class TestSetBuilder {
 	 * make index out of trec data
 	 */
 	public void indexCentralizedCompleteDB() {
-		TrecToLuceneIndexBuilder builder = new TrecToLuceneIndexBuilder(Settings.BaseIndex.documentsPath,
-						Settings.BaseIndex.baseIndexPath, Settings.BaseIndex.testSetName, Settings.RamBufferSizeMB,
-						Settings.LuceneVersion);
+		TrecToLuceneIndexBuilder builder = new TrecToLuceneIndexBuilder(ReddeSettings.BaseIndex.documentsPath,
+				ReddeSettings.BaseIndex.baseIndexPath, ReddeSettings.BaseIndex.testSetName, ReddeSettings.RamBufferSizeMB,
+				ReddeSettings.LuceneVersion);
 		builder.index();
 	}
 
@@ -99,15 +99,15 @@ public class TestSetBuilder {
 	 * no title given) as query.
 	 */
 	public void indexByTopics() {
-		HashSet<TestIndexSettings> testSets = Settings.topicBasedTestSets();
+		HashSet<ReddeSettings.TestIndexSettings> testSets = ReddeSettings.topicBasedTestSets();
 
-		for (TestIndexSettings set : testSets) {
+		for (ReddeSettings.TestIndexSettings set : testSets) {
 			try {
 				System.out.println("indexing [" + set.testSetName + "] ...");
 				List<Topic> topics = getTrecTopicsByID(set.topicNumbers);
 
 				IndexTopicDocumentsExtractor extractor = new IndexTopicDocumentsExtractor(
-								Settings.BaseIndex.baseIndexPath, set.baseIndexPath, Settings.LuceneVersion);
+						ReddeSettings.BaseIndex.baseIndexPath, set.baseIndexPath, ReddeSettings.LuceneVersion);
 				extractor.storeTopicDocs(topics.toArray(new Topic[0]));
 				extractor.close();
 			} catch (Exception e) {
@@ -129,14 +129,14 @@ public class TestSetBuilder {
 		List<Topic> topics = new ArrayList<Topic>();
 
 		TrecTopicTokenizer tokenizer = new TrecTopicTokenizer();
-		for (Topic topic : tokenizer.tokenize(new FileInputStream(Settings.Topics.TREC04_TOPICS_PATH))) {
+		for (Topic topic : tokenizer.tokenize(new FileInputStream(ReddeSettings.Topics.TREC04_TOPICS_PATH))) {
 			if (containsPrimitive(topicNumbers, topic.topicNumber)) {
 				topics.add(topic);
 			}
 		}
 
 		tokenizer.reset();
-		for (Topic topic : tokenizer.tokenize(new FileInputStream(Settings.Topics.TREC05_TOPICS_PATH))) {
+		for (Topic topic : tokenizer.tokenize(new FileInputStream(ReddeSettings.Topics.TREC05_TOPICS_PATH))) {
 			if (containsPrimitive(topicNumbers, topic.topicNumber)) {
 				topics.add(topic);
 			}

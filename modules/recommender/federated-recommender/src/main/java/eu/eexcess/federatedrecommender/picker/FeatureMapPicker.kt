@@ -27,7 +27,7 @@ class FeatureMapPicker : PartnersFederatedRecommendationsPicker() {
 
 
         var partnerFeatureMatrix = retrievePartnersFeatureFector(partners).getMatrix()
-        var userVector = secureUserProfile?.userVector?.vector
+        var userVector = secureUserProfile?.preferences?.vector
         var partnerSelectionVector: DoubleArray
         partnerSelectionVector = DoubleArray(partners!!.size)
          for (p in partnerFeatureMatrix.indices) {

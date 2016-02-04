@@ -52,14 +52,14 @@ class NaiveRecPicker : PartnersFederatedRecommendationsPicker() {
 
     private fun search(featureMatrix: Array<out DoubleArray>, combinedResults: ArrayList<Result>, secureUserProfile: SecureUserProfile): ResultList? {
      val dotProductMap = HashMap<Int, Double>()
-        var tmpVector = DoubleArray(secureUserProfile.userVector.vector.size + secureUserProfile.contextKeywords.size+1)
+        var tmpVector = DoubleArray(secureUserProfile.preferences.vector.size + secureUserProfile.contextKeywords.size+1)
         secureUserProfile.contextKeywords.forEachIndexed { i, d ->
             tmpVector[i] = 1.0
         }
-        secureUserProfile.userVector.vector.forEachIndexed { i, d ->
-            tmpVector[i + secureUserProfile.contextKeywords.size!!] = secureUserProfile.userVector.vector[i]
+        secureUserProfile.preferences.vector.forEachIndexed { i, d ->
+            tmpVector[i + secureUserProfile.contextKeywords.size!!] = secureUserProfile.preferences.vector[i]
         }
-        tmpVector[secureUserProfile.userVector.vector.size + secureUserProfile.contextKeywords.size]=1.0 //to take the original ranking into account
+        tmpVector[secureUserProfile.preferences.vector.size + secureUserProfile.contextKeywords.size]=1.0 //to take the original ranking into account
 
         for (i in featureMatrix.first().indices) {
             val tmpFeatureMatrix = DoubleArray(featureMatrix.size)
@@ -142,14 +142,20 @@ class NaiveRecPicker : PartnersFederatedRecommendationsPicker() {
                         0 -> if (document.mediaType!=null && document.mediaType.toLowerCase().equals("text", true)) matrix[x][y] = 1.0 else matrix[x][y] = 0.0
                         1 -> if (document.mediaType!=null && document.mediaType.toLowerCase().equals("video", true)) matrix[x][y] = 1.0 else matrix[x][y] = 0.0
                         2 -> if (document.mediaType!=null && document.mediaType.toLowerCase().equals("image", true)) matrix[x][y] = 1.0 else matrix[x][y] = 0.0
-                        3 -> if (document.licence != null && !document.licence.contains("restricted", true)) matrix[x][y] = 1.0 else matrix[x][y] = 0.0
+                        3 -> if (document.licence != null && !document.licence.toLowerCase().equals("restricted", true)) matrix[x][y] = 1.0 else matrix[x][y] = 0.0
                         4 -> if (document.date != null && !document.date.isEmpty()) matrix[x][y] = 1.0 else matrix[x][y] = 0.0
                     }
                 matrix[lastElement][y] = document.position/combinedResults.size*2
             }
 
         }
-
+        println()
+        matrix.forEachIndexed { x, doubles ->
+            doubles.forEachIndexed { i, d ->
+                print(" "+d+",")
+            }
+            println()
+        }
         return matrix
     }
 

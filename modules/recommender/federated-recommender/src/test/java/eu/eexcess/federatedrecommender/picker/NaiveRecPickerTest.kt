@@ -21,11 +21,11 @@ class NaiveRecPickerTest {
     @Test fun testPickResultsTextLow() {
         var NaiveRecPicker = NaiveRecPicker()
         var userProfile = SecureUserProfile()
-        userProfile.userVector.text = 0.0
-        userProfile.userVector.video = 1.9
-        userProfile.userVector.picture = 1.9
-        userProfile.userVector.openLicence = 1.9
-        userProfile.userVector.dateExisting = 1.9
+        userProfile.preferences.text = 0.0
+        userProfile.preferences.video = 1.9
+        userProfile.preferences.picture = 1.9
+        userProfile.preferences.openLicence = 1.9
+        userProfile.preferences.dateExisting = 1.9
         userProfile.contextKeywords.add(ContextKeyword("Lord Byron"))
         userProfile.contextKeywords.add(ContextKeyword("Ada Lovelace"))
 
@@ -86,11 +86,11 @@ class NaiveRecPickerTest {
 
         userProfile.contextKeywords.add(ContextKeyword("Lord Byron"))
         userProfile.contextKeywords.add(ContextKeyword("Ada Lovelace"))
-        userProfile.userVector.dateExisting=1.0;
-        userProfile.userVector.openLicence=1.0;
-        userProfile.userVector.picture=1.0;
-        userProfile.userVector.text=1.0;
-        userProfile.userVector.video=1.0;
+        userProfile.preferences.dateExisting=1.0;
+        userProfile.preferences.openLicence=1.0;
+        userProfile.preferences.picture=1.0;
+        userProfile.preferences.text=1.0;
+        userProfile.preferences.video=1.0;
 
         var partners = ArrayList<PartnerBadge>()
         val partner1 = PartnerBadge()
@@ -129,11 +129,11 @@ class NaiveRecPickerTest {
 
         var naiveRecPicker= NaiveRecPicker()
         var userProfile = SecureUserProfile()
-        userProfile.userVector.text = 5.0
-        userProfile.userVector.video = 0.0
-        userProfile.userVector.picture = 0.0
-        userProfile.userVector.openLicence = 0.0
-        userProfile.userVector.dateExisting = 0.0
+        userProfile.preferences.text = 5.0
+        userProfile.preferences.video = 0.0
+        userProfile.preferences.picture = 0.0
+        userProfile.preferences.openLicence = 0.0
+        userProfile.preferences.dateExisting = 0.0
         userProfile.contextKeywords.add(ContextKeyword("Lord Byron"))
         userProfile.contextKeywords.add(ContextKeyword("Ada Lovelace"))
 
@@ -172,11 +172,11 @@ class NaiveRecPickerTest {
     @Test fun testPickResultsTextLowNeutral() {
         var naiveRecPicker = NaiveRecPicker()
         var userProfile = SecureUserProfile()
-        userProfile.userVector.text = 0.0
-        userProfile.userVector.video = 6.0
-        userProfile.userVector.picture = 6.0
-        userProfile.userVector.openLicence = 6.0
-        userProfile.userVector.dateExisting = 6.0
+        userProfile.preferences.text = 0.0
+        userProfile.preferences.video = 6.0
+        userProfile.preferences.picture = 6.0
+        userProfile.preferences.openLicence = -6.0
+        userProfile.preferences.dateExisting = 6.0
         userProfile.contextKeywords.add(ContextKeyword("Lord Byron"))
         userProfile.contextKeywords.add(ContextKeyword("Ada Lovelace"))
 
@@ -274,11 +274,11 @@ class NaiveRecPickerTest {
     @Test fun testPickResultsTextHighNeutral() {
         var naiveRecPicker = NaiveRecPicker()
         var userProfile = SecureUserProfile()
-        userProfile.userVector.text = 1.0
-        userProfile.userVector.video = 0.0
-        userProfile.userVector.picture = 0.0
-        userProfile.userVector.openLicence = 0.0
-        userProfile.userVector.dateExisting = 0.0
+        userProfile.preferences.text = 1.0
+        userProfile.preferences.video = 0.0
+        userProfile.preferences.picture = 0.0
+        userProfile.preferences.openLicence = 0.0
+        userProfile.preferences.dateExisting = 0.0
         userProfile.contextKeywords.add(ContextKeyword("Lord Byron"))
         userProfile.contextKeywords.add(ContextKeyword("Ada Lovelace"))
 
@@ -401,8 +401,9 @@ class NaiveRecPickerTest {
         var resList2 = ResultList()
         var resList2Element1 = Result()
         resList2Element1.description=""
-        resList2Element1.title="[Text] Fotografie, Zeichnung von Georg Herwegh (Foto) p2"
+        resList2Element1.title="[Text] Fotografie, Zeichnung von Georg Herwegh (Foto) p2 res"
         resList2Element1.mediaType="text"
+        resList2Element1.licence="restricted"
         var resList2Element2 = Result()
         resList2Element2.description=""
         resList2Element2.title="[image Date Licence] Fotografie, Zeichnung von Georg Herwegh (Foto) p2"
@@ -415,8 +416,9 @@ class NaiveRecPickerTest {
         resList2Element3.mediaType="text"
         var resList2Element4 = Result()
         resList2Element4.description=""
-        resList2Element4.title="[Text] Fotografie, Zeichnung von Georg Herwegh (Foto) p2"
+        resList2Element4.title="[Text] Fotografie, Zeichnung von Georg Herwegh (Foto) p2 res"
         resList2Element4.mediaType="text"
+        resList2Element4.licence="restricted"
         resList2.results.add(resList2Element1);
         resList2.results.add(resList2Element2);
         resList2.results.add(resList2Element3);

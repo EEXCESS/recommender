@@ -27,6 +27,7 @@ import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import eu.eexcess.sourceselection.redde.config.ReddeSettings;
 import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.analysis.en.EnglishAnalyzer;
 import org.apache.lucene.document.Document;
@@ -39,8 +40,6 @@ import org.apache.lucene.store.Directory;
 import org.apache.lucene.store.FSDirectory;
 import org.apache.lucene.util.Version;
 
-import eu.eexcess.logger.PianoLogger;
-import eu.eexcess.sourceselection.redde.config.Settings;
 import eu.eexcess.sourceselection.redde.indexer.trec.TrecDocumentReader;
 
 /**
@@ -51,7 +50,7 @@ import eu.eexcess.sourceselection.redde.indexer.trec.TrecDocumentReader;
  */
 public class TrecToLuceneIndexBuilder {
 
-	private Logger logger = PianoLogger.getLogger(TestSetBuilder.class.getCanonicalName());
+	private Logger logger = Logger.getLogger(TestSetBuilder.class.getCanonicalName());
 
 	private TrecDocumentReader documentReader = new TrecDocumentReader();
 
@@ -162,7 +161,7 @@ public class TrecToLuceneIndexBuilder {
 					filesSkipped++;
 				} else {
 					for (Document document : documents) {
-						document.add(new TextField(Settings.IndexFields.IndexNameField, indexName, Field.Store.YES));
+						document.add(new TextField(ReddeSettings.IndexFields.IndexNameField, indexName, Field.Store.YES));
 						writer.addDocument(document);
 						documentsInFile++;
 					}
