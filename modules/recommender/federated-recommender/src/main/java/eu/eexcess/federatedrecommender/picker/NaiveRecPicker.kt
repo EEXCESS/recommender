@@ -2,6 +2,7 @@ package eu.eexcess.federatedrecommender.picker
 
 import com.aliasi.matrix.SvdMatrix
 import eu.eexcess.dataformats.PartnerBadge
+import eu.eexcess.dataformats.result.DocumentBadge
 import eu.eexcess.dataformats.result.Result
 import eu.eexcess.dataformats.result.ResultList
 import eu.eexcess.dataformats.userprofile.FeatureVector
@@ -20,16 +21,19 @@ import java.util.logging.Logger
 class NaiveRecPicker : PartnersFederatedRecommendationsPicker() {
     private val LOGGER = Logger.getLogger("eu.eexcess.federatedRecommender.picker.NaiveRecPicker")
 
+
+
+
     override fun pickResults(secureUserProfile: SecureUserProfile?, resultList: PartnersFederatedRecommendations?, partners: MutableList<PartnerBadge>?, numResults: Int): ResultList? {
         val combinedResults = ArrayList<Result>()
         resultList?.results?.entries?.forEach{ element ->
             element?.value?.results?.forEachIndexed { i, result ->
-                result.apply {
-                    position = element.value.results.size- i.toDouble()
-                }
+
+                result.position = element.value.results.size- i.toDouble()
+                result.documentBadge.expertLevel = element.key.expertLevel;
                 combinedResults.add(result)
             }
-            //combinedResults.addAll(element?.value?.results!!)
+
 
         }
 
@@ -126,7 +130,7 @@ class NaiveRecPicker : PartnersFederatedRecommendationsPicker() {
 
     fun createFeatureMatrix(oldFeatureMatrix: Array<out DoubleArray>, combinedResults: ArrayList<Result>): Array<out DoubleArray> {
         val matrix: Array<out DoubleArray> = Array(oldFeatureMatrix.size + FeatureVector().vector.size+1, { DoubleArray(oldFeatureMatrix.first().size) })
-        //TODO: Do not add expert vector field (scientific resource) (is in the feature vector anyway)
+
         for (x in oldFeatureMatrix.indices) {
             oldFeatureMatrix[x].forEachIndexed { y, d ->
                 matrix[x][y] = d
@@ -144,8 +148,7 @@ class NaiveRecPicker : PartnersFederatedRecommendationsPicker() {
                         2 -> if (document.mediaType!=null && document.mediaType.toLowerCase().equals("image", true)) matrix[x][y] = 1.0 else matrix[x][y] = 0.0
                         3 -> if (document.licence != null && !document.licence.toLowerCase().equals("restricted", true)) matrix[x][y] = 1.0 else matrix[x][y] = 0.0
                         4 -> if (document.date != null && !document.date.isEmpty()) matrix[x][y] = 1.0 else matrix[x][y] = 0.0
-                       // 5 -> if (document.documentBadge.expertLevel!=null) matrix[x][y] =  document.documentBadge.expertLevel else matrix[x][y] = 0.0
-                       //TODO: Add expert vector field (e.g. scientific resource)
+                        5 -> if (document.documentBadge.expertLevel!=null) matrix[x][y] =  document.documentBadge.expertLevel else matrix[x][y] = 0.0
                     }
                 matrix[lastElement][y] = document.position/combinedResults.size*3
 

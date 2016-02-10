@@ -288,6 +288,7 @@ class NaiveRecPickerTest {
         val partner3 = PartnerBadge()
         val partner4 = PartnerBadge()
         partner1.systemId="Partner1"
+
         partners.add(partner1)
 
         partner2.systemId="Partner2"
@@ -310,6 +311,46 @@ class NaiveRecPickerTest {
                 result!!.results.forEach { e ->
                     System.out.println(e.title)
                 }
+
+
+    }
+
+
+    @Test fun testPickResultsTextHighNeutralExpertLevel() {
+        var naiveRecPicker = NaiveRecPicker()
+        var userProfile = SecureUserProfile()
+        userProfile.preferences.text = 0.0
+        userProfile.preferences.video = 0.0
+        userProfile.preferences.picture = 0.0
+        userProfile.preferences.openLicence = 0.0
+        userProfile.preferences.dateExisting = 0.0
+        userProfile.preferences.expertLevel= 9.0
+        userProfile.contextKeywords.add(ContextKeyword("Lord Byron"))
+        userProfile.contextKeywords.add(ContextKeyword("Ada Lovelace"))
+
+        var partners = ArrayList<PartnerBadge>()
+        val partner1 = PartnerBadge()
+        val partner2 = PartnerBadge()
+        partner1.systemId="Partner1"
+        partner1.expertLevel = 0.0
+        partners.add(partner1)
+
+        partner2.systemId="Partner2"
+        partner2.expertLevel = 9.0
+        partners.add(partner2)
+
+
+
+        var resultList = getResultListNeutral(partner1,partner2)
+
+
+
+
+        var result =naiveRecPicker.pickResults(userProfile, resultList, partners, 20);
+        println("Test Text High")
+        result!!.results.forEach { e ->
+            System.out.println(e.title)
+        }
 
 
     }
