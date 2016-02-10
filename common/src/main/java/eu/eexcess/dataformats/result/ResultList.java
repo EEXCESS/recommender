@@ -119,4 +119,5 @@ public class ResultList implements Serializable {
         this.resultStats = resultStats;
     }
 
+
 }

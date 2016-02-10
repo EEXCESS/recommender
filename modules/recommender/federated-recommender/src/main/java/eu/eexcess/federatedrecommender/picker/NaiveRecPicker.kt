@@ -126,7 +126,7 @@ class NaiveRecPicker : PartnersFederatedRecommendationsPicker() {
 
     fun createFeatureMatrix(oldFeatureMatrix: Array<out DoubleArray>, combinedResults: ArrayList<Result>): Array<out DoubleArray> {
         val matrix: Array<out DoubleArray> = Array(oldFeatureMatrix.size + FeatureVector().vector.size+1, { DoubleArray(oldFeatureMatrix.first().size) })
-
+        //TODO: Do not add expert vector field (scientific resource) (is in the feature vector anyway)
         for (x in oldFeatureMatrix.indices) {
             oldFeatureMatrix[x].forEachIndexed { y, d ->
                 matrix[x][y] = d
@@ -144,8 +144,12 @@ class NaiveRecPicker : PartnersFederatedRecommendationsPicker() {
                         2 -> if (document.mediaType!=null && document.mediaType.toLowerCase().equals("image", true)) matrix[x][y] = 1.0 else matrix[x][y] = 0.0
                         3 -> if (document.licence != null && !document.licence.toLowerCase().equals("restricted", true)) matrix[x][y] = 1.0 else matrix[x][y] = 0.0
                         4 -> if (document.date != null && !document.date.isEmpty()) matrix[x][y] = 1.0 else matrix[x][y] = 0.0
+                       // 5 -> if (document.documentBadge.expertLevel!=null) matrix[x][y] =  document.documentBadge.expertLevel else matrix[x][y] = 0.0
+                       //TODO: Add expert vector field (e.g. scientific resource)
                     }
-                matrix[lastElement][y] = document.position/combinedResults.size*2
+                matrix[lastElement][y] = document.position/combinedResults.size*3
+
+
             }
 
         }
