@@ -34,11 +34,10 @@ import org.apache.lucene.misc.HighFreqTerms;
 import org.apache.lucene.misc.TermStats;
 import org.apache.lucene.store.FSDirectory;
 
-import eu.eexcess.logger.PianoLogger;
 
 public class IndexHelper implements Closeable {
 
-	private Logger logger = PianoLogger.getLogger(IndexHelper.class.getCanonicalName());
+	private Logger logger = Logger.getLogger(IndexHelper.class.getCanonicalName());
 	protected IndexReader inIndexReader;
 	protected String indexPath;
 	protected final static String fieldOfInterest = "text";

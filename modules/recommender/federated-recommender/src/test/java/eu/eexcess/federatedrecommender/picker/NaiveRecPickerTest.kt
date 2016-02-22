@@ -169,6 +169,51 @@ class NaiveRecPickerTest {
 
     }
 
+    @Test fun testPickResultsExpert() {
+
+        var naiveRecPicker= NaiveRecPicker()
+        var userProfile = SecureUserProfile()
+        userProfile.preferences.text = 0.0
+        userProfile.preferences.video = 0.0
+        userProfile.preferences.picture = 0.0
+        userProfile.preferences.openLicence = 0.0
+        userProfile.preferences.dateExisting = 0.0
+        userProfile.preferences.expertLevel=10.0
+        userProfile.contextKeywords.add(ContextKeyword("Lord Byron"))
+        userProfile.contextKeywords.add(ContextKeyword("Ada Lovelace"))
+
+        var partners = ArrayList<PartnerBadge>()
+        val partner1 = PartnerBadge()
+        val partner2 = PartnerBadge()
+        val partner3 = PartnerBadge()
+        val partner4 = PartnerBadge()
+        partner1.systemId="Partner1"
+        partners.add(partner1)
+
+        partner2.systemId="Partner2"
+        partners.add(partner2)
+
+        partner3.systemId="Partner3"
+        partners.add(partner3)
+
+        partner4.systemId="Partner4"
+        partners.add(partner4)
+
+
+        var resultList = getResultList(partner1,partner2)
+
+
+
+
+        var result =naiveRecPicker.pickResults(userProfile, resultList, partners, 20);
+        println("Test Text High")
+        result!!.results.forEach { e ->
+            System.out.println(e.title)
+        }
+
+
+    }
+
     @Test fun testPickResultsTextLowNeutral() {
         var naiveRecPicker = NaiveRecPicker()
         var userProfile = SecureUserProfile()
@@ -403,11 +448,15 @@ class NaiveRecPickerTest {
         resList2Element4.description="englische Literaturẹnglische Literatur.Als englische Literatur bezeichnete man lange Zeit die englischsprachige Literatur Großbritanniens und der ehemaligen britischen Kolonien..."
         resList2Element4.title="[Text]englische Literatur p2"
         resList2Element4.mediaType="text"
+        var resList2Element5 = Result()
+        resList2Element5.description="englische  Literaturẹnglische Literatur.Als englische Literatur bezeichnete man lange Zeit die englischsprachige Literatur Großbritanniens und der ehemaligen britischen Kolonien..."
+        resList2Element5.title="[Text]englische Literatur p2"
+        resList2Element5.mediaType="text"
         resList2.results.add(resList2Element1);
         resList2.results.add(resList2Element2);
         resList2.results.add(resList2Element3);
         resList2.results.add(resList2Element4);
-
+        resList2.results.add(resList2Element5);
         restultList.results.put(partner2, resList2);
         return restultList
     }
@@ -460,12 +509,21 @@ class NaiveRecPickerTest {
         resList2Element4.title="[Text] Fotografie, Zeichnung von Georg Herwegh (Foto) p2 res"
         resList2Element4.mediaType="text"
         resList2Element4.licence="restricted"
+        var resList2Element5 = Result()
+        resList2Element5.description=""
+        resList2Element5.title="[Text] Fotografie, Zeichnung von Georg Herwegh (Foto) p2 res"
+        resList2Element5.mediaType="text"
+        resList2Element5.licence="restricted"
         resList2.results.add(resList2Element1);
         resList2.results.add(resList2Element2);
         resList2.results.add(resList2Element3);
         resList2.results.add(resList2Element4);
+        resList2.results.add(resList2Element5);
 
         restultList.results.put(partner2, resList2);
+        partner2.systemId = "partner2"
+       // restultList.results.put(partner2, resList1);
+
         return restultList
     }
 

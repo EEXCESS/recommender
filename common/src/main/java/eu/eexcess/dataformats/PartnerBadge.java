@@ -49,7 +49,7 @@ import java.util.List;
     private String partnerKey;
 
 
-    public double expertLevel;
+    public double expertLevel =0.0;
 
 
 

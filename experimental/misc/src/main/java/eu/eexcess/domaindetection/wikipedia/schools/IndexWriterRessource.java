@@ -20,12 +20,6 @@
 
 package eu.eexcess.domaindetection.wikipedia.schools;
 
-import java.io.Closeable;
-import java.io.File;
-import java.io.IOException;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-
 import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.analysis.en.EnglishAnalyzer;
 import org.apache.lucene.index.IndexWriter;
@@ -35,7 +29,11 @@ import org.apache.lucene.store.Directory;
 import org.apache.lucene.store.FSDirectory;
 import org.apache.lucene.util.Version;
 
-import eu.eexcess.logger.PianoLogger;
+import java.io.Closeable;
+import java.io.File;
+import java.io.IOException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Resource class that allows quick opening new index for creation and closing.
@@ -44,7 +42,7 @@ import eu.eexcess.logger.PianoLogger;
  */
 public class IndexWriterRessource implements Closeable {
 
-    private static final Logger LOGGER = PianoLogger.getLogger(IndexWriterRessource.class);
+    private static final Logger LOGGER = Logger.getLogger(IndexWriterRessource.class.getName());
     protected IndexWriter outIndexWriter;
     private Version luceneVersion = Version.LATEST;
     private Double ramBufferSizeMB = 512.0;

@@ -20,7 +20,7 @@
 
 package eu.eexcess.diversityasurement.wikipedia;
 
-import eu.eexcess.logger.PianoLogger;
+
 import grph.Grph;
 import grph.path.ArrayListPath;
 
@@ -187,7 +187,7 @@ public class MainCategoryRelevanceEstimator {
 
     private static class Worker implements Runnable {
 
-        private static final Logger LOGGER = PianoLogger.getLogger(Worker.class);
+        private static final Logger LOGGER = Logger.getLogger(Worker.class.getName());
         private List<Integer> startCategories;
         private int topK;
         private MainCategoryRelevanceEstimator relevanceEstimator;
@@ -242,7 +242,7 @@ public class MainCategoryRelevanceEstimator {
         }
     }
 
-    private static final Logger LOGGER = PianoLogger.getLogger(MainCategoryRelevanceEstimator.class);
+    private static final Logger LOGGER = Logger.getLogger(MainCategoryRelevanceEstimator.class.getName());
     private final Grph graph;
     private final int[] topCategories;
     // private File outLuceneIndexDirectory = new

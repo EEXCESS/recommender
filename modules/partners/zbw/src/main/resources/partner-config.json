@@ -15,5 +15,6 @@
   "federatedRecommenderURI":"http://127.0.0.1/eexcess-federated-recommender-web-service-1.0-SNAPSHOT/recommender/",
    "languageContent" : ["en","de"],
   "ageRange": 2,
-  "isQueryExpansionEnabled": "true"
+  "isQueryExpansionEnabled": "true",
+  "expertLevel": 1.0
 }

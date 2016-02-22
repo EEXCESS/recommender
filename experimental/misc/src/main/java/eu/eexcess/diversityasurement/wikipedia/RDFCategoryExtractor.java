@@ -31,7 +31,6 @@ import java.util.regex.Pattern;
 
 import org.apache.commons.io.LineIterator;
 
-import eu.eexcess.logger.PianoLogger;
 
 public class RDFCategoryExtractor {
 
@@ -68,7 +67,7 @@ public class RDFCategoryExtractor {
         public String child;
     }
 
-    private Logger logger = PianoLogger.getLogger(RDFCategoryExtractor.class);
+    private Logger logger = Logger.getLogger(RDFCategoryExtractor.class.getName());
 
     private File categoryListing;
     private Statistics statistics = new Statistics();

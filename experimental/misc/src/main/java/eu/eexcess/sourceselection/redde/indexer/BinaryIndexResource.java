@@ -37,8 +37,6 @@ import org.apache.lucene.store.Directory;
 import org.apache.lucene.store.FSDirectory;
 import org.apache.lucene.util.Version;
 
-import eu.eexcess.logger.PianoLogger;
-
 /**
  * opens one index for reading and creates/overwrites an other for writing or
  * closes them
@@ -48,7 +46,7 @@ import eu.eexcess.logger.PianoLogger;
  */
 public class BinaryIndexResource implements Closeable {
 
-	private static final Logger LOGGER = PianoLogger.getLogger(BinaryIndexResource.class.getCanonicalName());
+	private static final Logger LOGGER = Logger.getLogger(BinaryIndexResource.class.getCanonicalName());
 	protected String inIndexPath = null;
 	protected String outIndexPath = null;
 	protected Version luceneVersion = null;

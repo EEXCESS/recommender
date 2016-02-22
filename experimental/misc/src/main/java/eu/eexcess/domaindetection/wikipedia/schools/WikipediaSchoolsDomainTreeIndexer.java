@@ -41,7 +41,7 @@ import eu.eexcess.federatedrecommender.utils.tree.BaseTreeNode;
 import eu.eexcess.federatedrecommender.utils.tree.NodeInspector;
 import eu.eexcess.federatedrecommender.utils.tree.TreeNode;
 import eu.eexcess.federatedrecommender.utils.tree.ValueSetTreeNode;
-import eu.eexcess.logger.PianoLogger;
+
 
 /**
  * This class parses the Wikipedia for Schools subjects and the their hierarchy.
@@ -80,7 +80,7 @@ public class WikipediaSchoolsDomainTreeIndexer extends IndexWriterRessource {
         }
     }
 
-    private static final Logger LOGGER = PianoLogger.getLogger(WikipediaSchoolsDomainTreeIndexer.class);
+    private static final Logger LOGGER = Logger.getLogger(WikipediaSchoolsDomainTreeIndexer.class.getName());
     private static final String DOMAIN_TREE_ENTRYPOINT_DIRECTORY = "wp/index/";
     private static final String DOMAIN_TREE_SITE_PREFIX = "subject.";
     private static final String DOMAIN_TREE_SITE_SUFFIX = ".htm";

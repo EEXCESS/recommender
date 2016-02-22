@@ -144,4 +144,11 @@ public class ContextKeyword implements Serializable {
         this.expansion = expansion;
     }
 
+    @Override public String toString() {
+        return "ContextKeyword{" +
+                "text='" + text + '\'' +
+                ", isMainTopic=" + isMainTopic +
+                ", type=" + type +
+                '}';
+    }
 }

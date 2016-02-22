@@ -62,11 +62,10 @@ import eu.eexcess.diversityasurement.ndcg.NDCGResult;
 import eu.eexcess.diversityasurement.ndcg.NDCGResultList;
 import eu.eexcess.diversityasurement.wikipedia.querytocategoryrelevance.CategoryToTopCategoryRelevance;
 import eu.eexcess.diversityasurement.wikipedia.querytocategoryrelevance.CategoryToTopCategoryRelevance.CategoryRelevance;
-import eu.eexcess.logger.PianoLogger;
 
 public class IASelectVSQueryExpansionEvaluation {
 
-    private static Logger logger = PianoLogger.getLogger(IASelectVSQueryExpansionEvaluation.class);
+    private static Logger logger = Logger.getLogger(IASelectVSQueryExpansionEvaluation.class.getName());
 
     // Map<Document, HashSet<Category>> documentQualities = new
     // HashMap<Document, HashSet<Category>>();

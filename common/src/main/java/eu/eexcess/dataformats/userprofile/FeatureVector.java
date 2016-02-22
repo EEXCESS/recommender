@@ -5,13 +5,12 @@ package eu.eexcess.dataformats.userprofile;
  */
 public class FeatureVector {
 
-    private Double text = 1.0;
-    private Double video = 1.0;
-    private Double picture = 1.0;
-    private Double openLicence = 1.0;
-    private Double dateExisting = 1.0;
-
-    private Double expertLevel = 1.0;
+    private Double text = 0.0;
+    private Double video = 0.0;
+    private Double picture = 0.0;
+    private Double openLicence = 0.0;
+    private Double dateExisting = 0.0;
+    private Double expertLevel = 0.0;
 
     public Double getText() {
         return text;

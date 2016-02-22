@@ -26,16 +26,20 @@ class NaiveRecPicker : PartnersFederatedRecommendationsPicker() {
 
     override fun pickResults(secureUserProfile: SecureUserProfile?, resultList: PartnersFederatedRecommendations?, partners: MutableList<PartnerBadge>?, numResults: Int): ResultList? {
         val combinedResults = ArrayList<Result>()
+
+
+        var maxSize = 0;
         resultList?.results?.entries?.forEach{ element ->
             element?.value?.results?.forEachIndexed { i, result ->
-
-                result.position = element.value.results.size- i.toDouble()
+                if (element.value.results.size>maxSize) maxSize=element.value.results.size
+                result.position =  i.toDouble()
                 result.documentBadge.expertLevel = element.key.expertLevel;
                 combinedResults.add(result)
             }
-
-
         }
+        combinedResults.forEach { it.position = maxSize-it.position }
+
+
 
         val termDocumentMatrix = createTermDocMatrix(secureUserProfile, combinedResults)
         var featureMatrix = createFeatureMatrix(termDocumentMatrix, combinedResults)
@@ -150,7 +154,7 @@ class NaiveRecPicker : PartnersFederatedRecommendationsPicker() {
                         4 -> if (document.date != null && !document.date.isEmpty()) matrix[x][y] = 1.0 else matrix[x][y] = 0.0
                         5 -> if (document.documentBadge.expertLevel!=null) matrix[x][y] =  document.documentBadge.expertLevel else matrix[x][y] = 0.0
                     }
-                matrix[lastElement][y] = document.position/combinedResults.size*3
+                matrix[lastElement][y] = Math.round(document.position/combinedResults.size*30)/10.0
 
 
             }
