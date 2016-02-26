@@ -67,7 +67,7 @@ class NaiveRecPicker : PartnersFederatedRecommendationsPicker() {
         secureUserProfile.preferences.vector.forEachIndexed { i, d ->
             tmpVector[i + secureUserProfile.contextKeywords.size!!] = secureUserProfile.preferences.vector[i]
         }
-        tmpVector[secureUserProfile.preferences.vector.size + secureUserProfile.contextKeywords.size]=1.0 //to take the original ranking into account
+        tmpVector[secureUserProfile.preferences.vector.size + secureUserProfile.contextKeywords.size]=1.5 //to take the original ranking into account
 
         for (i in featureMatrix.first().indices) {
             val tmpFeatureMatrix = DoubleArray(featureMatrix.size)
