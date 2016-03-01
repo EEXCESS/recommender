@@ -40,7 +40,7 @@ public class LuceneQueryGeneratorFieldTermConjunctionMainTopic implements QueryG
         List<ContextKeyword> otherKeywords = new ArrayList<ContextKeyword>();
 
         userProfile.getContextKeywords().forEach(kw -> {
-            if (kw.getType() == null || kw.getType().equals(SpecialFieldsEum.Misc)) {
+            //if (kw.getType() == null) {
                 if (kw.getIsMainTopic()) {
                     if (result.length() == 0) {
                         result.append("(" + kw.getText());
@@ -50,14 +50,14 @@ public class LuceneQueryGeneratorFieldTermConjunctionMainTopic implements QueryG
                     mainKeywords.add(kw);
                 } else
                     otherKeywords.add(kw);
-            }
+            //}
         });
         if (!mainKeywords.isEmpty() && !otherKeywords.isEmpty())
             result.append(") AND (");
         
         StringBuilder tmpResult = new StringBuilder();
         for (ContextKeyword key : otherKeywords) {
-            if (key.getType() == null || key.getType().equals(SpecialFieldsEum.Misc)) {
+            //if (key.getType() == null) {
                 String keyword = key.getText();
                 Matcher matcher2 = replace.matcher(keyword);
                 if (matcher2.find()) {
@@ -72,7 +72,7 @@ public class LuceneQueryGeneratorFieldTermConjunctionMainTopic implements QueryG
                 } else {
                     expansion = addQueryTerm(tmpResult, expansion, keyword);
                 }
-            }
+            //}
         }
         result.append(tmpResult);
         if (expansion)
@@ -87,6 +87,7 @@ public class LuceneQueryGeneratorFieldTermConjunctionMainTopic implements QueryG
         } catch (UnsupportedEncodingException e) {
             LOGGER.log(Level.WARNING, "Could not encode query in UTF-8", e);
         }
+        LOGGER.log(Level.INFO, "Query:"+ resultString);
         return resultString;
     }
 

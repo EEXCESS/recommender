@@ -1,9 +1,11 @@
 package eu.eexcess.dataformats.userprofile;
 
+import java.io.Serializable;
+
 /**
  * Created by hziak on 10.12.15.
  */
-public class FeatureVector {
+public class FeatureVector implements Serializable {
 
     private Double text = 0.0;
     private Double video = 0.0;

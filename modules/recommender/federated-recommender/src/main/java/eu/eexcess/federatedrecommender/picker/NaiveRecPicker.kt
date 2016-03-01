@@ -37,7 +37,7 @@ class NaiveRecPicker : PartnersFederatedRecommendationsPicker() {
                 combinedResults.add(result)
             }
         }
-        combinedResults.forEach { it.position = maxSize-it.position }
+      //  combinedResults.forEach { it.position = maxSize-it.position }
 
 
 
@@ -67,7 +67,7 @@ class NaiveRecPicker : PartnersFederatedRecommendationsPicker() {
         secureUserProfile.preferences.vector.forEachIndexed { i, d ->
             tmpVector[i + secureUserProfile.contextKeywords.size!!] = secureUserProfile.preferences.vector[i]
         }
-        tmpVector[secureUserProfile.preferences.vector.size + secureUserProfile.contextKeywords.size]=1.5 //to take the original ranking into account
+        tmpVector[secureUserProfile.preferences.vector.size + secureUserProfile.contextKeywords.size]=2.0 //to take the original ranking into account
 
         for (i in featureMatrix.first().indices) {
             val tmpFeatureMatrix = DoubleArray(featureMatrix.size)
@@ -93,7 +93,9 @@ class NaiveRecPicker : PartnersFederatedRecommendationsPicker() {
         return resultList
     }
 
-
+    /**
+     * calculates the dot product of two vectors
+     */
     internal fun dotProduct(xs: DoubleArray, ys: DoubleArray): Double {
         var sum = 0.0
         for (k in ys.indices)
@@ -114,17 +116,19 @@ class NaiveRecPicker : PartnersFederatedRecommendationsPicker() {
 
         secureUserProfile?.contextKeywords?.forEachIndexed { x, contextKeyword ->
 
-            contextKeyword.text.split(" ").forEach {
+            contextKeyword.text.forEach {
                 combinedResults.forEachIndexed { y, document ->
                     val combinedTitleDesc = document.title + " " + document.description
-                    var counter = 0;
+                    var counter = 0.0;
                     combinedTitleDesc.split("\\s").forEach { element ->
                         if (element.contains(it)) {
-                            counter += 1
+                            if(counter<0.5 && combinedTitleDesc.length>0) {
+                               val i = 1.0 / combinedTitleDesc.length
+                                counter += i
+                            }
                         }
-
                     }
-                    matrix[x][y] += counter;
+                    matrix[x][y] +=counter
                 }
             }
         }
@@ -154,7 +158,8 @@ class NaiveRecPicker : PartnersFederatedRecommendationsPicker() {
                         4 -> if (document.date != null && !document.date.isEmpty()) matrix[x][y] = 1.0 else matrix[x][y] = 0.0
                         5 -> if (document.documentBadge.expertLevel!=null) matrix[x][y] =  document.documentBadge.expertLevel else matrix[x][y] = 0.0
                     }
-                matrix[lastElement][y] = Math.round(document.position/combinedResults.size*30)/10.0
+                val d1 = Math.pow(Math.log((document.position+1)/combinedResults.size ),2.0)
+                matrix[lastElement][y] = d1*1.0
 
 
             }

@@ -25,16 +25,20 @@ public class MendeleySpecialFieldsTest {
     @Test public void toQueryTestWHOWHAT() {
         SecureUserProfile secureUserProfile = new SecureUserProfile();
         ContextKeyword ck1 = new ContextKeyword();
+        ContextKeyword ck3 = new ContextKeyword();
         ck1.setType(SpecialFieldsEum.Person);
         ck1.setText("SEPP FORCHER");
+        ck3.setType(SpecialFieldsEum.Person);
+        ck3.setText("Ada Lovelace");
         secureUserProfile.getContextKeywords().add(ck1);
         ContextKeyword ck2 = new ContextKeyword();
         ck2.setType(SpecialFieldsEum.Organization);
         ck2.setText("KLINGENDES ÖSTERREICH");
         secureUserProfile.getContextKeywords().add(ck2);
+        secureUserProfile.getContextKeywords().add(ck3);
         String returnString = mendeleySpecialFields.toQuery(secureUserProfile);
         System.out.println(returnString);
-        assertTrue(returnString.equals("&author=SEPP+FORCHER&title=KLINGENDES+%C3%96STERREICH"));
+        assertTrue(returnString.equals("&author=SEPP+FORCHER+OR+Ada+Lovelace&title=KLINGENDES+%C3%96STERREICH"));
 
     }
 

@@ -201,7 +201,7 @@ public class FederatedRecommenderEvaluationCore {
      * returns the next result from the evaluation manager and checks if the
      * manager chache is warmed
      * 
-     * @param uID
+     * @param uID the user id from
      * @return
      * @throws IOException
      */
@@ -427,7 +427,7 @@ public class FederatedRecommenderEvaluationCore {
     /**
      * returns a graph as object to convert to json for d3
      * 
-     * @param userProfileDefaultEdge
+     * @param userProfile
      * @return
      * @throws FederatedRecommenderException
      */

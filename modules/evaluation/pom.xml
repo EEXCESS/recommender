@@ -32,13 +32,13 @@
 			<artifactId>eexcess-common</artifactId>
 			<version>${project.parent.version}</version>
 		</dependency>
-
-
 		<dependency>
 			<groupId>eu.eexcess</groupId>
 			<artifactId>eexcess-federated-recommender-web-service</artifactId>
 			<version>${project.parent.version}</version>
 		</dependency>
+
+
 		<dependency>
 			<groupId>com.thetransactioncompany</groupId>
 			<artifactId>cors-filter</artifactId>
@@ -99,6 +99,11 @@
 			<groupId>org.apache.solr</groupId>
 			<artifactId>solr-core</artifactId>
 			<version>4.10.1</version>
+		</dependency>
+		<dependency>
+			<groupId>eu.eexcess</groupId>
+			<artifactId>eexcess-federated-recommender</artifactId>
+			<version>1.0-SNAPSHOT</version>
 		</dependency>
 	</dependencies>
 </project>
