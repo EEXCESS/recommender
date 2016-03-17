@@ -32,11 +32,13 @@ import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.util.EntityUtils;
 
+import eu.eexcess.dataformats.result.DocumentBadgeList;
 import eu.eexcess.dataformats.result.ResultList;
 
 public class PartnerRecommenderEvaluationTestHelper {
 	
-	private static final String FILENAME_KEYWORDS = ".\\src\\test\\data\\review-demo\\"+ "keywords_review_demo.txt";
+//	private static final String FILENAME_KEYWORDS = ".\\src\\test\\data\\review-demo\\"+ "keywords_review_demo.txt";
+	private static final String FILENAME_KEYWORDS = ".\\src\\test\\data\\testbed-1\\"+ "keywords_random_1.txt";
 //	private static final String FILENAME_KEYWORDS = ".\\src\\test\\data\\testbed-1\\"+ "keywords_random_10.txt";
 //	private static final String FILENAME_KEYWORDS = ".\\src\\test\\data\\testbed-1\\"+ "keywords_random_20.txt";
 //	private static final String FILENAME_KEYWORDS = ".\\src\\test\\data\\testbed-1\\"+ "keywords_random_100.txt";
@@ -93,12 +95,27 @@ public class PartnerRecommenderEvaluationTestHelper {
 
 			HttpPost request = new HttpPost("http://localhost:" +port + "/"+deploymentContext+"/partner/recommend/");
 	        request.addHeader("content-type", "application/xml");
+            request.addHeader("accept", "application/xml");
+
 	        request.setEntity(params);
 	        HttpResponse response = httpClient.execute(request);
             String responseString = EntityUtils.toString(response.getEntity());
             
             resultList = PartnerRecommenderEvaluationTestHelper.parseResponse(responseString);
             
+            
+            if (resultList!= null && resultList.results.size() > 0 )
+            {
+	            for (int i = 0; i < resultList.results.size(); i++) {
+	                ArrayList<String> ids = new ArrayList<String>();
+	                ArrayList<String> uris = new ArrayList<String>();
+	                ids.add(resultList.results.get(i).documentBadge.id);
+	                uris.add(resultList.results.get(i).documentBadge.uri);
+	                DocumentBadgeList documentDetails = PartnerRecommenderTestHelper
+	                        .getDetails(deploymentContext, port, PartnerRecommenderTestHelper.createParamsForPartnerRecommenderDetailCall(ids, uris,resultList.results.get(i).documentBadge.provider));
+	
+	            }
+            }
 	    }catch (Exception ex) {
 	    	System.out.println(ex);
 	    } finally {

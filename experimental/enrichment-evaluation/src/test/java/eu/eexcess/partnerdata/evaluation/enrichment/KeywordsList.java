@@ -54,25 +54,25 @@ public class KeywordsList {
 	}
 
 	public void sortKeywords() {
-		ArrayList<String> keywords = readFile("D:\\interactions-log\\keywords.txt");
+		ArrayList<String> keywords = readFile("C:\\dev\\eexcess\\trunk\\src\\wp4\\dataquality\\resources\\interactions-log\\keywords.txt");
 		java.util.Collections.sort(keywords);
-		writeFile("D:\\interactions-log\\keywords_sorted.txt", keywords,-1);
+		writeFile("C:\\dev\\eexcess\\trunk\\src\\wp4\\dataquality\\resources\\interactions-log\\keywords_sorted.txt", keywords,-1);
 	}
 
 	public void resizeKeywords(int size) {
-		ArrayList<String> keywords = readFile("D:\\interactions-log\\keywords_sorted.txt");
+		ArrayList<String> keywords = readFile("C:\\dev\\eexcess\\trunk\\src\\wp4\\dataquality\\resources\\interactions-log\\keywords_sorted.txt");
 		writeFile("D:\\interactions-log\\keywords_sorted_100.txt", keywords,size);
 	}
 
 	public void randomKeywords(int size) {
-		ArrayList<String> keywords = readFile("D:\\interactions-log\\keywords_sorted.txt");
+		ArrayList<String> keywords = readFile("C:\\dev\\eexcess\\trunk\\src\\wp4\\dataquality\\resources\\interactions-log\\keywords_sorted.txt");
 		Random randomGenerator = new Random();
 		ArrayList<String> ret = new ArrayList<String>(); 
 	    for (int idx = 1; idx <= size; ++idx){
 	      int randomInt = randomGenerator.nextInt(keywords.size());
 	      ret.add(keywords.get(randomInt));
 	    }		
-		writeFile("D:\\interactions-log\\keywords_random_"+size+".txt", ret,-1);
+		writeFile("C:\\dev\\eexcess\\trunk\\src\\wp4\\dataquality\\resources\\interactions-log\\keywords_random_"+size+".txt", ret,-1);
 	}
 
 	public void writeFile(String filename, ArrayList<String> keywords, int size) {
@@ -98,8 +98,12 @@ public class KeywordsList {
 
 	public static void main(String[] args) {
 		KeywordsList tester = new KeywordsList();
+		tester.randomKeywords(10);
 		tester.randomKeywords(20);
-
+		tester.randomKeywords(100);
+		tester.randomKeywords(200);
+		tester.randomKeywords(1000);
+		tester.randomKeywords(2000);
 	}
 
 }
