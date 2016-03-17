@@ -129,7 +129,7 @@ class NaiveRecPickerTest {
 
         var naiveRecPicker= NaiveRecPicker()
         var userProfile = SecureUserProfile()
-        userProfile.preferences.text = 5.0
+        userProfile.preferences.text = 30.0
         userProfile.preferences.video = 0.0
         userProfile.preferences.picture = 0.0
         userProfile.preferences.openLicence = 0.0
@@ -143,6 +143,7 @@ class NaiveRecPickerTest {
         val partner3 = PartnerBadge()
         val partner4 = PartnerBadge()
         partner1.systemId="Partner1"
+        partner1.queryGeneratorClass="MainTopic"
         partners.add(partner1)
 
         partner2.systemId="Partner2"
@@ -178,7 +179,7 @@ class NaiveRecPickerTest {
         userProfile.preferences.picture = 0.0
         userProfile.preferences.openLicence = 0.0
         userProfile.preferences.dateExisting = 0.0
-        userProfile.preferences.expertLevel=10.0
+        userProfile.preferences.expertLevel=0.0
         userProfile.contextKeywords.add(ContextKeyword("Lord Byron"))
         userProfile.contextKeywords.add(ContextKeyword("Ada Lovelace"))
 
@@ -188,12 +189,16 @@ class NaiveRecPickerTest {
         val partner3 = PartnerBadge()
         val partner4 = PartnerBadge()
         partner1.systemId="Partner1"
+        partner1.queryGeneratorClass = "eu.eexcess.partnerrecommender.reference.LuceneQueryGeneratorFieldTermConjunctionMainTopic"
+
         partners.add(partner1)
 
         partner2.systemId="Partner2"
+      //  partner2.queryGeneratorClass = "eu.eexcess.partnerrecommender.reference.LuceneQueryGeneratorFieldTermConjunction"
         partners.add(partner2)
 
         partner3.systemId="Partner3"
+        partner3.queryGeneratorClass = "eu.eexcess.partnerrecommender.reference.LuceneQueryGeneratorFieldTermConjunction"
         partners.add(partner3)
 
         partner4.systemId="Partner4"
@@ -206,7 +211,7 @@ class NaiveRecPickerTest {
 
 
         var result =naiveRecPicker.pickResults(userProfile, resultList, partners, 20);
-        println("Test Text High")
+        println("Test Expert High")
         result!!.results.forEach { e ->
             System.out.println(e.title)
         }
@@ -219,8 +224,8 @@ class NaiveRecPickerTest {
         var userProfile = SecureUserProfile()
         userProfile.preferences.text = 0.0
         userProfile.preferences.video = 6.0
-        userProfile.preferences.picture = 6.0
-        userProfile.preferences.openLicence = -6.0
+        userProfile.preferences.picture = 30.0
+        userProfile.preferences.openLicence = 6.0
         userProfile.preferences.dateExisting = 6.0
         userProfile.contextKeywords.add(ContextKeyword("Lord Byron"))
         userProfile.contextKeywords.add(ContextKeyword("Ada Lovelace"))
@@ -237,9 +242,12 @@ class NaiveRecPickerTest {
         partner1.featureVector.picture=0.0
         partner1.featureVector.dateExisting=0.0
         partner1.featureVector.video=0.0
+        partner1.queryGeneratorClass = "eu.eexcess.partnerrecommender.reference.LuceneQueryGeneratorFieldTermConjunctionMainTopic"
         partners.add(partner1)
         partner2.systemId="Partner2"
         partner2.featureVector = FeatureVector()
+
+        partner2.queryGeneratorClass = "eu.eexcess.partnerrecommender.reference.LuceneQueryGeneratorFieldTermConjunction"
         partner2.featureVector.text=2.0
         partner2.featureVector.openLicence=2.0
         partner2.featureVector.picture=1.0
@@ -247,6 +255,7 @@ class NaiveRecPickerTest {
         partner2.featureVector.video=0.0
         partners.add(partner2)
         partner3.systemId="Partner3"
+        partner3.queryGeneratorClass = "eu.eexcess.partnerrecommender.reference.LuceneQueryGeneratorFieldTermConjunction"
         partner3.featureVector = FeatureVector()
         partner3.featureVector.text=0.0
         partner3.featureVector.openLicence=0.0
@@ -407,7 +416,7 @@ class NaiveRecPickerTest {
         var resList1Element1 = Result()
         resList1Element1.description=""
         resList1Element1.title="[image]Critique of Lovelace Meta-Analysis p1"
-        resList1Element1.mediaType="image"
+        resList1Element1.mediaType="IMAGE"
         var resList1Element2 = Result()
         resList1Element2.description="Burg (oder Stadteingang) über Mauer und Fels. Davor freies Feld mit Bauer, Kuh und Ziege. Im Hintergrund ein rosses Kreuz. Auf der Rückseite handschriftlicher Eintrag von Marcel Herwegh: \"Après un dessin de G.H. de l'époque de Balingen. L'original se trouve chez ma soeur Ada de Paula-Souza; il m'a été donné par un ancien condisciple de G.H.En hommage après un concert spirituel ou je me suis fait entendre à Reutlingen (Würtemberg) en l'année 1878 ou 1880.... M.H.\". Das Original (BH 0170a) befindet sich in Liestal."
         resList1Element2.title="[Text]Fotografie, Zeichnung von Georg Herwegh (Foto) p1"
@@ -419,7 +428,7 @@ class NaiveRecPickerTest {
         var resList1Element4 = Result()
         resList1Element4.description=""
         resList1Element4.title="[image] Bild eines jungen Mannes mit rotem Hut (mit Feder) blauer Weste und Stock in der Hand. 3/4 Figur. p1"
-        resList1Element4.mediaType="image"
+        resList1Element4.mediaType="IMAGE"
         resList1.results.add(resList1Element1);
         resList1.results.add(resList1Element2);
         resList1.results.add(resList1Element3);

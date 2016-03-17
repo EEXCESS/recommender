@@ -32,7 +32,7 @@ class NaiveRecPicker : PartnersFederatedRecommendationsPicker() {
         resultList?.results?.entries?.forEach{ element ->
             element?.value?.results?.forEachIndexed { i, result ->
                 if (element.value.results.size>maxSize) maxSize=element.value.results.size
-                result.position =  i.toDouble()
+                result.position =  if(element.key.queryGeneratorClass!=null && element.key.queryGeneratorClass.contains("MainTopic")) i.toDouble() else i.toDouble()+1 //Boost if the query is more complex and supports main topic
                 result.documentBadge.expertLevel = element.key.expertLevel;
                 combinedResults.add(result)
             }
