@@ -29,6 +29,7 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
+import eu.eexcess.sourceselection.redde.config.ReddeSettings;
 import org.junit.Test;
 
 import eu.eexcess.federatedrecommender.domaindetection.probing.Domain;
@@ -37,7 +38,7 @@ import eu.eexcess.federatedrecommender.domaindetection.wordnet.WordnetDomainsDet
 import eu.eexcess.federatedrecommender.utils.tree.NodeInspector;
 import eu.eexcess.federatedrecommender.utils.tree.TreeNode;
 import eu.eexcess.federatedrecommender.utils.tree.ValueSetTreeNode;
-import eu.eexcess.sourceselection.redde.config.Settings;
+
 
 public class TopTermToWNDomainTest {
 
@@ -69,11 +70,11 @@ public class TopTermToWNDomainTest {
     @Test
     public void allignToDomains_allignTermsToDotmains_expectNotExceptional() {
 
-        if (Settings.isResourceAvailable(Settings.BaseIndex) && Settings.isWordNet20ResourceAvailable() && Settings.isWordNetDomainsResourceAvailable()) {
+        if (ReddeSettings.isResourceAvailable(ReddeSettings.BaseIndex) && ReddeSettings.isWordNet20ResourceAvailable() && ReddeSettings.isWordNetDomainsResourceAvailable()) {
             TopTermToWNDomain mapper;
             try {
-                mapper = new TopTermToWNDomain(Settings.BaseIndex.baseIndexPath, Settings.WordNet.Path_2_0, Settings.WordnetDomains.Path,
-                        Settings.WordnetDomains.CSVDomainPath);
+                mapper = new TopTermToWNDomain(ReddeSettings.BaseIndex.baseIndexPath, ReddeSettings.WordNet.Path_2_0, ReddeSettings.WordnetDomains.Path,
+                        ReddeSettings.WordnetDomains.CSVDomainPath);
 
                 TreeNode domainsToTermsTree = mapper.assignToDomains(0, 99);
                 mapper.close();
@@ -94,10 +95,10 @@ public class TopTermToWNDomainTest {
     @Test
     public void allignToDomains_allignTermsToDomains_expectCorrectAllignmentOfSomeTerms() {
         TopTermToWNDomain mapper;
-        if (Settings.isResourceAvailable(Settings.BaseIndex) && Settings.isWordNet20ResourceAvailable() && Settings.isWordNetDomainsResourceAvailable()) {
+        if (ReddeSettings.isResourceAvailable(ReddeSettings.BaseIndex) && ReddeSettings.isWordNet20ResourceAvailable() && ReddeSettings.isWordNetDomainsResourceAvailable()) {
             try {
-                mapper = new TopTermToWNDomain(Settings.BaseIndex.baseIndexPath, Settings.WordNet.Path_2_0, Settings.WordnetDomains.Path,
-                        Settings.WordnetDomains.CSVDomainPath);
+                mapper = new TopTermToWNDomain(ReddeSettings.BaseIndex.baseIndexPath, ReddeSettings.WordNet.Path_2_0, ReddeSettings.WordnetDomains.Path,
+                        ReddeSettings.WordnetDomains.CSVDomainPath);
 
                 // TERM -> DOMAIN
                 // parent -> person
@@ -141,11 +142,11 @@ public class TopTermToWNDomainTest {
     @Test
     public void allignToDomains_allignTermsToDomains_expectCorrectNumOfTermsInSubDomain() {
 
-        if (Settings.isResourceAvailable(Settings.BaseIndex) && Settings.isWordNet20ResourceAvailable() && Settings.isWordNetDomainsResourceAvailable()) {
+        if (ReddeSettings.isResourceAvailable(ReddeSettings.BaseIndex) && ReddeSettings.isWordNet20ResourceAvailable() && ReddeSettings.isWordNetDomainsResourceAvailable()) {
             TopTermToWNDomain mapper;
             try {
-                mapper = new TopTermToWNDomain(Settings.BaseIndex.baseIndexPath, Settings.WordNet.Path_2_0, Settings.WordnetDomains.Path,
-                        Settings.WordnetDomains.CSVDomainPath);
+                mapper = new TopTermToWNDomain(ReddeSettings.BaseIndex.baseIndexPath, ReddeSettings.WordNet.Path_2_0, ReddeSettings.WordnetDomains.Path,
+                        ReddeSettings.WordnetDomains.CSVDomainPath);
 
                 ValueSetTreeNode<String> domainsToTermsTree = mapper.assignToDomains(0, 99);
                 mapper.close();
@@ -173,9 +174,9 @@ public class TopTermToWNDomainTest {
 
     @Test
     public void wordnetDomainDetector_detect_detectDomainsAsExpected() {
-        if (Settings.isWordNetDomainsResourceAvailable()) {
+        if (ReddeSettings.isWordNetDomainsResourceAvailable()) {
             try {
-                WordnetDomainsDetector wdt = new WordnetDomainsDetector(new File(Settings.WordNet.Path_2_0), new File(Settings.WordnetDomains.Path), true);
+                WordnetDomainsDetector wdt = new WordnetDomainsDetector(new File(ReddeSettings.WordNet.Path_2_0), new File(ReddeSettings.WordnetDomains.Path), true);
 
                 // TERM -> DOMAIN
                 // parent -> person

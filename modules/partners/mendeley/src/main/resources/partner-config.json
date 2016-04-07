@@ -1,11 +1,11 @@
 {
   "systemId": "Mendeley",
   "queryGeneratorClass": "eu.eexcess.partnerrecommender.reference.LuceneQueryGeneratorFieldTermConjunctionMainTopic",
-  "specialFieldQueryGeneratorClass": "eu.eexcess.mendeley.recommender.MendeleySpecialFields",
+  //"specialFieldQueryGeneratorClass": "eu.eexcess.mendeley.recommender.MendeleySpecialFields",
   "partnerConnectorClass": "eu.eexcess.mendeley.recommender.PartnerConnector",
   "transformerClass": "eu.eexcess.mendeley.datalayer.MendeleyTransformer",
   "searchEndpoint": "https://api.mendeley.com/search/catalog?limit=20&query=${query}",
-  "specialFieldTemplate": "&${field}=${query}",
+  //"specialFieldTemplate": "&${field}=${query}",
   "fieldNameWho": "authors",
   "fieldNameWhere": "sources",
   "fieldNameWhat": "titles",
@@ -25,6 +25,6 @@
   "federatedRecommenderURI":"http://127.0.0.1/eexcess-federated-recommender-web-service-1.0-SNAPSHOT/recommender/",
   "languageContent" : ["en"],
   "ageRange": 2,
-  "isQueryExpansionEnabled": "true",
+  "isQueryExpansionEnabled": "false",
   "expertLevel": 1.0
 }

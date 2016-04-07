@@ -20,24 +20,17 @@
 
 package eu.eexcess.sourceselection.redde;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-
-import java.io.IOException;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.LinkedHashSet;
-import java.util.Map;
-import java.util.Set;
-import java.util.TreeSet;
-
+import eu.eexcess.sourceselection.redde.Redde.QueryRelevance;
+import eu.eexcess.sourceselection.redde.config.ReddeSettings;
+import eu.eexcess.sourceselection.redde.dbsampling.DatabaseDetails;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-import eu.eexcess.sourceselection.redde.Redde.QueryRelevance;
-import eu.eexcess.sourceselection.redde.config.Settings;
-import eu.eexcess.sourceselection.redde.dbsampling.DatabaseDetails;
+import java.io.IOException;
+import java.util.*;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 public class ReddeTest {
 
@@ -88,8 +81,8 @@ public class ReddeTest {
 
     @Test
     public void meanAbsoluteError_calculateMeanWithoutResult_expectError() {
-        if (Settings.isResourceAvailable(Settings.testSets()) && Settings.isWordNet30ResourceAvailable()) {
-            Redde estimator = new Redde(Settings.testSets(), Settings.WordNet.Path_3_0, Settings.LuceneVersion, Redde.newDefaultParameters());
+        if (ReddeSettings.isResourceAvailable(ReddeSettings.testSets()) && ReddeSettings.isWordNet30ResourceAvailable()) {
+            Redde estimator = new Redde(ReddeSettings.testSets(), ReddeSettings.WordNet.Path_3_0, ReddeSettings.LuceneVersion, Redde.newDefaultParameters());
             try {
                 estimator.meanAbsoluteError();
             } catch (IllegalStateException e) {
@@ -102,9 +95,9 @@ public class ReddeTest {
     @Test
     public void meanAbsoluteError_calculateMean_expectAccurateValue() {
 
-        if (Settings.isResourceAvailable(Settings.testSets()) && Settings.isWordNet30ResourceAvailable()) {
+        if (ReddeSettings.isResourceAvailable(ReddeSettings.testSets()) && ReddeSettings.isWordNet30ResourceAvailable()) {
             try {
-                Redde estimator = new Redde(Settings.testSets(), Settings.WordNet.Path_3_0, Settings.LuceneVersion, Redde.newDefaultParameters());
+                Redde estimator = new Redde(ReddeSettings.testSets(), ReddeSettings.WordNet.Path_3_0, ReddeSettings.LuceneVersion, Redde.newDefaultParameters());
 
                 DatabaseDetails result = new DatabaseDetails();
                 result.absoluteErrorRate = 3.14159265359;
@@ -134,13 +127,13 @@ public class ReddeTest {
     @Test
     public void queryRelevance_calculateQueryRelevance_expectNotExceptional() {
 
-        if (Settings.isResourceAvailable(Settings.testSets()) && Settings.isWordNet30ResourceAvailable()) {
+        if (ReddeSettings.isResourceAvailable(ReddeSettings.testSets()) && ReddeSettings.isWordNet30ResourceAvailable()) {
             Redde estimator = null;
 
             int maxTestRetry = 10;
             boolean hasTestRunThrough = false;
             while (true) {
-                estimator = new Redde(Settings.testSets(), Settings.WordNet.Path_3_0, Settings.LuceneVersion, Redde.newDefaultParameters());
+                estimator = new Redde(ReddeSettings.testSets(), ReddeSettings.WordNet.Path_3_0, ReddeSettings.LuceneVersion, Redde.newDefaultParameters());
                 // estimate database sizes and collect some more details
                 try {
                     estimator.estimateSourcesSize();
@@ -190,8 +183,8 @@ public class ReddeTest {
 
     @Test
     public void tqueryRelevanceDistribution_calculateQueryRelevanceDistribution_expectAccurateResult() {
-        if (Settings.isResourceAvailable(Settings.testSets()) && Settings.isWordNet30ResourceAvailable()) {
-            Redde estimator = new Redde(Settings.testSets(), Settings.WordNet.Path_3_0, Settings.LuceneVersion, Redde.newDefaultParameters());
+        if (ReddeSettings.isResourceAvailable(ReddeSettings.testSets()) && ReddeSettings.isWordNet30ResourceAvailable()) {
+            Redde estimator = new Redde(ReddeSettings.testSets(), ReddeSettings.WordNet.Path_3_0, ReddeSettings.LuceneVersion, Redde.newDefaultParameters());
             Set<QueryRelevance> relevanceResults = createMockResults(10);
 
             for (QueryRelevance queryRelevance : relevanceResults) {
@@ -211,9 +204,9 @@ public class ReddeTest {
     @Test
     public void queryRelevanceDistribution_calculateQueryRelevanceDistribution_toubleTestSetEntry_expectIllegalArgumentException() {
 
-        if (Settings.isResourceAvailable(Settings.testSets()) && Settings.isWordNet30ResourceAvailable()) {
+        if (ReddeSettings.isResourceAvailable(ReddeSettings.testSets()) && ReddeSettings.isWordNet30ResourceAvailable()) {
 
-            Redde estimator = new Redde(Settings.testSets(), Settings.WordNet.Path_3_0, Settings.LuceneVersion, Redde.newDefaultParameters());
+            Redde estimator = new Redde(ReddeSettings.testSets(), ReddeSettings.WordNet.Path_3_0, ReddeSettings.LuceneVersion, Redde.newDefaultParameters());
             Set<QueryRelevance> relevanceResults = createMockResults(10);
             assertEquals(11, relevanceResults.size());
 
@@ -242,8 +235,8 @@ public class ReddeTest {
 
     @Test
     public void queryRelevanceDistribution_calculateQueryRelevanceDistribution_doubleTargetTestSetEntry_expectIllegalArgumentException() {
-        if (Settings.isResourceAvailable(Settings.testSets()) && Settings.isWordNet30ResourceAvailable()) {
-            Redde estimator = new Redde(Settings.testSets(), Settings.WordNet.Path_3_0, Settings.LuceneVersion, Redde.newDefaultParameters());
+        if (ReddeSettings.isResourceAvailable(ReddeSettings.testSets()) && ReddeSettings.isWordNet30ResourceAvailable()) {
+            Redde estimator = new Redde(ReddeSettings.testSets(), ReddeSettings.WordNet.Path_3_0, ReddeSettings.LuceneVersion, Redde.newDefaultParameters());
             Set<QueryRelevance> relevanceResults = createMockResults(10);
             assertEquals(11, relevanceResults.size());
 
@@ -292,9 +285,9 @@ public class ReddeTest {
 
     @Test
     public void estimatedTotalDocumentsOfCentralizedCompleteDB_sumUp_expectAccurateSum() {
-        if (Settings.isResourceAvailable(Settings.testSets()) && Settings.isWordNet30ResourceAvailable()) {
+        if (ReddeSettings.isResourceAvailable(ReddeSettings.testSets()) && ReddeSettings.isWordNet30ResourceAvailable()) {
             try {
-                Redde estimator = new Redde(Settings.testSets(), Settings.WordNet.Path_3_0, Settings.LuceneVersion, Redde.newDefaultParameters());
+                Redde estimator = new Redde(ReddeSettings.testSets(), ReddeSettings.WordNet.Path_3_0, ReddeSettings.LuceneVersion, Redde.newDefaultParameters());
 
                 DatabaseDetails result = new DatabaseDetails();
                 result.estimatedDBSize = 3.14159265359;
@@ -366,8 +359,8 @@ public class ReddeTest {
 
     @Test
     public void rankSources_rankTestSetsGivenWord_expectNotExceptional() {
-        if (Settings.isResourceAvailable(Settings.testSets()) && Settings.isWordNet30ResourceAvailable()) {
-            Redde estimator = new Redde(Settings.testSets(), Settings.WordNet.Path_3_0, Settings.LuceneVersion, Redde.newDefaultParameters());
+        if (ReddeSettings.isResourceAvailable(ReddeSettings.testSets()) && ReddeSettings.isWordNet30ResourceAvailable()) {
+            Redde estimator = new Redde(ReddeSettings.testSets(), ReddeSettings.WordNet.Path_3_0, ReddeSettings.LuceneVersion, Redde.newDefaultParameters());
 
             try {
                 Set<QueryRelevance> ranks = estimator.rankSources("finance");

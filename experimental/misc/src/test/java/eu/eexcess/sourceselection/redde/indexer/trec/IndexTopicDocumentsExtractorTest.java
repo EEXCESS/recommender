@@ -30,8 +30,8 @@ import java.util.List;
 import org.apache.lucene.queryparser.classic.ParseException;
 import org.junit.Test;
 
-import eu.eexcess.sourceselection.redde.config.Settings;
-import eu.eexcess.sourceselection.redde.config.Settings.TestIndexSettings;
+import eu.eexcess.sourceselection.redde.config.ReddeSettings;
+import eu.eexcess.sourceselection.redde.config.ReddeSettings.TestIndexSettings;
 import eu.eexcess.sourceselection.redde.indexer.IndexTopicDocumentsExtractor;
 import eu.eexcess.sourceselection.redde.indexer.trec.topic.Topic;
 import eu.eexcess.sourceselection.redde.indexer.trec.topic.TrecTopicTokenizer;
@@ -40,16 +40,16 @@ public class IndexTopicDocumentsExtractorTest {
 
 	@Test
 	public void storeTopics_expectNotExcetptional() {
-		if (Settings.isTopicListingAvailable()) {
+		if (ReddeSettings.isTopicListingAvailable()) {
 			try {
-				TestIndexSettings testSet = Settings.topicBasedTestSets().iterator().next();
+				TestIndexSettings testSet = ReddeSettings.topicBasedTestSets().iterator().next();
 				assertTrue(testSet.topicNumbers.length > 0);
 
 				List<Topic> topics = getTrecTopicsByID(testSet.topicNumbers);
 				assertTrue(topics.size() > 0);
 
 				IndexTopicDocumentsExtractor extractor = new IndexTopicDocumentsExtractor(
-								Settings.BaseIndex.baseIndexPath, testSet.baseIndexPath, Settings.LuceneVersion);
+						ReddeSettings.BaseIndex.baseIndexPath, testSet.baseIndexPath, ReddeSettings.LuceneVersion);
 
 				extractor.storeTopicDocs(topics.toArray(new Topic[0]));
 				extractor.close();
@@ -88,12 +88,12 @@ public class IndexTopicDocumentsExtractorTest {
 
 	private List<Topic> getTrec4Topics() throws IOException {
 		TrecTopicTokenizer tokenizer = new TrecTopicTokenizer();
-		return tokenizer.tokenize(new FileInputStream(Settings.Topics.TREC04_TOPICS_PATH));
+		return tokenizer.tokenize(new FileInputStream(ReddeSettings.Topics.TREC04_TOPICS_PATH));
 	}
 
 	private List<Topic> getTrec5Topics() throws IOException {
 		TrecTopicTokenizer tokenizer = new TrecTopicTokenizer();
-		return tokenizer.tokenize(new FileInputStream(Settings.Topics.TREC05_TOPICS_PATH));
+		return tokenizer.tokenize(new FileInputStream(ReddeSettings.Topics.TREC05_TOPICS_PATH));
 	}
 
 }

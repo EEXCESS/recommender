@@ -28,7 +28,7 @@ import net.sf.extjwnl.JWNLException;
 
 import org.junit.Test;
 
-import eu.eexcess.sourceselection.redde.config.Settings;
+import eu.eexcess.sourceselection.redde.config.ReddeSettings;
 import eu.eexcess.sourceselection.redde.dbsampling.DBSampler;
 
 public class BinaryIndexResourceTest {
@@ -37,10 +37,10 @@ public class BinaryIndexResourceTest {
 	@Test
 	public void openOutIndex_openClose_notExceptional() {
 
-		if (Settings.isResourceAvailable(Settings.BaseIndex) && Settings.isWordNet30ResourceAvailable()) {
+		if (ReddeSettings.isResourceAvailable(ReddeSettings.BaseIndex) && ReddeSettings.isWordNet30ResourceAvailable()) {
 			try {
-				BinaryIndexResource sampler = new DBSampler(Settings.BaseIndex.baseIndexPath,
-								Settings.BaseIndex.sampledIndexPath, Settings.LuceneVersion, Settings.WordNet.Path_3_0);
+				BinaryIndexResource sampler = new DBSampler(ReddeSettings.BaseIndex.baseIndexPath,
+						ReddeSettings.BaseIndex.sampledIndexPath, ReddeSettings.LuceneVersion, ReddeSettings.WordNet.Path_3_0);
 				sampler.openOutIndex();
 				sampler.closeOutIndex();
 			} catch (JWNLException | IOException e) {

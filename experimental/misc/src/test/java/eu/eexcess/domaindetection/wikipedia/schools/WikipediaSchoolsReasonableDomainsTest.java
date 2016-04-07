@@ -38,7 +38,7 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 
 import eu.eexcess.federatedrecommender.utils.tree.TreeNode;
-import eu.eexcess.logger.PianoLogger;
+
 
 /**
  * Check every indexed domain of {@link WikipediaSchoolsDomainTreeIndexer} and
@@ -50,7 +50,7 @@ import eu.eexcess.logger.PianoLogger;
  */
 public class WikipediaSchoolsReasonableDomainsTest {
 
-    private static final Logger LOGGER = PianoLogger.getLogger(WikipediaSchoolsReasonableDomainsTest.class.getName());
+    private static final Logger LOGGER = Logger.getLogger(WikipediaSchoolsReasonableDomainsTest.class.getName());
     private static final File domainTreeIndex = new File("/opt/data/wikipedia-schools/domain-index/wikipedia-schools-domain-index/");
     private static final File paragraphIndex = new File("/opt/data/wikipedia-schools/paragraph-index/wikipedia-schools-paragraph-index/");
     private static volatile IndexReaderRessource domainTreeIndexReaderResource = new IndexReaderRessource(domainTreeIndex);

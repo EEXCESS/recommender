@@ -22,7 +22,7 @@
 		<module>modules/reference/partner-web-service/</module>
 		<module>modules/partners/wissenmedia/</module>
 		<module>modules/partners/wikipedialocal/</module>
-		<!--<module>modules/partners/fedwebe67/</module>-->
+		<module>modules/partners/fedwebe67/</module>
 		<module>modules/partners/europeana/</module>
 		<module>modules/partners/kimportal/</module>
 		<module>modules/partners/zbw/</module>

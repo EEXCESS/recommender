@@ -32,7 +32,7 @@ import org.junit.Test;
 import eu.eexcess.federatedrecommender.utils.tree.NodeInspector;
 import eu.eexcess.federatedrecommender.utils.tree.TreeNode;
 import eu.eexcess.federatedrecommender.utils.tree.ValueSetTreeNode;
-import eu.eexcess.sourceselection.redde.config.Settings;
+import eu.eexcess.sourceselection.redde.config.ReddeSettings;
 import eu.eexcess.sourceselection.redde.indexer.topterm.DBDomainSampler.SampleArguments;
 import eu.eexcess.sourceselection.redde.indexer.topterm.DBDomainSampler.WordNetArguments;
 
@@ -41,9 +41,9 @@ public class DBDomainSamplerTest {
     private static WordNetArguments getDefaultWordNetArguments() {
         WordNetArguments args = new WordNetArguments();
 
-        args.wordnetDomainCsvTreePath = Settings.WordnetDomains.CSVDomainPath;
-        args.wordnetDomainsPath = Settings.WordnetDomains.Path;
-        args.wordnetPath = Settings.WordNet.Path_2_0;
+        args.wordnetDomainCsvTreePath = ReddeSettings.WordnetDomains.CSVDomainPath;
+        args.wordnetDomainsPath = ReddeSettings.WordnetDomains.Path;
+        args.wordnetPath = ReddeSettings.WordNet.Path_2_0;
         return args;
     }
 
@@ -55,13 +55,13 @@ public class DBDomainSamplerTest {
     @Test
     public void construct_expectNotExceptional() {
 
-        if (Settings.isResourceAvailable(Settings.BaseIndex) && Settings.isWordNet20ResourceAvailable() && Settings.isWordNet30ResourceAvailable()
-                && Settings.isWordNetDomainsResourceAvailable()) {
+        if (ReddeSettings.isResourceAvailable(ReddeSettings.BaseIndex) && ReddeSettings.isWordNet20ResourceAvailable() && ReddeSettings.isWordNet30ResourceAvailable()
+                && ReddeSettings.isWordNetDomainsResourceAvailable()) {
 
             try {
 
                 WordNetArguments wnArgs = getDefaultWordNetArguments();
-                DBDomainSampler sampler = new DBDomainSampler(Settings.BaseIndex.baseIndexPath, wnArgs);
+                DBDomainSampler sampler = new DBDomainSampler(ReddeSettings.BaseIndex.baseIndexPath, wnArgs);
                 sampler.close();
 
             } catch (Exception e) {
@@ -73,11 +73,11 @@ public class DBDomainSamplerTest {
 
     @Test
     public void alignTerms_expectNotExceptional() {
-        if (Settings.isResourceAvailable(Settings.BaseIndex) && Settings.isWordNet20ResourceAvailable() && Settings.isWordNet30ResourceAvailable()
-                && Settings.isWordNetDomainsResourceAvailable()) {
+        if (ReddeSettings.isResourceAvailable(ReddeSettings.BaseIndex) && ReddeSettings.isWordNet20ResourceAvailable() && ReddeSettings.isWordNet30ResourceAvailable()
+                && ReddeSettings.isWordNetDomainsResourceAvailable()) {
 
             WordNetArguments wnArgs = getDefaultWordNetArguments();
-            try (DBDomainSampler sampler = new DBDomainSampler(Settings.BaseIndex.baseIndexPath, wnArgs)) {
+            try (DBDomainSampler sampler = new DBDomainSampler(ReddeSettings.BaseIndex.baseIndexPath, wnArgs)) {
                 TreeNode domainToTerms = sampler.alignTerms(0, 99);
 
                 final AtomicInteger numNodes = new AtomicInteger(0);
@@ -103,10 +103,10 @@ public class DBDomainSamplerTest {
     @Ignore
     @Test
     public void sampleDatabase_expectNotExceptoinal() {
-        if (Settings.isResourceAvailable(Settings.BaseIndex) && Settings.isWordNet20ResourceAvailable() && Settings.isWordNet30ResourceAvailable()
-                && Settings.isWordNetDomainsResourceAvailable()) {
+        if (ReddeSettings.isResourceAvailable(ReddeSettings.BaseIndex) && ReddeSettings.isWordNet20ResourceAvailable() && ReddeSettings.isWordNet30ResourceAvailable()
+                && ReddeSettings.isWordNetDomainsResourceAvailable()) {
             WordNetArguments wnArgs = getDefaultWordNetArguments();
-            try (DBDomainSampler sampler = new DBDomainSampler(Settings.BaseIndex.baseIndexPath, wnArgs)) {
+            try (DBDomainSampler sampler = new DBDomainSampler(ReddeSettings.BaseIndex.baseIndexPath, wnArgs)) {
                 TreeNode domainToTermTree = sampler.alignTerms(0, 500);
 
                 @SuppressWarnings("unchecked")
