@@ -23,11 +23,16 @@ package eu.eexcess.domaindetection.wikipedia.schools;
 import java.io.Closeable;
 import java.io.File;
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.apache.lucene.analysis.Analyzer;
+import org.apache.lucene.analysis.core.KeywordAnalyzer;
 import org.apache.lucene.analysis.en.EnglishAnalyzer;
+import org.apache.lucene.analysis.miscellaneous.PerFieldAnalyzerWrapper;
+import org.apache.lucene.analysis.shingle.ShingleAnalyzerWrapper;
 import org.apache.lucene.index.IndexWriter;
 import org.apache.lucene.index.IndexWriterConfig;
 import org.apache.lucene.index.IndexWriterConfig.OpenMode;
@@ -87,7 +92,17 @@ public class IndexWriterRessource implements Closeable {
 
         try {
             Directory indexDirectory = FSDirectory.open(outIndexPath);
-            Analyzer analyzer = new EnglishAnalyzer();
+            Map<String, Analyzer> fieldToAnalyzer = new HashMap<String, Analyzer>();
+            fieldToAnalyzer.put("document-is-sos-advertisement", new KeywordAnalyzer());
+            fieldToAnalyzer.put("document-subject", new KeywordAnalyzer());
+            fieldToAnalyzer.put("paragraph-level", new KeywordAnalyzer());
+            fieldToAnalyzer.put("paragraph-position-in-document", new KeywordAnalyzer());
+            fieldToAnalyzer.put("document-relative-path", new KeywordAnalyzer());
+            fieldToAnalyzer.put("child-subject", new KeywordAnalyzer());
+            fieldToAnalyzer.put("subject", new KeywordAnalyzer());
+            fieldToAnalyzer.put("paragraph-text-bigram", new ShingleAnalyzerWrapper(new EnglishAnalyzer(), 2));
+            
+			Analyzer analyzer = new PerFieldAnalyzerWrapper(new EnglishAnalyzer(), fieldToAnalyzer);
             IndexWriterConfig writerConfig = new IndexWriterConfig(luceneVersion, analyzer);
             writerConfig.setOpenMode(OpenMode.CREATE);
             writerConfig.setRAMBufferSizeMB(ramBufferSizeMB);

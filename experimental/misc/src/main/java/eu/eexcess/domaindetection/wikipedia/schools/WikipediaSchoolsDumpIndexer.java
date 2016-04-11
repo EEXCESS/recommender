@@ -50,6 +50,7 @@ import java.util.logging.Logger;
 import java.util.regex.Pattern;
 
 import org.apache.commons.lang.StringEscapeUtils;
+import org.apache.commons.lang.Validate;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.document.Field;
 import org.apache.lucene.document.TextField;
@@ -98,6 +99,8 @@ public class WikipediaSchoolsDumpIndexer extends IndexWriterRessource {
     private static final String LUCENE_FIELD_PARAGRAPH_POSITION_IN_DOCUMENT = "paragraph-position-in-document";
 
     private static final String LUCENE_FIELD_PARAGRAPH_TEXT = "paragraph-text";
+    
+    private static final String LUCENE_FIELD_PARAGRAPH_TEXT_BIGRAM = "paragraph-text-bigram";
 
     private static final String LUCENE_FIELD_PARAGRAPH_LEVEL = "paragraph-level";
 
@@ -185,6 +188,7 @@ public class WikipediaSchoolsDumpIndexer extends IndexWriterRessource {
         tagAttributeValueToNameFilter.put("logo", "id");
         tagAttributeValueToNameFilter.put("siteSub", "id");
 
+        documentTitleFilter.add("sos children: charity facts: our partners");
         documentTitleFilter.add("sos children");
         documentTitleFilter.add("the stiry of sos child sponsorship");
         documentTitleFilter.add("sos child who became");
@@ -548,6 +552,7 @@ public class WikipediaSchoolsDumpIndexer extends IndexWriterRessource {
             document.add(new TextField(LUCENE_FIELD_PARAGRAPH_TITLE, paragraph.getTitle(), Field.Store.YES));
             document.add(new TextField(LUCENE_FIELD_PARAGRAPH_LEVEL, paragraph.getLevel(), Field.Store.YES));
             document.add(new TextField(LUCENE_FIELD_PARAGRAPH_TEXT, paragraph.getParagraph(), Field.Store.YES));
+            document.add(new TextField(LUCENE_FIELD_PARAGRAPH_TEXT_BIGRAM, paragraph.getParagraph(), Field.Store.NO));
 
             int paragraphPosition = paragraphs.size() - paragraphPositionCounter;
             paragraphPositionCounter++;
@@ -571,25 +576,37 @@ public class WikipediaSchoolsDumpIndexer extends IndexWriterRessource {
         StringBuilder documentBuffer = new StringBuilder(documentString.toLowerCase());
 
         String startAnchor = "related subjects:";
-        String endAnchor = "</div>";
+//        String endAnchor = "</div>";
+        String endAnchor = "</h3>";
 
-        documentBuffer.delete(0, documentBuffer.indexOf(startAnchor) + startAnchor.length());
-        documentBuffer.delete(documentBuffer.indexOf(endAnchor), documentBuffer.length());
+        int startIndex = documentBuffer.indexOf(startAnchor);
 
-        /**
-         * matches: '<a href="xxx">' where xxx can be found in group 1
-         */
-        String domainRegexp = "<a\\s+href=(\"[^\"]*\"|'[^']*'|[^'\">])*\\s*>";
-        Pattern pattern = Pattern.compile(domainRegexp);
-        java.util.regex.Matcher matcher = pattern.matcher(documentBuffer);
-
-        try {
-            while (matcher.find()) {
-                List<String> stripedDomains = stripDomains(matcher.group(1));
-                documentSubjects.add(stripedDomains.get(stripedDomains.size() - 1));
-            }
-        } catch (NoSuchElementException e) {
-            throw new IOException("failed parsing document subject of document [" + absoluteFilePath + "]", e);
+        if (startIndex >= 0) {
+        	documentBuffer.delete(0, startIndex + startAnchor.length());
+        	documentBuffer.delete(documentBuffer.indexOf(endAnchor), documentBuffer.length());
+        	Validate.isTrue(documentBuffer.length() > 10, "Too small document: "+documentBuffer.toString());
+        	Validate.isTrue(documentBuffer.length() < 450, "Too long document: "+documentBuffer.toString());
+        	
+	        /**
+	         * matches: '<a href="xxx">' where xxx can be found in group 1
+	         */
+	        String domainRegexp = "<a\\s+href=(\"[^\"]*\"|'[^']*'|[^'\">])*\\s*>";
+	        Pattern pattern = Pattern.compile(domainRegexp);
+	        java.util.regex.Matcher matcher = pattern.matcher(documentBuffer);
+	
+	        try {
+	            while (matcher.find()) {
+	                List<String> stripedDomains = stripDomains(matcher.group(1));
+	                if (stripedDomains.size() > 0) {
+						documentSubjects.add(stripedDomains.get(stripedDomains.size() - 1));
+					}
+	            }
+	        } catch (NoSuchElementException e) {
+	            throw new IOException("failed parsing document subject of document [" + absoluteFilePath + "]", e);
+	        }
+        } else {
+        	System.err.println("No subjects found: "+absoluteFilePath);
+        	
         }
 
         return documentSubjects;
