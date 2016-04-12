@@ -27,16 +27,16 @@ import java.util.TreeSet;
 
 import org.junit.Test;
 
-import eu.eexcess.sourceselection.redde.config.Settings;
+import eu.eexcess.sourceselection.redde.config.ReddeSettings;
 
 public class NaiveTopTermFilterTest {
 
 	@Test
 	public void getTopTerms_fetchNTopTerms_expectNTermsAndNotExceptional() {
-		if (Settings.isResourceAvailable(Settings.BaseIndex) && Settings.isWordNet30ResourceAvailable()) {
+		if (ReddeSettings.isResourceAvailable(ReddeSettings.BaseIndex) && ReddeSettings.isWordNet30ResourceAvailable()) {
 			try {
-				NaiveTopTermFilter testSetBuilder = new NaiveTopTermFilter(Settings.BaseIndex.baseIndexPath,
-								Settings.WordNet.Path_3_0);
+				NaiveTopTermFilter testSetBuilder = new NaiveTopTermFilter(ReddeSettings.BaseIndex.baseIndexPath,
+						ReddeSettings.WordNet.Path_3_0);
 				String[] terms = testSetBuilder.getTopTerms(0, 99);
 				for (String term : terms) {
 					System.out.println("term " + term);
@@ -53,10 +53,10 @@ public class NaiveTopTermFilterTest {
 
 	@Test
 	public void getTopUnrelatedTerms_expectNTerms_notExceptional() {
-		if (Settings.isResourceAvailable(Settings.BaseIndex) && Settings.isWordNet30ResourceAvailable()) {
+		if (ReddeSettings.isResourceAvailable(ReddeSettings.BaseIndex) && ReddeSettings.isWordNet30ResourceAvailable()) {
 			try {
-				NaiveTopTermFilter builder = new NaiveTopTermFilter(Settings.BaseIndex.baseIndexPath,
-								Settings.WordNet.Path_3_0);
+				NaiveTopTermFilter builder = new NaiveTopTermFilter(ReddeSettings.BaseIndex.baseIndexPath,
+						ReddeSettings.WordNet.Path_3_0);
 
 				TreeSet<WordRelation> topUnrelated = builder.getTopUnrelatedTerms(200, 300);
 				System.out.println(WordRelation.fieldsToString());

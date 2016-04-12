@@ -5,7 +5,7 @@
   "partnerConnectorClass": "eu.eexcess.wikipedialocal.recommender.PartnerConnector",
   "isTransformedNative": "true",
   "transformerClass": "eu.eexcess.wikipedialocal.datalayer.WikipediaTransformer",
-  "searchEndpoint" : "/opt/datasets/EExcess/wiki/enwiki/" ,
+  "searchEndpoint" : "/media/hziak/494c2958-e0d7-4ac1-8337-2c3240b5b5b2/opt/datasets/wiki/enwiki" ,
   "userName": "",
   "password": "",
   "favIconURI":"https://de.wikipedia.org/static/favicon/wikipedia.ico",

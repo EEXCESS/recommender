@@ -44,11 +44,11 @@ import eu.eexcess.diversityasurement.evaluation.config.Settings;
 import eu.eexcess.diversityasurement.iaselect.Query;
 import eu.eexcess.federatedrecommender.decomposer.PseudoRelevanceWikipediaDecomposer;
 import eu.eexcess.federatedrecommender.utils.FederatedRecommenderException;
-import eu.eexcess.logger.PianoLogger;
+
 
 public class QueryExpansionEvaluation {
 
-    private static final Logger LOGGER = PianoLogger.getLogger(QueryExpansionEvaluation.class);
+    private static final Logger LOGGER = Logger.getLogger(QueryExpansionEvaluation.class.getName());
     private static long totalTime = 0;
     private static long decomposeCounts = 0;
     private static PseudoRelevanceWikipediaDecomposer decomposer = newDecomposer();

@@ -2,6 +2,7 @@ package eu.eexcess.federatedrecommender.picker
 
 import com.aliasi.matrix.SvdMatrix
 import eu.eexcess.dataformats.PartnerBadge
+import eu.eexcess.dataformats.result.DocumentBadge
 import eu.eexcess.dataformats.result.Result
 import eu.eexcess.dataformats.result.ResultList
 import eu.eexcess.dataformats.userprofile.FeatureVector
@@ -20,18 +21,25 @@ import java.util.logging.Logger
 class NaiveRecPicker : PartnersFederatedRecommendationsPicker() {
     private val LOGGER = Logger.getLogger("eu.eexcess.federatedRecommender.picker.NaiveRecPicker")
 
+
+
+
     override fun pickResults(secureUserProfile: SecureUserProfile?, resultList: PartnersFederatedRecommendations?, partners: MutableList<PartnerBadge>?, numResults: Int): ResultList? {
         val combinedResults = ArrayList<Result>()
+
+
+        var maxSize = 0;
         resultList?.results?.entries?.forEach{ element ->
             element?.value?.results?.forEachIndexed { i, result ->
-                result.apply {
-                    position = element.value.results.size- i.toDouble()
-                }
+                if (element.value.results.size>maxSize) maxSize=element.value.results.size
+                result.position =  if(element.key.queryGeneratorClass!=null && element.key.queryGeneratorClass.contains("MainTopic")) i.toDouble() else i.toDouble()+1 //Boost if the query is more complex and supports main topic
+                result.documentBadge.expertLevel = element.key.expertLevel;
                 combinedResults.add(result)
             }
-            //combinedResults.addAll(element?.value?.results!!)
-
         }
+      //  combinedResults.forEach { it.position = maxSize-it.position }
+
+
 
         val termDocumentMatrix = createTermDocMatrix(secureUserProfile, combinedResults)
         var featureMatrix = createFeatureMatrix(termDocumentMatrix, combinedResults)
@@ -59,7 +67,7 @@ class NaiveRecPicker : PartnersFederatedRecommendationsPicker() {
         secureUserProfile.preferences.vector.forEachIndexed { i, d ->
             tmpVector[i + secureUserProfile.contextKeywords.size!!] = secureUserProfile.preferences.vector[i]
         }
-        tmpVector[secureUserProfile.preferences.vector.size + secureUserProfile.contextKeywords.size]=1.0 //to take the original ranking into account
+        tmpVector[secureUserProfile.preferences.vector.size + secureUserProfile.contextKeywords.size]=2.0 //to take the original ranking into account
 
         for (i in featureMatrix.first().indices) {
             val tmpFeatureMatrix = DoubleArray(featureMatrix.size)
@@ -85,7 +93,9 @@ class NaiveRecPicker : PartnersFederatedRecommendationsPicker() {
         return resultList
     }
 
-
+    /**
+     * calculates the dot product of two vectors
+     */
     internal fun dotProduct(xs: DoubleArray, ys: DoubleArray): Double {
         var sum = 0.0
         for (k in ys.indices)
@@ -106,17 +116,19 @@ class NaiveRecPicker : PartnersFederatedRecommendationsPicker() {
 
         secureUserProfile?.contextKeywords?.forEachIndexed { x, contextKeyword ->
 
-            contextKeyword.text.split(" ").forEach {
+            contextKeyword.text.forEach {
                 combinedResults.forEachIndexed { y, document ->
                     val combinedTitleDesc = document.title + " " + document.description
-                    var counter = 0;
+                    var counter = 0.0;
                     combinedTitleDesc.split("\\s").forEach { element ->
                         if (element.contains(it)) {
-                            counter += 1
+                            if(counter<0.5 && combinedTitleDesc.length>0) {
+                               val i = 1.0 / combinedTitleDesc.length
+                                counter += i
+                            }
                         }
-
                     }
-                    matrix[x][y] += counter;
+                    matrix[x][y] +=counter
                 }
             }
         }
@@ -144,8 +156,12 @@ class NaiveRecPicker : PartnersFederatedRecommendationsPicker() {
                         2 -> if (document.mediaType!=null && document.mediaType.toLowerCase().equals("image", true)) matrix[x][y] = 1.0 else matrix[x][y] = 0.0
                         3 -> if (document.licence != null && !document.licence.toLowerCase().equals("restricted", true)) matrix[x][y] = 1.0 else matrix[x][y] = 0.0
                         4 -> if (document.date != null && !document.date.isEmpty()) matrix[x][y] = 1.0 else matrix[x][y] = 0.0
+                        5 -> if (document.documentBadge.expertLevel!=null) matrix[x][y] =  document.documentBadge.expertLevel else matrix[x][y] = 0.0
                     }
-                matrix[lastElement][y] = document.position/combinedResults.size*2
+                val d1 = Math.pow(Math.log((document.position+1)/combinedResults.size ),2.0)
+                matrix[lastElement][y] = d1*1.0
+
+
             }
 
         }

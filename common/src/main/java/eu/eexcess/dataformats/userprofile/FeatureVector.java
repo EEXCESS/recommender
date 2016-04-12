@@ -1,15 +1,18 @@
 package eu.eexcess.dataformats.userprofile;
 
+import java.io.Serializable;
+
 /**
  * Created by hziak on 10.12.15.
  */
-public class FeatureVector {
+public class FeatureVector implements Serializable {
 
-    private Double text=1.0;
-    private Double video=1.0;
-    private Double picture=1.0;
-    private Double openLicence=1.0;
-    private Double dateExisting=1.0;
+    private Double text = 0.0;
+    private Double video = 0.0;
+    private Double picture = 0.0;
+    private Double openLicence = 0.0;
+    private Double dateExisting = 0.0;
+    private Double expertLevel = 0.0;
 
     public Double getText() {
         return text;
@@ -21,6 +24,14 @@ public class FeatureVector {
 
     public Double getVideo() {
         return video;
+    }
+
+    public Double getExpertLevel() {
+        return expertLevel;
+    }
+
+    public void setExpertLevel(Double expertLevel) {
+        this.expertLevel = expertLevel;
     }
 
     public void setVideo(Double video) {
@@ -51,13 +62,14 @@ public class FeatureVector {
         this.dateExisting = dateExisting;
     }
 
-    public Double[] getVector(){
-        Double[] vector = new Double[5];
+    public Double[] getVector() {
+        Double[] vector = new Double[6];
         vector[0] = text;
         vector[1] = video;
         vector[2] = picture;
         vector[3] = openLicence;
         vector[4] = dateExisting;
+        vector[5] = expertLevel;
         return vector;
     }
 

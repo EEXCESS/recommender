@@ -33,7 +33,7 @@ import net.sf.extjwnl.JWNLException;
 import org.apache.lucene.queryparser.classic.ParseException;
 import org.junit.Test;
 
-import eu.eexcess.sourceselection.redde.config.Settings;
+import eu.eexcess.sourceselection.redde.config.ReddeSettings;
 import eu.eexcess.sourceselection.redde.dbsampling.DBSampler;
 
 public class DBSamplerTest {
@@ -41,10 +41,10 @@ public class DBSamplerTest {
 	@SuppressWarnings("resource")
 	@Test
 	public void generateRandomWords_expectRandomWords_notExceptional() {
-		if (Settings.isResourceAvailable(Settings.BaseIndex) && Settings.isWordNet30ResourceAvailable()) {
+		if (ReddeSettings.isResourceAvailable(ReddeSettings.BaseIndex) && ReddeSettings.isWordNet30ResourceAvailable()) {
 			try {
-				DBSampler sampler = new DBSampler(Settings.BaseIndex.baseIndexPath,
-								Settings.BaseIndex.sampledIndexPath, Settings.LuceneVersion, Settings.WordNet.Path_3_0);
+				DBSampler sampler = new DBSampler(ReddeSettings.BaseIndex.baseIndexPath,
+								ReddeSettings.BaseIndex.sampledIndexPath, ReddeSettings.LuceneVersion, ReddeSettings.WordNet.Path_3_0);
 
 				Set<String> randomWords = new HashSet<String>();
 				int numWords = 10000;
@@ -65,10 +65,10 @@ public class DBSamplerTest {
 
 	@Test
 	public void sample_writetRandomSamplesToIndex_atLeast50PercentOfDesiredSamplesStored() {
-		if (Settings.isResourceAvailable(Settings.BaseIndex) && Settings.isWordNet30ResourceAvailable()) {
+		if (ReddeSettings.isResourceAvailable(ReddeSettings.BaseIndex) && ReddeSettings.isWordNet30ResourceAvailable()) {
 			try {
-				DBSampler sampler = new DBSampler(Settings.BaseIndex.baseIndexPath,
-								Settings.BaseIndex.sampledIndexPath, Settings.LuceneVersion, Settings.WordNet.Path_3_0);
+				DBSampler sampler = new DBSampler(ReddeSettings.BaseIndex.baseIndexPath,
+								ReddeSettings.BaseIndex.sampledIndexPath, ReddeSettings.LuceneVersion, ReddeSettings.WordNet.Path_3_0);
 
 				sampler.open();
 				sampler.sample(80, 4);
@@ -84,10 +84,10 @@ public class DBSamplerTest {
 
 	@Test
 	public void estimationCalculator_calcSimpleEstimation_expectCorrectValue() {
-		if (Settings.isResourceAvailable(Settings.BaseIndex) && Settings.isWordNet30ResourceAvailable()) {
+		if (ReddeSettings.isResourceAvailable(ReddeSettings.BaseIndex) && ReddeSettings.isWordNet30ResourceAvailable()) {
 			try {
-				DBSampler sampler = new DBSampler(Settings.BaseIndex.baseIndexPath,
-								Settings.BaseIndex.sampledIndexPath, Settings.LuceneVersion, Settings.WordNet.Path_3_0);
+				DBSampler sampler = new DBSampler(ReddeSettings.BaseIndex.baseIndexPath,
+								ReddeSettings.BaseIndex.sampledIndexPath, ReddeSettings.LuceneVersion, ReddeSettings.WordNet.Path_3_0);
 
 				sampler.open();
 				assertEquals(272698.1300089047, sampler.estimationCalculator(30000, 1123, 10208, false), 1E-10);
@@ -101,10 +101,10 @@ public class DBSamplerTest {
 
 	@Test
 	public void estimateSize_estimateDatabaseSize_expectGoodApproximation() {
-		if (Settings.isResourceAvailable(Settings.BaseIndex) && Settings.isWordNet30ResourceAvailable()) {
+		if (ReddeSettings.isResourceAvailable(ReddeSettings.BaseIndex) && ReddeSettings.isWordNet30ResourceAvailable()) {
 			try {
-				DBSampler sampler = new DBSampler(Settings.BaseIndex.baseIndexPath,
-								Settings.BaseIndex.sampledIndexPath, Settings.LuceneVersion, Settings.WordNet.Path_3_0);
+				DBSampler sampler = new DBSampler(ReddeSettings.BaseIndex.baseIndexPath,
+								ReddeSettings.BaseIndex.sampledIndexPath, ReddeSettings.LuceneVersion, ReddeSettings.WordNet.Path_3_0);
 
 				sampler.open();
 				sampler.sample(300, 4);

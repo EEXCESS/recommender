@@ -61,20 +61,35 @@ import java.util.logging.Logger;
  */
 public class PartnerRecommender implements PartnerRecommenderApi {
     private static final Logger LOGGER = Logger.getLogger(PartnerRecommender.class.getName());
-    private static PartnerConfiguration partnerConfiguration = PartnerConfigurationCache.CONFIG.getPartnerConfiguration();
-    private static PartnerConnectorApi partnerConnector = PartnerConfigurationCache.CONFIG.getPartnerConnector();
-    private static ITransformer transformer = PartnerConfigurationCache.CONFIG.getTransformer();
+    private PartnerConfiguration partnerConfiguration = PartnerConfigurationCache.CONFIG.getPartnerConfiguration();
+    private PartnerConnectorApi partnerConnector = PartnerConfigurationCache.CONFIG.getPartnerConnector();
+    private ITransformer transformer = PartnerConfigurationCache.CONFIG.getTransformer();
 //    private static IEnrichment enricher = PartnerConfigurationCache.CONFIG.getEnricher();
 
     private ExecutorService threadPoolDetailCalls;
-    
+
+
     /**
      * Creates a new instance of this class.
      */
     public PartnerRecommender() {
         super();
-        threadPoolDetailCalls = Executors.newFixedThreadPool(20);
+
+        this.partnerConfiguration = PartnerConfigurationCache.CONFIG.getPartnerConfiguration();
+        this.partnerConnector = PartnerConfigurationCache.CONFIG.getPartnerConnector();
+        this.transformer = PartnerConfigurationCache.CONFIG.getTransformer();
+        //		enricher = PartnerConfigurationCache.CONFIG.getEnricher();
     }
+
+    public PartnerRecommender( PartnerConfiguration partnerConfiguration, PartnerConnectorApi partnerConnector, ITransformer transformer ) {
+        super();
+
+        this.partnerConfiguration = partnerConfiguration;
+        this.partnerConnector = partnerConnector;
+        this.transformer = transformer;
+        //		enricher = PartnerConfigurationCache.CONFIG.getEnricher();
+    }
+
 
     @Override
     public void initialize() throws IOException {
@@ -165,7 +180,7 @@ public class PartnerRecommender implements PartnerRecommenderApi {
         recommendations.setResultStats(new ResultStats(finalFormulatedQuery, endCallPartnerApi - startCallPartnerApi, endTransform1 - startTransform1, endTransform2
                 - startTransform2, 0, recommendations.totalResults));
         recommendations = addQueryToResultDocuments(recommendations, finalFormulatedQuery);
-        PartnerdataTracer.dumpFile(this.getClass(), PartnerRecommender.partnerConfiguration, recommendations, "partner-recommender-results", PartnerdataTracer.FILETYPE.XML,
+        PartnerdataTracer.dumpFile(this.getClass(), partnerConfiguration, recommendations, "partner-recommender-results", PartnerdataTracer.FILETYPE.XML,
                 partnerdataLogger);
         return recommendations;
     }

@@ -70,7 +70,6 @@ import org.htmlcleaner.conditional.ITagNodeCondition;
 import org.xml.sax.ContentHandler;
 import org.xml.sax.SAXException;
 
-import eu.eexcess.logger.PianoLogger;
 
 /**
  * This class creates an Lucene index out of an Wikipedia for Schools
@@ -111,7 +110,7 @@ public class WikipediaSchoolsDumpIndexer extends IndexWriterRessource {
 
     private static final long serialVersionUID = 4856619691781902215L;
 
-    private static final Logger LOGGER = PianoLogger.getLogger(WikipediaSchoolsDumpIndexer.class.getName());
+    private static final Logger LOGGER = Logger.getLogger(WikipediaSchoolsDumpIndexer.class.getName());
 
     /**
      * XPath to 1st h1-heading text

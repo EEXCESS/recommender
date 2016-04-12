@@ -60,19 +60,32 @@ public class PartnerConnector extends PartnerConnectorBase implements PartnerCon
     private static final Logger LOGGER = Logger.getLogger(PartnerConnector.class.getName());
 
     private static final String[] FIELD_CONTENTS = { "sectionText", "sectionTitle", "title" };
+    private Analyzer analyzer = null;
+    private File directoryPath = null;
+    private Directory directory = null;
+    private IndexReader indexReader = null;
+    private IndexSearcher indexSearcher = null;
 
     public PartnerConnector() {
-
+        this.analyzer = new ClassicAnalyzer();
+        this.directoryPath= directoryPath = new File("/media/hziak/494c2958-e0d7-4ac1-8337-2c3240b5b5b2/opt/datasets/wiki/enwiki");
+        try {
+            this.directory = FSDirectory.open(directoryPath);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        try {
+            this.indexReader = DirectoryReader.open(directory);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        this.indexSearcher = new IndexSearcher(indexReader);
     }
 
     @Override
     public ResultList queryPartnerNative(PartnerConfiguration partnerConfiguration, SecureUserProfile userProfile, PartnerdataLogger dataLogger) throws IOException {
         ResultList resultList = new ResultList();
-        Analyzer analyzer = new ClassicAnalyzer();
-        File directoryPath = new File(PartnerConfigurationCache.CONFIG.getPartnerConfiguration().getSearchEndpoint());
-        Directory directory = FSDirectory.open(directoryPath);
-        IndexReader indexReader = DirectoryReader.open(directory);
-        IndexSearcher indexSearcher = new IndexSearcher(indexReader);
+
         QueryParser queryParser = new MultiFieldQueryParser(FIELD_CONTENTS, analyzer);
         queryParser.setDefaultOperator(Operator.AND);
         String queryString = PartnerConfigurationCache.CONFIG.getQueryGenerator(partnerConfiguration.getQueryGeneratorClass()).toQuery(userProfile);

@@ -23,6 +23,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 package eu.eexcess.federatedrecommender.registration;
 
 import com.sun.jersey.api.client.Client;
+import com.sun.jersey.api.client.ClientHandlerException;
+import com.sun.jersey.api.client.UniformInterfaceException;
 import com.sun.jersey.api.client.WebResource;
 import com.sun.jersey.api.client.config.DefaultClientConfig;
 import eu.eexcess.dataformats.PartnerBadge;
@@ -81,13 +83,12 @@ public class PartnerRegister {
             DefaultClientConfig config = new DefaultClientConfig();
             Client favClient = Client.create(config);
             WebResource resource = favClient.resource(badge.getFavIconURI());
-            InputStream favIconInputStream = resource.get(InputStream.class);
-
             try {
+                InputStream favIconInputStream = resource.get(InputStream.class);
                 favIconCache.put(badge.getSystemId(), IOUtils.toByteArray(favIconInputStream));
                 favIconInputStream.close();
 
-            } catch (IOException e) {
+            } catch (IOException|UniformInterfaceException|ClientHandlerException e) {
                 LOGGER.log(Level.INFO, "could not retrieve favicon from partner", e);
             }
         }

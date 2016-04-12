@@ -161,10 +161,11 @@ public class FederatedRecommenderCore implements ProbeResultChanged {
         List<PartnerBadge> partners = getPartnerRegister().getPartners();
         for (final PartnerBadge partner : partners) {
             if (checkUserSelectedPartners(secureUserProfile, partner)) {
-                final Client tmpClient = partnerRegister.getClient(partner.getSystemId());
+
 
                 Future<ResultList> future = threadPool.submit(new Callable<ResultList>() {
                     @Override public ResultList call() {
+                        final Client tmpClient = partnerRegister.getClient(partner.getSystemId());
                         long startTime = System.currentTimeMillis();
                         ResultList resultList = new ResultList();
                         if (tmpClient != null) {

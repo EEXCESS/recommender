@@ -49,7 +49,6 @@ import eu.eexcess.diversityasurement.wikipedia.querytocategoryrelevance.Category
 import eu.eexcess.diversityasurement.wikipedia.querytocategoryrelevance.Queries;
 import eu.eexcess.diversityasurement.wikipedia.querytocategoryrelevance.Query;
 import eu.eexcess.diversityasurement.wikipedia.querytocategoryrelevance.QueryJsonIO;
-import eu.eexcess.logger.PianoLogger;
 
 /**
  * evaluate manually selected queries
@@ -96,7 +95,7 @@ public class QueryEvaluation {
         Map<Query, ArrayList<CategoryRelevance>> queryRelevancesCollapsedShortenedNormalized = new HashMap<>();
     }
 
-    private static final Logger LOGGER = PianoLogger.getLogger(IASelectVSQueryExpansionEvaluation.class);
+    private static final Logger LOGGER = Logger.getLogger(IASelectVSQueryExpansionEvaluation.class.getName());
 
     private static Map<Integer, String> categoryIdToName;
     private static Map<String, Integer> categoryNameToId;

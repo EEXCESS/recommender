@@ -1,5 +1,7 @@
 package eu.eexcess.dataformats.result;
 
+import org.codehaus.jackson.annotate.JsonIgnore;
+
 import java.io.Serializable;
 
 import javax.xml.bind.annotation.XmlElement;
@@ -22,6 +24,9 @@ public class DocumentBadge implements Serializable {
 
     @XmlElement(name = "detail")
     public String details = null;
+
+    @JsonIgnore
+    public double expertLevel = 1.0;
 
     public DocumentBadge() {
     }

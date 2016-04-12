@@ -37,6 +37,7 @@ public class Result implements Serializable {
     @JsonIgnore
     public Double position =0.0;
 
+
     @XmlElement(name = "resultGroup")
     public LinkedList<Result> resultGroup = new LinkedList<Result>();
 

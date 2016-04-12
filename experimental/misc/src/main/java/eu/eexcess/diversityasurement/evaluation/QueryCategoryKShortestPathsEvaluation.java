@@ -68,7 +68,7 @@ import eu.eexcess.diversityasurement.wikipedia.querytocategoryrelevance.Category
 import eu.eexcess.diversityasurement.wikipedia.querytocategoryrelevance.Queries;
 import eu.eexcess.diversityasurement.wikipedia.querytocategoryrelevance.Query;
 import eu.eexcess.diversityasurement.wikipedia.querytocategoryrelevance.QueryJsonIO;
-import eu.eexcess.logger.PianoLogger;
+
 import grph.Grph;
 
 /**
@@ -86,7 +86,7 @@ public class QueryCategoryKShortestPathsEvaluation {
         public int numCategoriesToCalculateBundled = 1;
     }
 
-    private static final Logger LOGGER = PianoLogger.getLogger(QueryCategoryKShortestPathsEvaluation.class);
+    private static final Logger LOGGER = Logger.getLogger(QueryCategoryKShortestPathsEvaluation.class.getName());
     static Grph grph;
     // CategoryRelevanceDetails queriesRelevances = new
     // CategoryRelevanceDetails();

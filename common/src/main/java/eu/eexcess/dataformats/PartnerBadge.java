@@ -49,11 +49,24 @@ import java.util.List;
     private String partnerKey;
 
 
+    public double expertLevel =0.0;
+
+
+
+
     private FeatureVector featureVector;
     // TODO: Statistics should be moved somewhere else! (Specially the logic for
     // it)
     private PartnerBadgeStats shortTimeStats = new PartnerBadgeStats();
 
+
+    public double getExpertLevel() {
+        return expertLevel;
+    }
+
+    public void setExpertLevel(double expertLevel) {
+        this.expertLevel = expertLevel;
+    }
     public String getSpecialFieldQueryGeneratorClass() {
         return specialFieldQueryGeneratorClass;
     }

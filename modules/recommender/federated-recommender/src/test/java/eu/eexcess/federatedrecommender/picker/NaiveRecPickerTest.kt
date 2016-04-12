@@ -129,7 +129,7 @@ class NaiveRecPickerTest {
 
         var naiveRecPicker= NaiveRecPicker()
         var userProfile = SecureUserProfile()
-        userProfile.preferences.text = 5.0
+        userProfile.preferences.text = 30.0
         userProfile.preferences.video = 0.0
         userProfile.preferences.picture = 0.0
         userProfile.preferences.openLicence = 0.0
@@ -143,6 +143,7 @@ class NaiveRecPickerTest {
         val partner3 = PartnerBadge()
         val partner4 = PartnerBadge()
         partner1.systemId="Partner1"
+        partner1.queryGeneratorClass="MainTopic"
         partners.add(partner1)
 
         partner2.systemId="Partner2"
@@ -169,13 +170,62 @@ class NaiveRecPickerTest {
 
     }
 
+    @Test fun testPickResultsExpert() {
+
+        var naiveRecPicker= NaiveRecPicker()
+        var userProfile = SecureUserProfile()
+        userProfile.preferences.text = 0.0
+        userProfile.preferences.video = 0.0
+        userProfile.preferences.picture = 0.0
+        userProfile.preferences.openLicence = 0.0
+        userProfile.preferences.dateExisting = 0.0
+        userProfile.preferences.expertLevel=0.0
+        userProfile.contextKeywords.add(ContextKeyword("Lord Byron"))
+        userProfile.contextKeywords.add(ContextKeyword("Ada Lovelace"))
+
+        var partners = ArrayList<PartnerBadge>()
+        val partner1 = PartnerBadge()
+        val partner2 = PartnerBadge()
+        val partner3 = PartnerBadge()
+        val partner4 = PartnerBadge()
+        partner1.systemId="Partner1"
+        partner1.queryGeneratorClass = "eu.eexcess.partnerrecommender.reference.LuceneQueryGeneratorFieldTermConjunctionMainTopic"
+
+        partners.add(partner1)
+
+        partner2.systemId="Partner2"
+      //  partner2.queryGeneratorClass = "eu.eexcess.partnerrecommender.reference.LuceneQueryGeneratorFieldTermConjunction"
+        partners.add(partner2)
+
+        partner3.systemId="Partner3"
+        partner3.queryGeneratorClass = "eu.eexcess.partnerrecommender.reference.LuceneQueryGeneratorFieldTermConjunction"
+        partners.add(partner3)
+
+        partner4.systemId="Partner4"
+        partners.add(partner4)
+
+
+        var resultList = getResultList(partner1,partner2)
+
+
+
+
+        var result =naiveRecPicker.pickResults(userProfile, resultList, partners, 20);
+        println("Test Expert High")
+        result!!.results.forEach { e ->
+            System.out.println(e.title)
+        }
+
+
+    }
+
     @Test fun testPickResultsTextLowNeutral() {
         var naiveRecPicker = NaiveRecPicker()
         var userProfile = SecureUserProfile()
         userProfile.preferences.text = 0.0
         userProfile.preferences.video = 6.0
-        userProfile.preferences.picture = 6.0
-        userProfile.preferences.openLicence = -6.0
+        userProfile.preferences.picture = 30.0
+        userProfile.preferences.openLicence = 6.0
         userProfile.preferences.dateExisting = 6.0
         userProfile.contextKeywords.add(ContextKeyword("Lord Byron"))
         userProfile.contextKeywords.add(ContextKeyword("Ada Lovelace"))
@@ -192,9 +242,12 @@ class NaiveRecPickerTest {
         partner1.featureVector.picture=0.0
         partner1.featureVector.dateExisting=0.0
         partner1.featureVector.video=0.0
+        partner1.queryGeneratorClass = "eu.eexcess.partnerrecommender.reference.LuceneQueryGeneratorFieldTermConjunctionMainTopic"
         partners.add(partner1)
         partner2.systemId="Partner2"
         partner2.featureVector = FeatureVector()
+
+        partner2.queryGeneratorClass = "eu.eexcess.partnerrecommender.reference.LuceneQueryGeneratorFieldTermConjunction"
         partner2.featureVector.text=2.0
         partner2.featureVector.openLicence=2.0
         partner2.featureVector.picture=1.0
@@ -202,6 +255,7 @@ class NaiveRecPickerTest {
         partner2.featureVector.video=0.0
         partners.add(partner2)
         partner3.systemId="Partner3"
+        partner3.queryGeneratorClass = "eu.eexcess.partnerrecommender.reference.LuceneQueryGeneratorFieldTermConjunction"
         partner3.featureVector = FeatureVector()
         partner3.featureVector.text=0.0
         partner3.featureVector.openLicence=0.0
@@ -288,6 +342,7 @@ class NaiveRecPickerTest {
         val partner3 = PartnerBadge()
         val partner4 = PartnerBadge()
         partner1.systemId="Partner1"
+
         partners.add(partner1)
 
         partner2.systemId="Partner2"
@@ -315,13 +370,53 @@ class NaiveRecPickerTest {
     }
 
 
+    @Test fun testPickResultsTextHighNeutralExpertLevel() {
+        var naiveRecPicker = NaiveRecPicker()
+        var userProfile = SecureUserProfile()
+        userProfile.preferences.text = 0.0
+        userProfile.preferences.video = 0.0
+        userProfile.preferences.picture = 0.0
+        userProfile.preferences.openLicence = 0.0
+        userProfile.preferences.dateExisting = 0.0
+        userProfile.preferences.expertLevel= 9.0
+        userProfile.contextKeywords.add(ContextKeyword("Lord Byron"))
+        userProfile.contextKeywords.add(ContextKeyword("Ada Lovelace"))
+
+        var partners = ArrayList<PartnerBadge>()
+        val partner1 = PartnerBadge()
+        val partner2 = PartnerBadge()
+        partner1.systemId="Partner1"
+        partner1.expertLevel = 0.0
+        partners.add(partner1)
+
+        partner2.systemId="Partner2"
+        partner2.expertLevel = 9.0
+        partners.add(partner2)
+
+
+
+        var resultList = getResultListNeutral(partner1,partner2)
+
+
+
+
+        var result =naiveRecPicker.pickResults(userProfile, resultList, partners, 20);
+        println("Test Text High")
+        result!!.results.forEach { e ->
+            System.out.println(e.title)
+        }
+
+
+    }
+
+
     private fun getResultList(partner1: PartnerBadge, partner2: PartnerBadge): PartnersFederatedRecommendations? {
         var restultList= PartnersFederatedRecommendations()
         var resList1 = ResultList()
         var resList1Element1 = Result()
         resList1Element1.description=""
         resList1Element1.title="[image]Critique of Lovelace Meta-Analysis p1"
-        resList1Element1.mediaType="image"
+        resList1Element1.mediaType="IMAGE"
         var resList1Element2 = Result()
         resList1Element2.description="Burg (oder Stadteingang) über Mauer und Fels. Davor freies Feld mit Bauer, Kuh und Ziege. Im Hintergrund ein rosses Kreuz. Auf der Rückseite handschriftlicher Eintrag von Marcel Herwegh: \"Après un dessin de G.H. de l'époque de Balingen. L'original se trouve chez ma soeur Ada de Paula-Souza; il m'a été donné par un ancien condisciple de G.H.En hommage après un concert spirituel ou je me suis fait entendre à Reutlingen (Würtemberg) en l'année 1878 ou 1880.... M.H.\". Das Original (BH 0170a) befindet sich in Liestal."
         resList1Element2.title="[Text]Fotografie, Zeichnung von Georg Herwegh (Foto) p1"
@@ -333,7 +428,7 @@ class NaiveRecPickerTest {
         var resList1Element4 = Result()
         resList1Element4.description=""
         resList1Element4.title="[image] Bild eines jungen Mannes mit rotem Hut (mit Feder) blauer Weste und Stock in der Hand. 3/4 Figur. p1"
-        resList1Element4.mediaType="image"
+        resList1Element4.mediaType="IMAGE"
         resList1.results.add(resList1Element1);
         resList1.results.add(resList1Element2);
         resList1.results.add(resList1Element3);
@@ -362,11 +457,15 @@ class NaiveRecPickerTest {
         resList2Element4.description="englische Literaturẹnglische Literatur.Als englische Literatur bezeichnete man lange Zeit die englischsprachige Literatur Großbritanniens und der ehemaligen britischen Kolonien..."
         resList2Element4.title="[Text]englische Literatur p2"
         resList2Element4.mediaType="text"
+        var resList2Element5 = Result()
+        resList2Element5.description="englische  Literaturẹnglische Literatur.Als englische Literatur bezeichnete man lange Zeit die englischsprachige Literatur Großbritanniens und der ehemaligen britischen Kolonien..."
+        resList2Element5.title="[Text]englische Literatur p2"
+        resList2Element5.mediaType="text"
         resList2.results.add(resList2Element1);
         resList2.results.add(resList2Element2);
         resList2.results.add(resList2Element3);
         resList2.results.add(resList2Element4);
-
+        resList2.results.add(resList2Element5);
         restultList.results.put(partner2, resList2);
         return restultList
     }
@@ -419,12 +518,21 @@ class NaiveRecPickerTest {
         resList2Element4.title="[Text] Fotografie, Zeichnung von Georg Herwegh (Foto) p2 res"
         resList2Element4.mediaType="text"
         resList2Element4.licence="restricted"
+        var resList2Element5 = Result()
+        resList2Element5.description=""
+        resList2Element5.title="[Text] Fotografie, Zeichnung von Georg Herwegh (Foto) p2 res"
+        resList2Element5.mediaType="text"
+        resList2Element5.licence="restricted"
         resList2.results.add(resList2Element1);
         resList2.results.add(resList2Element2);
         resList2.results.add(resList2Element3);
         resList2.results.add(resList2Element4);
+        resList2.results.add(resList2Element5);
 
         restultList.results.put(partner2, resList2);
+        partner2.systemId = "partner2"
+       // restultList.results.put(partner2, resList1);
+
         return restultList
     }
 

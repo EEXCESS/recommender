@@ -28,7 +28,7 @@ import java.util.List;
 
 import org.junit.Test;
 
-import eu.eexcess.sourceselection.redde.config.Settings;
+import eu.eexcess.sourceselection.redde.config.ReddeSettings;
 import eu.eexcess.sourceselection.redde.indexer.trec.topic.Topic;
 import eu.eexcess.sourceselection.redde.indexer.trec.topic.TrecTopicTokenizer;
 
@@ -38,7 +38,7 @@ public class TrecTopicTokenizerTest {
 	public void tokenize_givenValidFile_expectNotExceptional_verifyingTopic278() {
 		try {
 			TrecTopicTokenizer tokenizer = new TrecTopicTokenizer();
-			List<Topic> topics = tokenizer.tokenize(new FileInputStream(Settings.Topics.TREC05_TOPICS_PATH));
+			List<Topic> topics = tokenizer.tokenize(new FileInputStream(ReddeSettings.Topics.TREC05_TOPICS_PATH));
 
 			boolean isSpecificTopicValid = false;
 			for (Topic topic : topics) {

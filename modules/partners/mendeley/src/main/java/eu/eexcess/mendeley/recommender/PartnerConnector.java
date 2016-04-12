@@ -119,8 +119,10 @@ public class PartnerConnector extends PartnerConnectorBase implements PartnerCon
 		if (PartnerConfigurationCache.CONFIG.getPartnerConfiguration().getSpecialFieldQueryGeneratorClass() != null) {
 			SpecialFieldsQueryGeneratorApi specialFieldsGenerator = (SpecialFieldsQueryGeneratorApi) Class
 					.forName(PartnerConfigurationCache.CONFIG.getPartnerConfiguration().getSpecialFieldQueryGeneratorClass()).newInstance();
-			searchRequest += specialFieldsGenerator.toQuery(userProfile);
+			 String specialFieldQuery = specialFieldsGenerator.toQuery(userProfile);
+			searchRequest += specialFieldQuery;
 		}
+		logger.log(Level.ALL,"ACCESSTOKEN: "+accessTokenResponse.toString());
 		MendeleyResponse jsonResponse = getJSONResponse(client, accessTokenResponse, searchRequest);
 
 		if(jsonResponse==null || jsonResponse.getDocuments()==null )

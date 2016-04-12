@@ -81,8 +81,13 @@ public class FederatedRecommenderStressTest {
 
             try {
                 ResultList res = futures.get(string).get(7000, TimeUnit.MILLISECONDS);
-                if (res.partnerResponseState.size() > 0 && res.partnerResponseState.get(0).errorMessage != null)
-                    result.setTimeout(result.getTimeout() + 1);
+                if (res.partnerResponseState.size() > 0)
+                    res.partnerResponseState.forEach(response -> {
+                        if(response.errorMessage!=null)
+                            result.setTimeout(result.getTimeout()+1);
+                    });
+                    //TODO: // FIXME: 17.03.16 res.partnerResponseState iterate over it
+                    //result.setTimeout(result.getTimeout() + 1);
             } catch (Exception e) {
                 futures.get(string).cancel(true);
                 result.setFailure(result.getFailure() + 1);
@@ -111,20 +116,27 @@ public class FederatedRecommenderStressTest {
     private SecureUserProfile createSecureUserProfileFromString(String string) {
         SecureUserProfile sUserProfile = new SecureUserProfile();
         sUserProfile.setNumResults(10);
-        sUserProfile.getContextKeywords().add(new ContextKeyword(string));
+        sUserProfile.getContextKeywords().add(new ContextKeyword(string.trim()));
         PartnerBadge badge = new PartnerBadge();
-        badge.setSystemId("Wikipedia-Local");
-        // badge.setSystemId("Mendeley");
+        badge.setSystemId("fedweb");
+        PartnerBadge badge2 = new PartnerBadge();
+        badge2.setSystemId("Europeana");
+        PartnerBadge badge3 = new PartnerBadge();
+        badge3.setSystemId("KIMPortal");
+        sUserProfile.setPartnerList(new ArrayList<PartnerBadge>());
         sUserProfile.getPartnerList().add(badge);
+//        sUserProfile.getPartnerList().add(badge2);
+//        sUserProfile.getPartnerList().add(badge3);
+
+
         return sUserProfile;
     }
 
     public static void main(String[] args) {
 
         FederatedRecommenderStressTest m = null;
-        // m = new
-        // MassivFedRecQueryTest("http://eexcess-demo.know-center.tugraz.at/eexcess-federated-recommender-web-service-1.0-SNAPSHOT/recommender/recommend");
-        m = new FederatedRecommenderStressTest("http://localhost/eexcess-federated-recommender-web-service-1.0-SNAPSHOT/recommender/recommend");
+         m = new FederatedRecommenderStressTest("http://localhost/eexcess-federated-recommender-web-service-1.0-SNAPSHOT/recommender/recommend");
+        //m = new FederatedRecommenderStressTest("http://localhost/eexcess-federated-recommender-web-service-1.0-SNAPSHOT/recommender/recommend");
 
         try {
             m.submitQueryToFedRec("test");
