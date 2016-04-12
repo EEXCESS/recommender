@@ -38,10 +38,11 @@ import eu.eexcess.dataformats.result.ResultList;
 public class PartnerRecommenderEvaluationTestHelper {
 	
 //	private static final String FILENAME_KEYWORDS = ".\\src\\test\\data\\review-demo\\"+ "keywords_review_demo.txt";
-	private static final String FILENAME_KEYWORDS = ".\\src\\test\\data\\testbed-1\\"+ "keywords_random_1.txt";
+//	private static final String FILENAME_KEYWORDS = ".\\src\\test\\data\\testbed-1\\"+ "keywords_random_1.txt";
 //	private static final String FILENAME_KEYWORDS = ".\\src\\test\\data\\testbed-1\\"+ "keywords_random_10.txt";
 //	private static final String FILENAME_KEYWORDS = ".\\src\\test\\data\\testbed-1\\"+ "keywords_random_20.txt";
 //	private static final String FILENAME_KEYWORDS = ".\\src\\test\\data\\testbed-1\\"+ "keywords_random_100.txt";
+	private static final String FILENAME_KEYWORDS = ".\\src\\test\\data\\testbed-1\\"+ "keywords_random_2000.txt";
 
 	private static int port = 8090;
 
@@ -127,14 +128,17 @@ public class PartnerRecommenderEvaluationTestHelper {
 	static public void testService(String serviceName) {
 		ArrayList<String> keywords = PartnerRecommenderEvaluationTestHelper.readKeywords();
 		for (int i = 0; i < keywords.size(); i++) {
+			try {
 			ArrayList<String> keyword = new ArrayList<String>();
 			keyword.add(keywords.get(i));
 	        ResultList resultList = PartnerRecommenderEvaluationTestHelper.getRecommendations("eexcess-partner-"+serviceName+"-1.0-SNAPSHOT",	
     		port , 
     		PartnerRecommenderEvaluationTestHelper.createParamsForPartnerRecommender(20,keyword ));
-			System.out.print(" " + i);
+			System.out.print(" " + i+":" + resultList.results.size());
+			} catch (RuntimeException e) {System.out.print(e);}
+			
 		}
-
+		System.out.print("\n");
 	}
 	
 

@@ -38,17 +38,17 @@ public class PartnerRecommenderEnrichmentEvaluationTest {
 
 		PartnerRecommenderEnrichmentEvaluationTest tester = new PartnerRecommenderEnrichmentEvaluationTest();
 
-//		tester.testService("kimportal");
+		tester.testService("kimportal");
 		
-//		tester.testService("europeana");
+		tester.testService("europeana");
 
-//		tester.testService("ddb");
+		tester.testService("ddb");
 		
 		tester.testService("mendeley");
 
 //		tester.testService("wissenmedia");
 
-//		tester.testService("zbw");
+		tester.testService("zbw");
 		
 		System.out.println(" finished " + (System.currentTimeMillis() - start) +"ms");
 
