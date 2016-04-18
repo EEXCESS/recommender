@@ -153,7 +153,7 @@ public class PartnerConnectorBase implements PartnerConnectorApi {
             queryGenerator = PartnerConfigurationCache.CONFIG.getQueryGenerator(partnerConfiguration.getQueryGeneratorClass());
 
             String query = getQueryGenerator().toQuery(userProfile);
-
+            
           //  query = URLEncoder.encode(query, "UTF-8");
             Map<String, String> valuesMap = new HashMap<String, String>();
             valuesMap.put("query", query);
@@ -167,6 +167,7 @@ public class PartnerConnectorBase implements PartnerConnectorApi {
                 SpecialFieldsQueryGeneratorApi specialFieldsGenerator = (SpecialFieldsQueryGeneratorApi) Class.forName(PartnerConfigurationCache.CONFIG.getPartnerConfiguration().getSpecialFieldQueryGeneratorClass()).newInstance();
                 searchRequest+= specialFieldsGenerator.toQuery(userProfile);
             }
+            //System.out.println(searchRequest);
             WebResource service = client.resource(searchRequest);
 
             return getDocumentUniFormat(client, service);
@@ -192,7 +193,7 @@ public class PartnerConnectorBase implements PartnerConnectorApi {
             valuesMap.put("detailQuery", detailQuery);
 
             String searchRequest = StrSubstitutor.replace(partnerConfiguration.getDetailEndpoint(), valuesMap);
-
+            System.out.println(searchRequest);
             WebResource service = client.resource(searchRequest);
 
             return getDocumentUniFormat(client, service);

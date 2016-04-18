@@ -68,6 +68,7 @@ public class Transformer implements ITransformer {
     private static final String EEXCESS_FACETS_VALUE_DEFAULT_LICENCE = "restricted";
     protected static final String EEXCESS_FACETS_VALUE_UNKNOWN = "unknown";
     protected static final String EEXCESS_MEDIATYPE_TEXT = "text";
+    protected static final String EEXCESS_MEDIATYPE_IMAGE = "image";
     protected PartnerConfiguration partnerConfig;
     protected String resultListTransformationFilename;
 
@@ -350,7 +351,8 @@ public class Transformer implements ITransformer {
             }
             if (result.mediaType == null || result.mediaType.isEmpty() || result.mediaType.trim().isEmpty()) {
                 result.mediaType = EEXCESS_FACETS_VALUE_UNKNOWN;
-            }
+            } else 
+            	result.mediaType = result.mediaType.toLowerCase();
             if (result.date == null || result.date.isEmpty() || result.date.trim().isEmpty()) {
                 result.date = EEXCESS_FACETS_VALUE_UNKNOWN;
             } else {
