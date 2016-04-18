@@ -467,6 +467,7 @@ public class WordnetDomainsDetector extends DomainDetector {
 
                 "computer graphics", "linux", "windows", "vacation", "apple notebook", "lipstick color", "messenger bag", "horse trailer for sale",
                 "kittens for sale", "climate change", "department of justice",
+                "cayenne pepper plant",
 
         }) {
             Set<Domain> detect = wordnetDomainsDetector.detect(query);
