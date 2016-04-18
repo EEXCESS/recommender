@@ -24,6 +24,7 @@ package eu.eexcess.domaindetection.wikipedia;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -37,6 +38,7 @@ import java.util.TreeSet;
 import java.util.stream.Collectors;
 
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.ArrayUtils;
 import org.apache.lucene.analysis.en.EnglishAnalyzer;
 import org.apache.lucene.analysis.shingle.ShingleAnalyzerWrapper;
@@ -82,6 +84,15 @@ public class WikipediaDomainDetector extends DomainDetector {
 	
 	private void prepare(File indexDir) throws IOException {
 		Schema<TreeMap> schema = RuntimeSchema.getSchema(TreeMap.class);
+		
+		InputStream resourceAsStream = getClass().getResourceAsStream("/eu/eexcess/domaindetection/wikipedia/eexcess-wikipedia-domains.cache");
+		if (resourceAsStream != null) {
+			this.termsToSubjectsToProb = CompressionUtils.fromCompressedBytes(IOUtils.toByteArray(resourceAsStream));
+			Set<String> collector = new HashSet<>();
+			termsToSubjectsToProb.values().forEach(m -> { collector.addAll(m.keySet()); });
+			this.subjects = collector;
+			return;
+		}
 		
 		File cacheFile = new File("/tmp/eexcess-wikipedia-domains.cache");	
 		if (cacheFile.exists()) {
@@ -237,6 +248,7 @@ public class WikipediaDomainDetector extends DomainDetector {
 
                 "computer graphics", "linux", "windows", "vacation", "apple notebook", "lipstick color", "messenger bag", "horse trailer for sale",
                 "kittens for sale", "climate change", "department of justice",
+                "cayenne pepper plant",
 
         }) {
             Set<Domain> detect = instance.detect(query);
