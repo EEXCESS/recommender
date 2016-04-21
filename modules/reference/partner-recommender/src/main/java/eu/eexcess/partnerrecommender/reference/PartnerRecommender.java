@@ -74,7 +74,7 @@ public class PartnerRecommender implements PartnerRecommenderApi {
      */
     public PartnerRecommender() {
         super();
-
+        threadPoolDetailCalls = Executors.newFixedThreadPool(20);
         this.partnerConfiguration = PartnerConfigurationCache.CONFIG.getPartnerConfiguration();
         this.partnerConnector = PartnerConfigurationCache.CONFIG.getPartnerConnector();
         this.transformer = PartnerConfigurationCache.CONFIG.getTransformer();
@@ -83,6 +83,7 @@ public class PartnerRecommender implements PartnerRecommenderApi {
 
     public PartnerRecommender( PartnerConfiguration partnerConfiguration, PartnerConnectorApi partnerConnector, ITransformer transformer ) {
         super();
+        threadPoolDetailCalls = Executors.newFixedThreadPool(20);
 
         this.partnerConfiguration = partnerConfiguration;
         this.partnerConnector = partnerConnector;
