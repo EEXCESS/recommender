@@ -77,6 +77,21 @@ public class DDBPartnerRecommenderTest {
 	}
 	
 	@Test
+	public void singleQueryGitHub37() {
+		ArrayList<String> keywords = new ArrayList<String>();
+		keywords.add("weben");
+		keywords.add("weberin");
+        ResultList resultList = PartnerRecommenderTestHelper.getRecommendations(DEPLOYMENT_CONTEXT,	
+        		port, 
+        		PartnerRecommenderTestHelper.createParamsForPartnerRecommender(20,keywords ));
+	    
+        assertNotNull(resultList);
+        assertTrue(resultList.results.size() > 0 );
+        assertEquals(8, resultList.results.size());
+
+	}
+
+	@Test
 	public void singleQueryUhrturm() {
 		ArrayList<String> keywords = new ArrayList<String>();
 		keywords.add("Uhrturm");
