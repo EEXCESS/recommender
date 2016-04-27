@@ -7,7 +7,7 @@
   "detailEndpoint": "http://europeana.eu/api/v2/record/${detailQuery}.json?wskey=${apiKey}",
   "isTransformedNative": "false",
   "apiKey": "",
-  "favIconURI": "http://styleguide.europeana.eu/v/0.2.9/images/favicons/favicon-32x32.png?ver=alpha",
+  "favIconURI": "http://styleguide.europeana.eu/v/0.2.30/images/favicons/favicon-32x32.png?ver=alpha",
   "mappingListTransformationFile": "mapperResultList.xsl",
   "mappingObjectTransformationFile": "mapperObject.xsl",
   "partnerDataRequestsTrace": "false",
